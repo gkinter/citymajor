@@ -28,7 +28,9 @@ export function ZoneOverlay({ zones }: ZoneOverlayProps) {
     const mesh = meshRef.current;
     if (!mesh) return;
 
-    zones.forEach((tile, i) => {
+    const count = Math.min(zones.length, MAX_INSTANCES);
+    for (let i = 0; i < count; i++) {
+      const tile = zones[i]!;
       _position.set(tile.tileX + 0.5, 0.03, tile.tileZ + 0.5);
       _quaternion.setFromEuler(_euler);
       _matrix.compose(_position, _quaternion, _scale);
@@ -37,9 +39,9 @@ export function ZoneOverlay({ zones }: ZoneOverlayProps) {
         i,
         _color.set(ZONE_OVERLAY_COLORS[tile.zoneType] ?? "#888888"),
       );
-    });
+    }
 
-    mesh.count = zones.length;
+    mesh.count = count;
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   }, [zones]);

@@ -311,7 +311,8 @@ export function createSimBridge(): SimBridge {
     },
 
     loadSnapshot(snapshot) {
-      if (!worker) {
+      const localWorker = worker;
+      if (!localWorker) {
         return Promise.reject(new Error("Sim worker not initialized"));
       }
       if (pendingLoad) {
@@ -339,7 +340,7 @@ export function createSimBridge(): SimBridge {
           },
         };
 
-        worker.postMessage({
+        localWorker.postMessage({
           type: "command",
           command: { type: "load_snapshot", snapshot } satisfies SimCommand,
         } satisfies WorkerInbound);

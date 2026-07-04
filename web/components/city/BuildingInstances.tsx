@@ -2,14 +2,16 @@
 
 import { BuildingCategory } from "@citymajor/sim-types";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { hasGltfAsset } from "@/lib/gltf-catalog";
 import type { ChunkState, CityData } from "@/lib/types";
 import {
   composeInstanceMatrix,
   lodVisualForBuilding,
   metalnessForCategory,
 } from "@/lib/lod";
+import { GltfBuildingBucket } from "./GltfBuildingBucket";
 
 type BuildingInstancesProps = {
   city: CityData;
@@ -20,7 +22,7 @@ type BuildingInstancesProps = {
 
 /**
  * One InstancedMesh per archetype key (sim-types taxonomy).
- * Draw-call count scales with unique keys in the procedural city (~100–200).
+ * At LOD L0, catalog GLTF assets replace boxes via GltfBuildingBucket.
  */
 export function BuildingInstances({
   city,
@@ -36,12 +38,13 @@ export function BuildingInstances({
         key,
         buildings: city.buildingsByArchetypeKey[key] ?? [],
         category: city.buildingsByArchetypeKey[key]?.[0]?.category ?? BuildingCategory.ResidentialLow,
+        useGltf: hasGltfAsset(key),
       })),
     [city],
   );
 
   useFrame(() => {
-    for (const { key, buildings } of buckets) {
+    for (const { key, buildings, useGltf } of buckets) {
       const mesh = meshRefs.current[key];
       if (!mesh || !buildings.length) continue;
 
@@ -55,9 +58,18 @@ export function BuildingInstances({
         const visual = lodVisualForBuilding(building, lod, dayNightFactor);
         if (visual.wireframe) bucketWireframe = true;
 
+        const gltfCoversL0 =
+          useGltf && !hidden && lod === 0 && !visual.wireframe;
+        const showBox = !gltfCoversL0;
+
         mesh.setMatrixAt(
           i,
-          composeInstanceMatrix(building.tileX, building.tileZ, visual, hidden),
+          composeInstanceMatrix(
+            building.tileX,
+            building.tileZ,
+            showBox ? visual : { scale: [0, 0, 0], color: visual.color, opacity: 0 },
+            hidden || !showBox,
+          ),
         );
         if (!colorsRef.current[i]) colorsRef.current[i] = new THREE.Color();
         const c = colorsRef.current[i];
@@ -77,27 +89,38 @@ export function BuildingInstances({
 
   return (
     <>
-      {buckets.map(({ key, buildings, category }) =>
-        buildings.length > 0 ? (
-          <instancedMesh
-            key={key}
-            ref={(el) => {
-              meshRefs.current[key] = el;
-            }}
-            args={[undefined, undefined, buildings.length]}
-            frustumCulled={false}
-            castShadow
-            receiveShadow
-          >
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial
-              vertexColors
-              roughness={0.65}
-              metalness={metalnessForCategory(category)}
-            />
-          </instancedMesh>
-        ) : null,
-      )}
+      {buckets.map(({ key, buildings, category, useGltf }) => (
+        <group key={key}>
+          {useGltf && buildings.length > 0 ? (
+            <Suspense fallback={null}>
+              <GltfBuildingBucket
+                archetypeKey={key}
+                buildings={buildings}
+                chunks={chunks}
+                dayNightFactor={dayNightFactor}
+              />
+            </Suspense>
+          ) : null}
+          {buildings.length > 0 ? (
+            <instancedMesh
+              ref={(el) => {
+                meshRefs.current[key] = el;
+              }}
+              args={[undefined, undefined, buildings.length]}
+              frustumCulled={false}
+              castShadow
+              receiveShadow
+            >
+              <boxGeometry args={[1, 1, 1]} />
+              <meshStandardMaterial
+                vertexColors
+                roughness={0.65}
+                metalness={metalnessForCategory(category)}
+              />
+            </instancedMesh>
+          ) : null}
+        </group>
+      ))}
     </>
   );
 }

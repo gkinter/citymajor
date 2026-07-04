@@ -14,7 +14,13 @@ export type SimCommand =
   | { type: "bulldoze"; tileX: number; tileZ: number }
   | { type: "set_speed"; level: GameSpeedLevel }
   | { type: "pause" }
-  | { type: "resume" };
+  | { type: "resume" }
+  | {
+      type: "herald_choice";
+      optionId: string;
+      eventTypeId?: string;
+      eventId?: number;
+    };
 
 export type ZoneSnapshot = {
   tileX: number;
@@ -38,6 +44,37 @@ export type BuildingSnapshot = {
   condition: number;
 };
 
+/** RCI demand from EconomySystem — normalized -1 (surplus) to +1 (shortage). */
+export type RciDemand = {
+  residential: number;
+  commercial: number;
+  industrial: number;
+};
+
+export type ActiveEventSnapshot = {
+  eventId: number;
+  typeId: string;
+  phase: string;
+  severity: number;
+  tileX: number;
+  tileY: number;
+};
+
+export type EraProgressGate = {
+  id: string;
+  label: string;
+  current: number;
+  required: number;
+  met: boolean;
+};
+
+export type EraProgress = {
+  nextEra: number;
+  nextEraName: string;
+  percent: number;
+  gates: EraProgressGate[];
+};
+
 export type SimResources = {
   tick: number;
   population: number;
@@ -45,7 +82,34 @@ export type SimResources = {
   householdCount?: number;
   cityFunds: number;
   era: number;
+  /** WASM GetStatus — progress toward next era (WasmConfig thresholds). */
+  eraProgress?: EraProgress;
+  /** WASM GetStatus — EconomySystem demand signals (-1..+1). */
+  residentialDemand?: number;
+  commercialDemand?: number;
+  industrialDemand?: number;
+  /** WASM GetStatus — ResearchSystem accumulated RP. */
+  researchPoints?: number;
+  /** WASM GetStatus — RP generated per game month. */
+  researchRate?: number;
+  /** WASM GetStatus — count of unlocked technologies. */
+  techCount?: number;
+  /** WASM GetStatus — mayor approval percent (0–100) when PoliticsSystem is exported. */
+  approval?: number;
+  /** Live EventSystem instances from WASM GetStatus / snapshot. */
+  activeEvents?: ActiveEventSnapshot[];
 };
+
+/** Strip render payload from a full sim snapshot for HUD consumers. */
+export function resourcesFromSnapshot(snapshot: SimSnapshot): SimResources {
+  const {
+    buildings: _buildings,
+    zones: _zones,
+    roads: _roads,
+    ...resources
+  } = snapshot;
+  return resources;
+}
 
 export type SimSnapshot = SimResources & {
   buildings: BuildingSnapshot[];
@@ -67,6 +131,7 @@ export interface SimBridge {
 export type SimClientApi = {
   getSnapshot: () => SimSnapshot | null;
   applySnapshot: (snapshot: SimSnapshot) => void;
+  sendCommand: (command: SimCommand) => void;
 };
 
 const DEFAULT_WASM_URL = "/dotnet";

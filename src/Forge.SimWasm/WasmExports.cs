@@ -7,6 +7,11 @@ public static partial class Program
 {
     private static WasmSimHost? _host;
 
+    private static readonly JsonSerializerOptions StatusJson = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
     [JSExport]
     public static void Init(int worldSize)
     {
@@ -50,7 +55,7 @@ public static partial class Program
     public static string GetStatus()
     {
         if (_host is null)
-            return JsonSerializer.Serialize(new { initialized = false });
+            return JsonSerializer.Serialize(new { initialized = false }, StatusJson);
 
         return JsonSerializer.Serialize(new
         {
@@ -62,9 +67,18 @@ public static partial class Program
             cityFunds = _host.CityFunds,
             era = _host.Era,
             eraName = WasmEraDeriver.EraName(_host.Era),
+            eraProgress = _host.EraProgress,
+            residentialDemand = _host.ResidentialDemand,
+            commercialDemand = _host.CommercialDemand,
+            industrialDemand = _host.IndustrialDemand,
+            approval = _host.ApprovalRating * 100f,
+            happiness = _host.Happiness,
+            monthlyIncome = _host.MonthlyIncome,
+            monthlyExpenses = _host.MonthlyExpenses,
             researchPoints = _host.ResearchPoints,
             researchRate = _host.ResearchRate,
             eventDefinitionCount = _host.EventDefinitionCount,
+            activeEvents = _host.ActiveEvents,
             techCount = _host.TechCount,
             trafficMode = _host.TrafficMode.ToString().ToLowerInvariant(),
             tickIntervals = new
@@ -100,6 +114,6 @@ public static partial class Program
                 "TradeSystem (not wired in spike)",
                 "ProductionChain (not wired in spike)",
             },
-        });
+        }, StatusJson);
     }
 }

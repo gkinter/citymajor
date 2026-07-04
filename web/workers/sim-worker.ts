@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 
 import type {
+  ActiveEventSnapshot,
   RoadSnapshot,
   SimCommand,
   SimSnapshot,
@@ -28,6 +29,25 @@ type WasmStatus = {
   householdCount?: number;
   cityFunds?: number;
   era?: number;
+  residentialDemand?: number;
+  commercialDemand?: number;
+  industrialDemand?: number;
+  researchPoints?: number;
+  researchRate?: number;
+  techCount?: number;
+  approval?: number;
+  eraProgress?: {
+    nextEra?: number;
+    nextEraName?: string;
+    percent?: number;
+    gates?: Array<{
+      id?: string;
+      label?: string;
+      current?: number;
+      required?: number;
+      met?: boolean;
+    }>;
+  };
 };
 
 type SimExports = {
@@ -215,18 +235,56 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
 
 function readStatus(): Pick<
   SimSnapshot,
-  "tick" | "population" | "householdCount" | "cityFunds" | "era"
+  | "tick"
+  | "population"
+  | "householdCount"
+  | "cityFunds"
+  | "era"
+  | "residentialDemand"
+  | "commercialDemand"
+  | "industrialDemand"
+  | "researchPoints"
+  | "researchRate"
+  | "techCount"
+  | "approval"
+  | "eraProgress"
 > | null {
   if (!sim?.GetStatus) return null;
   try {
     const parsed = JSON.parse(sim.GetStatus()) as WasmStatus;
     if (parsed.initialized === false) return null;
+
+    const rawProgress = parsed.eraProgress;
+    const eraProgress =
+      rawProgress && typeof rawProgress.nextEra === "number"
+        ? {
+            nextEra: rawProgress.nextEra,
+            nextEraName: rawProgress.nextEraName ?? "",
+            percent: rawProgress.percent ?? 0,
+            gates: (rawProgress.gates ?? []).map((gate) => ({
+              id: gate.id ?? "",
+              label: gate.label ?? gate.id ?? "",
+              current: gate.current ?? 0,
+              required: gate.required ?? 0,
+              met: gate.met ?? false,
+            })),
+          }
+        : undefined;
+
     return {
       tick: parsed.tick ?? parsed.tickCount ?? 0,
       population: parsed.population ?? 0,
       householdCount: parsed.householdCount,
       cityFunds: parsed.cityFunds ?? 0,
       era: parsed.era ?? 0,
+      residentialDemand: parsed.residentialDemand,
+      commercialDemand: parsed.commercialDemand,
+      industrialDemand: parsed.industrialDemand,
+      researchPoints: parsed.researchPoints,
+      researchRate: parsed.researchRate,
+      techCount: parsed.techCount,
+      approval: parsed.approval,
+      eraProgress,
     };
   } catch {
     return null;
@@ -255,6 +313,16 @@ function readSnapshot(): SimSnapshot {
     population: parsed.population ?? status?.population ?? 0,
     cityFunds: parsed.cityFunds ?? status?.cityFunds ?? 0,
     era: parsed.era ?? status?.era ?? 0,
+    residentialDemand:
+      parsed.residentialDemand ?? status?.residentialDemand,
+    commercialDemand: parsed.commercialDemand ?? status?.commercialDemand,
+    industrialDemand: parsed.industrialDemand ?? status?.industrialDemand,
+    researchPoints: parsed.researchPoints ?? status?.researchPoints,
+    researchRate: parsed.researchRate ?? status?.researchRate,
+    techCount: parsed.techCount ?? status?.techCount,
+    approval: parsed.approval ?? status?.approval,
+    activeEvents:
+      parseActiveEvents(parsed.activeEvents) ?? status?.activeEvents,
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),
@@ -353,6 +421,9 @@ function handleCommand(command: SimCommand) {
       break;
     case "bulldoze":
       bulldozeTile(command.tileX, command.tileZ);
+      break;
+    case "herald_choice":
+      console.info("[CityMajor] Herald council choice (stub)", command);
       break;
   }
 }

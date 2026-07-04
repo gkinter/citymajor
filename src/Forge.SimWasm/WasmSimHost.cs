@@ -46,6 +46,14 @@ public sealed class WasmSimHost
     public int EventDefinitionCount => _events?.Definitions.Count ?? 0;
     public int TechCount => _research?.TechCount ?? 0;
     public WasmTrafficMode TrafficMode => WasmTrafficMode.Lite;
+    public ActiveEventDto[] ActiveEvents => CollectActiveEvents();
+    public float ResidentialDemand => _economy?.ResidentialDemand ?? 0f;
+    public float CommercialDemand => _economy?.CommercialDemand ?? 0f;
+    public float IndustrialDemand => _economy?.IndustrialDemand ?? 0f;
+    public float ApprovalRating => _state?.ApprovalRating ?? 0f;
+    public float Happiness => _state?.Happiness ?? 0f;
+    public long MonthlyIncome => _state?.Income.Total ?? 0;
+    public long MonthlyExpenses => _state?.Expenses.Total ?? 0;
 
     public void Init(int worldSize = WasmConfig.DefaultWorldSize)
     {
@@ -127,7 +135,7 @@ public sealed class WasmSimHost
         if (!IsInitialized) return "{}";
 
         var snap = SimSnapshot.CaptureFrom(_state);
-        var dto = SimSnapshotDto.From(snap, _state);
+        var dto = SimSnapshotDto.From(snap, _state, _events);
         return JsonSerializer.Serialize(dto, JsonContext.Default.SimSnapshotDto);
     }
 
@@ -469,6 +477,29 @@ public sealed class WasmSimHost
         while (p < value) p <<= 1;
         return p;
     }
+
+    private ActiveEventDto[] CollectActiveEvents()
+    {
+        if (_events is null) return [];
+
+        var active = _events.ActiveEvents;
+        var result = new ActiveEventDto[active.Count];
+        for (int i = 0; i < active.Count; i++)
+        {
+            var e = active[i];
+            result[i] = new ActiveEventDto
+            {
+                EventId = e.EventId,
+                TypeId = e.TypeId,
+                Phase = e.Phase.ToString().ToLowerInvariant(),
+                Severity = e.Severity,
+                TileX = e.TileX,
+                TileY = e.TileY,
+            };
+        }
+
+        return result;
+    }
 }
 
 /// <summary>
@@ -484,8 +515,9 @@ public sealed class SimSnapshotDto
     public BuildingDto[] Buildings { get; init; } = [];
     public ZoneDto[] Zones { get; init; } = [];
     public RoadDto[] Roads { get; init; } = [];
+    public ActiveEventDto[] ActiveEvents { get; init; } = [];
 
-    public static SimSnapshotDto From(SimSnapshot snap, WorldState state)
+    public static SimSnapshotDto From(SimSnapshot snap, WorldState state, EventSystem? events = null)
     {
         var buildings = new BuildingDto[snap.BuildingCount];
         for (int i = 0; i < snap.BuildingCount; i++)
@@ -517,7 +549,29 @@ public sealed class SimSnapshotDto
             Buildings = buildings,
             Zones = zones,
             Roads = roads,
+            ActiveEvents = events is null ? [] : CollectActiveEvents(events),
         };
+    }
+
+    private static ActiveEventDto[] CollectActiveEvents(EventSystem events)
+    {
+        var active = events.ActiveEvents;
+        var result = new ActiveEventDto[active.Count];
+        for (int i = 0; i < active.Count; i++)
+        {
+            var e = active[i];
+            result[i] = new ActiveEventDto
+            {
+                EventId = e.EventId,
+                TypeId = e.TypeId,
+                Phase = e.Phase.ToString().ToLowerInvariant(),
+                Severity = e.Severity,
+                TileX = e.TileX,
+                TileY = e.TileY,
+            };
+        }
+
+        return result;
     }
 
     private static ZoneDto[] CollectZones(WorldState state)
@@ -588,9 +642,21 @@ public sealed class RoadDto
     public byte RoadFlags { get; init; }
 }
 
+public sealed class ActiveEventDto
+{
+    public int EventId { get; init; }
+    public string TypeId { get; init; } = "";
+    public string Phase { get; init; } = "";
+    public float Severity { get; init; }
+    public int TileX { get; init; }
+    public int TileY { get; init; }
+}
+
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(SimSnapshotDto))]
 [JsonSerializable(typeof(BuildingDto))]
 [JsonSerializable(typeof(ZoneDto))]
 [JsonSerializable(typeof(RoadDto))]
+[JsonSerializable(typeof(ActiveEventDto))]
+[JsonSerializable(typeof(ActiveEventDto[]))]
 internal partial class JsonContext : JsonSerializerContext;

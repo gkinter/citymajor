@@ -1,5 +1,7 @@
 # MASTER DEVELOPMENT PLAN: Iron & Oak
 
+> **Historical — pre-web pivot.** See [WEB_V1_SCOPE.md](WEB_V1_SCOPE.md) and [CLAUDE.md](../../CLAUDE.md).
+
 ## 10-Agent Parallel Development Strategy
 
 **Target**: Playable prototype in 3-4 weeks. Early Access in 10-12 weeks.

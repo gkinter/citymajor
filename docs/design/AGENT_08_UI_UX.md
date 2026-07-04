@@ -1,5 +1,7 @@
 # AGENT 08: UI/UX SYSTEM
 
+> **Historical — pre-web pivot.** See [WEB_V1_SCOPE.md](WEB_V1_SCOPE.md) and [CLAUDE.md](../../CLAUDE.md).
+
 ## Role
 Build all user interface: HUD, panels, menus, overlays, tooltips, data visualizations, statistics, advisors, news ticker, and tutorial system. This is the player's window into every other system.
 

@@ -1,5 +1,7 @@
 # IRON & OAK: City Builder Game Design Document v2.0
 
+> **Historical — pre-web pivot.** See [WEB_V1_SCOPE.md](WEB_V1_SCOPE.md) and [CLAUDE.md](../../CLAUDE.md).
+
 ## A Deep Retro City Builder for Urban Planning Enthusiasts
 
 ---

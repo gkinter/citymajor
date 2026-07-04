@@ -25,6 +25,7 @@ type WasmStatus = {
   tick?: number;
   tickCount?: number;
   population?: number;
+  householdCount?: number;
   cityFunds?: number;
   era?: number;
 };
@@ -214,7 +215,7 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
 
 function readStatus(): Pick<
   SimSnapshot,
-  "tick" | "population" | "cityFunds" | "era"
+  "tick" | "population" | "householdCount" | "cityFunds" | "era"
 > | null {
   if (!sim?.GetStatus) return null;
   try {
@@ -223,6 +224,7 @@ function readStatus(): Pick<
     return {
       tick: parsed.tick ?? parsed.tickCount ?? 0,
       population: parsed.population ?? 0,
+      householdCount: parsed.householdCount,
       cityFunds: parsed.cityFunds ?? 0,
       era: parsed.era ?? 0,
     };

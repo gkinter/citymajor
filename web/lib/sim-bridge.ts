@@ -3,11 +3,16 @@
  * Falls back to procedural city-data when WASM is unavailable (see city-data.ts).
  */
 
+/** 0 = paused, 1 = 1x, 2 = 2x, 3 = 3x */
+export type GameSpeedLevel = 0 | 1 | 2 | 3;
+
 export type SimCommand =
   | { type: "tick"; deltaMs: number }
   | { type: "place_building"; tileX: number; tileZ: number; typeId: number }
+  | { type: "place_road"; tileX: number; tileZ: number }
   | { type: "zone_paint"; tileX: number; tileZ: number; zoneType: number }
   | { type: "bulldoze"; tileX: number; tileZ: number }
+  | { type: "set_speed"; level: GameSpeedLevel }
   | { type: "pause" }
   | { type: "resume" };
 
@@ -15,6 +20,12 @@ export type ZoneSnapshot = {
   tileX: number;
   tileZ: number;
   zoneType: number;
+};
+
+export type RoadSnapshot = {
+  tileX: number;
+  tileZ: number;
+  roadFlags: number;
 };
 
 export type BuildingSnapshot = {
@@ -38,6 +49,8 @@ export type SimSnapshot = SimResources & {
   buildings: BuildingSnapshot[];
   /** Sparse zoned tiles (non-zero zoneType). */
   zones?: ZoneSnapshot[];
+  /** Sparse road tiles (non-zero roadFlags). */
+  roads?: RoadSnapshot[];
 };
 
 export interface SimBridge {
@@ -47,6 +60,12 @@ export interface SimBridge {
   onSnapshot(callback: (snapshot: SimSnapshot) => void): () => void;
   dispose(): void;
 }
+
+/** Client-side snapshot access for save/load UI. */
+export type SimClientApi = {
+  getSnapshot: () => SimSnapshot | null;
+  applySnapshot: (snapshot: SimSnapshot) => void;
+};
 
 const DEFAULT_WASM_URL = "/dotnet";
 const DEFAULT_WORLD_SIZE = 256;

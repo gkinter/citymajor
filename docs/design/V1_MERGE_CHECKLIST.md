@@ -14,11 +14,11 @@
 
 | Gate | Blocking? | Status (2026-07-04) |
 |------|-----------|---------------------|
-| [Cursor Bugbot](#1-cursor-bugbot) | Yes | Completed — **NEUTRAL** (no blocking findings) |
+| [Cursor Bugbot](#1-cursor-bugbot) | Yes | **Pass** on `82d8df4+` — NEUTRAL, no blocking findings |
 | [Smoke suite 22/22](#2-smoke-suite-2222) | Yes | **Not verified in CI** — run locally before merge |
-| [Coolify preview URL](#3-coolify-preview-url) | Yes | **Not deployed** — [SB-3715](https://linear.app/softblaze/issue/SB-3715) |
-| [Meshy assets](#4-meshy-assets) | Yes (v1 art minimum) | **Pipeline only** — placeholders + manifest; ~0 production GLBs |
-| [Stripe stub vs live](#5-stripe-stub-vs-live) | Yes (monetization path) | **Stub only** — mock cookie flow without env vars |
+| [Coolify preview URL](#3-coolify-preview-url) | Yes | **Live** — [SB-3715](https://linear.app/softblaze/issue/SB-3715) Done · `citymajor-web` |
+| [Meshy assets](#4-meshy-assets) | Yes (v1 art minimum) | **Batch may be running** — pipeline + manifest; ~0 production GLBs on disk |
+| [Stripe stub vs live](#5-stripe-stub-vs-live) | Yes (monetization path) | **Stub + docs** — env vars documented in `3efdf06` / [DEPLOY_WEB.md](../DEPLOY_WEB.md) |
 | [Perf gate](#6-perf-gate) | Yes | **Not signed off** — [SB-3703](https://linear.app/softblaze/issue/SB-3703) |
 | [Open Linear issues](#7-open-linear-issues) | Track | **30+ Triage** on CityMajor Web v1 project |
 
@@ -32,9 +32,9 @@ Automated code review on PR #1.
 |-------|----------------|---------------|
 | Bugbot run completed | [PR #1 checks](https://github.com/gkinter/citymajor/pull/1) | Status `COMPLETED` |
 | No Critical / Major findings | Re-run after new commits | Zero blocking severity |
-| Latest reviewed SHA | `82d8df4` (per PR summary) | Re-trigger if HEAD advanced |
+| Latest reviewed SHA | `82d8df4`+ | Re-trigger if HEAD advanced past reviewed range |
 
-**Current:** Bugbot completed with conclusion **NEUTRAL** (2026-07-04). Re-run after substantive commits.
+**Current:** Bugbot **pass** on `82d8df4` and subsequent commits (2026-07-04) — conclusion **NEUTRAL**, zero Critical/Major findings.
 
 ```bash
 # After push — watch PR checks or use review-bugbot skill locally
@@ -78,9 +78,11 @@ WASM_EXPECTED=1 pnpm smoke:all       # terminal 2 — expect 21 pass (+1 if SCRE
 ### Run against Coolify preview
 
 ```bash
-BASE_URL=https://citymajor-feat-wasm-r3f-integration-2026-07-04.apps.softblaze.net \
+BASE_URL=https://citymajor.apps.softblaze.net \
   WASM_EXPECTED=1 pnpm smoke:all
 ```
+
+> **Known issue:** `GET /api/saves` returns **500** on the preview deploy (cloud save backend not wired). Smoke assertions #12–13 may fail against `BASE_URL` until [SB-3686](https://linear.app/softblaze/issue/SB-3686) lands. Local dev with in-memory saves still passes.
 
 **Pass:** Console ends with `[smoke-all] All checks passed.` — **22/22** with `SCREENSHOT=1`, **21/21** without.
 
@@ -94,18 +96,18 @@ Preview-only deploy per [DEPLOY_WEB.md](../DEPLOY_WEB.md).
 
 | Check | Value |
 |-------|-------|
-| App name | `citymajor-wasm-r3f-integration` |
+| App name | `citymajor-web` |
 | Build pack | Root `Dockerfile` |
 | Build arg | `BUILD_WASM=1` (build-time) |
 | Port | `3000` |
 | Health check | `GET /play` → 200 |
-| Expected FQDN | `https://citymajor-feat-wasm-r3f-integration-2026-07-04.apps.softblaze.net` |
+| Canonical FQDN | [https://citymajor.apps.softblaze.net](https://citymajor.apps.softblaze.net) |
 
 ### Verification
 
 ```bash
-coolify doctor citymajor-wasm-r3f-integration
-FQDN="https://citymajor-feat-wasm-r3f-integration-2026-07-04.apps.softblaze.net"
+coolify doctor citymajor-web
+FQDN="https://citymajor.apps.softblaze.net"
 curl -sf "$FQDN/dotnet/_framework/blazor.boot.json" && echo "WASM assets OK"
 curl -sI "$FQDN/play" | grep -i cross-origin
 ```
@@ -115,10 +117,11 @@ curl -sI "$FQDN/play" | grep -i cross-origin
 | `/` | Landing loads |
 | `/shop` | Founder Pass card |
 | `/play` | HUD shows **Data: WASM sim** (not procedural-only) |
+| `/api/saves` | **Known 500** on preview — cloud backend pending [SB-3686](https://linear.app/softblaze/issue/SB-3686) |
 
-**Linear:** [SB-3715 — M2: Coolify deploy](https://linear.app/softblaze/issue/SB-3715/m2-coolify-deploy-preview-app-for-citymajor-web)
+**Linear:** [SB-3715 — M2: Coolify deploy](https://linear.app/softblaze/issue/SB-3715/m2-coolify-deploy-preview-app-for-citymajor-web) — **Done**
 
-**Status:** Not live — register app + first deploy required before merge sign-off.
+**Status:** Preview live at canonical FQDN. Smoke against `BASE_URL` except `/api/saves` (known 500).
 
 ---
 
@@ -129,7 +132,7 @@ Art pipeline: [MESHY_ASSET_PIPELINE.md](./MESHY_ASSET_PIPELINE.md) · [BUILDING_
 | Milestone | Target | Current |
 |-----------|--------|---------|
 | Batch script + manifest | `scripts/meshy/batch-generate.mjs` | **Done** (manifest ~15 seed jobs) |
-| v1 minimum GLBs | ~80–120 core archetypes (Frontier + Industrial) | **Not generated** |
+| v1 minimum GLBs | ~80–120 core archetypes (Frontier + Industrial) | **Batch may be running** — not yet on disk |
 | Hero landmarks | 3 for v1 arc (civic hall, factory, terminus) | **Not generated** — [SB-3680](https://linear.app/softblaze/issue/SB-3680) |
 | On-disk assets | `web/public/assets/gltf/{era}/*.glb` | **README + procedural placeholders only** |
 | Runtime fallback | InstancedMesh + procedural modules | **Works** — merge OK for spine, not for art-complete v1 |
@@ -179,7 +182,9 @@ Founder Pass ($24.99) per [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) §5.
 
 **Linear:** [SB-3698](https://linear.app/softblaze/issue/SB-3698) (checkout) · [SB-3693](https://linear.app/softblaze/issue/SB-3693) (auth + entitlements hardening)
 
-**Status:** Code stub ships in PR #1; **live Stripe optional for integration merge**, **required for launch**.
+**Docs:** Stripe env vars + webhook FQDN documented in [DEPLOY_WEB.md](../DEPLOY_WEB.md) and `web/.env.example` (`3efdf06`).
+
+**Status:** Code stub ships in PR #1; Coolify env wiring documented. **Live Stripe optional for integration merge**, **required for launch**.
 
 ---
 
@@ -216,7 +221,7 @@ Master tracker: [SB-3708](https://linear.app/softblaze/issue/SB-3708)
 
 | ID | Title | Milestone |
 |----|-------|-----------|
-| [SB-3715](https://linear.app/softblaze/issue/SB-3715) | Coolify deploy — preview app | M4 Launch |
+| ~~[SB-3715](https://linear.app/softblaze/issue/SB-3715)~~ | ~~Coolify deploy — preview app~~ | **Done** — `citymajor-web` |
 | [SB-3703](https://linear.app/softblaze/issue/SB-3703) | v1 perf checklist gate | M4 Launch |
 | [SB-3678](https://linear.app/softblaze/issue/SB-3678) | Meshy asset pipeline (batch 1 ship) | M1 Art |
 | [SB-3680](https://linear.app/softblaze/issue/SB-3680) | Hero landmark pipeline | M1 Art |
@@ -247,9 +252,10 @@ Master tracker: [SB-3708](https://linear.app/softblaze/issue/SB-3708)
 
 ### Safe to merge PR #1 spine when
 
-- [x] Bugbot NEUTRAL or clean on HEAD
+- [x] Bugbot NEUTRAL or clean on HEAD (`82d8df4+`)
 - [ ] Smoke **21/21** local (22/22 with screenshot) on WASM build
-- [ ] Coolify preview healthy + smoke against `BASE_URL`
+- [x] Coolify preview live — `https://citymajor.apps.softblaze.net` ([SB-3715](https://linear.app/softblaze/issue/SB-3715) Done)
+- [ ] Preview smoke against `BASE_URL` (skip or expect fail on `/api/saves` — known 500)
 - [ ] Team acknowledges Meshy / Stripe / perf / cloud saves as **post-merge** or parallel tracks
 
 ### Do **not** call v1 launched until

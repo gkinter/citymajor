@@ -73,16 +73,14 @@ export function CityCanvas({
   const applySnapshot = useCallback(
     (snapshot: SimSnapshot) => {
       setCity(cityDataFromSnapshot(snapshot));
-      if (snapshot.zones) setZones(snapshot.zones);
-      if (snapshot.roads) {
-        setRoads(
-          snapshot.roads.map((r) => ({
-            tileX: r.tileX,
-            tileZ: r.tileZ,
-            roadFlags: r.roadFlags,
-          })),
-        );
-      }
+      setZones(snapshot.zones ?? []);
+      setRoads(
+        (snapshot.roads ?? []).map((r) => ({
+          tileX: r.tileX,
+          tileZ: r.tileZ,
+          roadFlags: r.roadFlags,
+        })),
+      );
       onSimResources?.(resourcesFromSnapshot(snapshot));
     },
     [onSimResources],
@@ -152,8 +150,11 @@ export function CityCanvas({
     }
     onSimApi?.({
       getSnapshot: () => bridge.getSnapshot(),
-      applySnapshot: (snapshot) => {
-        bridge.send({ type: "load_snapshot", snapshot });
+      applySnapshot: async (snapshot) => {
+        applySnapshot(snapshot);
+        await bridge.loadSnapshot(snapshot);
+        const authoritative = bridge.getSnapshot();
+        if (authoritative) applySnapshot(authoritative);
       },
       sendCommand: (command) => bridge.send(command),
     });

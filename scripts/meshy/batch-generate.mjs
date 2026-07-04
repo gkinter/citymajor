@@ -12,7 +12,8 @@
 import { mkdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { Document, NodeIO, getBounds } from "@gltf-transform/core";
+import { Document, NodeIO } from "@gltf-transform/core";
+import { getBounds } from "@gltf-transform/functions";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "../..");
@@ -352,7 +353,17 @@ async function main() {
   }
 
   if (dryRun) {
-    console.log(`\nDry-run complete. Set MESHY_API_KEY to generate for real.`);
+    const validation = validateManifest({ requireOnDisk: true });
+    if (!validation.ok) {
+      console.error(`\nManifest / GLB validation failed:`);
+      for (const err of validation.errors) {
+        console.error(`  - ${err}`);
+      }
+      process.exit(1);
+    }
+    console.log(
+      `\nDry-run complete (${validation.jobCount} job(s) match web/public/assets/gltf). Set MESHY_API_KEY to generate for real.`,
+    );
   } else {
     console.log(`\nBatch complete.`);
   }

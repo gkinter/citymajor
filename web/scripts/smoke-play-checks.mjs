@@ -1,6 +1,89 @@
 import { BASE_URL, fail, pass, WASM_EXPECTED } from "./smoke-lib.mjs";
 
 /**
+ * GET /api/saves — list endpoint must return a well-formed envelope.
+ * @param {string} tag
+ */
+export async function assertSaveApiHealth(tag) {
+  const res = await fetch(`${BASE_URL}/api/saves`, { redirect: "follow" });
+  if (!res.ok) {
+    fail(tag, `GET /api/saves returned HTTP ${res.status}`);
+  }
+
+  let json;
+  try {
+    json = await res.json();
+  } catch {
+    fail(tag, "GET /api/saves returned non-JSON body");
+  }
+
+  if (!Array.isArray(json.saves)) {
+    fail(tag, "GET /api/saves missing saves array");
+  }
+  if (typeof json.count !== "number" || json.count < 0) {
+    fail(tag, "GET /api/saves missing or invalid count");
+  }
+  if (typeof json.maxSlots !== "number" || json.maxSlots < 1) {
+    fail(tag, "GET /api/saves missing or invalid maxSlots");
+  }
+  if (json.tier !== "free" && json.tier !== "founder_pass") {
+    fail(tag, `GET /api/saves unexpected tier: ${json.tier ?? "null"}`);
+  }
+  pass(tag, `save API healthy (${json.count}/${json.maxSlots} slots, tier=${json.tier})`);
+
+  const badBody = await fetch(`${BASE_URL}/api/saves`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{not-json",
+  });
+  if (badBody.status !== 400) {
+    fail(tag, `POST /api/saves with invalid JSON expected 400, got ${badBody.status}`);
+  }
+  pass(tag, "POST /api/saves rejects malformed JSON");
+}
+
+/**
+ * Research + Herald HUD panels open and render expected chrome.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function assertHudPanels(page, tag) {
+  const researchBtn = page.getByRole("button", { name: /^Research\b/ });
+  await researchBtn.waitFor({ state: "visible" });
+  await researchBtn.click();
+
+  const researchPanel = page.getByRole("dialog", { name: "Research catalog" });
+  await researchPanel.waitFor({ state: "visible" });
+  await page.getByText(/Technologies \(\d+\)/).waitFor({ state: "visible" });
+  pass(tag, "research panel opens with tech catalog");
+
+  await researchPanel.getByRole("button", { name: "Close" }).click();
+  await researchPanel.waitFor({ state: "hidden" });
+  pass(tag, "research panel closes");
+
+  const heraldBtn = page.getByRole("button", { name: /Herald/ });
+  await heraldBtn.waitFor({ state: "visible" });
+  await page.locator('button:has-text("Herald"):not([disabled])').waitFor({
+    state: "visible",
+    timeout: 15_000,
+  });
+  await heraldBtn.click();
+
+  const heraldPanel = page.getByRole("dialog", { name: /Daily Herald/ });
+  await heraldPanel.waitFor({ state: "visible" });
+  await page.locator("#herald-event-headline").waitFor({ state: "visible", timeout: 15_000 });
+  const headline = await page.locator("#herald-event-headline").innerText();
+  if (!headline.trim()) {
+    fail(tag, "Herald panel loaded but headline is empty");
+  }
+  pass(tag, `herald panel loads story: "${headline.slice(0, 48)}${headline.length > 48 ? "…" : ""}"`);
+
+  await page.keyboard.press("Escape");
+  await heraldPanel.waitFor({ state: "hidden" });
+  pass(tag, "herald panel closes");
+}
+
+/**
  * Deep /play checks — WebGL canvas, HUD, COOP/COEP, sim tick.
  * @param {import('playwright').Page} page
  * @param {{ tag?: string; screenshotPath?: string }} [options]
@@ -58,6 +141,9 @@ export async function runPlayChecks(page, options = {}) {
   pass(tag, "WebGL context created");
 
   await page.waitForTimeout(3500);
+
+  await assertSaveApiHealth(tag);
+  await assertHudPanels(page, tag);
 
   if (options.screenshotPath) {
     await page.screenshot({ path: options.screenshotPath, fullPage: false });

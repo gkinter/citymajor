@@ -89,7 +89,9 @@ function formatWhen(iso: string): string {
   }
 }
 
-function isZoneSnapshot(value: unknown): value is SimSnapshot["zones"][number] {
+function isZoneSnapshot(
+  value: unknown,
+): value is NonNullable<SimSnapshot["zones"]>[number] {
   if (typeof value !== "object" || value === null) return false;
   const zone = value as Record<string, unknown>;
   return (
@@ -254,7 +256,7 @@ export function SaveLoadControls({
         setActionMessage("Sim not ready yet");
         return;
       }
-      setListLoading(true);
+      setLoadingSlotId(slot.id);
       setActionMessage(null);
       try {
         const res = await fetch(`/api/saves/${slot.id}`, { credentials: "include" });
@@ -276,14 +278,14 @@ export function SaveLoadControls({
           setActionMessage(`Save "${slot.name}" has no restorable snapshot`);
           return;
         }
-        simApi.applySnapshot(snapshot);
+        await simApi.applySnapshot(snapshot);
         setLoadOpen(false);
         setActionMessage(`Loaded "${slot.name}"`);
         onLoadSuccess?.();
       } catch (err) {
         setActionMessage(err instanceof Error ? err.message : "Load failed");
       } finally {
-        setListLoading(false);
+        setLoadingSlotId(null);
       }
     },
     [simApi, onLoadSuccess],
@@ -303,8 +305,13 @@ export function SaveLoadControls({
         >
           {saving ? "Saving…" : "Save"}
         </button>
-        <button type="button" style={hudActionButton()} onClick={() => setLoadOpen(true)}>
-          Load
+        <button
+          type="button"
+          style={hudActionButton(!!loadingSlotId)}
+          disabled={!!loadingSlotId}
+          onClick={() => setLoadOpen(true)}
+        >
+          {loadingSlotId ? "Loading…" : "Load"}
         </button>
         <span style={slotBadgeStyle} aria-live="polite">
           slots {slotCount}/{maxSlots}

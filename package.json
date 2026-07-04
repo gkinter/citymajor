@@ -10,7 +10,8 @@
     "smoke:all": "pnpm --filter @citymajor/web smoke:all",
     "smoke:play": "pnpm --filter @citymajor/web smoke:play",
     "meshy:batch": "node scripts/meshy/batch-generate.mjs",
-    "meshy:batch:dry": "node scripts/meshy/batch-generate.mjs --dry-run"
+    "meshy:batch:dry": "node scripts/meshy/batch-generate.mjs --dry-run",
+    "meshy:validate": "node scripts/meshy/validate-manifest.mjs"
   },
   "devDependencies": {
     "@gltf-transform/core": "^4.2.1",

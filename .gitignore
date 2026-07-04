@@ -72,6 +72,7 @@ web/.next/
 web/out/
 web/public/dotnet/
 !web/public/dotnet/.gitkeep
+web/wasm/public/dotnet/
 *.tsbuildinfo
 next-env.d.ts
 .env*.local

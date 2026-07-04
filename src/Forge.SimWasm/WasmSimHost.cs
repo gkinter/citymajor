@@ -243,6 +243,14 @@ public sealed class WasmSimHost
             _state.Roads.AddNode(road.TileX, road.TileZ);
         }
 
+        Array.Clear(_state.Tiles.Traffic, 0, _state.Tiles.Traffic.Length);
+        foreach (var tile in dto.Traffic)
+        {
+            if (!_state.Tiles.InBounds(tile.TileX, tile.TileZ)) continue;
+            int idx = _state.Tiles.Index(tile.TileX, tile.TileZ);
+            _state.Tiles.Traffic[idx] = Math.Clamp(tile.Density, 0f, 1f);
+        }
+
         foreach (var building in dto.Buildings)
         {
             if (!_state.Tiles.InBounds(building.TileX, building.TileZ)) continue;
@@ -298,6 +306,7 @@ public sealed class WasmSimHost
         Array.Clear(tiles.ZoneType, 0, tiles.ZoneType.Length);
         Array.Clear(tiles.ZoneDensity, 0, tiles.ZoneDensity.Length);
         Array.Clear(tiles.RoadFlags, 0, tiles.RoadFlags.Length);
+        Array.Clear(tiles.Traffic, 0, tiles.Traffic.Length);
     }
 
     private byte ComputeRoadFlags(int x, int y)
@@ -771,6 +780,8 @@ public sealed class SimSnapshotDto
     public BuildingDto[] Buildings { get; init; } = [];
     public ZoneDto[] Zones { get; init; } = [];
     public RoadDto[] Roads { get; init; } = [];
+    /// <summary>Sparse road tiles with congestion density (0–1).</summary>
+    public TrafficDto[] Traffic { get; init; } = [];
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
 
     public static SimSnapshotDto From(
@@ -782,6 +793,7 @@ public sealed class SimSnapshotDto
         var buildings = CollectBuildings(state);
         var zones = CollectZones(state);
         var roads = CollectRoads(state);
+        var traffic = CollectTraffic(state);
 
         return new SimSnapshotDto
         {
@@ -800,6 +812,7 @@ public sealed class SimSnapshotDto
             Buildings = buildings,
             Zones = zones,
             Roads = roads,
+            Traffic = traffic,
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
         };
     }
@@ -880,6 +893,22 @@ public sealed class SimSnapshotDto
         return list.ToArray();
     }
 
+    private static TrafficDto[] CollectTraffic(WorldState state)
+    {
+        const float MinDensity = 0.01f;
+        var tiles = state.Tiles;
+        var list = new List<TrafficDto>(256);
+        for (int y = 0; y < tiles.Size; y++)
+        for (int x = 0; x < tiles.Size; x++)
+        {
+            int idx = tiles.Index(x, y);
+            float density = tiles.Traffic[idx];
+            if (density < MinDensity) continue;
+            list.Add(new TrafficDto { TileX = x, TileZ = y, Density = density });
+        }
+        return list.ToArray();
+    }
+
 }
 
 public sealed class BuildingDto
@@ -907,6 +936,13 @@ public sealed class RoadDto
     public byte RoadFlags { get; init; }
 }
 
+public sealed class TrafficDto
+{
+    public int TileX { get; init; }
+    public int TileZ { get; init; }
+    public float Density { get; init; }
+}
+
 public sealed class ActiveEventDto
 {
     public int EventId { get; init; }
@@ -925,6 +961,8 @@ public sealed class ActiveEventDto
 [JsonSerializable(typeof(ZoneDto[]))]
 [JsonSerializable(typeof(RoadDto))]
 [JsonSerializable(typeof(RoadDto[]))]
+[JsonSerializable(typeof(TrafficDto))]
+[JsonSerializable(typeof(TrafficDto[]))]
 [JsonSerializable(typeof(ActiveEventDto))]
 [JsonSerializable(typeof(ActiveEventDto[]))]
 [JsonSerializable(typeof(WasmStatusDto))]

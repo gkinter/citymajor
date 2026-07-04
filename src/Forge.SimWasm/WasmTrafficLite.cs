@@ -26,6 +26,7 @@ public sealed class WasmTrafficLite
     private int[]? _zoneCentroidNode;
     private float[]? _zoneDistanceCache;
     private int _edgeCount;
+    private int _cachedNodeCount;
     private int _edgeBatchCursor;
 
     /// <summary>
@@ -44,6 +45,8 @@ public sealed class WasmTrafficLite
 
         if (!_initialized || state.Tiles.Size != _worldSize)
             Initialize(state);
+        else
+            EnsureRoadGraphCurrent(state);
 
         if (_totalZones == 0 || state.Roads.NodeCount == 0 || _edgeCount == 0)
             return;
@@ -61,7 +64,12 @@ public sealed class WasmTrafficLite
     {
         _ = dt;
 
-        if (!_initialized || _edgeCount == 0 || _edgeVolume == null ||
+        if (!_initialized || state.Tiles.Size != _worldSize)
+            Initialize(state);
+        else
+            EnsureRoadGraphCurrent(state);
+
+        if (_edgeCount == 0 || _edgeVolume == null ||
             _edgeCapacity == null || _edgeFreeFlow == null)
             return;
 
@@ -94,9 +102,26 @@ public sealed class WasmTrafficLite
 
         UpdateZoneCentroids(state);
         UpdateEdgeData(state);
+        _cachedNodeCount = state.Roads.NodeCount;
         ComputeZoneDistances(state);
 
         _initialized = true;
+    }
+
+    /// <summary>
+    /// Refresh edge table and zone centroids when the road graph changes without a
+    /// world resize (e.g. PlaceRoad during play or snapshot load).
+    /// </summary>
+    private void EnsureRoadGraphCurrent(WorldState state)
+    {
+        int nodeCount = state.Roads.NodeCount;
+        if (state.Roads.EdgeCount == _edgeCount && nodeCount == _cachedNodeCount)
+            return;
+
+        UpdateZoneCentroids(state);
+        UpdateEdgeData(state);
+        _cachedNodeCount = nodeCount;
+        ComputeZoneDistances(state);
     }
 
     private void UpdateZoneCentroids(WorldState state)

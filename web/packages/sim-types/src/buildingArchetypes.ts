@@ -307,14 +307,13 @@ export interface BuildingArchetype {
   key: string;
   roof: RoofArchetype;
   wallColor: string;
-  /** Story count derived from level (present when `level > 0` is passed to `describeBuilding`). */
-  stories?: number;
+  stories: number;
 }
 
 /** Full archetype descriptor for a TypeId. */
 export function describeBuilding(typeId: number, level = 1): BuildingArchetype {
   const category = classifyBuilding(typeId);
-  const base: BuildingArchetype = {
+  return {
     typeId,
     category,
     era: deriveEra(typeId),
@@ -322,7 +321,6 @@ export function describeBuilding(typeId: number, level = 1): BuildingArchetype {
     key: archetypeKey(typeId),
     roof: roofArchetype(category),
     wallColor: resolveWallColor(typeId),
+    stories: computeStories(category, level),
   };
-  if (level > 0) base.stories = computeStories(category, level);
-  return base;
 }

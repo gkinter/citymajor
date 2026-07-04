@@ -36,6 +36,13 @@ export type RoadSnapshot = {
   roadFlags: number;
 };
 
+/** Sparse road tiles with congestion density (0–1) from WasmTrafficLite. */
+export type TrafficSnapshot = {
+  tileX: number;
+  tileZ: number;
+  density: number;
+};
+
 export type BuildingSnapshot = {
   id: number;
   typeId: number;
@@ -113,6 +120,7 @@ export function resourcesFromSnapshot(snapshot: SimSnapshot): SimResources {
     buildings: _buildings,
     zones: _zones,
     roads: _roads,
+    traffic: _traffic,
     ...resources
   } = snapshot;
   return resources;
@@ -124,11 +132,15 @@ export type SimSnapshot = SimResources & {
   zones?: ZoneSnapshot[];
   /** Sparse road tiles (non-zero roadFlags). */
   roads?: RoadSnapshot[];
+  /** Sparse road tiles with congestion density (≥0.01). */
+  traffic?: TrafficSnapshot[];
 };
 
 export interface SimBridge {
   init(wasmUrl?: string, worldSize?: number): Promise<void>;
   send(command: SimCommand): void;
+  /** Restore WASM state from a save payload; resolves when the worker acks. */
+  loadSnapshot(snapshot: SimSnapshot): Promise<void>;
   getSnapshot(): SimSnapshot | null;
   onSnapshot(callback: (snapshot: SimSnapshot) => void): () => void;
   /**
@@ -146,7 +158,8 @@ export interface SimBridge {
 /** Client-side snapshot access for save/load UI. */
 export type SimClientApi = {
   getSnapshot: () => SimSnapshot | null;
-  applySnapshot: (snapshot: SimSnapshot) => void;
+  /** Optimistic UI apply + WASM restore; rejects on worker load failure. */
+  applySnapshot: (snapshot: SimSnapshot) => Promise<void>;
   sendCommand: (command: SimCommand) => void;
 };
 
@@ -167,7 +180,10 @@ type WorkerInbound =
 type WorkerOutbound =
   | { type: "ready" }
   | { type: "snapshot"; snapshot: SimSnapshot }
+  | { type: "load_complete"; ok: boolean }
   | { type: "error"; message: string };
+
+const LOAD_SNAPSHOT_TIMEOUT_MS = 15_000;
 
 /** Worker-backed bridge loading the published dotnet WASM bundle at runtime. */
 export function createSimBridge(): SimBridge {
@@ -175,9 +191,36 @@ export function createSimBridge(): SimBridge {
   let latestSnapshot: SimSnapshot | null = null;
   const listeners = new Set<(snapshot: SimSnapshot) => void>();
   const errorListeners = new Set<(error: Error) => void>();
+  let pendingLoad:
+    | { resolve: () => void; reject: (error: Error) => void }
+    | null = null;
 
   const notifyError = (error: Error) => {
     for (const listener of errorListeners) listener(error);
+  };
+
+  const settlePendingLoad = (ok: boolean, error?: Error) => {
+    const pending = pendingLoad;
+    if (!pending) return;
+    pendingLoad = null;
+    if (ok) pending.resolve();
+    else pending.reject(error ?? new Error("Failed to restore WASM snapshot"));
+  };
+
+  const handleWorkerOutbound = (msg: WorkerOutbound) => {
+    if (msg.type === "snapshot") {
+      notify(msg.snapshot);
+      return;
+    }
+    if (msg.type === "load_complete") {
+      settlePendingLoad(msg.ok);
+      return;
+    }
+    if (msg.type === "error") {
+      const err = new Error(msg.message);
+      notifyError(err);
+      settlePendingLoad(false, err);
+    }
   };
 
   const notify = (snapshot: SimSnapshot) => {
@@ -206,11 +249,11 @@ export function createSimBridge(): SimBridge {
           const msg = event.data;
           if (msg.type === "ready") {
             settle(resolve);
-          } else if (msg.type === "snapshot") {
-            notify(msg.snapshot);
+          } else if (msg.type === "snapshot" || msg.type === "load_complete") {
+            handleWorkerOutbound(msg);
           } else if (msg.type === "error") {
             const err = new Error(msg.message);
-            notifyError(err);
+            handleWorkerOutbound(msg);
             settle(() => reject(err));
           }
         };
@@ -252,9 +295,7 @@ export function createSimBridge(): SimBridge {
       localWorker.addEventListener(
         "message",
         (event: MessageEvent<WorkerOutbound>) => {
-          const msg = event.data;
-          if (msg.type === "snapshot") notify(msg.snapshot);
-          if (msg.type === "error") notifyError(new Error(msg.message));
+          handleWorkerOutbound(event.data);
         },
       );
       localWorker.addEventListener("error", (event) => {
@@ -267,6 +308,42 @@ export function createSimBridge(): SimBridge {
 
     send(command) {
       worker?.postMessage({ type: "command", command } satisfies WorkerInbound);
+    },
+
+    loadSnapshot(snapshot) {
+      if (!worker) {
+        return Promise.reject(new Error("Sim worker not initialized"));
+      }
+      if (pendingLoad) {
+        return Promise.reject(new Error("Another load is already in progress"));
+      }
+      return new Promise<void>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          if (!pendingLoad) return;
+          pendingLoad = null;
+          reject(
+            new Error(
+              `Load snapshot timed out after ${LOAD_SNAPSHOT_TIMEOUT_MS}ms`,
+            ),
+          );
+        }, LOAD_SNAPSHOT_TIMEOUT_MS);
+
+        pendingLoad = {
+          resolve: () => {
+            clearTimeout(timeoutId);
+            resolve();
+          },
+          reject: (error) => {
+            clearTimeout(timeoutId);
+            reject(error);
+          },
+        };
+
+        worker.postMessage({
+          type: "command",
+          command: { type: "load_snapshot", snapshot } satisfies SimCommand,
+        } satisfies WorkerInbound);
+      });
     },
 
     getSnapshot() {
@@ -285,6 +362,8 @@ export function createSimBridge(): SimBridge {
     },
 
     dispose() {
+      pendingLoad?.reject(new Error("Sim bridge disposed"));
+      pendingLoad = null;
       worker?.postMessage({ type: "dispose" } satisfies WorkerInbound);
       worker?.terminate();
       worker = null;
@@ -303,6 +382,9 @@ export function createSimBridgeStub(): SimBridge {
   return {
     async init() {},
     send() {},
+    async loadSnapshot() {
+      throw new Error("Sim bridge stub cannot load snapshots");
+    },
     getSnapshot() {
       return null;
     },

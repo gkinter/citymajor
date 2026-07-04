@@ -16,6 +16,7 @@ type WorkerInbound =
 type WorkerOutbound =
   | { type: "ready" }
   | { type: "snapshot"; snapshot: SimSnapshot }
+  | { type: "load_complete"; ok: boolean }
   | { type: "error"; message: string };
 
 const ctx: DedicatedWorkerGlobalScope =
@@ -389,6 +390,7 @@ function readSnapshot(): SimSnapshot {
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),
+    traffic: parsed.traffic ?? [],
   };
 }
 
@@ -469,12 +471,24 @@ function syncGridsFromSnapshot(snapshot: SimSnapshot) {
 }
 
 function loadSnapshot(snapshot: SimSnapshot) {
-  if (!sim) return;
-
-  const restored = sim.LoadSnapshot?.(JSON.stringify(snapshot)) ?? false;
-  if (!restored) {
-    post({ type: "error", message: "Failed to restore WASM snapshot" });
+  if (!sim) {
+    post({ type: "load_complete", ok: false });
+    post({ type: "error", message: "Sim worker not initialized" });
     return;
+  }
+
+  let restored = true;
+  if (sim.LoadSnapshot) {
+    restored = sim.LoadSnapshot(JSON.stringify(snapshot));
+    if (!restored) {
+      post({ type: "load_complete", ok: false });
+      post({ type: "error", message: "Failed to restore WASM snapshot" });
+      return;
+    }
+  } else {
+    console.warn(
+      "[sim-worker] LoadSnapshot export missing — syncing grids only",
+    );
   }
 
   syncGridsFromSnapshot(snapshot);
@@ -482,6 +496,7 @@ function loadSnapshot(snapshot: SimSnapshot) {
   lastSnapshotMs = 0;
   lastResourceMs = 0;
   publishSnapshot();
+  post({ type: "load_complete", ok: true });
 }
 
 function clampSpeedLevel(level: number): 0 | 1 | 2 | 3 {

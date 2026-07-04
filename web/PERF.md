@@ -31,7 +31,50 @@
 | Discrete (M-series / RTX) | ≥60 FPS max fill | **Expected 60+** at DPR 1.5–2 with ~5 instanced draw calls |
 | Integrated | ≥30 FPS max fill | **Expected 30–55**; `AdaptiveDpr` steps down after 2s below 30 FPS |
 
-### Local benchmark (fill in after `/play` smoke test)
+### Dev flow (WASM + R3F)
+
+From repo root or `web/`:
+
+```bash
+unset NODE_OPTIONS          # required on Beast if emcc rejects --max-semi-space-size
+pnpm build:wasm             # publishes Forge.SimWasm → web/public/dotnet/
+pnpm dev                    # Next.js on http://localhost:3000
+```
+
+Shortcut: `pnpm dev:wasm` (build + dev in one command). Re-run `pnpm build:wasm` after any C# sim change.
+
+Without WASM assets, `/play` falls back to **procedural** city data (~5000 mock buildings). With `web/public/dotnet/` present, the HUD shows **WASM sim** (~220 starter buildings, zone growth over time).
+
+### Automated headless smoke test
+
+Script: `web/scripts/smoke-play.mjs` (Playwright + Chromium).
+
+**Terminal 1** — start the app:
+
+```bash
+pnpm build:wasm && pnpm dev
+```
+
+**Terminal 2** — run smoke (first time: `npx playwright install chromium`):
+
+```bash
+cd web && pnpm smoke:play
+# or from repo root:
+pnpm --filter @citymajor/web smoke:play
+```
+
+Environment:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `BASE_URL` | `http://localhost:3000` | Dev server URL |
+| `TIMEOUT_MS` | `60000` | Page/load timeout |
+| `HEADLESS` | `1` | Set `0` to watch the browser |
+| `WASM_EXPECTED` | unset | Set `1` to fail if HUD is not `WASM sim` |
+
+Checks: `/play` HTTP 200, COOP/COEP headers, HUD text, `<canvas>` + WebGL context, buildings count in HUD. **Headless Chromium often reports FPS `—`** — the script warns but does not fail; use the interactive benchmark below for FPS targets.
+
+### Local benchmark (fill in after interactive `/play` session)
 
 ```
 Machine:
@@ -40,9 +83,8 @@ DPR (initial):
 FPS (orbit, full city in view):
 FPS (zoomed district, ~8 chunks):
 DPR after degrade (if triggered):
+Sim source (HUD): WASM sim | procedural
 ```
-
-**Headless CI cannot measure WebGL FPS** — validate interactively at http://localhost:3000/play.
 
 ## COOP/COEP
 

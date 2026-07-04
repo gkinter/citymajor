@@ -10,11 +10,16 @@ import {
 } from "@/lib/narrative-templates";
 import { deriveNarrativeBucket } from "@/lib/sim-metrics";
 import type { GameSpeedLevel, SimClientApi, SimResources } from "@/lib/sim-bridge";
+import {
+  GRAPHICS_QUALITY_STORAGE_KEY,
+  type GraphicsQualityTier,
+} from "@/lib/constants";
 import type { FpsStats } from "@/lib/types";
 import type { ZoningTool } from "@/lib/zoning";
 import { CityCanvas } from "@/components/city/CityCanvas";
 import { FpsHud } from "@/components/city/FpsHud";
 import { HeraldPanel } from "@/components/city/HeraldPanel";
+import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
 import { SpeedToolbar } from "@/components/city/SpeedToolbar";
@@ -49,9 +54,18 @@ function formatQuota(remaining: number | undefined): string {
   return String(remaining);
 }
 
+function readStoredQualityTier(): GraphicsQualityTier {
+  if (typeof window === "undefined") return "high";
+  const stored = window.localStorage.getItem(GRAPHICS_QUALITY_STORAGE_KEY);
+  return stored === "low" ? "low" : "high";
+}
+
 export function PlayClient() {
   const [activeTool, setActiveTool] = useState<ZoningTool>("residential");
   const [gameSpeed, setGameSpeed] = useState<GameSpeedLevel>(1);
+  const [qualityTier, setQualityTier] = useState<GraphicsQualityTier>(() =>
+    readStoredQualityTier(),
+  );
   const [stats, setStats] = useState<FpsStats>({
     fps: 0,
     dpr: 1,
@@ -90,6 +104,11 @@ export function PlayClient() {
   useEffect(() => {
     void refreshEntitlements();
   }, [refreshEntitlements]);
+
+  const handleQualityChange = useCallback((tier: GraphicsQualityTier) => {
+    setQualityTier(tier);
+    window.localStorage.setItem(GRAPHICS_QUALITY_STORAGE_KEY, tier);
+  }, []);
 
   const fetchHeraldStory = useCallback(async () => {
     const coverage = statsRef.current.healthcareCoverage ?? 0.5;
@@ -159,11 +178,13 @@ export function PlayClient() {
       <CityCanvas
         activeTool={activeTool}
         gameSpeed={gameSpeed}
+        qualityTier={qualityTier}
         onStats={setStats}
         onSimResources={setSimResources}
         onSimApi={setSimApi}
       />
       <SpeedToolbar speedLevel={gameSpeed} onSpeedChange={setGameSpeed} />
+      <QualityToolbar qualityTier={qualityTier} onQualityChange={handleQualityChange} />
       <SaveLoadControls
         simApi={simApi}
         entitlements={entitlements}

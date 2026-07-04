@@ -28,3 +28,8 @@ export const FPS_DEGRADE_THRESHOLD = 30;
 export const FPS_DEGRADE_DURATION_MS = 2000;
 export const MIN_DPR = 0.5;
 export const MAX_DPR = 2;
+
+/** Graphics quality tier — controls post-processing and other GPU-heavy features. */
+export type GraphicsQualityTier = "low" | "high";
+
+export const GRAPHICS_QUALITY_STORAGE_KEY = "citymajor_graphics_quality";

@@ -12,8 +12,8 @@
 import { mkdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { Document, NodeIO } from "@gltf-transform/core";
-import { getBounds } from "@gltf-transform/functions";
+import { Document, NodeIO, getBounds } from "@gltf-transform/core";
+import { validateManifest } from "./validate-manifest.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "../..");

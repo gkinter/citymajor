@@ -76,7 +76,9 @@ export async function POST(req: Request) {
     // narrativeFromBucket templates use the literal placeholder "the city"
     // as the substitution anchor; case-insensitive replace so lowercase
     // and title-cased variants both get personalized.
-    event.body = event.body.replace(/the city/gi, cityName);
+    const personalize = (text: string) => text.replace(/the city/gi, cityName);
+    event.headline = personalize(event.headline);
+    event.body = personalize(event.body);
   }
 
   const payload = NarrativeEventResponseSchema.parse(event);

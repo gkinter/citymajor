@@ -1,0 +1,26 @@
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/coverage
+**/.git
+**/.github
+**/.vscode
+**/.idea
+**/.DS_Store
+**/Thumbs.db
+**/.env
+**/.env.*
+!**/.env.example
+**/test-results
+**/playwright-report
+
+# C# build artefacts (WASM stage rebuilds from source)
+**/bin
+**/obj
+
+# Desktop / server game targets — not needed for web Docker build
+src/Forge.Server
+
+# Local dev caches
+**/.pnpm-store

@@ -9,6 +9,7 @@ import {
   NarrativeEventRequestSchema,
   NarrativeEventResponseSchema,
   narrativeFromBucket,
+  personalizeNarrativeEvent,
   resolveBucket,
 } from "@/lib/narrative-templates";
 import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
@@ -69,16 +70,11 @@ export async function POST(req: Request) {
   }
 
   const bucket = resolveBucket(parsed.data.bucket, parsed.data.context);
-  const event = narrativeFromBucket(bucket);
+  let event = narrativeFromBucket(bucket);
 
   const cityName = parsed.data.context?.cityName;
   if (cityName) {
-    // narrativeFromBucket templates use the literal placeholder "the city"
-    // as the substitution anchor; case-insensitive replace so lowercase
-    // and title-cased variants both get personalized.
-    const personalize = (text: string) => text.replace(/the city/gi, cityName);
-    event.headline = personalize(event.headline);
-    event.body = personalize(event.body);
+    event = personalizeNarrativeEvent(event, cityName);
   }
 
   const payload = NarrativeEventResponseSchema.parse(event);

@@ -56,8 +56,16 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 {
   "tick": 1000,
   "population": 842,
+  "householdCount": 128,
   "cityFunds": 51200,
   "era": 0,
+  "residentialDemand": 0.42,
+  "commercialDemand": -0.15,
+  "industrialDemand": 0.08,
+  "approval": 62.5,
+  "happiness": 0.68,
+  "monthlyIncome": 12400,
+  "monthlyExpenses": 9800,
   "buildings": [
     {
       "id": 3,
@@ -86,6 +94,13 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
   "cityFunds": 51200,
   "era": 0,
   "eraName": "Frontier",
+  "residentialDemand": 0.42,
+  "commercialDemand": -0.15,
+  "industrialDemand": 0.08,
+  "approval": 62.5,
+  "happiness": 0.68,
+  "monthlyIncome": 12400,
+  "monthlyExpenses": 9800,
   "researchPoints": 12.5,
   "researchRate": 3.2,
   "trafficMode": "lite",
@@ -119,7 +134,7 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 | L1 (game day) | `GameDayInterval` (1.0 sim s) | `EconomySystem.DailyTick`, `ServiceSystem`, `ZoneGrowthSystem`, `PoliticsSystem`, events |
 | L2 (month) | `GameMonthInterval` (30.0 sim s) | `PopulationSystem.MonthlyTick` (migration, births/deaths), `BudgetSystem`, `ResearchSystem`, land-value recalc, **era derivation** |
 
-`WasmSimHost` accumulates sim time: `GameDayInterval` drives L1 daily ticks; `GameMonthInterval` (30 game days) drives L2 month ticks including `PopulationSystem.MonthlyTick` and staggered per-tick satisfaction updates (1/30 of households per sim tick). Population, household count, and city treasury are exposed via `GetStatus()` and `GetRenderSnapshot()`.
+`WasmSimHost` accumulates sim time: `GameDayInterval` drives L1 daily ticks; `GameMonthInterval` (30 game days) drives L2 month ticks including `PopulationSystem.MonthlyTick` and staggered per-tick satisfaction updates (1/30 of households per sim tick). Population, household count, city treasury, **RCI demand** (`EconomySystem`), **approval / happiness** (`PoliticsSystem` / `WorldState`), and **monthly budget ledgers** (`BudgetSystem`) are exposed via `GetStatus()` and `GetRenderSnapshot()`.
 
 **Era derivation (SB-3692 partial):** Without `tech_tree.json`, `WasmEraDeriver` sets `era` from tick count and research proxies (accumulated RP, heavy-industry tiles, educated population). The primary threshold is **Frontier → Industrial** (`EraIndustrialTickThreshold` = 1200 ticks, or RP ≥ 25 / heavy industry ≥ 3). HUD uses visual era names (Frontier … Future) with per-era badge colors.
 

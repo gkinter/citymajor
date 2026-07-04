@@ -96,6 +96,11 @@ export type SimResources = {
   techCount?: number;
   /** WASM GetStatus — mayor approval percent (0–100) when PoliticsSystem is exported. */
   approval?: number;
+  /** City happiness (0–1). */
+  happiness?: number;
+  /** Current-month income / expense totals from BudgetSystem ledgers. */
+  monthlyIncome?: number;
+  monthlyExpenses?: number;
   /** Live EventSystem instances from WASM GetStatus / snapshot. */
   activeEvents?: ActiveEventSnapshot[];
 };

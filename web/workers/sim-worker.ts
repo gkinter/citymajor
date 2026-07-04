@@ -36,6 +36,9 @@ type WasmStatus = {
   researchRate?: number;
   techCount?: number;
   approval?: number;
+  happiness?: number;
+  monthlyIncome?: number;
+  monthlyExpenses?: number;
   eraProgress?: {
     nextEra?: number;
     nextEraName?: string;
@@ -48,6 +51,14 @@ type WasmStatus = {
       met?: boolean;
     }>;
   };
+  activeEvents?: Array<{
+    eventId?: number;
+    typeId?: string;
+    phase?: string;
+    severity?: number;
+    tileX?: number;
+    tileY?: number;
+  }>;
 };
 
 type SimExports = {
@@ -233,6 +244,27 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
   };
 }
 
+function parseActiveEvents(
+  raw: unknown,
+): ActiveEventSnapshot[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const events: ActiveEventSnapshot[] = [];
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null) continue;
+    const e = item as Record<string, unknown>;
+    if (typeof e.typeId !== "string") continue;
+    events.push({
+      eventId: typeof e.eventId === "number" ? e.eventId : 0,
+      typeId: e.typeId,
+      phase: typeof e.phase === "string" ? e.phase : "active",
+      severity: typeof e.severity === "number" ? e.severity : 0,
+      tileX: typeof e.tileX === "number" ? e.tileX : -1,
+      tileY: typeof e.tileY === "number" ? e.tileY : -1,
+    });
+  }
+  return events.length > 0 ? events : undefined;
+}
+
 function readStatus(): Pick<
   SimSnapshot,
   | "tick"
@@ -247,7 +279,11 @@ function readStatus(): Pick<
   | "researchRate"
   | "techCount"
   | "approval"
+  | "happiness"
+  | "monthlyIncome"
+  | "monthlyExpenses"
   | "eraProgress"
+  | "activeEvents"
 > | null {
   if (!sim?.GetStatus) return null;
   try {
@@ -284,7 +320,11 @@ function readStatus(): Pick<
       researchRate: parsed.researchRate,
       techCount: parsed.techCount,
       approval: parsed.approval,
+      happiness: parsed.happiness,
+      monthlyIncome: parsed.monthlyIncome,
+      monthlyExpenses: parsed.monthlyExpenses,
       eraProgress,
+      activeEvents: parseActiveEvents(parsed.activeEvents),
     };
   } catch {
     return null;
@@ -321,6 +361,10 @@ function readSnapshot(): SimSnapshot {
     researchRate: parsed.researchRate ?? status?.researchRate,
     techCount: parsed.techCount ?? status?.techCount,
     approval: parsed.approval ?? status?.approval,
+    happiness: parsed.happiness ?? status?.happiness,
+    monthlyIncome: parsed.monthlyIncome ?? status?.monthlyIncome,
+    monthlyExpenses: parsed.monthlyExpenses ?? status?.monthlyExpenses,
+    eraProgress: parsed.eraProgress ?? status?.eraProgress,
     activeEvents:
       parseActiveEvents(parsed.activeEvents) ?? status?.activeEvents,
     buildings: parsed.buildings ?? [],

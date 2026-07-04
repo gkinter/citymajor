@@ -54,6 +54,10 @@ public sealed class WasmSimHost
     public float Happiness => _state?.Happiness ?? 0f;
     public long MonthlyIncome => _state?.Income.Total ?? 0;
     public long MonthlyExpenses => _state?.Expenses.Total ?? 0;
+    public EraProgressSnapshot EraProgress =>
+        _state is null || _research is null
+            ? new EraProgressSnapshot()
+            : WasmEraDeriver.GetEraProgress(_state, _research);
 
     public void Init(int worldSize = WasmConfig.DefaultWorldSize)
     {
@@ -135,8 +139,16 @@ public sealed class WasmSimHost
         if (!IsInitialized) return "{}";
 
         var snap = SimSnapshot.CaptureFrom(_state);
-        var dto = SimSnapshotDto.From(snap, _state, _events);
+        var dto = SimSnapshotDto.From(snap, _state, _events, _economy);
         return JsonSerializer.Serialize(dto, JsonContext.Default.SimSnapshotDto);
+    }
+
+    public string GetStatusJson()
+    {
+        if (!IsInitialized)
+            return JsonSerializer.Serialize(new WasmStatusDto(), JsonContext.Default.WasmStatusDto);
+
+        return JsonSerializer.Serialize(WasmStatusDto.From(this), JsonContext.Default.WasmStatusDto);
     }
 
     public void PaintZone(int x, int y, byte zoneType)
@@ -502,6 +514,111 @@ public sealed class WasmSimHost
     }
 }
 
+public sealed class TickIntervalsDto
+{
+    public double GameDaySeconds { get; init; }
+    public double GameMonthSeconds { get; init; }
+    public double TrafficLiteSeconds { get; init; }
+    public double TrafficLiteEdgeBatchSeconds { get; init; }
+    public double TrafficStubSeconds { get; init; }
+}
+
+public sealed class TrafficLiteInfoDto
+{
+    public int ZoneCount { get; init; }
+    public int FrankWolfeIterations { get; init; }
+    public int EdgeBatchCount { get; init; }
+}
+
+public sealed class WasmStatusDto
+{
+    public bool Initialized { get; init; }
+    public long Tick { get; init; }
+    public long TickCount { get; init; }
+    public int Population { get; init; }
+    public int HouseholdCount { get; init; }
+    public long CityFunds { get; init; }
+    public int Era { get; init; }
+    public string EraName { get; init; } = "";
+    public EraProgressSnapshot EraProgress { get; init; } = new();
+    public float ResidentialDemand { get; init; }
+    public float CommercialDemand { get; init; }
+    public float IndustrialDemand { get; init; }
+    public float Approval { get; init; }
+    public float Happiness { get; init; }
+    public long MonthlyIncome { get; init; }
+    public long MonthlyExpenses { get; init; }
+    public float ResearchPoints { get; init; }
+    public float ResearchRate { get; init; }
+    public int EventDefinitionCount { get; init; }
+    public ActiveEventDto[] ActiveEvents { get; init; } = [];
+    public int TechCount { get; init; }
+    public string TrafficMode { get; init; } = "";
+    public TickIntervalsDto TickIntervals { get; init; } = new();
+    public TrafficLiteInfoDto TrafficLite { get; init; } = new();
+    public string[] Systems { get; init; } = [];
+    public string[] Stubbed { get; init; } = [];
+
+    public static WasmStatusDto From(WasmSimHost host) => new()
+    {
+        Initialized = host.IsInitialized,
+        Tick = host.TickCount,
+        TickCount = host.TickCount,
+        Population = host.Population,
+        HouseholdCount = host.HouseholdCount,
+        CityFunds = host.CityFunds,
+        Era = host.Era,
+        EraName = WasmEraDeriver.EraName(host.Era),
+        EraProgress = host.EraProgress,
+        ResidentialDemand = host.ResidentialDemand,
+        CommercialDemand = host.CommercialDemand,
+        IndustrialDemand = host.IndustrialDemand,
+        Approval = host.ApprovalRating * 100f,
+        Happiness = host.Happiness,
+        MonthlyIncome = host.MonthlyIncome,
+        MonthlyExpenses = host.MonthlyExpenses,
+        ResearchPoints = host.ResearchPoints,
+        ResearchRate = host.ResearchRate,
+        EventDefinitionCount = host.EventDefinitionCount,
+        ActiveEvents = host.ActiveEvents,
+        TechCount = host.TechCount,
+        TrafficMode = host.TrafficMode.ToString().ToLowerInvariant(),
+        TickIntervals = new TickIntervalsDto
+        {
+            GameDaySeconds = WasmConfig.GameDayInterval,
+            GameMonthSeconds = WasmConfig.GameMonthInterval,
+            TrafficLiteSeconds = WasmConfig.TrafficLiteInterval,
+            TrafficLiteEdgeBatchSeconds = WasmConfig.TrafficLiteEdgeBatchInterval,
+            TrafficStubSeconds = WasmConfig.TrafficStubInterval,
+        },
+        TrafficLite = new TrafficLiteInfoDto
+        {
+            ZoneCount = WasmConfig.TrafficLiteZoneCount,
+            FrankWolfeIterations = WasmConfig.TrafficLiteFrankWolfeIterations,
+            EdgeBatchCount = WasmConfig.TrafficLiteEdgeBatchCount,
+        },
+        Systems =
+        [
+            "EconomySystem",
+            "PopulationSystem",
+            "WasmTrafficLite (64-zone BPR Frank-Wolfe)",
+            "ServiceSystem",
+            "ZoneGrowthSystem",
+            "BudgetSystem",
+            "PoliticsSystem",
+            "EventSystem",
+            "ResearchSystem",
+            "CulturalDNASystem",
+        ],
+        Stubbed =
+        [
+            "TrafficSystem full (500 zones — desktop only; WASM uses lite mode)",
+            "TradeSystem (not wired in spike)",
+            "ProductionChain (not wired in spike)",
+        ],
+    };
+}
+
 /// <summary>
 /// JSON snapshot matching web/lib/sim-bridge.ts SimSnapshot (SB-3683).
 /// </summary>
@@ -512,12 +629,24 @@ public sealed class SimSnapshotDto
     public int HouseholdCount { get; init; }
     public long CityFunds { get; init; }
     public int Era { get; init; }
+    public float ResidentialDemand { get; init; }
+    public float CommercialDemand { get; init; }
+    public float IndustrialDemand { get; init; }
+    /// <summary>Mayor approval percent (0–100).</summary>
+    public float Approval { get; init; }
+    public float Happiness { get; init; }
+    public long MonthlyIncome { get; init; }
+    public long MonthlyExpenses { get; init; }
     public BuildingDto[] Buildings { get; init; } = [];
     public ZoneDto[] Zones { get; init; } = [];
     public RoadDto[] Roads { get; init; } = [];
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
 
-    public static SimSnapshotDto From(SimSnapshot snap, WorldState state, EventSystem? events = null)
+    public static SimSnapshotDto From(
+        SimSnapshot snap,
+        WorldState state,
+        EventSystem? events = null,
+        EconomySystem? economy = null)
     {
         var buildings = new BuildingDto[snap.BuildingCount];
         for (int i = 0; i < snap.BuildingCount; i++)
@@ -546,6 +675,13 @@ public sealed class SimSnapshotDto
             HouseholdCount = state.Households.Count,
             CityFunds = state.CityFunds,
             Era = state.Era,
+            ResidentialDemand = economy?.ResidentialDemand ?? 0f,
+            CommercialDemand = economy?.CommercialDemand ?? 0f,
+            IndustrialDemand = economy?.IndustrialDemand ?? 0f,
+            Approval = state.ApprovalRating * 100f,
+            Happiness = state.Happiness,
+            MonthlyIncome = state.Income.Total,
+            MonthlyExpenses = state.Expenses.Total,
             Buildings = buildings,
             Zones = zones,
             Roads = roads,
@@ -659,4 +795,11 @@ public sealed class ActiveEventDto
 [JsonSerializable(typeof(RoadDto))]
 [JsonSerializable(typeof(ActiveEventDto))]
 [JsonSerializable(typeof(ActiveEventDto[]))]
+[JsonSerializable(typeof(WasmStatusDto))]
+[JsonSerializable(typeof(TickIntervalsDto))]
+[JsonSerializable(typeof(TrafficLiteInfoDto))]
+[JsonSerializable(typeof(EraProgressSnapshot))]
+[JsonSerializable(typeof(EraProgressGate))]
+[JsonSerializable(typeof(EraProgressGate[]))]
+[JsonSerializable(typeof(string[]))]
 internal partial class JsonContext : JsonSerializerContext;

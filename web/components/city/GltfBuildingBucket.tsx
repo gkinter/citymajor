@@ -6,6 +6,10 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { resolveCatalogKey, resolveGltfPath } from "@/lib/gltf-catalog";
 import {
+  scaleVisualForSpawn,
+  useBuildingSpawnScales,
+} from "@/lib/building-spawn";
+import {
   composeGltfInstanceMatrix,
   lodVisualForBuilding,
   metalnessForCategory,
@@ -64,6 +68,7 @@ export function GltfBuildingBucket({
   const { scene } = useGLTF(path);
   const meshRef = useRef<THREE.InstancedMesh | null>(null);
   const colorsRef = useRef<THREE.Color[]>([]);
+  const getSpawnScale = useBuildingSpawnScales(buildings);
 
   const { geometry, footprint } = useMemo(() => meshFootprint(scene), [scene]);
   const category = buildings[0]?.category;
@@ -78,6 +83,11 @@ export function GltfBuildingBucket({
       const hidden = !chunk?.visible;
       const lod = chunk?.visible ? chunk.lod : 3;
       const visual = lodVisualForBuilding(building, 0, dayNightFactor);
+      const spawnScale = getSpawnScale(building.id);
+      const targetScale =
+        spawnScale < 0.999
+          ? scaleVisualForSpawn(visual.scale, spawnScale)
+          : visual.scale;
       const rotationY = tileYawRadians(
         building.tileX,
         building.tileZ,
@@ -91,7 +101,7 @@ export function GltfBuildingBucket({
         composeGltfInstanceMatrix(
           building.tileX,
           building.tileZ,
-          visual.scale,
+          targetScale,
           footprint,
           rotationY,
           !showGltf,

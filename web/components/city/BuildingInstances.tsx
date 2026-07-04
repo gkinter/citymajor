@@ -13,6 +13,10 @@ import {
   tileYawRadians,
 } from "@/lib/lod";
 import {
+  scaleVisualForSpawn,
+  useBuildingSpawnScales,
+} from "@/lib/building-spawn";
+import {
   GltfBuildingBucket,
   groupBuildingsByCatalogKey,
 } from "./GltfBuildingBucket";
@@ -36,6 +40,7 @@ export function BuildingInstances({
 }: BuildingInstancesProps) {
   const meshRefs = useRef<Record<string, THREE.InstancedMesh | null>>({});
   const colorsRef = useRef<THREE.Color[]>([]);
+  const getSpawnScale = useBuildingSpawnScales(city.buildings);
 
   const buckets = useMemo(
     () =>
@@ -66,6 +71,14 @@ export function BuildingInstances({
         const hidden = !chunk?.visible;
         const lod = chunk?.visible ? chunk.lod : 0;
         const visual = lodVisualForBuilding(building, lod, dayNightFactor);
+        const spawnScale = getSpawnScale(building.id);
+        const scaledVisual =
+          spawnScale < 0.999
+            ? {
+                ...visual,
+                scale: scaleVisualForSpawn(visual.scale, spawnScale),
+              }
+            : visual;
         if (visual.wireframe) bucketWireframe = true;
 
         const gltfCoversL0 =
@@ -82,7 +95,7 @@ export function BuildingInstances({
           composeInstanceMatrix(
             building.tileX,
             building.tileZ,
-            showBox ? visual : { scale: [0, 0, 0], color: visual.color, opacity: 0 },
+            showBox ? scaledVisual : { scale: [0, 0, 0], color: visual.color, opacity: 0 },
             hidden || !showBox,
             showBox ? rotationY : 0,
           ),

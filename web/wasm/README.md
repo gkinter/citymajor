@@ -156,7 +156,7 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 **Stubbed / degraded in spike:**
 
 - `TrafficSystem` full — desktop only; WASM uses `lite` mode
-- `TradeSystem`, `ProductionChain` — not wired in `WasmSimHost`
+- `TradeSystem` — not wired in `WasmSimHost` (`ProductionChain` runs inside `EconomySystem.DailyTick`)
 - `SimulationLoop` background thread — replaced by single-threaded `WasmSimHost`
 - Full 512×512 world — WASM v1 uses 256×256 (`WasmConfig.DefaultWorldSize`)
 

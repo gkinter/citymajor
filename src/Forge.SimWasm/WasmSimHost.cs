@@ -614,7 +614,6 @@ public sealed class WasmStatusDto
         [
             "TrafficSystem full (500 zones — desktop only; WASM uses lite mode)",
             "TradeSystem (not wired in spike)",
-            "ProductionChain (not wired in spike)",
         ],
     };
 }

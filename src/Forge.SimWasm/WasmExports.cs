@@ -41,6 +41,12 @@ public static partial class Program
     }
 
     [JSExport]
+    public static void PlaceRoad(int x, int y)
+    {
+        _host?.PlaceRoad(x, y);
+    }
+
+    [JSExport]
     public static string GetStatus()
     {
         if (_host is null)

@@ -14,7 +14,7 @@
 
 | Gate | Blocking? | Status (2026-07-04) |
 |------|-----------|---------------------|
-| [Cursor Bugbot](#1-cursor-bugbot) | Yes | **Pass** on `82d8df4+` — NEUTRAL, no blocking findings |
+| [Cursor Bugbot](#1-cursor-bugbot) | Yes | **Pass** on `e4d3d4f` — NEUTRAL, no blocking findings |
 | [Smoke suite 22/22](#2-smoke-suite-2222) | Yes | **Not verified in CI** — run locally before merge |
 | [Coolify preview URL](#3-coolify-preview-url) | Yes | **Live** — [SB-3715](https://linear.app/softblaze/issue/SB-3715) Done · `citymajor-web` |
 | [Meshy assets](#4-meshy-assets) | Yes (v1 art minimum) | **Batch may be running** — pipeline + manifest; ~0 production GLBs on disk |
@@ -32,9 +32,9 @@ Automated code review on PR #1.
 |-------|----------------|---------------|
 | Bugbot run completed | [PR #1 checks](https://github.com/gkinter/citymajor/pull/1) | Status `COMPLETED` |
 | No Critical / Major findings | Re-run after new commits | Zero blocking severity |
-| Latest reviewed SHA | `82d8df4`+ | Re-trigger if HEAD advanced past reviewed range |
+| Latest reviewed SHA | `e4d3d4f` | Re-trigger if HEAD advanced past reviewed range |
 
-**Current:** Bugbot **pass** on `82d8df4` and subsequent commits (2026-07-04) — conclusion **NEUTRAL**, zero Critical/Major findings.
+**Current:** Bugbot **pass** on `e4d3d4f` (HEAD) (2026-07-04) — conclusion **NEUTRAL**, zero Critical/Major findings.
 
 ```bash
 # After push — watch PR checks or use review-bugbot skill locally
@@ -252,7 +252,7 @@ Master tracker: [SB-3708](https://linear.app/softblaze/issue/SB-3708)
 
 ### Safe to merge PR #1 spine when
 
-- [x] Bugbot NEUTRAL or clean on HEAD (`82d8df4+`)
+- [x] Bugbot NEUTRAL or clean on HEAD (`e4d3d4f`)
 - [ ] Smoke **21/21** local (22/22 with screenshot) on WASM build
 - [x] Coolify preview live — `https://citymajor.apps.softblaze.net` ([SB-3715](https://linear.app/softblaze/issue/SB-3715) Done)
 - [ ] Preview smoke against `BASE_URL` (skip or expect fail on `/api/saves` — known 500)

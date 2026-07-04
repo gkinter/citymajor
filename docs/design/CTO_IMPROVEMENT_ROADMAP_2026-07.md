@@ -1,24 +1,24 @@
 # CityMajor — CTO Improvement Roadmap (July 2026)
 
 **Author:** CTO synthesis (parallel agent docs + PR #1 state)  
-**Worktree:** `feat/wasm-r3f-integration-2026-07-04`  
-**Sources:** `GAP_AUDIT_DESIGN_DOCS`, `TECH_TREE_GAP_ANALYSIS`, `ERA_ARC_DESIGN_V2`, `MULTIPLAYER_LIVE_PLAY_PROPOSAL`, `LIVE_SERVICES_ARCHITECTURE`, `OPEN_WORLD_SCALE_PROPOSAL`, `COMPETITIVE_POSITIONING`, PR #1 (`feat: CityMajor Web v1 — R3F + WASM integration spine`)
+**Worktree:** `citymajor-web-r3f-spike` · Branch: `feat/wasm-r3f-integration-2026-07-04`  
+**Sources:** `GAP_AUDIT_DESIGN_DOCS`, `GAMEPLAY_LOOP_IMPROVEMENTS`, `TECH_TREE_GAP_ANALYSIS`, `ERA_ARC_DESIGN_V2`, `MULTIPLAYER_LIVE_PLAY_PROPOSAL`, `LIVE_SERVICES_ARCHITECTURE`, `OPEN_WORLD_SCALE_PROPOSAL`, `COMPETITIVE_POSITIONING`, `MESHY_ASSET_PIPELINE`, `MESHY_HERO_LANDMARKS`, `FINAL_GAP_FILLS`, PR #1 (`feat: CityMajor Web v1 — R3F + WASM integration spine`)
 
 ---
 
 ## Executive Summary
 
-CityMajor has crossed a critical inflection point: the **web v1 integration spine** (R3F + WASM sim bridge, 256×256 world, zoning UI, Herald/narrative stubs) is in review on PR #1, while parallel design agents have produced coherent post-v1 roadmaps for multiplayer, open regions, era progression, and live services. The product wedge is clear — **deep simulation in the browser with zero install**, **Herald AI narrative**, and **co-op city building** in a genre where CS2 and Manor Lords have no multiplayer.
+CityMajor has crossed a critical inflection point: the **web v1 integration spine** (R3F + WASM sim bridge, 256×256 world, zoning UI, Herald/narrative stubs) is in review on PR #1, while parallel design agents have produced coherent post-v1 roadmaps for multiplayer, open regions, era progression, and live services. The product wedge is clear — **deep simulation in the browser with zero install**, **Herald AI narrative**, and **co-op city building** in a genre where CS2 and Manor Lords have no multiplayer ([COMPETITIVE_POSITIONING](./COMPETITIVE_POSITIONING.md)).
 
-**v1 launch is blocked** not by vision but by **sim parity gaps** (traffic stub, dead tech unlocks, era logic bypass), **missing player-facing research UI**, **incomplete 3D asset pipeline** (Meshy proposed, ~500 GLBs not shipped), and **persistence/auth stubs** (local JSON, no cloud saves). These are 6–10 weeks of focused engineering, not a replatform.
+**The sim is ahead of the player experience.** WASM runs economy, zone growth, 80 events, politics, budget, and era derivation — but `/play` is still a **3D zoning sandbox** with optional, disconnected Herald stories ([GAMEPLAY_LOOP_IMPROVEMENTS](./GAMEPLAY_LOOP_IMPROVEMENTS.md)). v1 launch is blocked not by vision but by **exporting what the sim already knows** (RCI, approval, active events), **sim parity gaps** (traffic stub, dead tech unlocks, era logic bypass), **missing research UI**, **incomplete 3D asset pipeline** (Meshy proposed, ~500 GLBs not shipped), and **persistence/auth stubs** (local JSON, no cloud saves). These are 6–10 weeks of focused engineering, not a replatform.
 
-**v1.1 (30 days post-launch)** should ship quick wins that make the Frontier→Industrial arc feel complete: research panel, era transition fanfare, hero landmarks batch, real traffic BPR, cloud saves, and doc consolidation so agents stop building against stale Godot/Steam specs.
+**v1.1 (30 days post-launch)** should ship quick wins that complete the mayor fantasy: RCI demand bars, Herald wired to `events.json`, era progress meter, approval/budget HUD, guided onboarding, and async cloud invites — before opening multiplayer or regional scope.
 
 **v2** is three pillars: **Live Co-op** (2–4 players, host-authoritative), **Open Region** (NPC neighbor towns + targeted trade via existing `TradeSystem`), and **Meshy art complete** (~500 archetype GLBs + 8 hero landmarks). This requires a **headless `Forge.SimCore` tick server** for competitive integrity — estimated ~$170–250/mo per 1K DAU vs ~$40 for async-only.
 
-**v3** unlocks **MMO-lite regional open world**: 512–1024 map streaming, simulation LOD, player cities on a shared regional map with server-authoritative trade and migration. This is explicitly **not** v1 or v2 scope; scope creep here is the #1 product risk.
+**v3** unlocks **MMO-lite regional open world**: 512–1024 map streaming, simulation LOD, player cities on a shared regional map with server-authoritative trade and migration. Explicitly **not** v1 or v2 scope; scope creep here is the #1 product risk.
 
-**Resource ask:** v1–v1.1 is achievable solo + AI automation (Meshy batch gen, Herald templates, codegen). v2 needs **one backend/multiplayer engineer** (6-month contract) and **part-time 3D art QA** (~20 hrs/week). v3 needs a **dedicated sim infra engineer** or senior full-stack with .NET + WebTransport experience. Everything else (docs, Linear hygiene, competitive analysis, gap audits) stays AI-automated.
+**Resource ask:** v1–v1.1 is achievable solo + AI automation (Meshy batch gen, Herald templates, codegen). v2 needs **one backend/multiplayer engineer** (6-month contract) and **part-time 3D art QA** (~20 hrs/week). v3 needs a **dedicated sim infra engineer** or senior full-stack with .NET + WebTransport experience.
 
 ---
 
@@ -27,14 +27,15 @@ CityMajor has crossed a critical inflection point: the **web v1 integration spin
 | Layer | Status | Gap |
 |-------|--------|-----|
 | **Client (R3F)** | M0→integration: instanced buildings, chunk LOD L0–L3, zoning toolbar, procedural fallback | Meshy GLBs mostly absent; hero landmarks not in scene |
-| **Sim (WASM)** | `Forge.SimWasm` ticks daily/monthly; ~220 starter buildings; zoning/roads wired | Traffic is stub; `WasmEraDeriver` bypasses `ResearchSystem` era logic |
+| **Sim (WASM)** | `Forge.SimWasm` ticks daily/monthly; ~220 starter buildings; zoning/roads wired; 80 events loaded | Traffic is stub; `WasmEraDeriver` bypasses `ResearchSystem` era logic; events not exported to client |
+| **Player loop** | Zoning paint + speed controls + save/load | No RCI bars, approval, budget panel, service overlays, or inert Herald choices |
 | **Research** | `ResearchSystem.cs` + `technologies.json` (156 techs) bundled | No UI; worker drops RP fields; most unlocks map to unimplemented buildings |
-| **Narrative** | Herald panel + `/api/narrative/event` stub (10/day quota) | Template fallback only; no grounded sim context pipeline |
+| **Narrative** | Herald panel + `/api/narrative/event` stub (10/day quota) | Template fallback only; not connected to `events.json`; choices have no click handlers |
 | **Persistence** | In-memory `/api/saves`, local `.data/saves.json` | No cloud schema, auth, or conflict resolution |
 | **Multiplayer** | Not in v1 scope (`CLAUDE.md`) | Proposals ready (`MULTIPLAYER_LIVE_PLAY`, `LIVE_SERVICES`) |
-| **Docs** | Strong 3D ADRs; gap audit complete | ~25/33 design docs still describe Godot/Steam/pixel at 10–100× scale |
+| **Docs** | Strong 3D ADRs; gap audit + gameplay loop audit complete | ~25/33 design docs still describe Godot/Steam/pixel at 10–100× scale |
 
-**Competitive moat (validated):** Browser deep sim + Herald AI + era arc + frictionless co-op URL — no tier-1 city builder offers co-op ([COMPETITIVE_POSITIONING](./COMPETITIVE_POSITIONING.md)).
+**Competitive moat (validated):** Browser deep sim + Herald AI + era arc + frictionless co-op URL — no tier-1 city builder offers co-op.
 
 ---
 
@@ -42,51 +43,63 @@ CityMajor has crossed a critical inflection point: the **web v1 integration spin
 
 These items block a credible public launch (Founder Pass / F2P core). Ordered by dependency.
 
-### P0 — Sim correctness & player loop
+### P0 — Player loop (sim export, not new systems)
 
-1. **Research UI v1** — Wire `researchPoints`, `researchRate`, `techCount` through `sim-worker` → `SimResources` → HUD; add tech panel + `enqueue_research` command ([TECH_TREE_GAP_ANALYSIS](./TECH_TREE_GAP_ANALYSIS.md) §4.1).
-2. **Fix era derivation** — Remove `WasmEraDeriver` override; use `ResearchSystem` population + tech-count gates for Frontier→Industrial arc ([ERA_ARC_DESIGN_V2](./ERA_ARC_DESIGN_V2.md) §5–6).
-3. **v1 tech/building subset** — Define and implement the Frontier→Industrial content slice: ~40 active techs, ~60 building types with working unlocks (not 156 dead techs).
-4. **Replace traffic stub** — Wire BPR edge flow from `AGENT_04` / `SIMULATION_ARCHITECTURE` §4; traffic is core to city-builder feel and Herald context.
-5. **Economy loop closure** — Leontief I/O or simplified RCI + budget tick visible in HUD; player must see cause/effect from zoning → growth → revenue.
+The gameplay loop audit ranks **exporting existing sim state** above building new systems. Without these, the product is a city painter, not a mayor sim.
+
+1. **RCI demand bars in HUD** — Export `residentialDemand` / `commercialDemand` / `industrialDemand` from WASM `GetStatus`; render classic R/C/I meters. Unblocks the core SimCity loop ([GAMEPLAY_LOOP_IMPROVEMENTS](./GAMEPLAY_LOOP_IMPROVEMENTS.md) #1).
+2. **Approval + happiness + monthly budget in HUD** — Extend `SimSnapshotDto` with approval, happiness, monthly income/expenses; mirror desktop `HudPanel` essentials (#6).
+3. **Research UI v1** — Wire `researchPoints`, `researchRate`, `techCount` through `sim-worker` → `SimResources` → HUD; add tech panel + `enqueue_research` command ([TECH_TREE_GAP_ANALYSIS](./TECH_TREE_GAP_ANALYSIS.md) §4.1).
+4. **Fix era derivation** — Remove `WasmEraDeriver` override; use `ResearchSystem` population + tech-count gates for Frontier→Industrial arc ([ERA_ARC_DESIGN_V2](./ERA_ARC_DESIGN_V2.md) §5–6).
+5. **Era progress meter** — Show pop/RP/industry checklist + % toward gates from `WasmConfig` (#5).
+6. **v1 tech/building subset** — Define and implement the Frontier→Industrial content slice: ~40 active techs, ~60 building types with working unlocks (not 156 dead techs).
+7. **Wire Herald to active sim events** — Export `activeEvents[]` from WASM; map event `typeId` → headline from `events.json` (#2). Template path only for v1; LLM is Founder-tier v1.1.
+8. **Replace traffic stub** — Wire BPR edge flow from `AGENT_04` / `SIMULATION_ARCHITECTURE` §4; traffic is core to city-builder feel and Herald context.
 
 ### P0 — Visual & performance
 
-6. **Meshy batch 1 (minimum viable art)** — Generate and ship ~80–120 core archetype GLBs (res/com/ind × Frontier + Industrial) per [MESHY_ASSET_PIPELINE](./MESHY_ASSET_PIPELINE.md); procedural fallback remains for missing keys.
-7. **256×256 perf budget** — Hold 30 FPS on mid-tier laptop: snapshot throttling (≤4 Hz), instance cap ~5k, chunk culling validated on WASM path ([PR #1 `web/PERF.md`](../web/PERF.md)).
-8. **8 hero landmarks (v1 arc)** — Ship at least 3 era-gate landmarks (Grand Terminus, first factory complex, civic hall) per [MESHY_HERO_LANDMARKS](./MESHY_HERO_LANDMARKS.md).
+9. **Meshy batch 1 (minimum viable art)** — Generate and ship ~80–120 core archetype GLBs (res/com/ind × Frontier + Industrial) per [MESHY_ASSET_PIPELINE](./MESHY_ASSET_PIPELINE.md); procedural fallback remains for missing keys.
+10. **256×256 perf budget** — Hold 30 FPS on mid-tier laptop: snapshot throttling (≤4 Hz), instance cap ~5k, chunk culling validated on WASM path.
+11. **3 hero landmarks (v1 arc)** — Grand Terminus, first factory complex, civic hall per [MESHY_HERO_LANDMARKS](./MESHY_HERO_LANDMARKS.md).
 
 ### P0 — Persistence & monetization
 
-9. **Cloud save v1** — Supabase Auth + R2 signed URLs; 3 saves free / 20 Founder Pass; schema doc (`SAVE_FORMAT_WEB` — currently missing per gap audit).
-10. **Entitlements hardening** — Replace stub `/api/me/entitlements` with verified JWT + Founder Pass flag; gate Herald unlimited events.
+12. **Cloud save v1** — Supabase Auth + R2 signed URLs; 3 saves free / 20 Founder Pass; schema doc (`SAVE_FORMAT_WEB` — currently missing per gap audit).
+13. **Entitlements hardening** — Replace stub `/api/me/entitlements` with verified JWT + Founder Pass flag; gate Herald unlimited events.
 
 ### P1 — Launch polish (can ship week-of if tight)
 
-11. **Herald v1 grounded context** — Pass structured sim snapshot (population, budget delta, recent events) to narrative API; template fallback when quota exceeded.
-12. **Doc supersession banners** — Mark Godot/Steam/pixel docs historical; point all agents to `CLAUDE.md` + this roadmap ([GAP_AUDIT](./GAP_AUDIT_DESIGN_DOCS.md) top 10 fixes).
-13. **Era transition moment** — One LLM-driven "Era Transition Quest" + UI fanfare when Industrial gate clears ([ERA_ARC_DESIGN_V2](./ERA_ARC_DESIGN_V2.md) §6.A).
+14. **Clickable Herald council options** — Dispatch sim commands (budget line items, law toggles, event response stubs) (#3).
+15. **Guided onboarding: 5-step overlay** — Zone residential → watch growth → open Herald → save city → reach 500 pop (#7).
+16. **Doc supersession banners** — Mark Godot/Steam/pixel docs historical; point all agents to `CLAUDE.md` + this roadmap ([GAP_AUDIT](./GAP_AUDIT_DESIGN_DOCS.md) top 10 fixes).
 
-**Exit criteria:** A new player can zone, research, grow Frontier→Industrial, see traffic and budget respond, save to cloud, read Herald headlines grounded in sim state, and experience 3D buildings (not全 procedural) at stable FPS — without hitting dead tech unlocks or era proxy bugs.
+**Exit criteria:** A new player can read RCI demand, zone accordingly, research tech, grow Frontier→Industrial with visible era progress, see traffic and budget respond, save to cloud, read Herald headlines grounded in active sim events, and experience 3D buildings (not all procedural) at stable FPS — without hitting dead tech unlocks or era proxy bugs.
 
 ---
 
 ## v1.1 Quick Wins (30 Days Post-Launch)
 
-Low-risk, high-perceived-value items that deepen retention without opening multiplayer/regional scope.
+Low-risk, high-perceived-value items that deepen retention without opening multiplayer/regional scope. Prioritized from gameplay loop audit impact/effort ranking.
 
-| # | Initiative | Effort | Impact |
-|---|------------|--------|--------|
-| 1 | **Research UX polish** — Category tabs, branching fork visuals, eureka tooltips | 1 wk | Makes 154-tech design legible |
-| 2 | **Era quest chain** — 3 LLM era transition quests with landmark gates | 1.5 wk | Fixes "slow morph" problem; shareable moments |
-| 3 | **Meshy batch 2** — Remaining Industrial + service buildings (~200 GLBs) | 1 wk + API cost | Visual consistency |
-| 4 | **Events integration** — Wire 20 Frontier/Industrial events from `events.json` into WASM tick | 1 wk | Herald + gameplay variety |
-| 5 | **Async cloud invites (v1.5 preview)** — Share city via link; session lock; read-only spectator | 2 wk | Validates Supabase path before Live Co-op |
-| 6 | **GAME_FEEL_BIBLE v1** — Placement feedback, camera easing, audio stubs | 3 d | Agent consistency |
-| 7 | **Mobile/tablet read-only** — Responsive HUD; touch pan/zoom; no editing | 1 wk | Cross-platform continuity bet |
-| 8 | **Leaderboard (casual)** — City population / happiness snapshots; client-trusted OK for v1.1 | 3 d | Social proof; not competitive-ranked |
-| 9 | **WASM bridge design doc** — Formalize snapshot schema (closes gap audit item) | 2 d | Reduces agent regressions |
-| 10 | **Parking + cruising (subset)** — Implement §1 of FINAL_GAP_FILLS for downtown feel | 1 wk | Differentiation vs browser idlers |
+| # | Initiative | Effort | Impact | Source |
+|---|------------|--------|--------|--------|
+| 1 | **Auto-Herald on event spawn** — Toast/slide-in when `EventSystem` enters Active; morning digest on session start | 1 wk | High | GAMEPLAY_LOOP #4 |
+| 2 | **Era transition fanfare** — 3s modal + Herald special edition when era increments | 3 d | High | GAMEPLAY_LOOP #11, ERA_ARC §6 |
+| 3 | **Era quest chain** — 3 LLM era transition quests with landmark gates | 1.5 wk | High | ERA_ARC §6.A–B |
+| 4 | **Research UX polish** — Category tabs, branching fork visuals, eureka tooltips | 1 wk | Medium | TECH_TREE_GAP §4.2–4.3 |
+| 5 | **Meshy batch 2** — Remaining Industrial + service buildings (~200 GLBs) | 1 wk + API cost | High | MESHY_ASSET_PIPELINE |
+| 6 | **Zone growth feedback** — Picked-tile tooltip: demand, road access, desirability, growth chance | 1 wk | Medium | GAMEPLAY_LOOP #8 |
+| 7 | **News ticker** — Scroll recent event names from sim (no LLM required) | 3 d | Medium | GAMEPLAY_LOOP #10 |
+| 8 | **Async cloud invites (v1.5 preview)** — Share city via link; session lock; read-only spectator | 2 wk | High | MULTIPLAYER §1, LIVE_SERVICES v1.5 |
+| 9 | **Bankruptcy / low-approval warnings** — Modal when `IsBankrupt` or approval <30% for 3 months | 1 wk | Medium | GAMEPLAY_LOOP #9 |
+| 10 | **LLM Herald path (Founder tier)** — Pass structured event payload when quota allows | 2 wk | High | GAMEPLAY_LOOP #15 |
+| 11 | **GAME_FEEL_BIBLE v1** — Placement feedback, camera easing, audio stubs | 3 d | Medium | GAP_AUDIT #9 |
+| 12 | **WASM bridge design doc** — Formalize snapshot schema | 2 d | Low | GAP_AUDIT #7 |
+| 13 | **Parking + cruising (subset)** — Implement §1 of FINAL_GAP_FILLS for downtown feel | 1 wk | Medium | FINAL_GAP_FILLS |
+| 14 | **Mobile/tablet read-only** — Responsive HUD; touch pan/zoom; no editing | 1 wk | Medium | COMPETITIVE bet #5 |
+| 15 | **Leaderboard (casual)** — Population / happiness snapshots; client-trusted OK for v1.1 | 3 d | Low | LIVE_SERVICES v1.5 |
+
+**Recommended v1.1 sprint (two weeks):** RCI + era meter + approval/budget HUD (if not in v1), Herald event wiring + auto-toast, 5-step onboarding, era fanfare.
 
 **Cost note:** Meshy batch 2 ≈ 6,000 credits (~$60–120 depending on plan); automate via existing regen script.
 
@@ -128,7 +141,7 @@ This delivers the "Victoria 3 trade on a map" fantasy without MMO complexity.
 
 | Milestone | Assets | Notes |
 |-----------|--------|-------|
-| v1 (blocker) | ~120 core | See above |
+| v1 (blocker) | ~120 core | Frontier + Industrial res/com/ind |
 | v1.1 | +200 Industrial/service | Batch automation |
 | v2 | +180 Postwar/Modern subset | Era 3–4 visuals for early access of full arc |
 | v2 complete | 8 heroes + polish pass | QA checklist from MESHY_HERO_LANDMARKS |
@@ -163,14 +176,16 @@ This delivers the "Victoria 3 trade on a map" fantasy without MMO complexity.
 
 | ID | Risk | Likelihood | Impact | Mitigation |
 |----|------|------------|--------|------------|
-| R1 | **WASM perf regression** — 256×256 OK but mobile/low-RAM browsers OOM | Medium | High | Strict 500 MB cap; sim LOD early; procedural fallback; perf CI on `/play` |
-| R2 | **Art pipeline cost overrun** — 500 assets × 30 credits = 15K credits | Medium | Medium | Batch automation; hero landmarks manual QA only; era-subset shipping |
-| R3 | **Multiplayer scope creep** — Shipping regional PvP before co-op stable | High | Critical | Phase gates in this doc; friend-invite only v2; no public matchmaking until v2.1 |
-| R4 | **Dead tech / sim parity drift** — Agents add features against full 5-era JSON | Medium | High | v1 content subset doc; CI check: unlock → building exists |
-| R5 | **Doc contradictions** — Steam/pixel/100K HH specs mislead agents | Medium | Medium | Gap audit fixes; supersession banners; `CLAUDE.md` as sole onboarding |
-| R6 | **Client-authoritative cheating** — Ranked/trade exploits if server sim delayed | Low (v1) / High (v3) | Critical | No competitive rewards until headless server; golden rule from LIVE_SERVICES |
-| R7 | **Herald LLM cost/latency** — 10 events/day free tier unsustainable at scale | Medium | Medium | Template fallback; self-hosted Qwen for Founder tier; cache headline templates |
-| R8 | **Meshy quality variance** — Inconsistent era readability at city scale | Medium | Medium | Strict prompt templates; human QA pass; procedural fallback per archetype key |
+| R1 | **Mayor fantasy gap** — Sim depth invisible; players churn as "zoning toy" | High | Critical | v1 blockers prioritize sim export (RCI, events, approval) before new systems |
+| R2 | **WASM perf regression** — 256×256 OK but mobile/low-RAM browsers OOM | Medium | High | Strict 500 MB cap; sim LOD early; procedural fallback; perf CI on `/play` |
+| R3 | **Art pipeline cost overrun** — 500 assets × 30 credits = 15K credits | Medium | Medium | Batch automation; hero landmarks manual QA only; era-subset shipping |
+| R4 | **Multiplayer scope creep** — Shipping regional PvP before co-op stable | High | Critical | Phase gates in this doc; friend-invite only v2; no public matchmaking until v2.1 |
+| R5 | **Dead tech / sim parity drift** — Agents add features against full 5-era JSON | Medium | High | v1 content subset doc; CI check: unlock → building exists |
+| R6 | **Doc contradictions** — Steam/pixel/100K HH specs mislead agents | Medium | Medium | Gap audit fixes; supersession banners; `CLAUDE.md` as sole onboarding |
+| R7 | **Client-authoritative cheating** — Ranked/trade exploits if server sim delayed | Low (v1) / High (v3) | Critical | No competitive rewards until headless server; golden rule from LIVE_SERVICES |
+| R8 | **Herald LLM cost/latency** — 10 events/day free tier unsustainable at scale | Medium | Medium | Template fallback; self-hosted Qwen for Founder tier; cache headline templates |
+| R9 | **Meshy quality variance** — Inconsistent era readability at city scale | Medium | Medium | Strict prompt templates; human QA pass; procedural fallback per archetype key |
+| R10 | **Tick-based era advance** — Player reaches Industrial before understanding zoning | Medium | Medium | Era progress meter + quest gates; remove tick-only proxy in `WasmEraDeriver` |
 
 ---
 
@@ -204,123 +219,267 @@ The integration spine proves one developer + AI can ship browser WASM + R3F. v1 
 
 ## Linear Issue Drafts
 
-> Drafts only — create in Linear when SB epic is opened. Do not block on MCP.
+> Drafts only — create in Linear when SB epic is opened. Titles use `[vX]` phase tags.
 
 ---
 
 ### Draft 1: `[v2] Live Co-op — Host-Authoritative Room Sync`
 
-**Priority:** High (v2 pillar)  
-**Labels:** multiplayer, backend, wasm  
-**Estimate:** 8–12 weeks
+**Priority:** High (v2 pillar A)  
+**Labels:** `multiplayer`, `backend`, `wasm`, `websocket`  
+**Estimate:** 8–12 weeks  
+**Epic:** CityMajor Live Services
 
-**Description:**
+#### Problem
 
-Implement 2–4 player live co-op for a single shared city, building on v1.5 async cloud saves.
+CityMajor's competitive wedge includes **frictionless co-op** — no tier-1 city builder offers multiplayer ([COMPETITIVE_POSITIONING](./COMPETITIVE_POSITIONING.md) §4). v1 is single-player only. v1.5 async invites validate cloud persistence; v2 must deliver **2–4 players building the same city simultaneously** via a shared URL, without public matchmaking or regional scope.
 
-**Acceptance criteria:**
-- [ ] Friend-invite flow via Supabase Auth + shareable room URL
-- [ ] Host runs authoritative sim tick (headless `Forge.SimCore` or designated client host with CRC32 validation)
-- [ ] Input forwarding for zoning, roads, budget commands; server/host rejects invalid intents
-- [ ] Delta-compressed state snapshots @ 4–8 Hz over WebSocket
-- [ ] Host migration on disconnect; resync from cloud snapshot
-- [ ] Optional role split: Mayor / Zoning / Finance (UI badges only in v2.0)
-- [ ] Desync detection + automatic resync path documented
+#### Proposed solution
 
-**References:** `MULTIPLAYER_LIVE_PLAY_PROPOSAL.md` §2, `LIVE_SERVICES_ARCHITECTURE.md` v2 Co-op
+Implement host-authoritative room sync per `MULTIPLAYER_LIVE_PLAY_PROPOSAL.md` §2 and `LIVE_SERVICES_ARCHITECTURE.md` v2 Co-op:
 
-**Out of scope:** Public matchmaking, regional map, PvP trade.
+- **Room lifecycle:** Supabase Auth → create/join room → host election → sim start.
+- **Authority model:** Designated host runs authoritative tick (headless `Forge.SimCore` preferred; client-host acceptable for v2.0 beta with CRC32 validation).
+- **Input model:** Clients send **intents** (zone paint, road place, budget approve) — never sim results.
+- **State model:** Delta-compressed snapshots @ 4–8 Hz over WebSocket; subsystem CRC32 checksums for desync detection.
+- **Roles (UI only v2.0):** Mayor (budget/approval), Zoning (paint/tools), Finance (taxes/bonds) — badges on player cursors.
+- **Resilience:** Host migration on disconnect; full resync from R2 cloud snapshot; documented desync recovery path.
+
+#### Acceptance criteria
+
+- [ ] Friend-invite flow: authenticated user creates room, shares URL, 1–3 friends join
+- [ ] All players see consistent building/zone state within 250 ms of input
+- [ ] Invalid intents rejected server-side (out-of-bounds zone, insufficient funds)
+- [ ] Host disconnect triggers migration or graceful pause with 60s rejoin window
+- [ ] CRC32 mismatch triggers automatic resync without data loss
+- [ ] Load test: 4-player room stable for 30-minute session on mid-tier hardware
+- [ ] No public matchmaking; rooms are invite-only
+
+#### Out of scope
+
+Public matchmaking, regional map, PvP trade, spectator elections (v2.1+).
+
+#### References
+
+- `docs/design/MULTIPLAYER_LIVE_PLAY_PROPOSAL.md` §2
+- `docs/design/LIVE_SERVICES_ARCHITECTURE.md` — v2 Co-op, Security Posture
+- `docs/research/16-multiplayer-achievements-qa.md` (orphaned; promote to design/)
+
+#### Dependencies
+
+v1.5 async cloud saves + Supabase Auth live.
 
 ---
 
 ### Draft 2: `[v2] Open Region — NPC Town Trade Routes`
 
-**Priority:** High (v2 pillar)  
-**Labels:** simulation, economy, ui  
-**Estimate:** 6–8 weeks
+**Priority:** High (v2 pillar B)  
+**Labels:** `simulation`, `economy`, `ui`, `trade`  
+**Estimate:** 6–8 weeks  
+**Epic:** CityMajor Regional Play
 
-**Description:**
+#### Problem
 
-Introduce a regional map layer with 3–5 NPC neighbor towns. Players establish targeted trade routes using the existing `TradeSystem.PartnerCityId` contract mechanics.
+Single-city play against the anonymous global market (`PartnerCityId = -1`) limits economic depth. `Forge.Game.Simulation.TradeSystem` already supports point-to-point trade via `PartnerCityId`, and `ProductionChainRegistry` defines multi-tier chains that **require regional specialization** (mining hub → industrial partner). None of this is player-visible in v1.
 
-**Acceptance criteria:**
-- [ ] Regional map UI (512×512) with player city claim (256×256) highlighted
-- [ ] 3–5 NPC towns with fixed supply/demand profiles (mining hub, industrial partner, agricultural exporter)
-- [ ] Trade route UI: select partner, goods, volume caps; monthly settlement tick
-- [ ] Aggregate sim LOD for NPC town tiles (no building-level sim outside player city)
-- [ ] Regional events (oil shock, boom) affecting global and bilateral prices
-- [ ] Herald generates trade-related headlines from route state
+#### Proposed solution
 
-**References:** `OPEN_WORLD_SCALE_PROPOSAL.md` Phase 2, `TradeSystem` in Forge.Game.Simulation
+Ship Phase 2 of `OPEN_WORLD_SCALE_PROPOSAL.md`:
 
-**Out of scope:** Player-owned cities on shared map (v3).
+- **Regional map UI:** 512×512 overview; player city highlighted as 256×256 claim.
+- **NPC towns (3–5):** Fixed profiles — e.g., Coal Ridge (exports ore), Harbor Vale (imports finished goods), Wheat County (agricultural).
+- **Trade route UI:** Select partner, goods, volume caps; monthly settlement tick; contract renewal/cancellation.
+- **Sim LOD:** Full building-level sim in player city; aggregate chunk-level production/consumption for NPC tiles.
+- **Regional events:** Oil shock, commodity boom — affect global index and bilateral route profitability.
+- **Herald integration:** Trade headlines from route state (surplus, embargo risk, price spike).
+
+#### Acceptance criteria
+
+- [ ] Regional map renders with player claim + 3 NPC town markers
+- [ ] Player can establish ≥2 active trade routes with different goods
+- [ ] Route revenue/cost visible in monthly budget breakdown
+- [ ] NPC towns have stable supply/demand that creates meaningful specialization incentives
+- [ ] Aggregate sim for NPC tiles does not degrade player-city FPS below 30
+- [ ] Herald generates ≥1 trade-related headline per active route per in-game month
+
+#### Out of scope
+
+Player-owned cities on shared map (v3), live PvP trade negotiation, multiplayer regional sessions.
+
+#### References
+
+- `docs/design/OPEN_WORLD_SCALE_PROPOSAL.md` §2, §5 Phase 2
+- `Forge.Game.Simulation.TradeSystem`, `ProductionChainRegistry`
+
+#### Dependencies
+
+v1 economy loop visible in HUD; Leontief or simplified RCI stable.
 
 ---
 
 ### Draft 3: `[v1 blocker] Research UI — HUD, Tech Panel, Enqueue Command`
 
 **Priority:** Urgent (v1 launch blocker)  
-**Labels:** frontend, wasm, gameplay  
-**Estimate:** 1–2 weeks
+**Labels:** `frontend`, `wasm`, `gameplay`, `research`  
+**Estimate:** 1–2 weeks  
+**Epic:** CityMajor v1 Launch
 
-**Description:**
+#### Problem
 
-Expose the fully implemented `ResearchSystem` to the web client. Currently RP accumulates but is invisible and unqueueable; era logic is bypassed by `WasmEraDeriver`.
+`ResearchSystem.cs` is fully implemented in WASM — RP accumulates, queue logic works, 156 techs load from JSON — but the web client is blind:
 
-**Acceptance criteria:**
-- [ ] `researchPoints`, `researchRate`, `techCount` propagated: `WasmExports` → `sim-worker` → `SimResources` → `ResourcesHud`
-- [ ] Tech panel modal/drawer on `/play`: list available techs, prerequisites, unlocks
-- [ ] `enqueue_research` command wired through worker to `EnqueueResearch(int techId)` export
-- [ ] Remove or gate `WasmEraDeriver` override; era transitions follow ResearchSystem thresholds
-- [ ] v1 subset: only Frontier→Industrial techs shown (~40 active)
+- `sim-worker.ts` drops `researchPoints`, `researchRate`, `techCount` from `WasmStatus`
+- `ResourcesHud` shows Pop/Funds/Tick/Era only
+- No tech panel; no `enqueue_research` command
+- `WasmEraDeriver` overrides era transitions, bypassing research-gated progression
 
-**References:** `TECH_TREE_GAP_ANALYSIS.md`, `ERA_ARC_DESIGN_V2.md`
+Players cannot research, cannot see era progress tied to tech, and most tech unlocks map to buildings that don't exist in the v1 pool ([TECH_TREE_GAP_ANALYSIS](./TECH_TREE_GAP_ANALYSIS.md)).
+
+#### Proposed solution
+
+**Phase A — Wire existing sim (3–5 days):**
+
+1. Propagate research fields: `WasmExports.GetStatus()` → `sim-worker.readStatus()` → `SimResources` → `ResourcesHud`
+2. Add `enqueue_research` to `SimCommand` enum; export `EnqueueResearch(int techId)` from WASM
+3. Remove or gate `WasmEraDeriver` — era follows `ResearchSystem` thresholds aligned with `ERA_ARC_DESIGN_V2` §6.C
+
+**Phase B — Tech panel v1 (5–7 days):**
+
+4. Modal/drawer on `/play`: list available techs filtered by prerequisites
+5. Show cost, unlocks, effects; enqueue on click
+6. **v1 subset filter:** Only Frontier→Industrial band (~40 techs); hide Postwar/Modern/Future
+
+#### Acceptance criteria
+
+- [ ] HUD displays RP, RP/month rate, techs researched count
+- [ ] Tech panel lists enqueueable techs with prerequisite tree
+- [ ] Enqueued tech completes after RP threshold; unlock effects apply (building availability)
+- [ ] Era transition requires research + population gates, not tick proxy alone
+- [ ] v1 subset: no dead unlocks (CI or manual matrix: tech → building exists)
+
+#### References
+
+- `docs/design/TECH_TREE_GAP_ANALYSIS.md`
+- `docs/design/ERA_ARC_DESIGN_V2.md` §5–6
+- `base/data/tech/technologies.json`
+
+#### Dependencies
+
+v1 tech/building subset doc (can ship in same PR).
 
 ---
 
 ### Draft 4: `[v1.1] Era Quests — LLM Transition Quests + Landmark Gates`
 
 **Priority:** Medium (v1.1 quick win)  
-**Labels:** narrative, gameplay, llm  
-**Estimate:** 2–3 weeks
+**Labels:** `narrative`, `gameplay`, `llm`, `era-arc`  
+**Estimate:** 2–3 weeks  
+**Epic:** CityMajor Era Arc
 
-**Description:**
+#### Problem
 
-Make era progression feel earned. When the player approaches Industrial gate thresholds, trigger an LLM-driven Era Transition Quest and require a monumental landmark build.
+Frontier→Industrial progression is a **debug counter** — `ResourcesHud` shows an era badge but no progress meter, no fanfare, no quest. `ERA_ARC_DESIGN_V2` §5 documents: "The player never achieves the next era. The city just slowly morphs." Tick-based `WasmEraDeriver` can fire before the player understands zoning or demand ([GAMEPLAY_LOOP_IMPROVEMENTS](./GAMEPLAY_LOOP_IMPROVEMENTS.md) §3).
 
-**Acceptance criteria:**
-- [ ] Population + tech-count + stability gates defined for Frontier→Industrial ([ERA_ARC_DESIGN_V2](./ERA_ARC_DESIGN_V2.md) §6.C)
-- [ ] Quest generator: Herald proposes quest (e.g., "Centennial Exhibition") with trackable objectives
-- [ ] Landmark gate: Grand Terminus (or equivalent) must be constructed to unlock Industrial era visuals/tech band
-- [ ] Completion fanfare: UI modal + Herald celebratory edition + era palette shift
-- [ ] Template fallback when Herald quota exceeded
+#### Proposed solution
 
-**References:** `ERA_ARC_DESIGN_V2.md` §5–6, `MESHY_HERO_LANDMARKS.md`
+Implement `ERA_ARC_DESIGN_V2` §6 proposals:
+
+**A. Era gates (mechanical):**
+
+- Population gate (e.g., 400+ for Industrial in v1 WASM config)
+- Tech gate: ≥80% of Frontier-era techs researched
+- Stability gate: approval ≥50% for 3 consecutive months
+
+**B. Era Transition Quest (narrative):**
+
+- When ≥2 of 3 gates met, Herald proposes quest (e.g., "The Centennial Exhibition")
+- Trackable objectives: stockpile steel, build train station, pass education act
+- LLM generates progress articles; template fallback when quota exceeded
+
+**C. Landmark gate:**
+
+- Industrial era locked until **Grand Terminus** (or equivalent hero landmark) constructed
+- Meshy GLB from `MESHY_HERO_LANDMARKS.md`; placement UI on `/play`
+
+**D. Completion fanfare:**
+
+- 3s modal, era palette shift, Herald celebratory edition, unlock Industrial tech band
+
+#### Acceptance criteria
+
+- [ ] Era progress UI shows 3 gates with current/required values
+- [ ] Quest triggers when approaching thresholds; objectives trackable in HUD
+- [ ] Landmark build required before Industrial era unlock
+- [ ] Completion triggers fanfare + Herald special edition
+- [ ] Template fallback works when Herald quota exceeded
+
+#### References
+
+- `docs/design/ERA_ARC_DESIGN_V2.md` §4–6
+- `docs/design/MESHY_HERO_LANDMARKS.md`
+- `docs/design/GAMEPLAY_LOOP_IMPROVEMENTS.md` §3, #11
+
+#### Dependencies
+
+Research UI (Draft 3); at least 1 hero landmark GLB shipped.
 
 ---
 
 ### Draft 5: `[v2] Cloud Sim Server — Headless Forge.SimCore Tick Daemon`
 
 **Priority:** High (v2 infrastructure)  
-**Labels:** backend, infra, simulation  
-**Estimate:** 6–10 weeks
+**Labels:** `backend`, `infra`, `simulation`, `docker-fleet`  
+**Estimate:** 6–10 weeks  
+**Epic:** CityMajor Live Services
 
-**Description:**
+#### Problem
 
-Deploy server-authoritative simulation for live co-op rooms, spectator streams, and future competitive features. Clients send intents; server ticks and broadcasts deltas.
+v1/v1.5 are **client-authoritative** — WASM runs in the browser, saves are trusted blobs. This is acceptable for casual async play but violates the golden rule for competitive features: **never trust client sim** ([LIVE_SERVICES_ARCHITECTURE](./LIVE_SERVICES_ARCHITECTURE.md) Security Posture). Live co-op (Draft 1), spectator streams, ranked leaderboards, and v3 regional trade all require server-authoritative ticks.
 
-**Acceptance criteria:**
-- [ ] `Forge.SimCore` runs headless on docker-fleet (.NET 8 daemon)
-- [ ] Fixed-interval tick engine (15 ticks/sec game-normal); room-based isolation
-- [ ] WebSocket RPC: client intents in, delta-compressed state out
-- [ ] Read-only spectator stream (no local sim required for viewers)
-- [ ] Snapshot persistence to R2 between sessions
-- [ ] Load test: 10 concurrent 4-player rooms on single AX41 node
-- [ ] Security: no client-trusted sim results for any ranked or trade feature
+#### Proposed solution
 
-**References:** `LIVE_SERVICES_ARCHITECTURE.md` v2, `MULTIPLAYER_LIVE_PLAY_PROPOSAL.md` §3
+Deploy `Forge.SimCore` as a headless .NET 8 daemon on docker-fleet:
 
-**Cost target:** ≤$250/mo infrastructure at 1K DAU (see LIVE_SERVICES cost model).
+**Architecture:**
+
+```
+Client (R3F viewer)  ←WebSocket→  Forge.SimCore Room Daemon  ←→  R2 snapshots
+       │                                      │
+   intents only                         fixed tick (15 Hz game-normal)
+   delta state in                       room isolation (1 city = 1 process)
+```
+
+**Components:**
+
+1. **Room daemon:** One sim instance per co-op room; fixed-interval tick; input queue per player
+2. **WebSocket RPC:** `POST intent` / `SUBSCRIBE state_delta` — protobuf or MessagePack payloads
+3. **Spectator stream:** Read-only subscription; no local WASM required for viewers
+4. **Persistence:** Snapshot to R2 on interval + graceful shutdown; restore on room recreate
+5. **Validation:** Reject invalid intents (funds, bounds, tech prerequisites) before tick
+
+#### Acceptance criteria
+
+- [ ] Headless `Forge.SimCore` builds and runs on docker-fleet AX41 node
+- [ ] Single room: 4 clients receive consistent state @ 4–8 Hz
+- [ ] Spectator client renders city without running WASM locally
+- [ ] Snapshot restore produces identical state hash after reload
+- [ ] Load test: 10 concurrent 4-player rooms on single node without tick slip >5%
+- [ ] No ranked/trade feature reads client-submitted sim results
+- [ ] Infrastructure cost ≤$250/mo at 1K DAU (per LIVE_SERVICES cost model)
+
+#### Out of scope
+
+Regional sharding (v3), global matchmaking, anti-cheat kernel drivers.
+
+#### References
+
+- `docs/design/LIVE_SERVICES_ARCHITECTURE.md` — v2 Dedicated Sim Tick Server
+- `docs/design/MULTIPLAYER_LIVE_PLAY_PROPOSAL.md` §3 (regional authority model)
+- `docs/design/SIMULATION_ARCHITECTURE.md` (tick/LOD reference)
+
+#### Dependencies
+
+Live Co-op room protocol (Draft 1); Supabase Auth; R2 snapshot schema.
 
 ---
 
@@ -341,6 +500,7 @@ Deploy server-authoritative simulation for live co-op rooms, spectator streams, 
 ```
 CLAUDE.md                              ← dev onboarding
 CTO_IMPROVEMENT_ROADMAP_2026-07.md     ← THIS DOC: executive priorities
+docs/design/GAMEPLAY_LOOP_IMPROVEMENTS.md
 docs/design/COMPETITIVE_POSITIONING.md
 docs/design/TECH_TREE_GAP_ANALYSIS.md
 docs/design/ERA_ARC_DESIGN_V2.md

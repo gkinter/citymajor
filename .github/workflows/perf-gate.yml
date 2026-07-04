@@ -1,0 +1,91 @@
+# Manual perf-gate sign-off — SB-3703 / WEB_V1_SCOPE §4.
+# Script: web/scripts/perf-gate.mjs (landed 4f63bb9).
+#
+# Default GHA ubuntu-latest runners use headless Chromium with a software WebGL
+# renderer. The gate auto-skips when max FPS < 15 unless PERF_GATE_STRICT=1.
+# Meaningful ≥30 FPS sign-off requires HEADLESS=0 on a GPU host or a future
+# GPU-capable self-hosted runner — not blocking PRs until that exists.
+
+name: Perf gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      headless:
+        description: "Playwright headless (0 = GPU window; use on self-hosted Mac)"
+        type: choice
+        options: ["1", "0"]
+        default: "1"
+      perf_gate_strict:
+        description: "PERF_GATE_STRICT — fail instead of skipping on software renderer"
+        type: choice
+        options: ["0", "1"]
+        default: "0"
+      min_fps:
+        description: "MIN_FPS threshold (integrated GPU target)"
+        type: string
+        default: "30"
+
+jobs:
+  perf-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: cd web && npx playwright install chromium --with-deps
+
+      - name: Start dev server
+        run: |
+          pnpm dev > /tmp/dev-server.log 2>&1 &
+          echo $! > /tmp/dev-server.pid
+        env:
+          NODE_OPTIONS: ""
+
+      - name: Wait for http://localhost:3000
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000/play > /dev/null; then
+              echo "Dev server ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Dev server did not become ready in time"
+          tail -50 /tmp/dev-server.log || true
+          exit 1
+
+      - name: Run perf gate
+        run: pnpm perf:gate
+        env:
+          HEADLESS: ${{ inputs.headless }}
+          PERF_GATE_STRICT: ${{ inputs.perf_gate_strict }}
+          MIN_FPS: ${{ inputs.min_fps }}
+
+      - name: Upload perf report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-gate-report
+          path: web/test-results/perf-gate.json
+          if-no-files-found: ignore
+
+      - name: Stop dev server
+        if: always()
+        run: |
+          if [ -f /tmp/dev-server.pid ]; then
+            kill "$(cat /tmp/dev-server.pid)" 2>/dev/null || true
+          fi

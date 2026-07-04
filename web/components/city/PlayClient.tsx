@@ -35,6 +35,8 @@ import { HeraldButton } from "@/components/city/HeraldButton";
 import { HeraldPanel } from "@/components/city/HeraldPanel";
 import { ResearchButton } from "@/components/city/ResearchButton";
 import { ResearchPanel } from "@/components/city/ResearchPanel";
+import { EconomyButton } from "@/components/city/EconomyButton";
+import { EconomyPanel } from "@/components/city/EconomyPanel";
 import { HudToast } from "@/components/city/HudToast";
 import { techNameFromIndex } from "@/lib/tech-catalog";
 import { HUD_ZONE } from "@/lib/hud-theme";
@@ -113,6 +115,7 @@ export function PlayClient() {
   const [heraldSpecialEdition, setHeraldSpecialEdition] = useState(false);
   const [eraTransitionEra, setEraTransitionEra] = useState<number | null>(null);
   const [researchOpen, setResearchOpen] = useState(false);
+  const [economyOpen, setEconomyOpen] = useState(false);
   const [researchToast, setResearchToast] = useState<string | null>(null);
   const [residentialZonePainted, setResidentialZonePainted] = useState(false);
 
@@ -455,6 +458,11 @@ export function PlayClient() {
           title="Open research catalog"
           onClick={() => setResearchOpen(true)}
         />
+        <EconomyButton
+          title="Goods shortages and surpluses"
+          active={economyOpen}
+          onClick={() => setEconomyOpen((open) => !open)}
+        />
         <HeraldButton
           embedded
           quotaLabel={entitlementsError ? "!" : formatQuota(quotaRemaining)}
@@ -483,6 +491,12 @@ export function PlayClient() {
         currentResearchMonthsRemaining={simResources?.currentResearchMonthsRemaining}
         unlockedTechIds={simResources?.unlockedTechIds}
         onEnqueueResearch={handleEnqueueResearch}
+      />
+
+      <EconomyPanel
+        open={economyOpen}
+        onClose={() => setEconomyOpen(false)}
+        resources={simResources}
       />
 
       <HudToast

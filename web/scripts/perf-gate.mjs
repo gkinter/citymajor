@@ -105,20 +105,23 @@ export async function runPerfGate(page, options = {}) {
     await page.goto(`${BASE_URL}/play`, { waitUntil: "networkidle" });
   }
 
-  const canvas = page.locator("canvas").first();
+  const canvas = page.locator('[data-testid="city-canvas"] canvas');
   await canvas.waitFor({ state: "visible" });
   pass(tag, "WebGL canvas visible");
 
-  const webgl = await page.evaluate(() => {
-    const el = document.querySelector("canvas");
-    if (!el) return false;
-    return !!(
-      el.getContext("webgl2") ??
-      el.getContext("webgl") ??
-      el.getContext("experimental-webgl")
+  try {
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-testid="city-canvas"] canvas');
+        const engine = el?.getAttribute("data-engine");
+        return typeof engine === "string" && engine.startsWith("three.js");
+      },
+      undefined,
+      { timeout: 15_000 },
     );
-  });
-  if (!webgl) fail(tag, "No WebGL context on canvas");
+  } catch {
+    fail(tag, "Main play canvas missing Three.js WebGL renderer");
+  }
   pass(tag, "WebGL context created");
 
   await page.waitForTimeout(PERF_WARMUP_MS);

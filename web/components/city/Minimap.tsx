@@ -1,12 +1,10 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { CHUNKS_PER_AXIS } from "@/lib/constants";
 import { resolveMinimapChunkColors } from "@/lib/minimap";
 import type { CityData } from "@/lib/types";
 import type { ZoneTile } from "@/lib/zoning";
-import { MinimapScene } from "./MinimapScene";
 
 const MINIMAP_PX = 160;
 const MINIMAP_MARGIN = 12;
@@ -17,13 +15,38 @@ type MinimapProps = {
 };
 
 /**
- * Bottom-left orthographic R3F minimap — one swatch per 32×32 world chunk.
+ * Bottom-left 2D canvas minimap — one swatch per 32×32 world chunk.
+ * Uses Canvas2D (not WebGL) so the main play canvas keeps a single GL context.
  */
 export function Minimap({ zones, city }: MinimapProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const chunkColors = useMemo(
     () => resolveMinimapChunkColors(zones, city),
     [zones, city],
   );
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const px = Math.round(MINIMAP_PX * dpr);
+    canvas.width = px;
+    canvas.height = px;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const cell = px / CHUNKS_PER_AXIS;
+    ctx.clearRect(0, 0, px, px);
+
+    for (let index = 0; index < chunkColors.length; index++) {
+      const cx = index % CHUNKS_PER_AXIS;
+      const cz = Math.floor(index / CHUNKS_PER_AXIS);
+      ctx.fillStyle = chunkColors[index]!;
+      ctx.fillRect(cx * cell, cz * cell, cell, cell);
+    }
+  }, [chunkColors]);
 
   return (
     <div
@@ -43,21 +66,11 @@ export function Minimap({ zones, city }: MinimapProps) {
         zIndex: 9,
       }}
     >
-      <Canvas
-        orthographic
-        dpr={[1, 2]}
-        gl={{ antialias: false, alpha: true }}
-        style={{ width: "100%", height: "100%" }}
-        camera={{
-          position: [CHUNKS_PER_AXIS / 2, 10, CHUNKS_PER_AXIS / 2],
-          rotation: [-Math.PI / 2, 0, 0],
-          zoom: 18,
-          near: 0.1,
-          far: 50,
-        }}
-      >
-        <MinimapScene chunkColors={chunkColors} />
-      </Canvas>
+      <canvas
+        ref={canvasRef}
+        aria-hidden
+        style={{ width: "100%", height: "100%", display: "block" }}
+      />
     </div>
   );
 }

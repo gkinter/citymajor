@@ -20,6 +20,13 @@ CityMajor has crossed a critical inflection point: the **web v1 integration spin
 
 **Resource ask:** v1–v1.1 is achievable solo + AI automation (Meshy batch gen, Herald templates, codegen). v2 needs **one backend/multiplayer engineer** (6-month contract) and **part-time 3D art QA** (~20 hrs/week). v3 needs a **dedicated sim infra engineer** or senior full-stack with .NET + WebTransport experience.
 
+### Canonical tracking (Linear + Meshy)
+
+Engineering priorities in this doc are mirrored in Linear for phase planning and issue hygiene:
+
+- **Linear canonical roadmap:** [CityMajor — Canonical Roadmap (v1 → Full Vision)](https://linear.app/softblaze/document/citymajor-canonical-roadmap-v1-full-vision-eb7277adafd0) — initiative, phase epics (v1 / v1.5 / v2 / full vision), and issue mapping. Master tracker: [SB-3708](https://linear.app/softblaze/issue/SB-3708).
+- **Meshy asset batches:** [`MESHY_ASSET_CATALOG.md`](./MESHY_ASSET_CATALOG.md) — 500-key taxonomy, P0–P3 batch table (counts, credits, manifest paths), hero landmarks, and Linear batch issues under [SB-3730](https://linear.app/softblaze/issue/SB-3730).
+
 ---
 
 ## Current State (July 2026)
@@ -510,6 +517,8 @@ docs/design/OPEN_WORLD_SCALE_PROPOSAL.md
 docs/design/GAP_AUDIT_DESIGN_DOCS.md
 MASTER_GAME_CONCEPT.md                 ← sim/economy north star (web sections)
 BUILDING_ARCHETYPE_3D.md + MESHY_*.md  ← art contract
+MESHY_ASSET_CATALOG.md               ← Meshy batch table + manifests
+Linear: Canonical Roadmap doc        ← phase epics + SB mapping
 ```
 
 ---

@@ -1,0 +1,129 @@
+{
+  "pipeline_version": "1.0",
+  "meshy_model": "meshy-6",
+  "export_format": "glb",
+  "jobs": [
+    {
+      "key": "res_low_frontier_00",
+      "prompt": "A single-story frontier log cabin, colonial era house, wooden planks, peaked roof, low poly, stylized game asset, isometric view",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_01",
+      "prompt": "A single-story frontier wooden shack, colonial era house, peaked roof, low poly, stylized game asset, isometric view",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "com_frontier_00",
+      "prompt": "A frontier general store, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_frontier_00",
+      "prompt": "A frontier blacksmith workshop, wooden and stone, sawtooth roof, low poly, stylized game asset",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_industrial_00",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_industrial_00",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "com_industrial_00",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_industrial_00",
+      "prompt": "An early industrial era coal factory, brick walls, sawtooth roof, low poly, stylized game asset",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_postwar_00",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_00",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_00",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_00",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_modern_00",
+      "prompt": "A single-story contemporary house, modern architecture, peaked roof, wood and stucco, stylized game asset, low poly",
+      "category": "res_low",
+      "era": "modern"
+    },
+    {
+      "key": "res_high_modern_00",
+      "prompt": "A modern mid-rise apartment block, balconies, flat roof with lip, concrete and glass, low poly, stylized game asset",
+      "category": "res_high",
+      "era": "modern"
+    },
+    {
+      "key": "com_modern_00",
+      "prompt": "A modern glass storefront retail building, flat roof with lip and HVAC units, low poly, stylized game asset",
+      "category": "com",
+      "era": "modern"
+    },
+    {
+      "key": "ind_modern_00",
+      "prompt": "A modern logistics warehouse, metal panels, sawtooth roof, loading bays, low poly, stylized game asset",
+      "category": "ind",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_00",
+      "prompt": "A modern city police station, flat roof with accent stripe, concrete, low poly, stylized game asset",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "res_low_future_00",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "com_future_00",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_00",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized",
+      "category": "ind",
+      "era": "future"
+    }
+  ],
+  "batch_id": "v1-core",
+  "linear_issue": "SB-3739"
+}

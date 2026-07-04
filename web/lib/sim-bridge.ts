@@ -71,6 +71,18 @@ export type RciDemand = {
   industrial: number;
 };
 
+/** Per-good Leontief market imbalance from WASM EconomySystem. */
+export type GoodImbalance = {
+  name: string;
+  magnitude: number;
+};
+
+/** Top shortages/surpluses exported from EconomySystem market zones. */
+export type EconomySnapshot = {
+  shortages: GoodImbalance[];
+  surpluses: GoodImbalance[];
+};
+
 export type ActiveEventSnapshot = {
   eventId: number;
   typeId: string;
@@ -141,6 +153,8 @@ export type SimResources = {
   policeCoverage?: number;
   /** WASM GetStatus — mean fire coverage over zoned tiles (0–1). */
   fireCoverage?: number;
+  /** WASM — top Leontief goods shortages and surpluses. */
+  economy?: EconomySnapshot;
 };
 
 /** Strip render payload from a full sim snapshot for HUD consumers. */

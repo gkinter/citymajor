@@ -1,0 +1,489 @@
+{
+  "pipeline_version": "1.0",
+  "batch_id": "v1-frontier-industrial-80",
+  "meshy_model": "meshy-6",
+  "export_format": "glb",
+  "linear_issue": "SB-3740",
+  "jobs": [
+    {
+      "key": "res_low_frontier_01",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 01",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_02",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 02",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_03",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 03",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_04",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 04",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_05",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 05",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_06",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 06",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_07",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 07",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_08",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 08",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_09",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 09",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_10",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 10",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_industrial_01",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 01",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_industrial_02",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 02",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_industrial_03",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 03",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_industrial_04",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 04",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_industrial_05",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 05",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_industrial_06",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 06",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_industrial_07",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 07",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_industrial_08",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 08",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_industrial_09",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 09",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_industrial_10",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 10",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_frontier_01",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 01",
+      "category": "res_high",
+      "era": "frontier"
+    },
+    {
+      "key": "res_high_frontier_02",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 02",
+      "category": "res_high",
+      "era": "frontier"
+    },
+    {
+      "key": "res_high_frontier_03",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 03",
+      "category": "res_high",
+      "era": "frontier"
+    },
+    {
+      "key": "res_high_frontier_04",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 04",
+      "category": "res_high",
+      "era": "frontier"
+    },
+    {
+      "key": "res_high_frontier_05",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 05",
+      "category": "res_high",
+      "era": "frontier"
+    },
+    {
+      "key": "res_high_frontier_06",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 06",
+      "category": "res_high",
+      "era": "frontier"
+    },
+    {
+      "key": "res_high_frontier_07",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 07",
+      "category": "res_high",
+      "era": "frontier"
+    },
+    {
+      "key": "res_high_frontier_08",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 08",
+      "category": "res_high",
+      "era": "frontier"
+    },
+    {
+      "key": "res_high_frontier_09",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 09",
+      "category": "res_high",
+      "era": "frontier"
+    },
+    {
+      "key": "res_high_frontier_10",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 10",
+      "category": "res_high",
+      "era": "frontier"
+    },
+    {
+      "key": "res_high_industrial_01",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 01",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_industrial_02",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 02",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_industrial_03",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 03",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_industrial_04",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 04",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_industrial_05",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 05",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_industrial_06",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 06",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_industrial_07",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 07",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_industrial_08",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 08",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_industrial_09",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 09",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "res_high_industrial_10",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 10",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
+      "key": "com_frontier_01",
+      "prompt": "A frontier general store or shop, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset, silhouette variant 01",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "com_frontier_02",
+      "prompt": "A frontier general store or shop, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset, silhouette variant 02",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "com_frontier_03",
+      "prompt": "A frontier general store or shop, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset, silhouette variant 03",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "com_frontier_04",
+      "prompt": "A frontier general store or shop, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset, silhouette variant 04",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "com_frontier_05",
+      "prompt": "A frontier general store or shop, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset, silhouette variant 05",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "com_frontier_06",
+      "prompt": "A frontier general store or shop, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset, silhouette variant 06",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "com_frontier_07",
+      "prompt": "A frontier general store or shop, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset, silhouette variant 07",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "com_frontier_08",
+      "prompt": "A frontier general store or shop, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset, silhouette variant 08",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "com_frontier_09",
+      "prompt": "A frontier general store or shop, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset, silhouette variant 09",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "com_frontier_10",
+      "prompt": "A frontier general store or shop, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset, silhouette variant 10",
+      "category": "com",
+      "era": "frontier"
+    },
+    {
+      "key": "com_industrial_01",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 01",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "com_industrial_02",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 02",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "com_industrial_03",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 03",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "com_industrial_04",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 04",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "com_industrial_05",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 05",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "com_industrial_06",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 06",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "com_industrial_07",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 07",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "com_industrial_08",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 08",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "com_industrial_09",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 09",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "com_industrial_10",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 10",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_frontier_01",
+      "prompt": "A frontier workshop or mill, wooden and stone, sawtooth roof, low poly, stylized game asset, silhouette variant 01",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_frontier_02",
+      "prompt": "A frontier workshop or mill, wooden and stone, sawtooth roof, low poly, stylized game asset, silhouette variant 02",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_frontier_03",
+      "prompt": "A frontier workshop or mill, wooden and stone, sawtooth roof, low poly, stylized game asset, silhouette variant 03",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_frontier_04",
+      "prompt": "A frontier workshop or mill, wooden and stone, sawtooth roof, low poly, stylized game asset, silhouette variant 04",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_frontier_05",
+      "prompt": "A frontier workshop or mill, wooden and stone, sawtooth roof, low poly, stylized game asset, silhouette variant 05",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_frontier_06",
+      "prompt": "A frontier workshop or mill, wooden and stone, sawtooth roof, low poly, stylized game asset, silhouette variant 06",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_frontier_07",
+      "prompt": "A frontier workshop or mill, wooden and stone, sawtooth roof, low poly, stylized game asset, silhouette variant 07",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_frontier_08",
+      "prompt": "A frontier workshop or mill, wooden and stone, sawtooth roof, low poly, stylized game asset, silhouette variant 08",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_frontier_09",
+      "prompt": "A frontier workshop or mill, wooden and stone, sawtooth roof, low poly, stylized game asset, silhouette variant 09",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_frontier_10",
+      "prompt": "A frontier workshop or mill, wooden and stone, sawtooth roof, low poly, stylized game asset, silhouette variant 10",
+      "category": "ind",
+      "era": "frontier"
+    },
+    {
+      "key": "ind_industrial_01",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 01",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_industrial_02",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 02",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_industrial_03",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 03",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_industrial_04",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 04",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_industrial_05",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 05",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_industrial_06",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 06",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_industrial_07",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 07",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_industrial_08",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 08",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_industrial_09",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 09",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
+      "key": "ind_industrial_10",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 10",
+      "category": "ind",
+      "era": "industrial"
+    }
+  ]
+}

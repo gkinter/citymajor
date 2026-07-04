@@ -81,6 +81,10 @@ public sealed class WasmSimHost
             ? new EraProgressSnapshot()
             : WasmEraDeriver.GetEraProgress(_state, _research);
 
+    /// <summary>Top goods shortages/surpluses from Leontief market zones.</summary>
+    public EconomySnapshotDto EconomySnapshot =>
+        EconomySnapshotDto.From(_economy);
+
     /// <summary>City-wide average health coverage over zoned tiles (0–1).</summary>
     public float HealthcareCoverage =>
         _services is null || _state is null ? 0f : ComputeAverageCoverage(_services.HealthCoverage);
@@ -794,6 +798,8 @@ public sealed class WasmStatusDto
     public float PoliceCoverage { get; init; }
     /// <summary>Mean fire coverage over zoned tiles (0–1).</summary>
     public float FireCoverage { get; init; }
+    /// <summary>Leontief goods shortages/surpluses for economy HUD.</summary>
+    public EconomySnapshotDto Economy { get; init; } = new();
 
     public static WasmStatusDto From(WasmSimHost host) => new()
     {
@@ -860,6 +866,7 @@ public sealed class WasmStatusDto
         HealthcareCoverage = host.HealthcareCoverage,
         PoliceCoverage = host.PoliceCoverage,
         FireCoverage = host.FireCoverage,
+        Economy = host.EconomySnapshot,
     };
 }
 
@@ -889,6 +896,8 @@ public sealed class SimSnapshotDto
     /// <summary>Sparse zoned tiles with per-service coverage (0–1).</summary>
     public ServiceCoverageDto[] ServiceCoverage { get; init; } = [];
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
+    /// <summary>Leontief goods shortages/surpluses for economy HUD.</summary>
+    public EconomySnapshotDto Economy { get; init; } = new();
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
@@ -923,6 +932,7 @@ public sealed class SimSnapshotDto
             Traffic = traffic,
             ServiceCoverage = serviceCoverage,
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
+            Economy = EconomySnapshotDto.From(economy),
         };
     }
 
@@ -1100,6 +1110,46 @@ public sealed class ActiveEventDto
     public int TileY { get; init; }
 }
 
+public sealed class GoodImbalanceDto
+{
+    public string Name { get; init; } = "";
+    /// <summary>Absolute demand−supply (shortage) or supply−demand (surplus).</summary>
+    public float Magnitude { get; init; }
+}
+
+public sealed class EconomySnapshotDto
+{
+    public GoodImbalanceDto[] Shortages { get; init; } = [];
+    public GoodImbalanceDto[] Surpluses { get; init; } = [];
+
+    public static EconomySnapshotDto From(EconomySystem? economy)
+    {
+        if (economy is null) return new EconomySnapshotDto();
+
+        var (shortages, surpluses) = economy.GetTopImbalances(5);
+        return new EconomySnapshotDto
+        {
+            Shortages = ToDto(shortages),
+            Surpluses = ToDto(surpluses),
+        };
+    }
+
+    private static GoodImbalanceDto[] ToDto(EconomySystem.GoodImbalanceEntry[] entries)
+    {
+        var result = new GoodImbalanceDto[entries.Length];
+        for (int i = 0; i < entries.Length; i++)
+        {
+            result[i] = new GoodImbalanceDto
+            {
+                Name = entries[i].Name,
+                Magnitude = entries[i].Magnitude,
+            };
+        }
+
+        return result;
+    }
+}
+
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(SimSnapshotDto))]
 [JsonSerializable(typeof(BuildingDto))]
@@ -1114,6 +1164,9 @@ public sealed class ActiveEventDto
 [JsonSerializable(typeof(ServiceCoverageDto[]))]
 [JsonSerializable(typeof(ActiveEventDto))]
 [JsonSerializable(typeof(ActiveEventDto[]))]
+[JsonSerializable(typeof(GoodImbalanceDto))]
+[JsonSerializable(typeof(GoodImbalanceDto[]))]
+[JsonSerializable(typeof(EconomySnapshotDto))]
 [JsonSerializable(typeof(WasmStatusDto))]
 [JsonSerializable(typeof(TickIntervalsDto))]
 [JsonSerializable(typeof(TrafficLiteInfoDto))]

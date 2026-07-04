@@ -16,8 +16,7 @@ type ServicesToolbarProps = {
   fireCoverage?: number;
 };
 
-const MODES: { id: ServiceViewMode; label: string }[] = [
-  { id: "off", label: "Off" },
+const SUBMODES: { id: Exclude<ServiceViewMode, "off">; label: string }[] = [
   { id: "health", label: "Health" },
   { id: "police", label: "Police" },
   { id: "fire", label: "Fire" },
@@ -35,6 +34,8 @@ export function ServicesToolbar({
   policeCoverage,
   fireCoverage,
 }: ServicesToolbarProps) {
+  const overlayOn = viewMode !== "off";
+
   return (
     <div
       data-testid="services-toolbar"
@@ -52,12 +53,40 @@ export function ServicesToolbar({
       >
         Services
       </span>
-      {MODES.map(({ id, label }) => (
+      <button
+        type="button"
+        style={{ ...hudButton(overlayOn), minWidth: 44 }}
+        aria-pressed={overlayOn}
+        title="Show service coverage overlay (defaults to Health)"
+        onClick={() => onViewModeChange(overlayOn ? viewMode : "health")}
+      >
+        On
+      </button>
+      <button
+        type="button"
+        style={{ ...hudButton(!overlayOn), minWidth: 44 }}
+        aria-pressed={!overlayOn}
+        title="Hide service coverage overlay"
+        onClick={() => onViewModeChange("off")}
+      >
+        Off
+      </button>
+      {SUBMODES.map(({ id, label }) => (
         <button
           key={id}
           type="button"
-          style={{ ...hudButton(viewMode === id), minWidth: id === "off" ? 44 : 58 }}
+          style={{
+            ...hudButton(viewMode === id),
+            minWidth: 58,
+            opacity: overlayOn ? 1 : 0.45,
+          }}
           aria-pressed={viewMode === id}
+          disabled={!overlayOn}
+          title={
+            overlayOn
+              ? `Show ${label.toLowerCase()} coverage`
+              : "Turn Services On to pick a coverage mode"
+          }
           onClick={() => onViewModeChange(id)}
         >
           {label}

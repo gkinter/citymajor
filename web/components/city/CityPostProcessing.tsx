@@ -29,7 +29,6 @@ export function CityPostProcessing({ qualityTier }: CityPostProcessingProps) {
       enableNormalPass={false}
       multisampling={0}
       frameBufferType={UnsignedByteType}
-      autoClear={false}
     >
       <Bloom
         luminanceThreshold={0.65}

@@ -335,39 +335,45 @@ export function CityCanvas({
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
-      <Canvas
-        dpr={dpr}
-        camera={{ position: [140, 120, 140], fov: 50, near: 0.1, far: 800 }}
-        gl={{ antialias: true, powerPreference: "high-performance" }}
-        onCreated={handleGlCreated}
-        style={{ width: "100%", height: "100%", display: "block" }}
-      >
-        <color attach="background" args={[skyColor]} />
-        <Suspense fallback={null}>
-          <CityScene
-            city={city}
-            chunks={chunks}
-            zones={zones}
-            roads={roads}
-            traffic={traffic}
-            showTrafficOverlay={showTrafficOverlay}
-            serviceCoverage={serviceCoverage}
-            serviceViewMode={serviceViewMode}
-            pickedTile={pickedTile}
-            activeEvents={activeEvents}
-            onEventMarkerClick={onEventMarkerClick}
-            onPick={handlePick}
-            onStats={handleStats}
-            dpr={dpr}
-            population={simResources?.population ?? 0}
-            householdCount={simResources?.householdCount}
-            era={simResources?.era ?? 0}
-            eraProgress={simResources?.eraProgress}
-          />
-          <AdaptiveDpr dpr={dpr} onDprChange={setDpr} />
-          <CityPostProcessing qualityTier={qualityTier} />
-        </Suspense>
-      </Canvas>
+      <div data-testid="city-canvas" style={{ width: "100%", height: "100%" }}>
+        <Canvas
+          dpr={dpr}
+          camera={{ position: [140, 120, 140], fov: 50, near: 0.1, far: 800 }}
+          gl={{
+            antialias: true,
+            powerPreference: "high-performance",
+            preserveDrawingBuffer: true,
+          }}
+          onCreated={handleGlCreated}
+          style={{ width: "100%", height: "100%", display: "block" }}
+        >
+          <color attach="background" args={[skyColor]} />
+          <Suspense fallback={null}>
+            <CityScene
+              city={city}
+              chunks={chunks}
+              zones={zones}
+              roads={roads}
+              traffic={traffic}
+              showTrafficOverlay={showTrafficOverlay}
+              serviceCoverage={serviceCoverage}
+              serviceViewMode={serviceViewMode}
+              pickedTile={pickedTile}
+              activeEvents={activeEvents}
+              onEventMarkerClick={onEventMarkerClick}
+              onPick={handlePick}
+              onStats={handleStats}
+              dpr={dpr}
+              population={simResources?.population ?? 0}
+              householdCount={simResources?.householdCount}
+              era={simResources?.era ?? 0}
+              eraProgress={simResources?.eraProgress}
+            />
+            <AdaptiveDpr dpr={dpr} onDprChange={setDpr} />
+            <CityPostProcessing qualityTier={qualityTier} />
+          </Suspense>
+        </Canvas>
+      </div>
       <Minimap zones={zones} city={city} />
     </div>
   );

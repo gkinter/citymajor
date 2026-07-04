@@ -99,17 +99,24 @@ async function assertOptionalOverlayToolbars(page, tag) {
 
   if ((await servicesToolbar.count()) > 0) {
     await servicesToolbar.first().waitFor({ state: "visible" });
-    const healthBtn = servicesToolbar.getByRole("button", { name: "Health", exact: true });
+    const onBtn = servicesToolbar.getByRole("button", { name: "On", exact: true });
     const offBtn = servicesToolbar.getByRole("button", { name: "Off", exact: true });
-    await healthBtn.click();
-    if ((await healthBtn.getAttribute("aria-pressed")) !== "true") {
-      fail(tag, "Services Health button did not activate (aria-pressed)");
+    const healthBtn = servicesToolbar.getByRole("button", { name: "Health", exact: true });
+    await onBtn.click();
+    if ((await onBtn.getAttribute("aria-pressed")) !== "true") {
+      fail(tag, "Services On button did not activate (aria-pressed)");
     }
     if ((await offBtn.getAttribute("aria-pressed")) === "true") {
-      fail(tag, "Services Health and Off both pressed (aria-pressed)");
+      fail(tag, "Services On and Off both pressed (aria-pressed)");
     }
-    pass(tag, "services toolbar present and Health mode toggles");
+    if ((await healthBtn.getAttribute("aria-pressed")) !== "true") {
+      fail(tag, "Services On did not default to Health submode");
+    }
+    pass(tag, "services toolbar On defaults to Health");
     await offBtn.click();
+    if ((await offBtn.getAttribute("aria-pressed")) !== "true") {
+      fail(tag, "Services Off button did not activate (aria-pressed)");
+    }
   } else {
     console.log(`[${tag}] SKIP: services toolbar not on page`);
   }
@@ -183,23 +190,44 @@ export async function runPlayChecks(page, options = {}) {
   await wordmark.waitFor({ state: "visible" });
   pass(tag, "CityMajor wordmark visible");
 
-  const canvas = page.locator("canvas").first();
+  const canvas = page.locator('[data-testid="city-canvas"] canvas');
   await canvas.waitFor({ state: "visible" });
   pass(tag, "WebGL canvas mounted");
 
-  const webgl = await page.evaluate(() => {
-    const el = document.querySelector("canvas");
-    if (!el) return null;
-    return !!(
-      el.getContext("webgl2") ??
-      el.getContext("webgl") ??
-      el.getContext("experimental-webgl")
+  try {
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('[data-testid="city-canvas"] canvas');
+        const engine = el?.getAttribute("data-engine");
+        return typeof engine === "string" && engine.startsWith("three.js");
+      },
+      undefined,
+      { timeout: 15_000 },
     );
-  });
-  if (!webgl) fail(tag, "No WebGL context on canvas");
+  } catch {
+    fail(tag, "Main play canvas missing Three.js WebGL renderer");
+  }
   pass(tag, "WebGL context created");
 
   await page.waitForTimeout(3500);
+
+  const canvasLit = await page.evaluate(() => {
+    const canvas = document.querySelector('[data-testid="city-canvas"] canvas');
+    if (!canvas) return false;
+    const gl =
+      canvas.getContext("webgl2", { preserveDrawingBuffer: true }) ??
+      canvas.getContext("webgl", { preserveDrawingBuffer: true });
+    if (!gl) return false;
+    const buf = new Uint8Array(4);
+    const x = Math.max(0, Math.floor(canvas.width / 2) - 1);
+    const y = Math.max(0, Math.floor(canvas.height / 2) - 1);
+    gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+    return buf[0] + buf[1] + buf[2] > 0;
+  });
+  if (!canvasLit) {
+    fail(tag, "Main WebGL canvas readPixels are all zero (black frame)");
+  }
+  pass(tag, "main canvas has non-zero pixels after load");
 
   await assertSaveApiHealth(tag);
   await assertHudPanels(page, tag);

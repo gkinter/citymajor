@@ -534,6 +534,75 @@
   text-align: right;
 }
 
+/* Economy panel — Leontief goods shortages/surpluses */
+.hud-economy-button {
+  font-family: var(--hud-font-mono);
+}
+
+.hud-economy-panel {
+  font-family: var(--hud-font-mono);
+}
+
+.hud-economy-section + .hud-economy-section {
+  margin-top: 18px;
+}
+
+.hud-economy-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--hud-text-dim);
+}
+
+.hud-economy-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hud-economy-list__item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--hud-row-bg);
+  border: 1px solid var(--hud-border-subtle);
+}
+
+.hud-economy-list__item--shortage {
+  border-left: 3px solid #ff7a8a;
+}
+
+.hud-economy-list__item--surplus {
+  border-left: 3px solid #7dffb2;
+}
+
+.hud-economy-list__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hud-economy-list__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hud-text);
+}
+
+.hud-economy-list__magnitude {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--hud-text-muted);
+}
+
+.hud-economy-list__hint {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--hud-text-dim);
+}
+
 /* Zoning toolbar — highlight tools matching high RCI demand */
 .hud-zoning-btn--demand {
   box-shadow:

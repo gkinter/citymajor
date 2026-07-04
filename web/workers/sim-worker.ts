@@ -2,6 +2,8 @@
 
 import type {
   ActiveEventSnapshot,
+  EconomySnapshot,
+  GoodImbalance,
   RoadSnapshot,
   ServiceCoverageSnapshot,
   SimCommand,
@@ -70,6 +72,10 @@ type WasmStatus = {
   healthcareCoverage?: number;
   policeCoverage?: number;
   fireCoverage?: number;
+  economy?: {
+    shortages?: Array<{ name?: string; magnitude?: number }>;
+    surpluses?: Array<{ name?: string; magnitude?: number }>;
+  };
 };
 
 type SimExports = {
@@ -317,6 +323,31 @@ function parseServiceCoverage(
   return tiles.length > 0 ? tiles : undefined;
 }
 
+function parseGoodImbalances(raw: unknown): GoodImbalance[] {
+  if (!Array.isArray(raw)) return [];
+  const rows: GoodImbalance[] = [];
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null) continue;
+    const row = item as Record<string, unknown>;
+    if (typeof row.name !== "string") continue;
+    rows.push({
+      name: row.name,
+      magnitude: typeof row.magnitude === "number" ? row.magnitude : 0,
+    });
+  }
+  return rows;
+}
+
+function parseEconomy(raw: unknown): EconomySnapshot | undefined {
+  if (raw === undefined) return undefined;
+  if (typeof raw !== "object" || raw === null) return undefined;
+  const economy = raw as Record<string, unknown>;
+  return {
+    shortages: parseGoodImbalances(economy.shortages),
+    surpluses: parseGoodImbalances(economy.surpluses),
+  };
+}
+
 function readStatus(): Pick<
   SimSnapshot,
   | "tick"
@@ -345,6 +376,7 @@ function readStatus(): Pick<
   | "healthcareCoverage"
   | "policeCoverage"
   | "fireCoverage"
+  | "economy"
 > | null {
   if (!sim?.GetStatus) return null;
   try {
@@ -395,6 +427,7 @@ function readStatus(): Pick<
       healthcareCoverage: parsed.healthcareCoverage,
       policeCoverage: parsed.policeCoverage,
       fireCoverage: parsed.fireCoverage,
+      economy: parseEconomy(parsed.economy),
     };
   } catch {
     return null;
@@ -451,6 +484,7 @@ function readSnapshot(): SimSnapshot {
       parsed.healthcareCoverage ?? status?.healthcareCoverage,
     policeCoverage: parsed.policeCoverage ?? status?.policeCoverage,
     fireCoverage: parsed.fireCoverage ?? status?.fireCoverage,
+    economy: parseEconomy(parsed.economy) ?? status?.economy,
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),

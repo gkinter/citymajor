@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useEffect, type CSSProperties } from "react";
 import {
   HUD_COLORS,
   HUD_RADIUS,
@@ -67,10 +67,25 @@ export function HeraldPanel({
   specialEdition = false,
   onOptionSelect,
 }: HeraldPanelProps) {
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
-    <aside style={hudSlidePanel()} role="dialog" aria-label="Daily Herald" aria-modal="true">
+    <aside
+      style={hudSlidePanel()}
+      role="dialog"
+      aria-label="Daily Herald"
+      aria-modal="true"
+      aria-busy={loading}
+    >
       <header style={headerStyle}>
         <div>
           <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: "0.04em" }}>

@@ -10,16 +10,18 @@ import {
   updateChunkVisibility,
   visibleBuildingCount,
 } from "@/lib/chunks";
-import type { ZoneTile } from "@/lib/zoning";
+import type { RoadTile, ZoneTile } from "@/lib/zoning";
 import { BuildingInstances } from "./BuildingInstances";
 import { TerrainChunks } from "./TerrainChunks";
 import { TilePicker } from "./TilePicker";
+import { RoadOverlay } from "./RoadOverlay";
 import { ZoneOverlay } from "./ZoneOverlay";
 
 type CitySceneProps = {
   city: CityData;
   chunks: ChunkState[];
   zones: ZoneTile[];
+  roads: RoadTile[];
   pickedTile: PickResult;
   onPick: (pick: PickResult) => void;
   onStats: (stats: FpsStats) => void;
@@ -30,6 +32,7 @@ export function CityScene({
   city,
   chunks,
   zones,
+  roads,
   pickedTile,
   onPick,
   onStats,
@@ -85,6 +88,7 @@ export function CityScene({
         target={[GRID_CENTER, 0, GRID_CENTER]}
       />
       <TerrainChunks chunks={chunks} pickedTile={pickedTile} />
+      <RoadOverlay roads={roads} />
       <ZoneOverlay zones={zones} />
       <BuildingInstances city={city} chunks={chunks} />
       <TilePicker onPick={onPick} />

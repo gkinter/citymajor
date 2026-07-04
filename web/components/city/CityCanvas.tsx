@@ -2,6 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type * as THREE from "three";
 import type { FpsStats, PickResult, CityData } from "@/lib/types";
 import { cityDataFromSnapshot, getCityData } from "@/lib/city-data";
 import { createChunkStates } from "@/lib/chunks";
@@ -92,9 +93,10 @@ export function CityCanvas({
     () => simResources?.healthcareCoverage ?? estimateHealthcareCoverage(city),
     [simResources?.healthcareCoverage, city],
   );
-  const [dpr, setDpr] = useState(
-    () => Math.min(MAX_DPR, typeof window !== "undefined" ? window.devicePixelRatio : 1),
-  );
+  const [dpr, setDpr] = useState(1);
+  useEffect(() => {
+    setDpr(Math.min(MAX_DPR, window.devicePixelRatio));
+  }, []);
   const [pickedTile, setPickedTile] = useState<PickResult>(null);
   const bridgeRef = useRef<SimBridge | null>(null);
   const gameSpeedRef = useRef(gameSpeed);
@@ -315,13 +317,30 @@ export function CityCanvas({
     [simResources?.approval],
   );
 
+  const handleGlCreated = useCallback(
+    ({ gl }: { gl: THREE.WebGLRenderer }) => {
+      const canvas = gl.domElement;
+      canvas.addEventListener("webglcontextlost", (event) => {
+        event.preventDefault();
+        console.warn("[CityMajor] WebGL context lost — awaiting restore");
+      });
+      canvas.addEventListener("webglcontextrestored", () => {
+        console.info("[CityMajor] WebGL context restored");
+        gl.setPixelRatio(dpr);
+        gl.setSize(canvas.clientWidth, canvas.clientHeight, false);
+      });
+    },
+    [dpr],
+  );
+
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <Canvas
         dpr={dpr}
         camera={{ position: [140, 120, 140], fov: 50, near: 0.1, far: 800 }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
-        style={{ width: "100%", height: "100%" }}
+        onCreated={handleGlCreated}
+        style={{ width: "100%", height: "100%", display: "block" }}
       >
         <color attach="background" args={[skyColor]} />
         <Suspense fallback={null}>

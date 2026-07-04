@@ -53,6 +53,7 @@ import {
   OnboardingOverlay,
 } from "@/components/city/OnboardingOverlay";
 import { resolveRci } from "@/lib/zoning-economy";
+import { GltfPreloader } from "@/components/city/GltfPreloader";
 
 const NarrativeApiResponseSchema = NarrativeEventResponseSchema.extend({
   narrativeEventsRemaining: z.number().int().nonnegative().optional(),
@@ -384,6 +385,7 @@ export function PlayClient() {
 
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
+      <GltfPreloader />
       <CityCanvas
         activeTool={activeTool}
         brushSize={brushSize}

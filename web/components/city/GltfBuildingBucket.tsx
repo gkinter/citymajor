@@ -2,9 +2,10 @@
 
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { resolveCatalogKey, resolveGltfPath } from "@/lib/gltf-catalog";
+import { markGltfCatalogLoaded } from "@/lib/gltf-load-state";
 import {
   scaleVisualForSpawn,
   useBuildingSpawnScales,
@@ -72,6 +73,10 @@ export function GltfBuildingBucket({
 
   const { geometry, footprint } = useMemo(() => meshFootprint(scene), [scene]);
   const category = buildings[0]?.category;
+
+  useEffect(() => {
+    markGltfCatalogLoaded(catalogKey);
+  }, [catalogKey, scene]);
 
   useFrame(() => {
     const mesh = meshRef.current;

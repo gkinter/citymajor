@@ -1,11 +1,12 @@
-import { PlayClient } from "@/components/city/PlayClient";
-import { GltfPreloader } from "@/components/city/GltfPreloader";
+"use client";
+
+import dynamic from "next/dynamic";
+
+const PlayClient = dynamic(
+  () => import("@/components/city/PlayClient").then((m) => m.PlayClient),
+  { ssr: false },
+);
 
 export default function PlayPage() {
-  return (
-    <>
-      <GltfPreloader />
-      <PlayClient />
-    </>
-  );
+  return <PlayClient />;
 }

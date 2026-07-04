@@ -4,7 +4,11 @@ import { BuildingCategory } from "@citymajor/sim-types";
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { hasGltfAsset } from "@/lib/gltf-catalog";
+import {
+  hasGltfAsset,
+  resolveCatalogKey,
+} from "@/lib/gltf-catalog";
+import { isGltfCatalogLoaded } from "@/lib/gltf-load-state";
 import type { ChunkState, CityData } from "@/lib/types";
 import {
   composeInstanceMatrix,
@@ -20,6 +24,7 @@ import {
   GltfBuildingBucket,
   groupBuildingsByCatalogKey,
 } from "./GltfBuildingBucket";
+import { GltfBucketBoundary } from "./GltfBucketBoundary";
 
 type BuildingInstancesProps = {
   city: CityData;
@@ -81,8 +86,14 @@ export function BuildingInstances({
             : visual;
         if (visual.wireframe) bucketWireframe = true;
 
+        const catalogKey = resolveCatalogKey(key);
         const gltfCoversL0 =
-          useGltf && !hidden && lod === 0 && !visual.wireframe;
+          useGltf &&
+          catalogKey !== null &&
+          isGltfCatalogLoaded(catalogKey) &&
+          !hidden &&
+          lod === 0 &&
+          !visual.wireframe;
         const showBox = !gltfCoversL0;
         const rotationY = tileYawRadians(
           building.tileX,
@@ -119,14 +130,16 @@ export function BuildingInstances({
   return (
     <>
       {gltfBuckets.map(({ catalogKey, buildings }) => (
-        <Suspense key={catalogKey} fallback={null}>
-          <GltfBuildingBucket
-            catalogKey={catalogKey}
-            buildings={buildings}
-            chunks={chunks}
-            dayNightFactor={dayNightFactor}
-          />
-        </Suspense>
+        <GltfBucketBoundary key={catalogKey} catalogKey={catalogKey}>
+          <Suspense fallback={null}>
+            <GltfBuildingBucket
+              catalogKey={catalogKey}
+              buildings={buildings}
+              chunks={chunks}
+              dayNightFactor={dayNightFactor}
+            />
+          </Suspense>
+        </GltfBucketBoundary>
       ))}
       {buckets.map(({ key, buildings, category }) => (
         buildings.length > 0 ? (

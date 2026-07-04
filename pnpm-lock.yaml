@@ -14,6 +14,9 @@ importers:
 
   web:
     dependencies:
+      '@citymajor/sim-types':
+        specifier: workspace:*
+        version: link:packages/sim-types
       '@react-three/drei':
         specifier: ^10.0.7
         version: 10.7.7(@react-three/fiber@9.6.1(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(three@0.175.0))(@types/react@19.2.17)(@types/three@0.175.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(three@0.175.0)
@@ -47,6 +50,12 @@ importers:
         version: 0.175.0
       typescript:
         specifier: ^5.8.3
+        version: 5.9.3
+
+  web/packages/sim-types:
+    devDependencies:
+      typescript:
+        specifier: ^5.8.0
         version: 5.9.3
 
 packages:

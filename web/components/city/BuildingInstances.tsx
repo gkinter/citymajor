@@ -1,14 +1,14 @@
 "use client";
 
+import { BuildingCategory } from "@citymajor/sim-types";
 import { useFrame } from "@react-three/fiber";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { ChunkState, CityData } from "@/lib/types";
-import { ARCHETYPE_COUNT } from "@/lib/constants";
 import {
-  archetypeBaseColor,
   composeInstanceMatrix,
   lodVisualForBuilding,
+  metalnessForCategory,
 } from "@/lib/lod";
 
 type BuildingInstancesProps = {
@@ -17,39 +17,30 @@ type BuildingInstancesProps = {
 };
 
 /**
- * One InstancedMesh per building archetype (5 draw calls total).
- * Instance matrices updated per-frame for chunk culling + per-chunk LOD.
+ * One InstancedMesh per archetype key (sim-types taxonomy).
+ * Draw-call count scales with unique keys in the procedural city (~100–200).
  */
 export function BuildingInstances({ city, chunks }: BuildingInstancesProps) {
-  const meshRefs = useRef<(THREE.InstancedMesh | null)[]>(
-    Array.from({ length: ARCHETYPE_COUNT }, () => null),
-  );
+  const meshRefs = useRef<Record<string, THREE.InstancedMesh | null>>({});
   const colorsRef = useRef<THREE.Color[]>([]);
 
-  const counts = useMemo(
-    () => city.buildingsByArchetype.map((list) => list.length),
+  const buckets = useMemo(
+    () =>
+      city.archetypeKeys.map((key) => ({
+        key,
+        buildings: city.buildingsByArchetypeKey[key] ?? [],
+        category: city.buildingsByArchetypeKey[key]?.[0]?.category ?? BuildingCategory.ResidentialLow,
+      })),
     [city],
   );
 
-  useLayoutEffect(() => {
-    meshRefs.current.forEach((mesh, archetype) => {
-      if (!mesh) return;
-      const color = new THREE.Color(archetypeBaseColor(archetype));
-      for (let i = 0; i < counts[archetype]; i++) {
-        mesh.setColorAt(i, color);
-      }
-      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-    });
-  }, [counts]);
-
   useFrame(() => {
-    for (let archetype = 0; archetype < ARCHETYPE_COUNT; archetype++) {
-      const mesh = meshRefs.current[archetype];
-      const list = city.buildingsByArchetype[archetype];
-      if (!mesh || !list.length) continue;
+    for (const { key, buildings } of buckets) {
+      const mesh = meshRefs.current[key];
+      if (!mesh || !buildings.length) continue;
 
-      for (let i = 0; i < list.length; i++) {
-        const building = list[i];
+      for (let i = 0; i < buildings.length; i++) {
+        const building = buildings[i];
         const chunk = chunks[building.chunkIndex];
         const hidden = !chunk?.visible;
         const lod = chunk?.visible ? chunk.lod : 0;
@@ -71,14 +62,14 @@ export function BuildingInstances({ city, chunks }: BuildingInstancesProps) {
 
   return (
     <>
-      {counts.map((count, archetype) =>
-        count > 0 ? (
+      {buckets.map(({ key, buildings, category }) =>
+        buildings.length > 0 ? (
           <instancedMesh
-            key={archetype}
+            key={key}
             ref={(el) => {
-              meshRefs.current[archetype] = el;
+              meshRefs.current[key] = el;
             }}
-            args={[undefined, undefined, count]}
+            args={[undefined, undefined, buildings.length]}
             frustumCulled={false}
             castShadow
             receiveShadow
@@ -87,7 +78,7 @@ export function BuildingInstances({ city, chunks }: BuildingInstancesProps) {
             <meshStandardMaterial
               vertexColors
               roughness={0.65}
-              metalness={archetype >= 3 ? 0.15 : 0.05}
+              metalness={metalnessForCategory(category)}
             />
           </instancedMesh>
         ) : null,

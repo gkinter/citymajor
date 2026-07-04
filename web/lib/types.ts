@@ -1,10 +1,14 @@
-import type { ArchetypeId, ZoneType } from "./constants";
+import type { BuildingCategory, Era } from "@citymajor/sim-types";
+import type { ZoneType } from "./constants";
 
 export type BuildingInstance = {
   id: number;
   tileX: number;
   tileZ: number;
-  archetype: ArchetypeId;
+  typeId: number;
+  archetypeKey: string;
+  category: BuildingCategory;
+  era: Era;
   zone: ZoneType;
   stories: number;
   chunkIndex: number;
@@ -21,7 +25,10 @@ export type ChunkState = {
 
 export type CityData = {
   buildings: BuildingInstance[];
-  buildingsByArchetype: BuildingInstance[][];
+  /** InstancedMesh buckets keyed by archetype key (e.g. res_low_frontier_05). */
+  buildingsByArchetypeKey: Record<string, BuildingInstance[]>;
+  /** Stable iteration order for draw-call batching. */
+  archetypeKeys: string[];
   chunkBuildingIndices: number[][];
 };
 

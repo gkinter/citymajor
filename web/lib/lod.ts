@@ -1,3 +1,4 @@
+import { BuildingCategory, resolveWallColor } from "@citymajor/sim-types";
 import type { BuildingInstance } from "./types";
 import { ZONE_COLORS } from "./constants";
 import * as THREE from "three";
@@ -14,30 +15,37 @@ export type LodVisual = {
   opacity: number;
 };
 
+function isCompactResidential(category: BuildingCategory): boolean {
+  return category === BuildingCategory.ResidentialLow;
+}
+
 /**
  * LOD visual params per level:
  * L0 full box, L1 simplified, L2 zone-colored flat, L3 heatmap block.
+ * Wall colors use sim-types era material hints at L0/L1.
  */
 export function lodVisualForBuilding(
   building: BuildingInstance,
   lod: 0 | 1 | 2 | 3,
 ): LodVisual {
-  const baseW = building.archetype <= 1 ? 0.75 : 0.9;
-  const baseD = building.archetype <= 1 ? 0.75 : 0.9;
+  const compact = isCompactResidential(building.category);
+  const baseW = compact ? 0.75 : 0.9;
+  const baseD = compact ? 0.75 : 0.9;
   const storyH = 0.35;
   const fullH = building.stories * storyH;
+  const wallColor = resolveWallColor(building.typeId);
 
   switch (lod) {
     case 0:
       return {
         scale: [baseW, fullH, baseD],
-        color: shadeColor(ZONE_COLORS[building.zone], 0.85 + building.heat * 0.15),
+        color: shadeColor(wallColor, 0.85 + building.heat * 0.15),
         opacity: 1,
       };
     case 1:
       return {
         scale: [baseW * 0.92, fullH * 0.75, baseD * 0.92],
-        color: shadeColor(ZONE_COLORS[building.zone], 0.7),
+        color: shadeColor(wallColor, 0.7),
         opacity: 1,
       };
     case 2:
@@ -65,7 +73,6 @@ function shadeColor(hex: string, factor: number): string {
 }
 
 function heatColorRamp(t: number): string {
-  // blue → green → yellow → red
   const r = Math.min(1, Math.max(0, (t - 0.5) * 2));
   const g = Math.min(1, Math.max(0, 1 - Math.abs(t - 0.5) * 2));
   const b = Math.min(1, Math.max(0, (0.5 - t) * 2));
@@ -95,13 +102,9 @@ export function composeInstanceMatrix(
   );
 }
 
-export function archetypeBaseColor(archetype: number): string {
-  const zones: (keyof typeof ZONE_COLORS)[] = [
-    "residential",
-    "residential",
-    "commercial",
-    "industrial",
-    "office",
-  ];
-  return ZONE_COLORS[zones[archetype] ?? "mixed"];
+export function metalnessForCategory(category: BuildingCategory): number {
+  return category === BuildingCategory.Industrial ||
+    category === BuildingCategory.Commercial
+    ? 0.15
+    : 0.05;
 }

@@ -1,10 +1,16 @@
 import {
-  ARCHETYPE_COUNT,
+  BuildingCategory,
+  TYPE_ID,
+  archetypeKey,
+  classifyBuilding,
+  computeStories,
+  deriveEra,
+} from "@citymajor/sim-types";
+import {
   CHUNK_SIZE,
   CHUNKS_PER_AXIS,
   GRID_SIZE,
   TARGET_BUILDING_COUNT,
-  type ArchetypeId,
   type ZoneType,
 } from "./constants";
 import type { BuildingInstance, CityData } from "./types";
@@ -20,13 +26,47 @@ function mulberry32(seed: number) {
   };
 }
 
-const ZONE_BY_ARCHETYPE: ZoneType[] = [
-  "residential",
-  "residential",
-  "commercial",
-  "industrial",
-  "office",
-];
+const ZONE_BY_CATEGORY: Record<BuildingCategory, ZoneType> = {
+  [BuildingCategory.ResidentialLow]: "residential",
+  [BuildingCategory.ResidentialHigh]: "residential",
+  [BuildingCategory.Commercial]: "commercial",
+  [BuildingCategory.Industrial]: "industrial",
+  [BuildingCategory.Service]: "office",
+};
+
+const CATEGORY_BASE: Record<
+  Exclude<BuildingCategory, BuildingCategory.Service>,
+  number
+> = {
+  [BuildingCategory.ResidentialLow]: TYPE_ID.RES_LOW_START,
+  [BuildingCategory.ResidentialHigh]: TYPE_ID.RES_HIGH_START,
+  [BuildingCategory.Commercial]: TYPE_ID.COM_START,
+  [BuildingCategory.Industrial]: TYPE_ID.IND_START,
+};
+
+function categoryForNoise(n: number, dist: number): BuildingCategory {
+  if (dist < 0.35 && n > 0.55) return BuildingCategory.Commercial;
+  if (dist < 0.5 && n > 0.7) return BuildingCategory.ResidentialHigh;
+  if (n < 0.3) return BuildingCategory.Industrial;
+  if (n < 0.55) return BuildingCategory.ResidentialLow;
+  if (n < 0.75) return BuildingCategory.ResidentialHigh;
+  if (n < 0.9) return BuildingCategory.Commercial;
+  return BuildingCategory.Industrial;
+}
+
+/** Pick a TypeId within category era bands (mirrors sim TypeId layout). */
+function typeIdForCategory(
+  category: BuildingCategory,
+  rand: () => number,
+): number {
+  if (category === BuildingCategory.Service) {
+    return Math.floor(rand() * 20);
+  }
+  const base = CATEGORY_BASE[category];
+  const eraBand = Math.floor(rand() * 5);
+  const variant = Math.floor(rand() * 20);
+  return base + eraBand * 20 + variant;
+}
 
 function chunkIndexForTile(tileX: number, tileZ: number): number {
   const cx = Math.floor(tileX / CHUNK_SIZE);
@@ -34,26 +74,15 @@ function chunkIndexForTile(tileX: number, tileZ: number): number {
   return cz * CHUNKS_PER_AXIS + cx;
 }
 
-function archetypeForNoise(n: number): ArchetypeId {
-  if (n < 0.35) return 0;
-  if (n < 0.55) return 1;
-  if (n < 0.72) return 2;
-  if (n < 0.88) return 3;
-  return 4;
-}
-
 /**
- * Procedural 256×256 city mock — ~5000 building instances across 5 archetypes.
- * No WASM; patterns mirror Forge spatial grid + instanced placement.
+ * Procedural 256×256 city mock — ~5000 buildings classified via sim-types.
+ * TypeIds follow Forge BuildingRenderer ranges; keys match BUILDING_ARCHETYPE_3D ADR.
  */
 export function generateCityData(seed = 0x63697479): CityData {
   const rand = mulberry32(seed);
   const occupied = new Uint8Array(GRID_SIZE * GRID_SIZE);
   const buildings: BuildingInstance[] = [];
-  const buildingsByArchetype: BuildingInstance[][] = Array.from(
-    { length: ARCHETYPE_COUNT },
-    () => [],
-  );
+  const buildingsByArchetypeKey: Record<string, BuildingInstance[]> = {};
   const chunkBuildingIndices: number[][] = Array.from(
     { length: CHUNKS_PER_AXIS * CHUNKS_PER_AXIS },
     () => [],
@@ -69,33 +98,45 @@ export function generateCityData(seed = 0x63697479): CityData {
     const idx = tileZ * GRID_SIZE + tileX;
     if (occupied[idx]) continue;
 
-    // Cluster bias — denser near center (simulated downtown).
     const nx = (tileX / GRID_SIZE - 0.5) * 2;
     const nz = (tileZ / GRID_SIZE - 0.5) * 2;
     const dist = Math.sqrt(nx * nx + nz * nz);
     if (rand() > 0.55 + dist * 0.35) continue;
 
     occupied[idx] = 1;
-    const archetype = archetypeForNoise(rand());
-    const zone = ZONE_BY_ARCHETYPE[archetype];
-    const stories = 1 + Math.floor(rand() * (archetype <= 1 ? 6 : 10));
+
+    const category = categoryForNoise(rand(), dist);
+    const typeId = typeIdForCategory(category, rand);
+    const key = archetypeKey(typeId);
+    const era = deriveEra(typeId);
+    const zone = ZONE_BY_CATEGORY[classifyBuilding(typeId)];
+    const level = 1 + Math.floor(rand() * (category === BuildingCategory.ResidentialLow ? 3 : 5));
+    const stories = computeStories(classifyBuilding(typeId), level);
     const chunkIndex = chunkIndexForTile(tileX, tileZ);
+
     const building: BuildingInstance = {
       id: buildings.length,
       tileX,
       tileZ,
-      archetype,
+      typeId,
+      archetypeKey: key,
+      category: classifyBuilding(typeId),
+      era,
       zone,
       stories,
       chunkIndex,
       heat: rand(),
     };
+
     buildings.push(building);
-    buildingsByArchetype[archetype].push(building);
+    if (!buildingsByArchetypeKey[key]) buildingsByArchetypeKey[key] = [];
+    buildingsByArchetypeKey[key].push(building);
     chunkBuildingIndices[chunkIndex].push(building.id);
   }
 
-  return { buildings, buildingsByArchetype, chunkBuildingIndices };
+  const archetypeKeys = Object.keys(buildingsByArchetypeKey).sort();
+
+  return { buildings, buildingsByArchetypeKey, archetypeKeys, chunkBuildingIndices };
 }
 
 /** Singleton city data for the spike (generated once per session). */

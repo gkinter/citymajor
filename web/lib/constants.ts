@@ -3,7 +3,6 @@ export const CHUNK_SIZE = 32;
 export const CHUNKS_PER_AXIS = GRID_SIZE / CHUNK_SIZE;
 export const CHUNK_COUNT = CHUNKS_PER_AXIS * CHUNKS_PER_AXIS;
 export const TARGET_BUILDING_COUNT = 5000;
-export const ARCHETYPE_COUNT = 5;
 
 /** World units per tile (1 tile = 1 unit). */
 export const TILE_SIZE = 1;
@@ -17,16 +16,6 @@ export const ZONE_COLORS = {
 } as const;
 
 export type ZoneType = keyof typeof ZONE_COLORS;
-
-export const ARCHETYPE_LABELS = [
-  "res-low",
-  "res-high",
-  "commercial",
-  "industrial",
-  "office",
-] as const;
-
-export type ArchetypeId = 0 | 1 | 2 | 3 | 4;
 
 export const LOD_THRESHOLDS = {
   /** Distance to chunk center — enter thresholds (camera moves away). */

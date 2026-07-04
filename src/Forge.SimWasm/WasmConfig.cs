@@ -21,4 +21,29 @@ public static class WasmConfig
     /// when this accumulator elapses (SB-3690).
     /// </summary>
     public const double GameDayInterval = 1.0;
+
+    // Era derivation thresholds (SB-3692 partial — visual eras, no tech_tree.json)
+
+    /// <summary>Sim ticks before tick-only path can reach Industrial era.</summary>
+    public const long EraIndustrialTickThreshold = 1_200;
+
+    public const long EraPostwarTickThreshold = 4_800;
+    public const long EraModernTickThreshold = 12_000;
+    public const long EraFutureTickThreshold = 24_000;
+
+    /// <summary>Accumulated RP before research path can reach Industrial era.</summary>
+    public const float EraIndustrialResearchPoints = 25f;
+
+    public const int EraIndustrialMinPopulation = 400;
+    public const int EraIndustrialEducatedPop = 80;
+    public const int EraIndustrialHeavyIndustry = 3;
+
+    public const float EraPostwarResearchPoints = 120f;
+    public const int EraPostwarMinPopulation = 2_000;
+
+    public const float EraModernResearchPoints = 400f;
+    public const int EraModernMinPopulation = 8_000;
+
+    public const float EraFutureResearchPoints = 1_000f;
+    public const int EraFutureMinPopulation = 20_000;
 }

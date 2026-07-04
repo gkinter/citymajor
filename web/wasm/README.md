@@ -84,6 +84,9 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
   "population": 842,
   "cityFunds": 51200,
   "era": 0,
+  "eraName": "Frontier",
+  "researchPoints": 12.5,
+  "researchRate": 3.2,
   "tickIntervals": {
     "gameDaySeconds": 1.0,
     "trafficStubSeconds": 2.0
@@ -104,9 +107,11 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 |-------|----------|---------|
 | L0 (sub-day) | `TrafficStubInterval` (2.0 sim s) | `WasmTrafficStub` — road occupancy only, no BPR |
 | L1 (game day) | `GameDayInterval` (1.0 sim s) | `EconomySystem.DailyTick`, `ServiceSystem`, `ZoneGrowthSystem`, `PoliticsSystem`, events |
-| L2 (month) | every 30 game days | `PopulationSystem`, `BudgetSystem`, `ResearchSystem`, land-value recalc |
+| L2 (month) | every 30 game days | `PopulationSystem`, `BudgetSystem`, `ResearchSystem`, land-value recalc, **era derivation** |
 
 `WasmSimHost` accumulates sim time and calls `EconomySystem.DailyTick` once per game day. Population and city treasury are exposed via `GetStatus()` and `GetRenderSnapshot()`.
+
+**Era derivation (SB-3692 partial):** Without `tech_tree.json`, `WasmEraDeriver` sets `era` from tick count and research proxies (accumulated RP, heavy-industry tiles, educated population). The primary threshold is **Frontier → Industrial** (`EraIndustrialTickThreshold` = 1200 ticks, or RP ≥ 25 / heavy industry ≥ 3). HUD uses visual era names (Frontier … Future) with per-era badge colors.
 
 **Included (linked via `Forge.SimCore`):**
 

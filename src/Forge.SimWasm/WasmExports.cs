@@ -54,6 +54,9 @@ public static partial class Program
             population = _host.Population,
             cityFunds = _host.CityFunds,
             era = _host.Era,
+            eraName = WasmEraDeriver.EraName(_host.Era),
+            researchPoints = _host.ResearchPoints,
+            researchRate = _host.ResearchRate,
             tickIntervals = new
             {
                 gameDaySeconds = WasmConfig.GameDayInterval,

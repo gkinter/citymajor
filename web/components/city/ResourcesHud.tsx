@@ -2,19 +2,7 @@
 
 import type { CSSProperties } from "react";
 import type { SimResources } from "@/lib/sim-bridge";
-
-const ERA_NAMES = [
-  "Ancient",
-  "Medieval",
-  "Colonial",
-  "Industrial",
-  "Modern",
-  "Future",
-] as const;
-
-function eraName(era: number): string {
-  return ERA_NAMES[era] ?? "Unknown";
-}
+import { hudEraBadgeStyle, hudEraName } from "@/lib/era";
 
 function formatFunds(cityFunds: number): string {
   const abs = Math.abs(cityFunds);
@@ -56,6 +44,18 @@ export function ResourcesHud({ resources }: ResourcesHudProps) {
     marginRight: 6,
   };
 
+  const era = resources?.era ?? 0;
+  const eraBadgeStyle: CSSProperties = {
+    display: "inline-block",
+    marginLeft: 4,
+    padding: "1px 8px",
+    borderRadius: 4,
+    fontWeight: 600,
+    fontSize: 11,
+    letterSpacing: "0.02em",
+    ...hudEraBadgeStyle(era),
+  };
+
   return (
     <div style={panelStyle}>
       <div>
@@ -72,7 +72,11 @@ export function ResourcesHud({ resources }: ResourcesHudProps) {
       </div>
       <div>
         <span style={labelStyle}>Era</span>
-        {resources ? eraName(resources.era) : "—"}
+        {resources ? (
+          <span style={eraBadgeStyle}>{hudEraName(era)}</span>
+        ) : (
+          "—"
+        )}
       </div>
     </div>
   );

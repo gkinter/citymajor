@@ -37,6 +37,8 @@ public sealed class WasmSimHost
     public int Population => _state?.Population ?? 0;
     public long CityFunds => _state?.CityFunds ?? 0;
     public int Era => _state?.Era ?? 0;
+    public float ResearchPoints => _state?.ResearchPoints ?? 0f;
+    public float ResearchRate => _state?.ResearchRate ?? 0f;
 
     public void Init(int worldSize = WasmConfig.DefaultWorldSize)
     {
@@ -63,6 +65,7 @@ public sealed class WasmSimHost
 
         CulturalDNASystem.ApplyPreset(_state, "western_european");
         _lastCulturalDnaYear = _state.Year;
+        _state.Era = 0; // Frontier — derived each month via WasmEraDeriver (SB-3692)
 
         GenerateMap();
         SeedStarterCity();
@@ -192,6 +195,7 @@ public sealed class WasmSimHost
         _budget.CalculateMonthlyBudget(_state, _economy);
         _politics.MonthlyTick(_state, WasmConfig.GameDayInterval);
         _research.MonthlyTick(_state, WasmConfig.GameDayInterval);
+        WasmEraDeriver.UpdateEra(_state, _research);
 
         if (_state.Year > _lastCulturalDnaYear)
         {
@@ -528,8 +532,16 @@ public sealed class ZoneDto
     public byte ZoneType { get; init; }
 }
 
+public sealed class RoadDto
+{
+    public int TileX { get; init; }
+    public int TileZ { get; init; }
+    public byte RoadFlags { get; init; }
+}
+
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(SimSnapshotDto))]
 [JsonSerializable(typeof(BuildingDto))]
 [JsonSerializable(typeof(ZoneDto))]
+[JsonSerializable(typeof(RoadDto))]
 internal partial class JsonContext : JsonSerializerContext;

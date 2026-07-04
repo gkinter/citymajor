@@ -37,6 +37,7 @@ export function ServicesToolbar({
 }: ServicesToolbarProps) {
   return (
     <div
+      data-testid="services-toolbar"
       style={hudToolbar(HUD_ZONE.bottomLeft)}
       role="toolbar"
       aria-label="Services coverage overlay"

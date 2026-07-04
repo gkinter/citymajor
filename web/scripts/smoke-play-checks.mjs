@@ -99,13 +99,17 @@ async function assertOptionalOverlayToolbars(page, tag) {
 
   if ((await servicesToolbar.count()) > 0) {
     await servicesToolbar.first().waitFor({ state: "visible" });
-    const healthBtn = servicesToolbar.getByRole("button", { name: "Health" });
+    const healthBtn = servicesToolbar.getByRole("button", { name: "Health", exact: true });
+    const offBtn = servicesToolbar.getByRole("button", { name: "Off", exact: true });
     await healthBtn.click();
     if ((await healthBtn.getAttribute("aria-pressed")) !== "true") {
       fail(tag, "Services Health button did not activate (aria-pressed)");
     }
+    if ((await offBtn.getAttribute("aria-pressed")) === "true") {
+      fail(tag, "Services Health and Off both pressed (aria-pressed)");
+    }
     pass(tag, "services toolbar present and Health mode toggles");
-    await servicesToolbar.getByRole("button", { name: "Off" }).click();
+    await offBtn.click();
   } else {
     console.log(`[${tag}] SKIP: services toolbar not on page`);
   }
@@ -116,14 +120,23 @@ async function assertOptionalOverlayToolbars(page, tag) {
 
   if ((await trafficToolbar.count()) > 0) {
     await trafficToolbar.first().waitFor({ state: "visible" });
-    const toggleBtn = trafficToolbar.getByRole("button", { name: /^(On|Off)$/ });
-    const initial = (await toggleBtn.innerText()).trim();
-    await toggleBtn.click();
-    const after = (await toggleBtn.innerText()).trim();
-    if (after === initial) {
-      fail(tag, "Traffic toggle did not change label after click");
+    const onBtn = trafficToolbar.getByRole("button", { name: "On", exact: true });
+    const offBtn = trafficToolbar.getByRole("button", { name: "Off", exact: true });
+    await onBtn.click();
+    if ((await onBtn.getAttribute("aria-pressed")) !== "true") {
+      fail(tag, "Traffic On button did not activate (aria-pressed)");
     }
-    pass(tag, `traffic toggle present (${initial} → ${after})`);
+    if ((await offBtn.getAttribute("aria-pressed")) === "true") {
+      fail(tag, "Traffic On and Off both pressed (aria-pressed)");
+    }
+    await offBtn.click();
+    if ((await offBtn.getAttribute("aria-pressed")) !== "true") {
+      fail(tag, "Traffic Off button did not activate (aria-pressed)");
+    }
+    if ((await onBtn.getAttribute("aria-pressed")) === "true") {
+      fail(tag, "Traffic On and Off both pressed after Off click");
+    }
+    pass(tag, "traffic toggle On/Off mutually exclusive");
   } else {
     console.log(`[${tag}] SKIP: traffic overlay toggle not on page`);
   }

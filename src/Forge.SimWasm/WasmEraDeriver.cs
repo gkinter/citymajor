@@ -24,9 +24,9 @@ public static class WasmEraDeriver
     /// </summary>
     public static void UpdateEra(WorldState state, ResearchSystem research)
     {
-        int tickEra = EraFromTick(state.TickCount);
-        int researchEra = EraFromResearch(state, research);
-        state.Era = Math.Max(tickEra, researchEra);
+        // Research gates only — tick thresholds are shown in eraProgress HUD but
+        // must not bypass RP/pop/industry requirements (SB-3718 / SB-3692).
+        state.Era = EraFromResearch(state, research);
     }
 
     public static string EraName(int era)

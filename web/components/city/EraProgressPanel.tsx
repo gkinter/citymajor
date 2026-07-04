@@ -1,9 +1,11 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { eraQuestTitle } from "@/lib/era-narrative";
 import { hudEraName } from "@/lib/era";
 import {
   HUD_COLORS,
+  HUD_Z,
   HUD_ZONE,
   hudInfoPanel,
   hudLabel,
@@ -21,6 +23,14 @@ const sectionTitle: CSSProperties = {
   letterSpacing: "0.06em",
   textTransform: "uppercase",
   color: HUD_COLORS.textMuted,
+};
+
+const questSubtitle: CSSProperties = {
+  marginBottom: 8,
+  fontSize: 11,
+  lineHeight: 1.35,
+  color: HUD_COLORS.text,
+  opacity: 0.9,
 };
 
 function formatGateValue(id: string, value: number): string {
@@ -70,7 +80,42 @@ function progressFill(percent: number): CSSProperties {
   };
 }
 
-function EraProgressContent({ progress, currentEra }: { progress: EraProgress; currentEra: number }) {
+function EraQuestChecklist({ progress }: { progress: EraProgress }) {
+  return (
+    <div
+      role="list"
+      aria-label="Era quest objectives"
+      style={{ marginTop: 8 }}
+    >
+      {progress.gates.map((gate) => (
+        <div
+          key={gate.id}
+          role="listitem"
+          style={gateRowStyle(gate.met)}
+          aria-label={`${gate.label}: ${formatGateValue(gate.id, gate.current)} of ${formatGateValue(gate.id, gate.required)}${gate.met ? ", complete" : ""}`}
+        >
+          <span style={checklistMark(gate.met)} aria-hidden>
+            {gate.met ? "✓" : "○"}
+          </span>
+          <span style={{ flex: 1 }}>{gate.label}</span>
+          <span style={{ opacity: 0.8, fontVariantNumeric: "tabular-nums" }}>
+            {formatGateValue(gate.id, gate.current)}
+            {" / "}
+            {formatGateValue(gate.id, gate.required)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EraProgressContent({
+  progress,
+  currentEra,
+}: {
+  progress: EraProgress;
+  currentEra: number;
+}) {
   if (progress.gates.length === 0) {
     return (
       <div style={{ opacity: 0.75 }}>
@@ -80,9 +125,16 @@ function EraProgressContent({ progress, currentEra }: { progress: EraProgress; c
   }
 
   const targetName = progress.nextEraName || hudEraName(progress.nextEra);
+  const questTitle = eraQuestTitle(progress.nextEra);
 
   return (
     <>
+      {questTitle ? (
+        <div style={questSubtitle}>
+          <span style={hudLabel()}>Quest</span>
+          {questTitle}
+        </div>
+      ) : null}
       <div style={{ marginBottom: 2 }}>
         <span style={hudLabel()}>Next</span>
         {targetName}
@@ -90,22 +142,17 @@ function EraProgressContent({ progress, currentEra }: { progress: EraProgress; c
           {Math.round(progress.percent)}%
         </span>
       </div>
-      <div style={progressBar(progress.percent)}>
+      <div
+        style={progressBar(progress.percent)}
+        role="progressbar"
+        aria-valuenow={Math.round(progress.percent)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Progress toward ${targetName}`}
+      >
         <div style={progressFill(progress.percent)} />
       </div>
-      <div style={{ marginTop: 8 }}>
-        {progress.gates.map((gate) => (
-          <div key={gate.id} style={gateRowStyle(gate.met)}>
-            <span style={checklistMark(gate.met)}>{gate.met ? "✓" : "○"}</span>
-            <span style={{ flex: 1 }}>{gate.label}</span>
-            <span style={{ opacity: 0.8, fontVariantNumeric: "tabular-nums" }}>
-              {formatGateValue(gate.id, gate.current)}
-              {" / "}
-              {formatGateValue(gate.id, gate.required)}
-            </span>
-          </div>
-        ))}
-      </div>
+      <EraQuestChecklist progress={progress} />
     </>
   );
 }
@@ -117,15 +164,17 @@ export function EraProgressPanel({ resources }: EraProgressPanelProps) {
   if (!progress) return null;
 
   return (
-    <div
+    <aside
+      aria-label="Era quest progress"
       style={{
         ...HUD_ZONE.topRight,
         top: 50,
+        zIndex: HUD_Z.panel,
         ...hudInfoPanel({ minWidth: 220, maxWidth: 280 }),
       }}
     >
-      <div style={sectionTitle}>Era Progress</div>
+      <div style={sectionTitle}>Era Quest</div>
       <EraProgressContent progress={progress} currentEra={currentEra} />
-    </div>
+    </aside>
   );
 }

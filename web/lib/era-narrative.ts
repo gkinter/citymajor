@@ -60,6 +60,19 @@ const HERALD_COPY: Record<
   },
 };
 
+/** LLM era-transition quest titles — ERA_ARC_DESIGN_V2 §6.A. */
+const ERA_QUEST_TITLES: Record<number, string> = {
+  1: "The Centennial Exhibition",
+  2: "The Automobile Boom",
+  3: "The Internet Revolution",
+  4: "Tomorrow, Built Today",
+};
+
+/** Player-facing quest name for the next era (null when at max era). */
+export function eraQuestTitle(nextEra: number): string | null {
+  return ERA_QUEST_TITLES[nextEra] ?? null;
+}
+
 export function eraTransitionModalCopy(era: number): EraTransitionModalCopy {
   const eraName = hudEraName(era);
   return (

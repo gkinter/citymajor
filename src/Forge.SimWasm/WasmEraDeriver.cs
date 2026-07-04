@@ -108,12 +108,15 @@ public static class WasmEraDeriver
         {
             0 =>
             [
-                Gate("researchPoints", "Research", rp, WasmConfig.EraIndustrialResearchPoints,
+                Gate("researchPoints", "Research points", rp, WasmConfig.EraIndustrialResearchPoints,
                     rp >= WasmConfig.EraIndustrialResearchPoints),
                 Gate("population", "Population", pop, WasmConfig.EraIndustrialMinPopulation,
-                    pop >= WasmConfig.EraIndustrialMinPopulation
-                        && educated >= WasmConfig.EraIndustrialEducatedPop),
-                Gate("heavyIndustry", "Industry", heavyIndustry, WasmConfig.EraIndustrialHeavyIndustry,
+                    pop >= WasmConfig.EraIndustrialMinPopulation),
+                Gate("educatedPopulation", "Educated citizens", educated,
+                    WasmConfig.EraIndustrialEducatedPop,
+                    educated >= WasmConfig.EraIndustrialEducatedPop),
+                Gate("heavyIndustry", "Heavy industry", heavyIndustry,
+                    WasmConfig.EraIndustrialHeavyIndustry,
                     heavyIndustry >= WasmConfig.EraIndustrialHeavyIndustry),
             ],
             1 =>

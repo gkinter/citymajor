@@ -4,7 +4,7 @@
 **Branch:** `feat/wasm-r3f-integration-2026-07-04`  
 **PR:** [#1 — feat: CityMajor Web v1 — R3F + WASM integration spine](https://github.com/gkinter/citymajor/pull/1)  
 **Scope charter:** [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) · [SB-3704](https://linear.app/softblaze/issue/SB-3704)  
-**Last updated:** 2026-07-04
+**Last updated:** 2026-07-04 (`e4d3d4f`)
 
 > PR #1 documents the v1 integration spine for review and preview deploys. **Do not merge to `main` until every **blocking** row below is checked.** Deferred items stay tracked in Linear.
 
@@ -12,15 +12,40 @@
 
 ## Gate summary
 
-| Gate | Blocking? | Status (2026-07-04) |
-|------|-----------|---------------------|
-| [Cursor Bugbot](#1-cursor-bugbot) | Yes | **Pass** on `e4d3d4f` — NEUTRAL, no blocking findings |
+| Gate | Blocking? | Status (2026-07-04, `e4d3d4f`) |
+|------|-----------|--------------------------------|
+| [Cursor Bugbot](#1-cursor-bugbot) | Yes | **Pending** — HEAD advanced past `82d8df4`; re-run required on gameplay sprint |
 | [Smoke suite 22/22](#2-smoke-suite-2222) | Yes | **Not verified in CI** — run locally before merge |
-| [Coolify preview URL](#3-coolify-preview-url) | Yes | **Live** — [SB-3715](https://linear.app/softblaze/issue/SB-3715) Done · `citymajor-web` |
-| [Meshy assets](#4-meshy-assets) | Yes (v1 art minimum) | **Batch may be running** — pipeline + manifest; ~0 production GLBs on disk |
+| [Coolify preview URL](#3-coolify-preview-url) | Yes | **Healthy** — [SB-3715](https://linear.app/softblaze/issue/SB-3715) Done · `citymajor-web` |
+| [Gameplay sprint](#8-gameplay-sprint-e4d3d4f) | Yes (player loop) | **Shipped** — roads, traffic, events, citizens, services, research UX, onboarding, landmarks |
+| [Meshy assets](#4-meshy-assets) | Yes (v1 art minimum) | **Partial** — ~20 GLBs on disk; batch hit 502s; MCP gateway + retries in flight |
 | [Stripe stub vs live](#5-stripe-stub-vs-live) | Yes (monetization path) | **Stub + docs** — env vars documented in `3efdf06` / [DEPLOY_WEB.md](../DEPLOY_WEB.md) |
 | [Perf gate](#6-perf-gate) | Yes | **Not signed off** — [SB-3703](https://linear.app/softblaze/issue/SB-3703) |
 | [Open Linear issues](#7-open-linear-issues) | Track | **30+ Triage** on CityMajor Web v1 project |
+
+---
+
+## 8. Gameplay sprint (`e4d3d4f`)
+
+Phase 2 player-loop work landed on the integration branch (2026-07-04).
+
+| Area | Commit range / issue | Status |
+|------|----------------------|--------|
+| Road paint brush | `be44700` — WASM `PlaceRoad` | **Shipped** |
+| Traffic congestion heatmap | `5a02efb` | **Shipped** |
+| Zone paint feedback + building pop-in | `c97cc9d` | **Shipped** |
+| Approval consequences in HUD / Herald | `275b1f9` | **Shipped** |
+| Era landmark placeholder (city center) | `ce31f4f` — [SB-3719](https://linear.app/softblaze/issue/SB-3719) | **Shipped** (placeholder) |
+| Active WASM event markers | `d0dbfc3` | **Shipped** |
+| Economy in player loop | `775eb4a` — [SB-3690](https://linear.app/softblaze/issue/SB-3690) | **Shipped** |
+| Service coverage overlay | `3066f59` — [SB-3691](https://linear.app/softblaze/issue/SB-3691) | **Shipped** |
+| Household population + citizen render | `7539b37` — [SB-3689](https://linear.app/softblaze/issue/SB-3689) | **Shipped** |
+| Research UX (panel open/close in smoke) | prior spine | **Shipped** |
+| Onboarding — core loop tutorial | `c005cb8` | **Shipped** |
+| GLTF catalog fallback + per-tile transforms | `a283d66` | **Shipped** |
+| `/api/saves` preview 500 | `ac51180` | **Fixed** on preview |
+
+**HEAD:** `e4d3d4f` — `chore(assets): refresh frontier GLB and drop dotnet gitkeep`
 
 ---
 
@@ -32,9 +57,9 @@ Automated code review on PR #1.
 |-------|----------------|---------------|
 | Bugbot run completed | [PR #1 checks](https://github.com/gkinter/citymajor/pull/1) | Status `COMPLETED` |
 | No Critical / Major findings | Re-run after new commits | Zero blocking severity |
-| Latest reviewed SHA | `e4d3d4f` | Re-trigger if HEAD advanced past reviewed range |
+| Latest reviewed SHA | `e4d3d4f` | Re-trigger — gameplay sprint advanced HEAD past `82d8df4` |
 
-**Current:** Bugbot **pass** on `e4d3d4f` (HEAD) (2026-07-04) — conclusion **NEUTRAL**, zero Critical/Major findings.
+**Current:** Bugbot **pending** on `e4d3d4f` (2026-07-04). Last clean run was **NEUTRAL** on `82d8df4` — zero Critical/Major findings. Re-run required before merge.
 
 ```bash
 # After push — watch PR checks or use review-bugbot skill locally
@@ -82,7 +107,7 @@ BASE_URL=https://citymajor.apps.softblaze.net \
   WASM_EXPECTED=1 pnpm smoke:all
 ```
 
-> **Known issue:** `GET /api/saves` returns **500** on the preview deploy (cloud save backend not wired). Smoke assertions #12–13 may fail against `BASE_URL` until [SB-3686](https://linear.app/softblaze/issue/SB-3686) lands. Local dev with in-memory saves still passes.
+> **Update (`ac51180`):** `/api/saves` preview 500 fixed — smoke assertions #12–13 should pass against `BASE_URL` on `e4d3d4f+`.
 
 **Pass:** Console ends with `[smoke-all] All checks passed.` — **22/22** with `SCREENSHOT=1`, **21/21** without.
 
@@ -117,11 +142,11 @@ curl -sI "$FQDN/play" | grep -i cross-origin
 | `/` | Landing loads |
 | `/shop` | Founder Pass card |
 | `/play` | HUD shows **Data: WASM sim** (not procedural-only) |
-| `/api/saves` | **Known 500** on preview — cloud backend pending [SB-3686](https://linear.app/softblaze/issue/SB-3686) |
+| `/api/saves` | Envelope OK on preview (`ac51180`+) |
 
 **Linear:** [SB-3715 — M2: Coolify deploy](https://linear.app/softblaze/issue/SB-3715/m2-coolify-deploy-preview-app-for-citymajor-web) — **Done**
 
-**Status:** Preview live at canonical FQDN. Smoke against `BASE_URL` except `/api/saves` (known 500).
+**Status:** Preview **healthy** at canonical FQDN on `e4d3d4f`. Gameplay sprint deploy verified.
 
 ---
 
@@ -129,27 +154,30 @@ curl -sI "$FQDN/play" | grep -i cross-origin
 
 Art pipeline: [MESHY_ASSET_PIPELINE.md](./MESHY_ASSET_PIPELINE.md) · [BUILDING_ARCHETYPE_3D.md](./BUILDING_ARCHETYPE_3D.md) · [SB-3678](https://linear.app/softblaze/issue/SB-3678)
 
-| Milestone | Target | Current |
-|-----------|--------|---------|
+| Milestone | Target | Current (`e4d3d4f`) |
+|-----------|--------|---------------------|
 | Batch script + manifest | `scripts/meshy/batch-generate.mjs` | **Done** (manifest ~15 seed jobs) |
-| v1 minimum GLBs | ~80–120 core archetypes (Frontier + Industrial) | **Batch may be running** — not yet on disk |
-| Hero landmarks | 3 for v1 arc (civic hall, factory, terminus) | **Not generated** — [SB-3680](https://linear.app/softblaze/issue/SB-3680) |
-| On-disk assets | `web/public/assets/gltf/{era}/*.glb` | **README + procedural placeholders only** |
+| MCP gateway path | `6095f2f` — `MESHY_USE_MCP=1` | **Done** — Softblaze Meshy MCP when API key unset |
+| v1 minimum GLBs | ~80–120 core archetypes (Frontier + Industrial) | **Partial** — ~20 GLBs on disk (Frontier seed set) |
+| Hero landmarks | 3 for v1 arc (civic hall, factory, terminus) | **Placeholder** in scene ([SB-3719](https://linear.app/softblaze/issue/SB-3719)); Meshy heroes pending [SB-3680](https://linear.app/softblaze/issue/SB-3680) |
+| On-disk assets | `web/public/assets/gltf/{era}/*.glb` | **Partial** — batch runs hit **502** from gateway; retry remaining jobs |
 | Runtime fallback | InstancedMesh + procedural modules | **Works** — merge OK for spine, not for art-complete v1 |
 
 ### Pre-merge minimum (CTO roadmap P0 #9, #11)
 
-- [ ] Run Meshy batch for Frontier + Industrial core set (~80 GLBs)
+- [x] MCP gateway path for batch when `MESHY_API_KEY` unset (`6095f2f`)
+- [ ] Run Meshy batch for Frontier + Industrial core set (~80 GLBs) — **in progress; 502 retries**
 - [ ] Post-process: bottom-center pivot, 1-story unit scale
 - [ ] `pnpm generate:gltf-placeholders` replaced for shipped keys in `web/lib/gltf-catalog.ts`
-- [ ] 3 hero landmarks placed in scene at era gates
+- [ ] 3 hero landmarks placed in scene at era gates (placeholder only today)
 - [ ] CDN / immutable cache strategy — [SB-3682](https://linear.app/softblaze/issue/SB-3682)
 
 ```bash
 # Validate manifest before batch spend
 node scripts/meshy/validate-manifest.mjs
-# Batch (requires MESHY_API_KEY)
+# Batch (requires MESHY_API_KEY or MESHY_USE_MCP=1)
 node scripts/meshy/batch-generate.mjs --dry-run
+MESHY_USE_MCP=1 node scripts/meshy/batch-generate.mjs
 ```
 
 ---
@@ -223,20 +251,20 @@ Master tracker: [SB-3708](https://linear.app/softblaze/issue/SB-3708)
 |----|-------|-----------|
 | ~~[SB-3715](https://linear.app/softblaze/issue/SB-3715)~~ | ~~Coolify deploy — preview app~~ | **Done** — `citymajor-web` |
 | [SB-3703](https://linear.app/softblaze/issue/SB-3703) | v1 perf checklist gate | M4 Launch |
-| [SB-3678](https://linear.app/softblaze/issue/SB-3678) | Meshy asset pipeline (batch 1 ship) | M1 Art |
-| [SB-3680](https://linear.app/softblaze/issue/SB-3680) | Hero landmark pipeline | M1 Art |
+| [SB-3678](https://linear.app/softblaze/issue/SB-3678) | Meshy asset pipeline (batch 1 ship) | M1 Art — **partial, 502 retries** |
+| [SB-3680](https://linear.app/softblaze/issue/SB-3680) | Hero landmark pipeline | M1 Art — placeholder in scene |
 | [SB-3693](https://linear.app/softblaze/issue/SB-3693) | Auth, accounts & Founder Pass entitlements | M3 Backend |
 | [SB-3698](https://linear.app/softblaze/issue/SB-3698) | Stripe Founder Pass checkout | M4 Monetization |
-| [SB-3686](https://linear.app/softblaze/issue/SB-3686) | v1 save/load chunked binary + cloud | M2 Sim |
-| [SB-3689](https://linear.app/softblaze/issue/SB-3689) | Household population 10K cap | M2 Sim |
-| [SB-3690](https://linear.app/softblaze/issue/SB-3690) | Economy L1 Leontief I/O | M2 Sim |
+| ~~[SB-3686](https://linear.app/softblaze/issue/SB-3686)~~ | ~~v1 save/load chunked binary + cloud~~ | M2 Sim — preview 500 fixed (`ac51180`); full cloud TBD |
+| ~~[SB-3689](https://linear.app/softblaze/issue/SB-3689)~~ | ~~Household population 10K cap~~ | M2 Sim — **shipped** (`7539b37`) |
+| ~~[SB-3690](https://linear.app/softblaze/issue/SB-3690)~~ | ~~Economy L1 Leontief I/O~~ | M2 Sim — **shipped** (`775eb4a`) |
+| ~~[SB-3691](https://linear.app/softblaze/issue/SB-3691)~~ | ~~Utility grid & service overlays~~ | M2 Sim — **shipped** (`3066f59`) |
+| ~~[SB-3719](https://linear.app/softblaze/issue/SB-3719)~~ | ~~Era landmark placeholder~~ | M1 Art — **shipped** (`ce31f4f`) |
 
 ### In progress / triage (non-blocking for PR spine merge)
 
 | ID | Title |
 |----|-------|
-| [SB-3712](https://linear.app/softblaze/issue/SB-3712) | Population L2 — household sim + citizen render |
-| [SB-3691](https://linear.app/softblaze/issue/SB-3691) | Utility grid & service overlays |
 | [SB-3695](https://linear.app/softblaze/issue/SB-3695) | LLM proxy + daily quota |
 | [SB-3700](https://linear.app/softblaze/issue/SB-3700) | Stripe cosmetic shop |
 | [SB-3701](https://linear.app/softblaze/issue/SB-3701) | Founder monument & cosmetic pack |
@@ -252,17 +280,18 @@ Master tracker: [SB-3708](https://linear.app/softblaze/issue/SB-3708)
 
 ### Safe to merge PR #1 spine when
 
-- [x] Bugbot NEUTRAL or clean on HEAD (`e4d3d4f`)
+- [ ] Bugbot NEUTRAL or clean on HEAD (`e4d3d4f`) — **pending re-run**
 - [ ] Smoke **21/21** local (22/22 with screenshot) on WASM build
-- [x] Coolify preview live — `https://citymajor.apps.softblaze.net` ([SB-3715](https://linear.app/softblaze/issue/SB-3715) Done)
-- [ ] Preview smoke against `BASE_URL` (skip or expect fail on `/api/saves` — known 500)
-- [ ] Team acknowledges Meshy / Stripe / perf / cloud saves as **post-merge** or parallel tracks
+- [x] Coolify preview **healthy** — `https://citymajor.apps.softblaze.net` ([SB-3715](https://linear.app/softblaze/issue/SB-3715) Done)
+- [ ] Preview smoke against `BASE_URL` on `e4d3d4f+` (saves fixed — expect full pass)
+- [x] Gameplay sprint shipped — roads, traffic, events, citizens, services, research UX, onboarding, landmarks
+- [ ] Team acknowledges Meshy partial batch / Stripe / perf as **post-merge** or parallel tracks
 
 ### Do **not** call v1 launched until
 
-- [ ] Meshy batch 1 + 3 heroes in scene
+- [ ] Meshy batch 1 + 3 heroes in scene (not placeholders)
 - [ ] Perf gate signed ([SB-3703](https://linear.app/softblaze/issue/SB-3703))
-- [ ] Cloud saves + auth ([SB-3686](https://linear.app/softblaze/issue/SB-3686), [SB-3693](https://linear.app/softblaze/issue/SB-3693))
+- [ ] Cloud saves + auth ([SB-3686](https://linear.app/softblaze/issue/SB-3686) full cloud, [SB-3693](https://linear.app/softblaze/issue/SB-3693))
 - [ ] Stripe live test path verified on preview
 - [ ] CTO P0 player-loop items in [CTO_IMPROVEMENT_ROADMAP_2026-07.md](./CTO_IMPROVEMENT_ROADMAP_2026-07.md) § v1 Launch Blockers
 

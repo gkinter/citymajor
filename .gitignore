@@ -56,9 +56,10 @@ node_modules/
 TestResults/
 coverage/
 
-## Saves
-saves/
+## Saves (game data, not API routes)
+/saves/
 *.sav
+web/.data/
 
 ## Build artifacts
 publish/

@@ -379,6 +379,7 @@ export function PlayClient() {
         techCount={simResources?.techCount}
         researchPoints={simResources?.researchPoints}
         researchRate={simResources?.researchRate}
+        onEnqueueResearch={handleEnqueueResearch}
       />
 
       <HeraldPanel

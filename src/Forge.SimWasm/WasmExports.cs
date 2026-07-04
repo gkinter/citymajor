@@ -49,10 +49,16 @@ public static partial class Program
         return JsonSerializer.Serialize(new
         {
             initialized = _host.IsInitialized,
+            tick = _host.TickCount,
             tickCount = _host.TickCount,
             population = _host.Population,
             cityFunds = _host.CityFunds,
             era = _host.Era,
+            tickIntervals = new
+            {
+                gameDaySeconds = WasmConfig.GameDayInterval,
+                trafficStubSeconds = WasmConfig.TrafficStubInterval,
+            },
             systems = new[]
             {
                 "EconomySystem",

@@ -13,8 +13,6 @@ namespace Forge.SimWasm;
 /// </summary>
 public sealed class WasmSimHost
 {
-    private const double DayInterval = 1.0;
-
     private Config _config = null!;
     private WorldState _state = null!;
     private EventBus _eventBus = null!;
@@ -87,9 +85,9 @@ public sealed class WasmSimHost
         }
 
         _dayAccumulator += dt;
-        while (_dayAccumulator >= DayInterval)
+        while (_dayAccumulator >= WasmConfig.GameDayInterval)
         {
-            _dayAccumulator -= DayInterval;
+            _dayAccumulator -= WasmConfig.GameDayInterval;
             RunDayTick();
         }
     }
@@ -125,15 +123,59 @@ public sealed class WasmSimHost
         // Building demolition lands in a follow-up command.
     }
 
+    /// <summary>Place a single dirt-road tile and refresh neighbor connection flags.</summary>
+    public void PlaceRoad(int x, int y)
+    {
+        if (!IsInitialized || !_state.Tiles.InBounds(x, y)) return;
+
+        int idx = _state.Tiles.Index(x, y);
+        byte terrain = _state.Tiles.TerrainType[idx];
+        if (terrain == (byte)TerrainId.Water || terrain == (byte)TerrainId.Rock) return;
+
+        _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y);
+        _state.Roads.AddNode(x, y);
+
+        RefreshRoadFlagsAt(x - 1, y);
+        RefreshRoadFlagsAt(x + 1, y);
+        RefreshRoadFlagsAt(x, y - 1);
+        RefreshRoadFlagsAt(x, y + 1);
+    }
+
+    private byte ComputeRoadFlags(int x, int y)
+    {
+        byte connections = 0;
+        if (HasRoadAt(x, y - 1)) connections |= 0x01; // N
+        if (HasRoadAt(x + 1, y)) connections |= 0x02; // E
+        if (HasRoadAt(x, y + 1)) connections |= 0x04; // S
+        if (HasRoadAt(x - 1, y)) connections |= 0x08; // W
+        // bits 4-5: road level 0=dirt — leave at 0
+        return connections != 0 ? connections : (byte)0x01;
+    }
+
+    private bool HasRoadAt(int x, int y)
+    {
+        if (!_state.Tiles.InBounds(x, y)) return false;
+        return _state.Tiles.RoadFlags[_state.Tiles.Index(x, y)] != 0;
+    }
+
+    private void RefreshRoadFlagsAt(int x, int y)
+    {
+        if (!_state.Tiles.InBounds(x, y)) return;
+        int idx = _state.Tiles.Index(x, y);
+        if (_state.Tiles.RoadFlags[idx] == 0) return;
+        _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y);
+    }
+
     private void RunDayTick()
     {
-        _economy.DailyTick(_state, DayInterval);
-        _services.DailyTick(_state, DayInterval);
+        // L1 economy tick — order collection, zone pricing, RCI demand (SIMULATION_ARCHITECTURE L1)
+        _economy.DailyTick(_state, WasmConfig.GameDayInterval);
+        _services.DailyTick(_state, WasmConfig.GameDayInterval);
         _zoneGrowth.Tick(_state, _economy);
         _events.DailyTick(_state);
         _events.UpdateEvents(_state, 1f);
         _state.TickEvents();
-        _politics.DailyTick(_state, DayInterval);
+        _politics.DailyTick(_state, WasmConfig.GameDayInterval);
 
         if (_state.AdvanceDay())
             RunMonthTick();
@@ -144,12 +186,12 @@ public sealed class WasmSimHost
         _services.MonthlyTick(_state);
         FeedCrossSystemData();
         _population.MonthlyTick(_state);
-        _economy.MonthlyTick(_state, DayInterval);
+        _economy.MonthlyTick(_state, WasmConfig.GameDayInterval);
         _zoneGrowth.RecalculateLandValue(_state);
         _zoneGrowth.CheckUpgrades(_state);
         _budget.CalculateMonthlyBudget(_state, _economy);
-        _politics.MonthlyTick(_state, DayInterval);
-        _research.MonthlyTick(_state, DayInterval);
+        _politics.MonthlyTick(_state, WasmConfig.GameDayInterval);
+        _research.MonthlyTick(_state, WasmConfig.GameDayInterval);
 
         if (_state.Year > _lastCulturalDnaYear)
         {
@@ -389,6 +431,7 @@ public sealed class SimSnapshotDto
     public int Era { get; init; }
     public BuildingDto[] Buildings { get; init; } = [];
     public ZoneDto[] Zones { get; init; } = [];
+    public RoadDto[] Roads { get; init; } = [];
 
     public static SimSnapshotDto From(SimSnapshot snap, WorldState state)
     {
@@ -410,6 +453,7 @@ public sealed class SimSnapshotDto
         }
 
         var zones = CollectZones(state);
+        var roads = CollectRoads(state);
 
         return new SimSnapshotDto
         {
@@ -419,6 +463,7 @@ public sealed class SimSnapshotDto
             Era = state.Era,
             Buildings = buildings,
             Zones = zones,
+            Roads = roads,
         };
     }
 
@@ -433,6 +478,21 @@ public sealed class SimSnapshotDto
             byte zoneType = tiles.ZoneType[idx];
             if (zoneType == 0) continue;
             list.Add(new ZoneDto { TileX = x, TileZ = y, ZoneType = zoneType });
+        }
+        return list.ToArray();
+    }
+
+    private static RoadDto[] CollectRoads(WorldState state)
+    {
+        var tiles = state.Tiles;
+        var list = new List<RoadDto>(512);
+        for (int y = 0; y < tiles.Size; y++)
+        for (int x = 0; x < tiles.Size; x++)
+        {
+            int idx = tiles.Index(x, y);
+            byte roadFlags = tiles.RoadFlags[idx];
+            if (roadFlags == 0) continue;
+            list.Add(new RoadDto { TileX = x, TileZ = y, RoadFlags = roadFlags });
         }
         return list.ToArray();
     }

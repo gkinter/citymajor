@@ -13,6 +13,9 @@ export type BuildingSnapshot = {
 
 export type SimSnapshot = {
   tick: number;
+  population: number;
+  cityFunds: number;
+  era: number;
   buildings: BuildingSnapshot[];
 };
 
@@ -88,7 +91,7 @@ ctx.onmessage = async (event: MessageEvent<WorkerInbound>) => {
     const dt = 1 / hz;
     const intervalMs = 1000 / hz;
     const started = performance.now();
-    let lastSnapshot: SimSnapshot = { tick: 0, buildings: [] };
+    let lastSnapshot: SimSnapshot = { tick: 0, population: 0, cityFunds: 0, era: 0, buildings: [] };
 
     for (let i = 1; i <= total && !cancelled; i++) {
       sim.Tick(dt);

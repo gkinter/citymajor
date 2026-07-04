@@ -15,4 +15,10 @@ public static class WasmConfig
 
     /// <summary>Traffic tick interval in sim seconds (stub runs at most this often).</summary>
     public const double TrafficStubInterval = 2.0;
+
+    /// <summary>
+    /// L1 simulation interval in sim seconds — one game day. EconomySystem.DailyTick runs
+    /// when this accumulator elapses (SB-3690).
+    /// </summary>
+    public const double GameDayInterval = 1.0;
 }

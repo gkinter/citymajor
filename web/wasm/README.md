@@ -1,4 +1,4 @@
-# CityMajor WASM simulation spike (SB-3661 / SB-3683 partial)
+# CityMajor WASM simulation spike (SB-3661 / SB-3683 / SB-3690 partial)
 
 Standalone proof that C# simulation code runs in the browser and emits render snapshots.
 
@@ -46,7 +46,7 @@ Open http://localhost:5174 — click **Run 1000 ticks**. The worker loads `Forge
 | `Init(worldSize)` | Creates 256×256 (default) world, seeds map + starter city (~220 buildings) |
 | `Tick(dtSeconds)` | Advances simulation; returns `tickCount` |
 | `GetRenderSnapshot()` | JSON string — see schema below |
-| `GetStatus()` | JSON metadata: included vs stubbed systems |
+| `GetStatus()` | JSON metadata: tick count, population, city funds, era, tick intervals, included vs stubbed systems |
 
 ## Render snapshot schema
 
@@ -55,6 +55,9 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 ```json
 {
   "tick": 1000,
+  "population": 842,
+  "cityFunds": 51200,
+  "era": 0,
   "buildings": [
     {
       "id": 3,
@@ -65,7 +68,28 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
       "state": 1,
       "condition": 100
     }
+  ],
+  "zones": [
+    { "tileX": 120, "tileZ": 128, "zoneType": 1 }
   ]
+}
+```
+
+`GetStatus()` returns live counters without a full snapshot:
+
+```json
+{
+  "initialized": true,
+  "tickCount": 1000,
+  "population": 842,
+  "cityFunds": 51200,
+  "era": 0,
+  "tickIntervals": {
+    "gameDaySeconds": 1.0,
+    "trafficStubSeconds": 2.0
+  },
+  "systems": ["EconomySystem", "PopulationSystem", "..."],
+  "stubbed": ["TrafficSystem (WasmTrafficStub — no BPR assignment in browser)", "..."]
 }
 ```
 
@@ -73,6 +97,16 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 - `state`: 0=constructing, 1=operational, 2=abandoned, 3=demolishing
 
 ## Simulation systems
+
+**Tick schedule (SB-3690 partial):**
+
+| Layer | Interval | Systems |
+|-------|----------|---------|
+| L0 (sub-day) | `TrafficStubInterval` (2.0 sim s) | `WasmTrafficStub` — road occupancy only, no BPR |
+| L1 (game day) | `GameDayInterval` (1.0 sim s) | `EconomySystem.DailyTick`, `ServiceSystem`, `ZoneGrowthSystem`, `PoliticsSystem`, events |
+| L2 (month) | every 30 game days | `PopulationSystem`, `BudgetSystem`, `ResearchSystem`, land-value recalc |
+
+`WasmSimHost` accumulates sim time and calls `EconomySystem.DailyTick` once per game day. Population and city treasury are exposed via `GetStatus()` and `GetRenderSnapshot()`.
 
 **Included (linked via `Forge.SimCore`):**
 

@@ -6,6 +6,9 @@ Deploy the Next.js web client (`web/`) to Coolify for branch previews. Productio
 
 | Setting | Value |
 |---------|-------|
+| **Coolify app name** | `citymajor-web` |
+| **App UUID** | `w134tsftvj327kp96j45kcsb` |
+| **Preview URL** | [https://citymajor.apps.softblaze.net](https://citymajor.apps.softblaze.net) |
 | Repository | `DigitalSoftDistribution/citymajor` |
 | Branch | `feat/wasm-r3f-integration-2026-07-04` |
 | Build pack | **Dockerfile** (repo root) |
@@ -13,8 +16,9 @@ Deploy the Next.js web client (`web/`) to Coolify for branch previews. Productio
 | Build arg | `BUILD_WASM=1` (build-time only) |
 | Port exposes | `3000` |
 | Health check | `GET /play` (or `GET /`) |
-| Preview URL | `https://citymajor-feat-wasm-r3f-integration-2026-07-04.apps.softblaze.net` (typical slug) |
 | Auto-deploy | Enable for the watched branch |
+
+> **Deprecated preview:** `citymajor-wasm-r3f-integration` (branch-slug FQDN e.g. `citymajor-feat-wasm-r3f-integration-2026-07-04.apps.softblaze.net`) is superseded by **`citymajor-web`** at the canonical URL above. Use `coolify doctor citymajor-web` and the UUID in CLI/MCP calls; retire or disable the old app once traffic is confirmed on the canonical preview.
 
 ## Coolify app creation (step-by-step)
 
@@ -32,7 +36,7 @@ Use this checklist when creating the **first** preview app for the WASM + R3F in
 1. **Projects** → open the CityMajor project (or create one, e.g. `citymajor`).
 2. **+ New** → **Application** → **Public Repository** or **Private Repository (GitHub App)**.
 3. Select repository **`DigitalSoftDistribution/citymajor`**.
-4. **Name**: `citymajor-wasm-r3f-integration` (human label; FQDN slug derives from branch).
+4. **Name**: `citymajor-web` (canonical Coolify app; custom FQDN `citymajor.apps.softblaze.net`).
 5. **Environment**: `production` (Coolify env name — still a preview URL, not live prod).
 
 ### 2. Source & branch
@@ -70,9 +74,9 @@ The WASM sim is compiled in the Dockerfile `wasm` stage. Set the build arg in Co
 **CLI equivalent** (after app exists):
 
 ```bash
-coolify env-set citymajor-wasm-r3f-integration BUILD_WASM 1
+coolify env-set citymajor-web BUILD_WASM 1
 # ensure is_buildtime=true via Coolify UI if the CLI does not set it
-coolify deploy citymajor-wasm-r3f-integration --force
+coolify deploy citymajor-web --force
 ```
 
 Use `BUILD_WASM=0` only for faster procedural-only previews (skips .NET SDK stage).
@@ -83,7 +87,7 @@ Use `BUILD_WASM=0` only for faster procedural-only previews (skips .NET SDK stag
 |-------|-------|
 | Ports exposes | `3000` |
 | Ports mappings | leave default (Traefik routes to container 3000) |
-| Domain | Coolify auto-suggests e.g. `citymajor-feat-wasm-r3f-integration-2026-07-04.apps.softblaze.net` |
+| Domain | `citymajor.apps.softblaze.net` (canonical; app UUID `w134tsftvj327kp96j45kcsb`) |
 
 Preview hostnames use the `*.apps.softblaze.net` wildcard (Cloudflare tunnel `softblaze-preview-wildcard`). Do not attach a custom apex domain here until prod routing is defined.
 
@@ -131,7 +135,7 @@ M0 preview needs **no secrets**. Omit Stripe vars unless testing checkout:
 **Verify WASM shipped:**
 
 ```bash
-FQDN="https://citymajor-feat-wasm-r3f-integration-2026-07-04.apps.softblaze.net"
+FQDN="https://citymajor.apps.softblaze.net"
 curl -sf "$FQDN/dotnet/_framework/blazor.boot.json" && echo "WASM assets OK"
 curl -sI "$FQDN/play" | grep -i cross-origin
 ```
@@ -146,7 +150,7 @@ In the browser: `/play` → FPS HUD shows **Data: WASM sim** (not **procedural**
 git push origin feat/wasm-r3f-integration-2026-07-04
 ```
 
-One commit → one deploy. Poll with `coolify doctor citymajor-wasm-r3f-integration` or the deploy webhook reminder before pushing again.
+One commit → one deploy. Poll with `coolify doctor citymajor-web` or the deploy webhook reminder before pushing again.
 
 ### API / MCP shortcut
 

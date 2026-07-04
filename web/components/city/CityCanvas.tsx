@@ -7,10 +7,12 @@ import { cityDataFromSnapshot, getCityData } from "@/lib/city-data";
 import { createChunkStates } from "@/lib/chunks";
 import { MAX_DPR } from "@/lib/constants";
 import { createSimBridge, type SimBridge, type SimResources } from "@/lib/sim-bridge";
+import { estimateHealthcareCoverage } from "@/lib/sim-metrics";
 import type { ZoningTool, ZoneTile } from "@/lib/zoning";
 import { ENGINE_ZONE_TYPE } from "@/lib/zoning";
 import { CityScene } from "./CityScene";
 import { AdaptiveDpr } from "./AdaptiveDpr";
+import { Minimap } from "./Minimap";
 
 type CityCanvasProps = {
   activeTool: ZoningTool;
@@ -25,6 +27,10 @@ export function CityCanvas({ activeTool, onStats, onSimResources }: CityCanvasPr
     "procedural",
   );
   const chunks = useMemo(() => createChunkStates(), []);
+  const healthcareCoverage = useMemo(
+    () => estimateHealthcareCoverage(city),
+    [city],
+  );
   const [dpr, setDpr] = useState(
     () => Math.min(MAX_DPR, typeof window !== "undefined" ? window.devicePixelRatio : 1),
   );
@@ -123,9 +129,9 @@ export function CityCanvas({ activeTool, onStats, onSimResources }: CityCanvasPr
   );
 
   useEffect(() => {
-    latestStats.current = { ...latestStats.current, pickedTile, dpr, simSource };
+    latestStats.current = { ...latestStats.current, pickedTile, dpr, simSource, healthcareCoverage };
     onStats(latestStats.current);
-  }, [pickedTile, dpr, simSource, onStats]);
+  }, [pickedTile, dpr, simSource, healthcareCoverage, onStats]);
 
   const handleStats = (partial: FpsStats) => {
     latestStats.current = {
@@ -133,6 +139,7 @@ export function CityCanvas({ activeTool, onStats, onSimResources }: CityCanvasPr
       pickedTile,
       dpr,
       simSource,
+      healthcareCoverage,
       totalBuildings: city.buildings.length,
     };
     onStats(latestStats.current);

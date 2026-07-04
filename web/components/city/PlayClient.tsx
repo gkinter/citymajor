@@ -1,17 +1,57 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { Entitlements } from "@/lib/entitlements";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { z } from "zod";
+import { EntitlementsSchema, type Entitlements } from "@/lib/entitlements";
+import {
+  NarrativeEventResponseSchema,
+  type NarrativeEventResponse,
+  type SimStateBucket,
+} from "@/lib/narrative-templates";
+import { deriveNarrativeBucket } from "@/lib/sim-metrics";
+import type { GameSpeedLevel, SimClientApi, SimResources } from "@/lib/sim-bridge";
 import type { FpsStats } from "@/lib/types";
 import type { ZoningTool } from "@/lib/zoning";
-import { FpsHud } from "@/components/city/FpsHud";
-import { ResourcesHud } from "@/components/city/ResourcesHud";
 import { CityCanvas } from "@/components/city/CityCanvas";
+import { FpsHud } from "@/components/city/FpsHud";
+import { HeraldPanel } from "@/components/city/HeraldPanel";
+import { ResourcesHud } from "@/components/city/ResourcesHud";
+import { SaveLoadControls } from "@/components/city/SaveLoadControls";
+import { SpeedToolbar } from "@/components/city/SpeedToolbar";
 import { ZoningToolbar } from "@/components/city/ZoningToolbar";
-import type { SimResources } from "@/lib/sim-bridge";
+
+const NarrativeApiResponseSchema = NarrativeEventResponseSchema.extend({
+  narrativeEventsRemaining: z.number().int().nonnegative().optional(),
+});
+
+const heraldButtonStyle = {
+  position: "absolute" as const,
+  top: 12,
+  right: 12,
+  zIndex: 15,
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  padding: "8px 14px",
+  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+  fontSize: 12,
+  fontWeight: 600,
+  color: "#e8eef8",
+  background: "rgba(8, 12, 24, 0.82)",
+  border: "1px solid rgba(120, 160, 220, 0.25)",
+  borderRadius: 8,
+  cursor: "pointer",
+};
+
+function formatQuota(remaining: number | undefined): string {
+  if (remaining === undefined) return "…";
+  if (remaining === Number.MAX_SAFE_INTEGER) return "∞";
+  return String(remaining);
+}
 
 export function PlayClient() {
   const [activeTool, setActiveTool] = useState<ZoningTool>("residential");
+  const [gameSpeed, setGameSpeed] = useState<GameSpeedLevel>(1);
   const [stats, setStats] = useState<FpsStats>({
     fps: 0,
     dpr: 1,
@@ -24,41 +64,110 @@ export function PlayClient() {
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
   const [entitlementsError, setEntitlementsError] = useState<string | null>(null);
   const [simResources, setSimResources] = useState<SimResources | null>(null);
+  const [simApi, setSimApi] = useState<SimClientApi | null>(null);
+  const [heraldOpen, setHeraldOpen] = useState(false);
+  const [heraldLoading, setHeraldLoading] = useState(false);
+  const [heraldError, setHeraldError] = useState<string | null>(null);
+  const [heraldEvent, setHeraldEvent] = useState<NarrativeEventResponse | null>(null);
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadEntitlements() {
-      try {
-        const res = await fetch("/api/me/entitlements", { credentials: "include" });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = (await res.json()) as Entitlements;
-        if (!cancelled) {
-          setEntitlements(data);
-          setEntitlementsError(null);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setEntitlementsError(err instanceof Error ? err.message : "Failed to load entitlements");
-        }
-      }
+  const refreshEntitlements = useCallback(async () => {
+    try {
+      const res = await fetch("/api/me/entitlements", { credentials: "include" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json: unknown = await res.json();
+      const parsed = EntitlementsSchema.safeParse(json);
+      if (!parsed.success) throw new Error("Invalid entitlements response");
+      setEntitlements(parsed.data);
+      setEntitlementsError(null);
+    } catch (err) {
+      setEntitlementsError(err instanceof Error ? err.message : "Failed to load entitlements");
     }
-
-    void loadEntitlements();
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useEffect(() => {
+    void refreshEntitlements();
+  }, [refreshEntitlements]);
+
+  const fetchHeraldStory = useCallback(async () => {
+    const coverage = statsRef.current.healthcareCoverage ?? 0.5;
+    const bucket: SimStateBucket = deriveNarrativeBucket(coverage);
+
+    setHeraldLoading(true);
+    setHeraldError(null);
+    setHeraldEvent(null);
+
+    try {
+      const res = await fetch("/api/narrative/event", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bucket,
+          context: { metricValue: coverage },
+        }),
+      });
+
+      const json: unknown = await res.json();
+
+      if (!res.ok) {
+        const message =
+          typeof json === "object" &&
+          json !== null &&
+          "error" in json &&
+          typeof (json as { error: unknown }).error === "string"
+            ? (json as { error: string }).error
+            : `HTTP ${res.status}`;
+        throw new Error(message);
+      }
+
+      const parsed = NarrativeApiResponseSchema.safeParse(json);
+      if (!parsed.success) {
+        throw new Error("Invalid narrative response from server");
+      }
+
+      const { narrativeEventsRemaining, ...event } = parsed.data;
+      setHeraldEvent(event);
+
+      if (narrativeEventsRemaining !== undefined && entitlements) {
+        setEntitlements({ ...entitlements, narrativeEventsRemaining });
+      } else {
+        await refreshEntitlements();
+      }
+    } catch (err) {
+      setHeraldError(err instanceof Error ? err.message : "Failed to load Herald story");
+    } finally {
+      setHeraldLoading(false);
+    }
+  }, [entitlements, refreshEntitlements]);
+
+  const openHerald = useCallback(() => {
+    setHeraldOpen(true);
+    void fetchHeraldStory();
+  }, [fetchHeraldStory]);
+
+  const quotaRemaining = entitlements?.narrativeEventsRemaining;
+  const heraldDisabled =
+    quotaRemaining !== undefined &&
+    quotaRemaining !== Number.MAX_SAFE_INTEGER &&
+    quotaRemaining <= 0;
 
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <CityCanvas
         activeTool={activeTool}
+        gameSpeed={gameSpeed}
         onStats={setStats}
         onSimResources={setSimResources}
+        onSimApi={setSimApi}
+      />
+      <SpeedToolbar speedLevel={gameSpeed} onSpeedChange={setGameSpeed} />
+      <SaveLoadControls
+        simApi={simApi}
+        entitlements={entitlements}
+        onSlotsChanged={refreshEntitlements}
       />
       <ResourcesHud resources={simResources} />
       <FpsHud
@@ -67,38 +176,49 @@ export function PlayClient() {
         activeTool={activeTool}
       />
       <ZoningToolbar activeTool={activeTool} onToolChange={setActiveTool} />
-      <div
+
+      <button
+        type="button"
         style={{
-          position: "absolute",
-          top: 12,
-          right: 12,
-          padding: "8px 12px",
-          background: "rgba(0,0,0,0.65)",
-          color: "#e8e8e8",
-          fontFamily: "monospace",
-          fontSize: 12,
-          borderRadius: 6,
-          pointerEvents: "none",
-          lineHeight: 1.4,
+          ...heraldButtonStyle,
+          opacity: heraldDisabled ? 0.5 : 1,
+          cursor: heraldDisabled ? "not-allowed" : "pointer",
+        }}
+        disabled={heraldDisabled}
+        title={
+          entitlementsError
+            ? entitlementsError
+            : heraldDisabled
+              ? "Daily narrative quota exhausted"
+              : "Open the Daily Herald"
+        }
+        onClick={() => {
+          if (!heraldDisabled) openHerald();
         }}
       >
-        {entitlements ? (
-          <>
-            <div>tier: {entitlements.tier}</div>
-            <div>saves: {entitlements.maxSaveSlots} max</div>
-            <div>
-              narrative/day:{" "}
-              {entitlements.maxNarrativeEventsPerDay === Number.MAX_SAFE_INTEGER
-                ? "∞"
-                : entitlements.maxNarrativeEventsPerDay}
-            </div>
-          </>
-        ) : entitlementsError ? (
-          <div>entitlements: {entitlementsError}</div>
-        ) : (
-          <div>entitlements: loading…</div>
-        )}
-      </div>
+        <span>Herald</span>
+        <span
+          style={{
+            padding: "2px 6px",
+            borderRadius: 4,
+            background: "rgba(94, 200, 255, 0.15)",
+            border: "1px solid rgba(94, 200, 255, 0.35)",
+            fontSize: 11,
+            fontWeight: 500,
+          }}
+        >
+          {entitlementsError ? "!" : formatQuota(quotaRemaining)}
+        </span>
+      </button>
+
+      <HeraldPanel
+        open={heraldOpen}
+        onClose={() => setHeraldOpen(false)}
+        event={heraldEvent}
+        loading={heraldLoading}
+        error={heraldError}
+        quotaRemaining={quotaRemaining}
+      />
     </div>
   );
 }

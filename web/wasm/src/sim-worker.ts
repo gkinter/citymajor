@@ -61,7 +61,7 @@ ctx.onmessage = async (event: MessageEvent<WorkerInbound>) => {
       post({ type: 'log', message: `Loading WASM from ${msg.wasmBaseUrl}…` });
       const exports = await loadWasm(msg.wasmBaseUrl);
       (ctx as unknown as { sim: typeof exports }).sim = exports;
-      exports.Init(msg.worldSize || 64);
+      exports.Init(msg.worldSize || 256);
       const status = exports.GetStatus();
       post({ type: 'log', message: status });
       post({ type: 'ready' });

@@ -43,7 +43,7 @@ Open http://localhost:5174 — click **Run 1000 ticks**. The worker loads `Forge
 
 | Export | Description |
 |--------|-------------|
-| `Init(worldSize)` | Creates 64×64 (default) world, seeds map + starter city |
+| `Init(worldSize)` | Creates 256×256 (default) world, seeds map + starter city (~220 buildings) |
 | `Tick(dtSeconds)` | Advances simulation; returns `tickCount` |
 | `GetRenderSnapshot()` | JSON string — see schema below |
 | `GetStatus()` | JSON metadata: included vs stubbed systems |
@@ -76,17 +76,18 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 
 **Included (linked via `Forge.SimCore`):**
 
-- `EconomySystem`, `PopulationSystem`, `TrafficSystem`, `ServiceSystem`
+- `EconomySystem`, `PopulationSystem`, `ServiceSystem`
 - `ZoneGrowthSystem`, `BudgetSystem`, `PoliticsSystem`, `CulturalDNASystem`
 - Engine data: `WorldState`, `SimSnapshot`, `MapGenerator`, tile/building pools
 
 **Stubbed / degraded in spike:**
 
+- `TrafficSystem` — replaced by `WasmTrafficStub` (no BPR / Frank-Wolfe in browser)
 - `EventSystem` — no `events.json` bundled in WASM
 - `ResearchSystem` — no `tech_tree.json` bundled
 - `TradeSystem`, `ProductionChain` — not wired in `WasmSimHost`
 - `SimulationLoop` background thread — replaced by single-threaded `WasmSimHost`
-- Full 512×512 world — spike uses 64×64 for browser performance
+- Full 512×512 world — WASM v1 uses 256×256 (`WasmConfig.DefaultWorldSize`)
 
 ## COOP / COEP and SharedArrayBuffer
 

@@ -11,6 +11,13 @@
 
 **CPU hot path:** per-frame matrix + color updates for visible instances only (scale=0 for culled chunks). Chunk frustum test + LOD hysteresis run at 2 Hz (stats interval), not every frame — acceptable for spike; move to `useFrame` throttling if needed.
 
+## WASM sim stats (256×256, SB-3683)
+
+- Grid: 256×256 tiles (same as procedural)
+- Starter: ~220 buildings, cross + ring roads, zoned core
+- Sim worker: 8 Hz tick, ≤4 Hz snapshot to main thread
+- Traffic: stubbed (`WasmTrafficStub`) — full BPR only in desktop build
+
 ## Procedural city stats (seed `0x63697479`)
 
 - Grid: 256×256 tiles

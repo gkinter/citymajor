@@ -62,4 +62,4 @@ stopBtn.addEventListener('click', () => {
 });
 
 append('Starting worker…');
-worker.postMessage({ type: 'init', wasmBaseUrl: WASM_BASE, worldSize: 64 });
+worker.postMessage({ type: 'init', wasmBaseUrl: WASM_BASE, worldSize: 256 });

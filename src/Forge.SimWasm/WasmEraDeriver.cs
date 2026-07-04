@@ -20,13 +20,11 @@ public static class WasmEraDeriver
     ];
 
     /// <summary>
-    /// Recompute <see cref="WorldState.Era"/> from tick + research signals.
-    /// Uses the higher of tick-based and research-based tier so either path can advance era.
+    /// Recompute <see cref="WorldState.Era"/> from research gates (RP, population, industry).
+    /// Tick count must not advance era — aligns with ERA_ARC_DESIGN_V2 §6.C (SB-3718).
     /// </summary>
     public static void UpdateEra(WorldState state, ResearchSystem research)
     {
-        // Research gates only — tick thresholds are shown in eraProgress HUD but
-        // must not bypass RP/pop/industry requirements (SB-3718 / SB-3692).
         state.Era = EraFromResearch(state, research);
     }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import type { CSSProperties } from "react";
 import {
   HUD_COLORS,
@@ -9,7 +10,10 @@ import {
 import {
   TECH_CATALOG_TOTAL,
   TECH_V1_CATALOG,
+  classifyTechAvailability,
   techIdFromCatalogId,
+  techNameFromIndex,
+  type TechAvailability,
   type TechPreview,
 } from "@/lib/tech-catalog";
 
@@ -32,11 +36,40 @@ const statRowStyle: CSSProperties = {
   gap: 16,
   marginBottom: 16,
   fontSize: 12,
+  flexWrap: "wrap",
+};
+
+const activeResearchStyle: CSSProperties = {
+  marginBottom: 16,
+  padding: "12px 14px",
+  borderRadius: 8,
+  border: `1px solid ${HUD_COLORS.accentBorder}`,
+  background: HUD_COLORS.accentSoft,
 };
 
 function formatRp(value: number | undefined): string {
   if (value === undefined) return "—";
   return value.toFixed(1);
+}
+
+function formatMonthsRemaining(value: number | undefined): string | null {
+  if (value === undefined || value < 0) return null;
+  if (value === 0) return "completing…";
+  if (value < 1) return "<1 mo";
+  return `~${value.toFixed(1)} mo`;
+}
+
+function availabilityClass(availability: TechAvailability): string {
+  switch (availability) {
+    case "unlocked":
+      return "hud-research-list__item--unlocked";
+    case "researching":
+      return "hud-research-list__item--researching";
+    case "available":
+      return "hud-research-list__item--available";
+    default:
+      return "hud-research-list__item--locked";
+  }
 }
 
 type ResearchPanelProps = {
@@ -45,9 +78,11 @@ type ResearchPanelProps = {
   techCount?: number;
   researchPoints?: number;
   researchRate?: number;
-  /** Override catalog (defaults to WEB v1 Frontier + Industrial subset). */
+  currentResearchId?: number;
+  currentResearchProgress?: number;
+  currentResearchMonthsRemaining?: number;
+  unlockedTechIds?: number[];
   technologies?: TechPreview[];
-  /** Called when the player clicks a tech to enqueue research. */
   onEnqueueResearch?: (techId: number) => void;
 };
 
@@ -57,13 +92,31 @@ export function ResearchPanel({
   techCount,
   researchPoints,
   researchRate,
+  currentResearchId,
+  currentResearchProgress,
+  currentResearchMonthsRemaining,
+  unlockedTechIds,
   technologies = TECH_V1_CATALOG,
   onEnqueueResearch,
 }: ResearchPanelProps) {
+  const unlockedSet = useMemo(
+    () => new Set(unlockedTechIds ?? []),
+    [unlockedTechIds],
+  );
+
   if (!open) return null;
 
-  const unlocked = techCount ?? 0;
+  const unlocked = techCount ?? unlockedSet.size;
   const catalogTotal = TECH_CATALOG_TOTAL;
+  const activeTechName =
+    currentResearchId !== undefined && currentResearchId >= 0
+      ? techNameFromIndex(currentResearchId)
+      : undefined;
+  const progressPct =
+    currentResearchProgress !== undefined
+      ? Math.round(Math.min(1, Math.max(0, currentResearchProgress)) * 100)
+      : 0;
+  const etaLabel = formatMonthsRemaining(currentResearchMonthsRemaining);
 
   return (
     <aside
@@ -108,6 +161,38 @@ export function ResearchPanel({
           ) : null}
         </div>
 
+        {activeTechName ? (
+          <section style={activeResearchStyle} aria-label="Active research">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 8,
+                fontSize: 12,
+                marginBottom: 8,
+              }}
+            >
+              <span style={{ fontWeight: 600 }}>{activeTechName}</span>
+              <span style={{ opacity: 0.75 }}>{progressPct}%</span>
+            </div>
+            <div
+              className="hud-research-progress"
+              role="progressbar"
+              aria-valuenow={progressPct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div
+                className="hud-research-progress__fill"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            {etaLabel ? (
+              <div className="hud-research-progress__eta">{etaLabel} remaining</div>
+            ) : null}
+          </section>
+        ) : null}
+
         <div className="hud-research-list__heading">
           Technologies ({technologies.length})
         </div>
@@ -115,10 +200,21 @@ export function ResearchPanel({
         <ul className="hud-research-list">
           {technologies.map((tech) => {
             const techId = techIdFromCatalogId(tech.id);
-            const canEnqueue = onEnqueueResearch !== undefined && techId >= 0;
+            const availability = classifyTechAvailability(
+              tech,
+              unlockedSet,
+              currentResearchId,
+            );
+            const canEnqueue =
+              onEnqueueResearch !== undefined &&
+              techId >= 0 &&
+              availability === "available";
 
             return (
-              <li key={tech.id} className="hud-research-list__item">
+              <li
+                key={tech.id}
+                className={`hud-research-list__item ${availabilityClass(availability)}`}
+              >
                 <button
                   type="button"
                   className="hud-research-list__enqueue"
@@ -126,7 +222,15 @@ export function ResearchPanel({
                   onClick={() => {
                     if (canEnqueue) onEnqueueResearch(techId);
                   }}
-                  aria-label={`Enqueue research: ${tech.name}`}
+                  aria-label={
+                    availability === "unlocked"
+                      ? `${tech.name} — unlocked`
+                      : availability === "researching"
+                        ? `${tech.name} — researching`
+                        : canEnqueue
+                          ? `Enqueue research: ${tech.name}`
+                          : `${tech.name} — locked`
+                  }
                   style={{
                     display: "block",
                     width: "100%",
@@ -143,12 +247,25 @@ export function ResearchPanel({
                   <div className="hud-research-list__row">
                     <span className="hud-research-list__id">{tech.id}</span>
                     <span className="hud-research-list__name">{tech.name}</span>
-                    <span className="hud-research-list__cost">{tech.cost_rp} RP</span>
+                    {availability === "unlocked" ? (
+                      <span className="hud-research-list__badge hud-research-list__badge--done">
+                        ✓
+                      </span>
+                    ) : availability === "researching" ? (
+                      <span className="hud-research-list__badge hud-research-list__badge--active">
+                        …
+                      </span>
+                    ) : (
+                      <span className="hud-research-list__cost">{tech.cost_rp} RP</span>
+                    )}
                   </div>
                   <div className="hud-research-list__meta">
                     {tech.era} · {tech.category}
                     {tech.prerequisites.length > 0
                       ? ` · req ${tech.prerequisites.join(", ")}`
+                      : ""}
+                    {tech.unlocks && tech.unlocks.length > 0
+                      ? ` · unlocks ${tech.unlocks.join(", ")}`
                       : ""}
                   </div>
                   <p className="hud-research-list__desc">{tech.description}</p>

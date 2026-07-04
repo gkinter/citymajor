@@ -795,7 +795,11 @@ public sealed class WasmStatusDto
         ResearchRate = host.ResearchRate,
         EventDefinitionCount = host.EventDefinitionCount,
         ActiveEvents = host.ActiveEvents,
-        TechCount = host.TechCount,
+        TechCount = host.UnlockedTechCount,
+        CurrentResearchId = host.CurrentResearchId,
+        CurrentResearchProgress = host.CurrentResearchProgress,
+        CurrentResearchMonthsRemaining = host.CurrentResearchMonthsRemaining,
+        UnlockedTechIds = host.CollectUnlockedTechIds(),
         TrafficMode = host.TrafficMode.ToString().ToLowerInvariant(),
         TickIntervals = new TickIntervalsDto
         {

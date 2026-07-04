@@ -116,6 +116,14 @@ export type SimResources = {
   researchRate?: number;
   /** WASM GetStatus — count of unlocked technologies. */
   techCount?: number;
+  /** WASM GetStatus — active research queue head (tech index). */
+  currentResearchId?: number;
+  /** WASM GetStatus — progress toward current tech (0–1). */
+  currentResearchProgress?: number;
+  /** WASM GetStatus — estimated months remaining on current tech. */
+  currentResearchMonthsRemaining?: number;
+  /** WASM GetStatus — unlocked technology indices. */
+  unlockedTechIds?: number[];
   /** WASM GetStatus — mayor approval percent (0–100) when PoliticsSystem is exported. */
   approval?: number;
   /** City happiness (0–1). */

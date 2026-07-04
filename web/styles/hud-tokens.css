@@ -911,6 +911,58 @@
   }
 }
 
+/* Era landmark placeholder (SB-3719) — 3D scene label */
+.era-landmark {
+  --era-landmark-color: #e8eef8;
+  min-width: 140px;
+  max-width: 220px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--era-landmark-color) 55%, transparent);
+  background: color-mix(in srgb, var(--era-landmark-color) 12%, #0b1020);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--era-landmark-color) 15%, transparent),
+    0 6px 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.era-landmark__eyebrow {
+  margin: 0 0 4px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hud-text-muted);
+}
+
+.era-landmark__title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--era-landmark-color);
+}
+
+.era-landmark__quest {
+  margin: 0 0 4px;
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--hud-text);
+  opacity: 0.85;
+  font-style: italic;
+}
+
+.era-landmark__era {
+  margin: 0;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hud-text-dim);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hud-ticker__track {
     animation: none;

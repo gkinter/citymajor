@@ -59,7 +59,20 @@ export function CrisisWarningModal({ resources }: CrisisWarningModalProps) {
   const [activeWarning, setActiveWarning] = useState<CrisisKind | null>(null);
 
   useEffect(() => {
-    if (!resources || activeWarning) return;
+    if (!resources) return;
+
+    // Re-arm crisis warnings after metrics recover so crossing thresholds again re-triggers.
+    if (resources.cityFunds >= 0) {
+      window.sessionStorage.removeItem(CRISIS_BANKRUPTCY_SESSION_KEY);
+    }
+    if (
+      resources.approval === undefined ||
+      resources.approval >= LOW_APPROVAL_WARNING_THRESHOLD + 5
+    ) {
+      window.sessionStorage.removeItem(CRISIS_LOW_APPROVAL_SESSION_KEY);
+    }
+
+    if (activeWarning) return;
     const crisis = detectCrisis(resources);
     if (crisis) setActiveWarning(crisis);
   }, [resources, activeWarning]);

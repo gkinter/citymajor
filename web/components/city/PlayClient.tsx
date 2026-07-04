@@ -22,6 +22,7 @@ import {
   TRAFFIC_OVERLAY_STORAGE_KEY,
   type GraphicsQualityTier,
 } from "@/lib/constants";
+import type { FpsStats } from "@/lib/types";
 import { PopulationGrowthTracker } from "@/lib/population-growth";
 import type { ZoningTool, PaintBrushSize } from "@/lib/zoning";
 import { ApprovalMoodOverlay } from "@/components/city/ApprovalMoodOverlay";
@@ -85,6 +86,7 @@ export function PlayClient() {
   const [showTrafficOverlay, setShowTrafficOverlay] = useState(() =>
     readStoredTrafficOverlay(),
   );
+  const [serviceViewMode, setServiceViewMode] = useState<ServiceViewMode>("off");
   const [stats, setStats] = useState<FpsStats>({
     fps: 0,
     dpr: 1,
@@ -388,6 +390,7 @@ export function PlayClient() {
         gameSpeed={gameSpeed}
         qualityTier={qualityTier}
         showTrafficOverlay={showTrafficOverlay}
+        serviceViewMode={serviceViewMode}
         activeEvents={simResources?.activeEvents}
         onEventMarkerClick={openHerald}
         onStats={setStats}
@@ -395,12 +398,20 @@ export function PlayClient() {
         onSimApi={setSimApi}
         onZonePainted={handleZonePainted}
       />
+      <ApprovalMoodOverlay approval={simResources?.approval} />
       <HudWordmark />
       <SpeedToolbar speedLevel={gameSpeed} onSpeedChange={setGameSpeed} />
       <QualityToolbar qualityTier={qualityTier} onQualityChange={handleQualityChange} />
       <TrafficOverlayToggle
         enabled={showTrafficOverlay}
         onToggle={handleTrafficOverlayToggle}
+      />
+      <ServicesToolbar
+        viewMode={serviceViewMode}
+        onViewModeChange={setServiceViewMode}
+        healthcareCoverage={simResources?.healthcareCoverage}
+        policeCoverage={simResources?.policeCoverage}
+        fireCoverage={simResources?.fireCoverage}
       />
       <SaveLoadControls
         simApi={simApi}

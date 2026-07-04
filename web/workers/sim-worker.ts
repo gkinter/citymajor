@@ -29,6 +29,7 @@ type WasmStatus = {
   tickCount?: number;
   population?: number;
   householdCount?: number;
+  populationGrowthRate?: number;
   cityFunds?: number;
   era?: number;
   residentialDemand?: number;
@@ -330,6 +331,10 @@ function readStatus(): Pick<
   | "researchPoints"
   | "researchRate"
   | "techCount"
+  | "currentResearchId"
+  | "currentResearchProgress"
+  | "currentResearchMonthsRemaining"
+  | "unlockedTechIds"
   | "approval"
   | "happiness"
   | "monthlyIncome"

@@ -78,6 +78,8 @@ type HeraldPanelProps = {
   error: string | null;
   quotaRemaining?: number;
   specialEdition?: boolean;
+  /** Why this Herald bucket was chosen — links live sim metrics to the story. */
+  bucketReason?: string | null;
   onOptionSelect?: (optionId: string) => void;
 };
 
@@ -89,6 +91,7 @@ export function HeraldPanel({
   error,
   quotaRemaining,
   specialEdition = false,
+  bucketReason,
   onOptionSelect,
 }: HeraldPanelProps) {
   const panelRef = useRef<HTMLElement>(null);
@@ -181,9 +184,24 @@ export function HeraldPanel({
                 opacity: 0.55,
                 marginBottom: 8,
               }}
+              title={bucketReason ?? undefined}
             >
               {event.bucket.replace(/_/g, " ")} · {event.source}
             </div>
+            {bucketReason ? (
+              <p
+                style={{
+                  margin: "0 0 10px",
+                  fontSize: 11,
+                  lineHeight: 1.45,
+                  opacity: 0.72,
+                  color: HUD_COLORS.accentHighlight,
+                }}
+                title={bucketReason}
+              >
+                Story driver: {bucketReason}
+              </p>
+            ) : null}
             <h2
               id="herald-event-headline"
               style={{ margin: "0 0 12px", fontSize: 18, fontWeight: 700, lineHeight: 1.35 }}

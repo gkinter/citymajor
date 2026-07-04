@@ -190,6 +190,62 @@ Excludes existing subscriptions (ChatGPT Pro, Claude Max). Compare to traditiona
 
 ---
 
+## 3D Module Pipeline (Web v1)
+
+> **Added 2026-07** for mesh 3D pivot ([SB-3704](https://linear.app/softblaze/issue/SB-3704)). Supplements — does not replace — the pixel sprite workflow above for historical reference.
+
+The web client uses **hybrid procedural kitbash**, not 600 unique GLTF buildings. Pixel-art batch generation does not transfer; the bottleneck remains curation, not raw generation.
+
+### Split
+
+| Tier | % of visual | Method |
+|------|-------------|--------|
+| **Modules** | ~70% | **40–60 instanced archetypes per era** — walls, roofs, chimneys, awnings, window bays as modular GLTF parts |
+| **Assembly** | procedural | Port `BuildingRenderer.cs` rules: footprint, stories, era palette, construction/abandoned states |
+| **Hero landmarks** | ~30% polish budget | **8–12 hand-authored GLTF per era** (city hall, cathedral, steel mill) for screenshots/trailer |
+| **Cosmetics (shop)** | swap layer | Alternate materials + facade modules on same `InstancedMesh` — sim-neutral MTX |
+
+### TypeId → mesh archetype (preserve taxonomy)
+
+```
+100-199 Residential low  → res_low_{era}_{variant}
+200-299 Residential high → res_high_{era}_{variant}
+300-399 Commercial       → com_{era}_{variant}
+400-499 Industrial       → ind_{era}_{variant}
+500+     Services        → hero GLTF or service_{type}
+```
+
+Era bands (x00–x19 Frontier, x20–x39 Industrial, etc.) from `BuildingRenderer` comments stay unchanged.
+
+### AI 3D production workflow
+
+| Step | Tool | Output |
+|------|------|--------|
+| 1. Module draft | **Meshy**, **Tripo**, **Scenario 3D** | Raw modular parts (wall, roof, chimney) |
+| 2. Cleanup | **Blender** — scale to grid, merge verts, PBR bake | Era-consistent GLTF modules |
+| 3. Hero polish | Blender + reference renders from **Midjourney** mood boards | 8–12 landmarks/era |
+| 4. Atlas & materials | Shared PBR per era; normal maps on heroes only | CDN-ready `*.gltf` + textures |
+| 5. QA | In-engine — silhouette at L2 zoom, triangle budget, instancing | Ship to module library |
+
+**Mid-fidelity rule:** Shared materials per era; normal maps on hero buildings only. Variety comes from procedural assembly + material swaps, not 5k unique meshes.
+
+### Performance constraints
+
+- One `InstancedMesh` per archetype per visible chunk — target 20–40 draw calls/chunk
+- `Cache-Control: immutable` on CDN GLTF modules
+- Cosmetic skins = alternate mesh/material on same instance index — no sim change
+
+### Tools (3D-specific)
+
+| Tool | Role | Notes |
+|------|------|-------|
+| Meshy / Tripo | Module draft generation | Fast iteration; expect Blender cleanup |
+| Scenario 3D | Style-locked batch modules | Era consistency |
+| Blender | Grid snap, LOD simplification, export GLTF | Required |
+| ComfyUI + 3D nodes | Optional texture/normal generation | Supplemental |
+
+---
+
 ## Bottom Line
 
 > **Revised Assessment:** Art is no longer the primary bottleneck for CityMajor. For an isometric city builder with static buildings and no character work, AI art tools in 2026 collapse the pipeline from a multi-year contracted art budget to ~$400 and 8–12 weeks of generation + curation. The real bottleneck — and where development time should be concentrated — is whether the Economic Control Spectrum produces genuinely fun emergent decisions. Build the simulation headless with placeholder rectangles first. Prove the game is fun. Then layer the art.

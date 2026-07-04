@@ -407,11 +407,30 @@ The newspaper serves as both narrative flavor and an information tool. A percept
 
 ---
 
+## Web v1 pivot (2026-07)
+
+> **Linear [SB-3704](https://linear.app/softblaze/issue/SB-3704).** CityMajor ships **web-only** as mesh 3D mid-fidelity (R3F + Three.js), not native Steam + pixel art. Simulation design below is largely unchanged; rendering, platform, and monetization sections are updated in §8–9 and §12.
+
+| Dimension | Original plan (this doc) | **Web v1 (current)** |
+|-----------|--------------------------|----------------------|
+| Platform | Steam native, Forge Engine | **Browser** (Next.js shell + R3F canvas) |
+| Rendering | Isometric 2D sprites, OpenGL | **Perspective mesh 3D**, `InstancedMesh` + LOD |
+| Art | Premium pixel art, 600+ sprites | **Modular GLTF kitbash** (~40–60 archetypes/era) |
+| Map scale | 1024×1024 / 50k buildings | **256×256 / ~5k buildings** (phased) |
+| Monetization | $24.99 premium, no MTX | **Free core + Founder Pass $24.99 + cosmetics** |
+| LLM | Self-hosted Qwen on player GPU | **Backend API + quotas**; templates always |
+
+Historical pixel-art and Steam-native content in this document is **superseded for v1** but retained for sim/economy reference.
+
+---
+
 ## 8. Visual Identity
 
 ### Art Direction
 
-CityMajor targets **Songs of Conquest-level pixel art quality** — hand-crafted sprites with deliberate palette choices, expressive lighting, and meticulous attention to silhouette readability at zoom levels from neighborhood close-up to full-city overview.
+**Web v1:** Mid-fidelity mesh 3D (Cities: Skylines lite) — modular GLTF buildings assembled procedurally per era, perspective orbit camera, shared PBR materials. Hero landmarks (8–12/era) hand-polished; bulk volume via instanced archetypes.
+
+**Original (superseded for v1):** CityMajor targeted **Songs of Conquest-level pixel art quality** — hand-crafted sprites with deliberate palette choices, expressive lighting, and meticulous attention to silhouette readability at zoom levels from neighborhood close-up to full-city overview.
 
 **Isometric grid**: 64x32 pixel tiles (standard 2:1 isometric ratio). Buildings occupy 1x1 to 8x8 tile footprints depending on type and density. Sprites are drawn at 2x resolution (128x64 base tile) and downscaled for crisp rendering at default zoom.
 
@@ -466,7 +485,17 @@ Procedural weather system with 8 states: clear, partly cloudy, overcast, rain, h
 
 ### Zoom Levels
 
-Five discrete zoom levels, each with appropriate detail:
+**Web v1 (mesh LOD):** Same five conceptual zoom bands, implemented as mesh LOD swaps + instancing:
+
+1. **Street** (L0): Full GLTF modules + detail; citizens as simple meshes or instanced dots; traffic as colored flow particles.
+2. **Neighborhood** (L1): Simplified meshes; emissive window materials at night.
+3. **District** (L2): Instanced boxes + zone color tint; overlays readable.
+4. **City** (L3): Colored blocks / heatmap by zone; major roads and terrain dominate.
+5. **Region** (L4): City cluster silhouette; multiplayer/trade context (phase 4).
+
+LOD hysteresis at thresholds to avoid pop-in. See [`VISUAL_QUALITY_GUIDE.md`](VISUAL_QUALITY_GUIDE.md) header for perf checklist.
+
+**Original pixel plan (superseded for v1):**
 
 1. **Street** (closest): Individual citizens visible as 4x8 pixel sprites. Read shop signs. See individual trees. Count cars on roads.
 2. **Neighborhood**: Buildings are fully detailed. Road markings visible. Parks show individual elements (benches, fountains). Traffic flow visible.
@@ -478,23 +507,38 @@ Five discrete zoom levels, each with appropriate detail:
 
 ## 9. Technical Overview
 
-### Engine: Forge Engine (Custom)
+### Web v1 stack (current)
 
-CityMajor runs on **Forge Engine**, a custom-built game engine optimized specifically for large-scale city simulation. No Unity. No Unreal. No Godot. A purpose-built engine that makes the right trade-offs for this genre.
+| Layer | Choice |
+|-------|--------|
+| **Shell / UI** | Next.js 16 + React 19 — HUD as HTML overlays on canvas |
+| **3D** | React Three Fiber + Three.js — `InstancedMesh`, chunk frustum culling, LOD |
+| **Simulation** | C# → **.NET 8 WASM** in Web Workers (reuse Forge sim ~9.4k LOC) |
+| **Sync** | Double-buffer snapshots: WASM tick → read-only render snapshot → R3F `useFrame` |
+| **Assets** | Modular GLTF per era on CDN; 20–40 draw calls/chunk budget |
 
-**Why custom**: City builders have unique technical requirements — massive tile grids, hundreds of thousands of entities, complex overlay rendering, deep simulation running in parallel with rendering. General-purpose engines impose overhead and abstractions that fight these requirements. Cities: Skylines 2's performance problems on Unity are a cautionary tale. A custom engine lets us control memory layout, threading, and rendering at the level this game demands.
+Forge Engine (SDL2 + OpenGL sprite batcher, ~12.5k LOC) remains in-repo as **sim wiring reference** during migration; it is not the shipping renderer.
 
-**Language**: C# on .NET 8. Modern C# provides the performance characteristics we need (struct types, Span<T>, SIMD intrinsics, stackalloc, aggressive inlining) while maintaining productivity advantages over C++ (garbage collection for non-hot-path code, strong type system, excellent tooling). The hot simulation loop uses value types exclusively — zero GC pressure during gameplay.
-
-**Rendering**: SDL2 for windowing and input, OpenGL 3.3+ for rendering. The renderer is a 2D sprite batcher optimized for isometric tile maps:
-- Frustum culling against the isometric viewport (only draw visible tiles)
-- Texture atlases per era (one draw call per era's building set)
-- Instanced rendering for repeated elements (trees, road segments, vehicles)
-- Overlay rendering via screen-space shader passes (zone colors, coverage heat maps)
-- Day/night lighting via a global color multiply pass + additive light sprites for lamps and windows
-- Weather particles as a screen-space particle system layer
+**Rendering (mesh 3D):**
+- `InstancedMesh` per building archetype per visible chunk (not per unique building)
+- 32×32 tile chunks — matches sim spatial partitions; frustum cull per chunk
+- LOD swaps at zoom thresholds (full GLTF → simplified → boxes → heatmap)
+- Day/night: hemisphere light + emissive window materials; tiered SSAO/bloom
+- Terrain: heightmap or chunked plane meshes, merged at load
 
 ### Scale Targets
+
+**Web v1 (locked):**
+
+| Metric | Target | Notes |
+|--------|--------|-------|
+| Map size | **256×256** tiles (65,536) | 64 chunks @ 32×32 |
+| Buildings | **~5,000** max instanced | ~40–60 archetypes/era |
+| Households | **~10,000** | One era arc |
+| Draw calls | 20–40 per visible chunk | Instancing + chunk culling |
+| FPS | ≥30 integrated / ≥60 discrete | LOD + quality tiers mandatory |
+
+**Full vision (post-v1, unchanged sim ceiling):**
 
 | Metric | Target | Memory |
 |--------|--------|--------|
@@ -521,9 +565,9 @@ The simulation uses a **producer-consumer double-buffer** architecture:
 
 The simulation itself uses `Parallel.For` for data-parallel work (building aggregation, partition updates, traffic assignment). On an 8-core CPU, the simulation targets 10-20 ticks/second with <16ms total frame time (simulation + render).
 
-**Minimum spec**: 4-core CPU, 8 GB RAM, integrated GPU (Intel UHD 630+), 2 GB disk.
-**Recommended spec**: 8-core CPU, 16 GB RAM, dedicated GPU (GTX 1060+ / RX 580+), SSD. GPU with 6+ GB VRAM for local LLM.
-**LLM requirement**: Optional. Requires 6+ GB VRAM for Qwen 2.5 7B 4-bit. Falls back to template text without it.
+**Web v1 minimum**: Modern browser with WebGL2 + WASM; COOP/COEP for SharedArrayBuffer; integrated GPU (30 FPS at max fill with LOD).
+**Recommended**: Discrete GPU, 8 GB RAM, broadband for GLTF CDN.
+**LLM (web)**: Backend API at launch — free tier 10 LLM events/day; Founder Pass unlimited. Template fallback always available (no player-side model).
 
 ### Save System
 
@@ -623,51 +667,38 @@ Full Steam Workshop support at launch:
 
 ## 12. Business Strategy
 
-### Revenue Model
+### Revenue Model (Web v1)
 
-**Premium purchase, no microtransactions, no subscription, no DLC paywall for core features.**
+**Free-to-play core + Founder Pass + cosmetic shop.** Sim depth is never paywalled; cosmetics and convenience only.
 
-| Phase | Price | Rationale |
-|-------|-------|-----------|
-| Early Access | $24.99 | Below the $30 impulse-buy threshold. Competitive with Workers & Resources EA price. |
-| 1.0 Release | $29.99 | Standard for indie premium city builders. Below Anno 1800 ($60) and CS2 ($50). |
-| Expansion packs (post-1.0) | $9.99-$14.99 | Major content additions: new eras, new regions, new economic systems. Never splits the community — base game remains complete. |
-| Soundtrack DLC | $4.99 | Low-effort revenue. Music is composed regardless. |
+| Tier | Price | Includes |
+|------|-------|----------|
+| **Free** | $0 | Full v1 gameplay (256×256, era arc, all core sim). 3 cloud saves. **10 LLM narrative events/day.** |
+| **Founder Pass** | **$24.99** one-time | Unlimited LLM. 20 cloud saves. Founder monument skin. 3 cosmetic building packs. Early era-2 access. Credits name. |
+| **Cosmetic shop** | $3–$15/item | Facade skins, landmark variants, mayor office themes — **sim-neutral only.** Stripe at launch. |
+| **Solana (phase 2)** | — | Holder token perks + SOL/USDC rail atop Founder tier. Not required to play. |
 
-### Self-Hosted LLM: Zero Ongoing Cost
+**Original premium Steam model (superseded for v1):** $24.99 EA / $29.99 1.0, no MTX. Retained for long-term positioning reference.
 
-The LLM integration uses **Qwen 2.5 7B**, an open-source model that runs entirely on the player's hardware. There are no API calls, no cloud services, no ongoing costs. This is a deliberate architectural decision:
+### LLM: Backend API (Web)
 
-- No recurring server costs that scale with player count
-- No privacy concerns — all text generation happens locally
-- No dependency on third-party services that could shut down or change pricing
-- Players with weak GPUs get template-based text — still a complete game
-- Modders can swap in different models
+Browser players cannot run local Qwen. v1 uses a **backend LLM proxy** with strict quotas and **template fallback always available**:
 
-### Demo Strategy
+- Free: 10 LLM events/day (Herald headlines, mayor negotiation, council snippets)
+- Founder Pass: unlimited + priority queue
+- LLM never drives sim authority (unchanged from §7)
+- Recurring API cost funded by Founder Pass + cosmetics (~$200–800/mo at 1K DAU target)
 
-A free demo on Steam containing:
+### Distribution & Demo Strategy (Web)
 
-- Tutorial island (guided first 30 minutes)
-- Era 1 and the beginning of Era 2 (population cap at 10,000)
-- All core systems functional but limited in scale
-- Multiplayer disabled
-- LLM integration enabled (if hardware supports it)
+- **No Steam gate for v1** — playable in browser; frictionless entry drives virality
+- Free core *is* the demo; Founder Pass converts depth fans who would have paid $25 on Steam
+- Dev logs, streamer-friendly LLM newspaper, city-builder communities (Reddit, YouTube)
+- 3D cosmetic skins are a natural MTX surface (facade swaps on instanced meshes)
 
-The demo is designed to be a complete, satisfying experience that ends right when the game opens up — the transition from small town to industrial city is the "wow, I need more" moment.
+### Financial outlook (web hybrid)
 
-### Zero-Budget Marketing
-
-As a solo developer, the marketing budget is effectively zero dollars. Strategy:
-
-1. **Steam as primary storefront** — optimize the Steam page relentlessly. Tags, description, screenshots, trailer all tuned for discoverability.
-2. **Dev logs as content** — monthly YouTube/blog dev logs showing the game's development. The technical depth (Leontief economics, BPR traffic, LLM integration) appeals to the "how it works" audience that shares content organically.
-3. **Steam Next Fest demo** — the single most important marketing event for indie games. A polished demo in a Next Fest can generate 50K+ wishlists.
-4. **Reddit and community** — active presence on r/CitySkylines, r/SimCity, r/BaseBuildingGames, r/IndieDev. Share interesting systems, ask for feedback, build a community before launch.
-5. **Streamer-friendly design** — the LLM-generated newspaper and citizen stories create natural streaming content. Every player's city tells a different story.
-6. **Press kit** — professional screenshots, trailer, one-page fact sheet. Send to city builder YouTubers (City Planner Plays, Biffa, T4rget) and indie game press.
-
-### Financial Projections (Conservative)
+Revenue mixes Founder Pass one-time sales, cosmetic shop, and optional phase-2 crypto perks. Steam-style unit projections below are **historical**; web F2P conversion targets TBD post-launch.
 
 | Scenario | EA Sales (Y1) | Revenue | Post-EA Sales | Total Revenue |
 |----------|--------------|---------|---------------|---------------|
@@ -675,7 +706,7 @@ As a solo developer, the marketing budget is effectively zero dollars. Strategy:
 | Moderate | 20,000 | $350K | 50,000 | $1.5M |
 | Optimistic | 50,000 | $875K | 200,000 | $5.2M |
 
-These assume a 70% Steam revenue share (after Steam's cut and regional pricing). Workers & Resources: Soviet Republic sold 500K+ copies as a niche city builder with no marketing budget — the moderate scenario is realistic for a game with broader appeal.
+*Table assumes original Steam premium model for comparison only.*
 
 ---
 

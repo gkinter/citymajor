@@ -1,5 +1,15 @@
 # IRON & OAK: Visual Quality Guide
 
+> **Superseded for Web v1 (2026-07).** CityMajor pivoted to **mesh 3D mid-fidelity** (R3F + Three.js, CS-lite). This document remains the historical reference for the **pixel-art / Forge Engine** plan. For current targets see:
+>
+> - [`MASTER_GAME_CONCEPT.md`](MASTER_GAME_CONCEPT.md) §8 — mesh LOD zoom levels, era PBR materials
+> - [`AI_ART_PIPELINE.md`](AI_ART_PIPELINE.md) — **3D Module Pipeline (Web v1)** (modular GLTF kitbash)
+> - Linear [SB-3704](https://linear.app/softblaze/issue/SB-3704) — instancing, chunk culling, quality tiers
+
+**Web v1 rendering targets:** `InstancedMesh` per building archetype per chunk; 32×32 spatial grid for frustum culling; LOD hysteresis at four zoom bands (full GLTF → simplified mesh → instanced boxes → colored blocks); dynamic `devicePixelRatio` downscale when FPS &lt; 30; shadow tiers (off / key buildings / full); citizens as instanced dots beyond street zoom.
+
+---
+
 ## How Good Can This Game Actually Look?
 
 **Short answer: Premium pixel art quality on par with Songs of Conquest / Eastward, with fluid traffic that feels as satisfying as Mini Motorways (which proved colored dots moving smoothly is MORE satisfying than detailed 3D cars).**

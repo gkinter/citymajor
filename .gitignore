@@ -10,6 +10,8 @@ obj/
 ## NuGet
 **/[Pp]ackages/*
 !**/[Pp]ackages/build/
+!web/packages/
+!web/packages/**
 *.nupkg
 **/packages/repositories.config
 project.lock.json
@@ -46,6 +48,9 @@ Thumbs.db
 
 ## dotnet tool
 .dotnet/
+
+## Node
+node_modules/
 
 ## Test results
 TestResults/

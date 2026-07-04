@@ -12,6 +12,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS wasm
 ARG BUILD_WASM=1
 WORKDIR /src
 COPY src/ ./src/
+COPY base/ ./base/
 COPY web/wasm/build-wasm.sh ./web/wasm/build-wasm.sh
 RUN mkdir -p web/public/dotnet
 ENV NODE_OPTIONS=

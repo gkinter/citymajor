@@ -160,7 +160,7 @@ wasm (optional) → deps → builder → runner
 
 | Stage | Purpose |
 |-------|---------|
-| `wasm` | .NET 8 SDK publishes `Forge.SimWasm` → `web/public/dotnet/` |
+| `wasm` | .NET 8 SDK publishes `Forge.SimWasm` → `web/public/dotnet/` (copies `base/data/` for embedded events/tech JSON) |
 | `deps` | `pnpm install --frozen-lockfile` for root + `web/` + `sim-types` |
 | `builder` | `pnpm --filter @citymajor/web... build` (Next.js standalone) |
 | `runner` | Node 20 slim, runs `node web/server.js` |

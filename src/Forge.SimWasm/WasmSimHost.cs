@@ -13,7 +13,6 @@ namespace Forge.SimWasm;
 /// </summary>
 public sealed class WasmSimHost
 {
-    private const double TrafficInterval = 0.5;
     private const double DayInterval = 1.0;
 
     private Config _config = null!;
@@ -22,7 +21,7 @@ public sealed class WasmSimHost
 
     private EconomySystem _economy = null!;
     private PopulationSystem _population = null!;
-    private TrafficSystem _traffic = null!;
+    private WasmTrafficStub _traffic = null!;
     private ServiceSystem _services = null!;
     private ZoneGrowthSystem _zoneGrowth = null!;
     private BudgetSystem _budget = null!;
@@ -38,18 +37,18 @@ public sealed class WasmSimHost
     public bool IsInitialized { get; private set; }
     public long TickCount => _state?.TickCount ?? 0;
 
-    public void Init(int worldSize = 64)
+    public void Init(int worldSize = WasmConfig.DefaultWorldSize)
     {
-        worldSize = NextPowerOfTwo(Math.Clamp(worldSize, 32, 256));
+        worldSize = NextPowerOfTwo(Math.Clamp(worldSize, WasmConfig.MinWorldSize, WasmConfig.MaxWorldSize));
 
-        _config = new Config { WorldSize = worldSize, ChunkSize = Math.Min(64, worldSize) };
-        _state = new WorldState(worldSize, maxHouseholds: 4096, maxBuildings: 2048,
-            maxRoadNodes: 8192, maxVehicles: 512);
+        _config = new Config { WorldSize = worldSize, ChunkSize = WasmConfig.ChunkSize };
+        _state = new WorldState(worldSize, maxHouseholds: 8192, maxBuildings: 4096,
+            maxRoadNodes: 16384, maxVehicles: 256);
         _eventBus = new EventBus();
 
         _economy = new EconomySystem();
         _population = new PopulationSystem();
-        _traffic = new TrafficSystem();
+        _traffic = new WasmTrafficStub();
         _services = new ServiceSystem(worldSize);
         _zoneGrowth = new ZoneGrowthSystem(worldSize);
         _budget = new BudgetSystem();
@@ -78,10 +77,10 @@ public sealed class WasmSimHost
         _state.TickCount++;
 
         _trafficAccumulator += dt;
-        while (_trafficAccumulator >= TrafficInterval)
+        while (_trafficAccumulator >= WasmConfig.TrafficStubInterval)
         {
-            _trafficAccumulator -= TrafficInterval;
-            _traffic.Tick(_state, TrafficInterval);
+            _trafficAccumulator -= WasmConfig.TrafficStubInterval;
+            _traffic.Tick(_state, WasmConfig.TrafficStubInterval);
         }
 
         _dayAccumulator += dt;
@@ -173,50 +172,106 @@ public sealed class WasmSimHost
         int size = _config.WorldSize;
         int cx = size / 2;
         int cy = size / 2;
+        int roadHalf = Math.Max(8, size / 8);
+        int zoneHalf = Math.Max(12, size / 5);
+        int buildingTarget = Math.Min(
+            WasmConfig.TargetStarterBuildings,
+            (size * size) / 300);
 
-        for (int x = cx - 8; x <= cx + 8; x++)
+        for (int x = cx - roadHalf; x <= cx + roadHalf; x++)
         {
+            if (!_state.Tiles.InBounds(x, cy)) continue;
             _state.Tiles.RoadFlags[_state.Tiles.Index(x, cy)] = 1;
             _state.Roads.AddNode(x, cy);
         }
 
-        for (int y = cy - 6; y <= cy + 6; y++)
-        for (int x = cx - 6; x <= cx + 6; x++)
+        for (int y = cy - roadHalf; y <= cy + roadHalf; y++)
+        {
+            if (!_state.Tiles.InBounds(cx, y)) continue;
+            _state.Tiles.RoadFlags[_state.Tiles.Index(cx, y)] = 1;
+            _state.Roads.AddNode(cx, y);
+        }
+
+        int ringRadius = size / 3;
+        for (int angle = 0; angle < 360; angle += 6)
+        {
+            double rad = angle * Math.PI / 180.0;
+            int x = cx + (int)Math.Round(Math.Cos(rad) * ringRadius);
+            int y = cy + (int)Math.Round(Math.Sin(rad) * ringRadius);
+            if (!_state.Tiles.InBounds(x, y)) continue;
+            byte terrain = _state.Tiles.TerrainType[_state.Tiles.Index(x, y)];
+            if (terrain == (byte)TerrainId.Water) continue;
+            _state.Tiles.RoadFlags[_state.Tiles.Index(x, y)] = 1;
+            _state.Roads.AddNode(x, y);
+        }
+
+        int commercialCore = size / 32;
+        int residentialRing = size / 16;
+        int commercialMid = size / 10;
+
+        for (int y = cy - zoneHalf; y <= cy + zoneHalf; y++)
+        for (int x = cx - zoneHalf; x <= cx + zoneHalf; x++)
         {
             if (!_state.Tiles.InBounds(x, y)) continue;
             byte terrain = _state.Tiles.TerrainType[_state.Tiles.Index(x, y)];
             if (terrain == (byte)TerrainId.Water) continue;
 
             int dist = Math.Abs(x - cx) + Math.Abs(y - cy);
-            byte zone = dist < 3 ? (byte)3 : (byte)1; // commercial core, residential ring
+            byte zone;
+            if (dist < commercialCore)
+                zone = 3;
+            else if (dist < residentialRing)
+                zone = 1;
+            else if (dist < commercialMid)
+                zone = 2;
+            else
+                zone = 4;
             _state.Tiles.ZoneType[_state.Tiles.Index(x, y)] = zone;
         }
 
         var rng = new Random(7);
-        for (int i = 0; i < 12; i++)
+        int placed = 0;
+        int attempts = 0;
+        int maxAttempts = buildingTarget * 20;
+        int spawnHalf = zoneHalf - 2;
+
+        while (placed < buildingTarget && attempts < maxAttempts)
         {
-            int x = cx + rng.Next(-5, 6);
-            int y = cy + rng.Next(-5, 6);
+            attempts++;
+            int x = cx + rng.Next(-spawnHalf, spawnHalf + 1);
+            int y = cy + rng.Next(-spawnHalf, spawnHalf + 1);
             if (!_state.Tiles.InBounds(x, y)) continue;
+
+            byte terrain = _state.Tiles.TerrainType[_state.Tiles.Index(x, y)];
+            if (terrain == (byte)TerrainId.Water) continue;
 
             int slot = _state.Buildings.Allocate();
             if (slot < 0) break;
+
+            byte tileZone = _state.Tiles.ZoneType[_state.Tiles.Index(x, y)];
+            ushort typeBase = tileZone switch
+            {
+                3 or 2 => (ushort)40,
+                4 => (ushort)80,
+                _ => (ushort)10,
+            };
 
             _state.Buildings.GridX[slot] = x;
             _state.Buildings.GridY[slot] = y;
             _state.Buildings.Width[slot] = 1;
             _state.Buildings.Height[slot] = 1;
-            _state.Buildings.TypeId[slot] = (ushort)(10 + rng.Next(0, 5));
-            _state.Buildings.Level[slot] = (byte)rng.Next(1, 4);
+            _state.Buildings.TypeId[slot] = (ushort)(typeBase + rng.Next(0, 20));
+            _state.Buildings.Level[slot] = (byte)rng.Next(1, 5);
             _state.Buildings.State[slot] = 1;
-            _state.Buildings.Occupants[slot] = (ushort)rng.Next(1, 20);
-            _state.Buildings.MaxOccupants[slot] = 40;
+            _state.Buildings.Occupants[slot] = (ushort)rng.Next(1, 30);
+            _state.Buildings.MaxOccupants[slot] = 48;
+            placed++;
         }
     }
 
     private void SeedStartingPopulation()
     {
-        const int initialHouseholds = 50;
+        int initialHouseholds = Math.Min(200, Math.Max(50, _config.WorldSize / 2));
         var rng = new Random(42);
 
         for (int i = 0; i < initialHouseholds; i++)

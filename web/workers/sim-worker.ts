@@ -26,6 +26,12 @@ type SimExports = {
 let sim: SimExports | null = null;
 let paused = false;
 let worldSize = 256;
+/** Sim tick rate — decouple from display RAF to keep 256×256 WASM within budget. */
+const SIM_TICK_HZ = 8;
+const SIM_TICK_MS = 1000 / SIM_TICK_HZ;
+let simAccumMs = 0;
+let lastSnapshotMs = 0;
+const SNAPSHOT_MIN_MS = 250;
 /** Optimistic zone grid — merged into snapshots when WASM lacks zone data. */
 let zoneGrid: Uint8Array | null = null;
 
@@ -172,8 +178,18 @@ function handleCommand(command: SimCommand) {
       break;
     case "tick":
       if (!paused) {
-        sim.Tick(command.deltaMs / 1000);
-        publishSnapshot();
+        simAccumMs += command.deltaMs;
+        const now = performance.now();
+        let simTicked = false;
+        while (simAccumMs >= SIM_TICK_MS) {
+          simAccumMs -= SIM_TICK_MS;
+          sim.Tick(SIM_TICK_MS / 1000);
+          simTicked = true;
+        }
+        if (simTicked && now - lastSnapshotMs >= SNAPSHOT_MIN_MS) {
+          lastSnapshotMs = now;
+          publishSnapshot();
+        }
       }
       break;
     case "place_building":
@@ -203,6 +219,8 @@ ctx.onmessage = async (event: MessageEvent<WorkerInbound>) => {
       ensureZoneGrid(worldSize);
       sim = await loadWasm(msg.wasmBaseUrl);
       sim.Init(worldSize);
+      simAccumMs = 0;
+      lastSnapshotMs = 0;
       publishSnapshot();
       post({ type: "ready" });
     } catch (err) {

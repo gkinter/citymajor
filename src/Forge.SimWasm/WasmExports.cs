@@ -11,7 +11,7 @@ public static partial class Program
     public static void Init(int worldSize)
     {
         _host = new WasmSimHost();
-        _host.Init(worldSize > 0 ? worldSize : 64);
+        _host.Init(worldSize > 0 ? worldSize : WasmConfig.DefaultWorldSize);
     }
 
     [JSExport]
@@ -54,7 +54,6 @@ public static partial class Program
             {
                 "EconomySystem",
                 "PopulationSystem",
-                "TrafficSystem",
                 "ServiceSystem",
                 "ZoneGrowthSystem",
                 "BudgetSystem",
@@ -63,6 +62,7 @@ public static partial class Program
             },
             stubbed = new[]
             {
+                "TrafficSystem (WasmTrafficStub — no BPR assignment in browser)",
                 "EventSystem (no events.json in WASM bundle)",
                 "ResearchSystem (no tech_tree.json in WASM bundle)",
                 "TradeSystem (not wired in spike)",

@@ -87,6 +87,49 @@ async function assertHudPanels(page, tag) {
 }
 
 /**
+ * Optional Services toolbar + Traffic toggle — skipped when UI not mounted.
+ * Resolves via data-testid first, then toolbar aria-label / button text.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function assertOptionalOverlayToolbars(page, tag) {
+  const servicesToolbar = page
+    .locator('[data-testid="services-toolbar"]')
+    .or(page.getByRole("toolbar", { name: "Services coverage overlay" }));
+
+  if ((await servicesToolbar.count()) > 0) {
+    await servicesToolbar.first().waitFor({ state: "visible" });
+    const healthBtn = servicesToolbar.getByRole("button", { name: "Health" });
+    await healthBtn.click();
+    if ((await healthBtn.getAttribute("aria-pressed")) !== "true") {
+      fail(tag, "Services Health button did not activate (aria-pressed)");
+    }
+    pass(tag, "services toolbar present and Health mode toggles");
+    await servicesToolbar.getByRole("button", { name: "Off" }).click();
+  } else {
+    console.log(`[${tag}] SKIP: services toolbar not on page`);
+  }
+
+  const trafficToolbar = page
+    .locator('[data-testid="traffic-overlay-toggle"]')
+    .or(page.getByRole("toolbar", { name: "Traffic overlay" }));
+
+  if ((await trafficToolbar.count()) > 0) {
+    await trafficToolbar.first().waitFor({ state: "visible" });
+    const toggleBtn = trafficToolbar.getByRole("button", { name: /^(On|Off)$/ });
+    const initial = (await toggleBtn.innerText()).trim();
+    await toggleBtn.click();
+    const after = (await toggleBtn.innerText()).trim();
+    if (after === initial) {
+      fail(tag, "Traffic toggle did not change label after click");
+    }
+    pass(tag, `traffic toggle present (${initial} → ${after})`);
+  } else {
+    console.log(`[${tag}] SKIP: traffic overlay toggle not on page`);
+  }
+}
+
+/**
  * Deep /play checks — WebGL canvas, HUD, COOP/COEP, sim tick.
  * @param {import('playwright').Page} page
  * @param {{ tag?: string; screenshotPath?: string }} [options]
@@ -147,6 +190,7 @@ export async function runPlayChecks(page, options = {}) {
 
   await assertSaveApiHealth(tag);
   await assertHudPanels(page, tag);
+  await assertOptionalOverlayToolbars(page, tag);
 
   if (options.screenshotPath) {
     await page.screenshot({ path: options.screenshotPath, fullPage: false });

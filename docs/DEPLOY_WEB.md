@@ -70,8 +70,11 @@ The M0 spike runs with in-memory stubs — no secrets required for preview.
 | `HOSTNAME` | No | `0.0.0.0` | Bind all interfaces in container |
 | `NODE_ENV` | No | `production` | Set in Dockerfile runner stage |
 | `BUILD_WASM` | No | `1` | Docker **build arg** (not runtime env) — pass via Coolify build args |
+| `STRIPE_SECRET_KEY` | No | — | Enables live Founder Pass Checkout; omit for mock cookie flow |
+| `STRIPE_FOUNDER_PASS_PRICE_ID` | No | — | Stripe Price ID for Founder Pass (`price_…`) |
+| `STRIPE_WEBHOOK_SECRET` | No | — | Verifies `POST /api/webhooks/stripe` (register Coolify FQDN + `/api/webhooks/stripe`) |
 
-Future backend integration may add `DATABASE_URL`, auth secrets, etc. — document here when wired.
+Without Stripe vars, `/shop` uses the mock entitlements cookie path. See `web/.env.example`.
 
 ## COOP / COEP headers (SharedArrayBuffer)
 

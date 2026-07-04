@@ -376,9 +376,9 @@ public sealed class WasmSimHost
             byte tileZone = _state.Tiles.ZoneType[_state.Tiles.Index(x, y)];
             ushort typeBase = tileZone switch
             {
-                3 or 2 => (ushort)40,
-                4 => (ushort)80,
-                _ => (ushort)10,
+                3 or 2 => (ushort)300,
+                4 => (ushort)400,
+                _ => (ushort)100,
             };
 
             _state.Buildings.GridX[slot] = x;

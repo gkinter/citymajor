@@ -18,7 +18,9 @@ import type { FpsStats } from "@/lib/types";
 import type { ZoningTool } from "@/lib/zoning";
 import { CityCanvas } from "@/components/city/CityCanvas";
 import { FpsHud } from "@/components/city/FpsHud";
+import { HeraldButton } from "@/components/city/HeraldButton";
 import { HeraldPanel } from "@/components/city/HeraldPanel";
+import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
@@ -28,25 +30,6 @@ import { ZoningToolbar } from "@/components/city/ZoningToolbar";
 const NarrativeApiResponseSchema = NarrativeEventResponseSchema.extend({
   narrativeEventsRemaining: z.number().int().nonnegative().optional(),
 });
-
-const heraldButtonStyle = {
-  position: "absolute" as const,
-  top: 12,
-  right: 12,
-  zIndex: 15,
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-  padding: "8px 14px",
-  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-  fontSize: 12,
-  fontWeight: 600,
-  color: "#e8eef8",
-  background: "rgba(8, 12, 24, 0.82)",
-  border: "1px solid rgba(120, 160, 220, 0.25)",
-  borderRadius: 8,
-  cursor: "pointer",
-};
 
 function formatQuota(remaining: number | undefined): string {
   if (remaining === undefined) return "…";
@@ -183,6 +166,7 @@ export function PlayClient() {
         onSimResources={setSimResources}
         onSimApi={setSimApi}
       />
+      <HudWordmark />
       <SpeedToolbar speedLevel={gameSpeed} onSpeedChange={setGameSpeed} />
       <QualityToolbar qualityTier={qualityTier} onQualityChange={handleQualityChange} />
       <SaveLoadControls
@@ -198,13 +182,8 @@ export function PlayClient() {
       />
       <ZoningToolbar activeTool={activeTool} onToolChange={setActiveTool} />
 
-      <button
-        type="button"
-        style={{
-          ...heraldButtonStyle,
-          opacity: heraldDisabled ? 0.5 : 1,
-          cursor: heraldDisabled ? "not-allowed" : "pointer",
-        }}
+      <HeraldButton
+        quotaLabel={entitlementsError ? "!" : formatQuota(quotaRemaining)}
         disabled={heraldDisabled}
         title={
           entitlementsError
@@ -216,21 +195,7 @@ export function PlayClient() {
         onClick={() => {
           if (!heraldDisabled) openHerald();
         }}
-      >
-        <span>Herald</span>
-        <span
-          style={{
-            padding: "2px 6px",
-            borderRadius: 4,
-            background: "rgba(94, 200, 255, 0.15)",
-            border: "1px solid rgba(94, 200, 255, 0.35)",
-            fontSize: 11,
-            fontWeight: 500,
-          }}
-        >
-          {entitlementsError ? "!" : formatQuota(quotaRemaining)}
-        </span>
-      </button>
+      />
 
       <HeraldPanel
         open={heraldOpen}

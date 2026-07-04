@@ -2,6 +2,15 @@
 
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import type { Entitlements } from "@/lib/entitlements";
+import {
+  HUD_COLORS,
+  HUD_RADIUS,
+  HUD_Z,
+  HUD_ZONE,
+  hudActionButton,
+  hudModalShell,
+  hudPanel,
+} from "@/lib/hud-theme";
 import type { SimClientApi, SimSnapshot } from "@/lib/sim-bridge";
 import {
   CreateSaveResponseSchema,
@@ -16,62 +25,31 @@ type SaveLoadControlsProps = {
 };
 
 const barStyle: CSSProperties = {
-  position: "absolute",
-  top: 56,
-  left: 12,
-  zIndex: 15,
+  ...HUD_ZONE.leftStack,
   display: "flex",
   alignItems: "center",
   gap: 8,
   pointerEvents: "auto",
 };
 
-const buttonStyle: CSSProperties = {
-  padding: "8px 14px",
-  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-  fontSize: 12,
-  fontWeight: 600,
-  color: "#e8eef8",
-  background: "rgba(8, 12, 24, 0.82)",
-  border: "1px solid rgba(120, 160, 220, 0.25)",
-  borderRadius: 8,
-  cursor: "pointer",
-};
-
-const slotBadgeStyle: CSSProperties = {
+const slotBadgeStyle: CSSProperties = hudPanel({
   padding: "8px 10px",
-  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
   fontSize: 11,
-  color: "rgba(232, 238, 248, 0.75)",
-  background: "rgba(8, 12, 24, 0.65)",
-  border: "1px solid rgba(120, 160, 220, 0.18)",
-  borderRadius: 8,
+  color: HUD_COLORS.textMuted,
+  background: HUD_COLORS.panelBgSoft,
+  border: `1px solid ${HUD_COLORS.borderSubtle}`,
   pointerEvents: "none",
-};
+});
 
 const overlayStyle: CSSProperties = {
   position: "fixed",
   inset: 0,
-  zIndex: 40,
+  zIndex: HUD_Z.modal,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "rgba(4, 8, 16, 0.72)",
+  background: HUD_COLORS.overlay,
   padding: 16,
-};
-
-const modalStyle: CSSProperties = {
-  width: "min(480px, 100%)",
-  maxHeight: "min(70vh, 560px)",
-  display: "flex",
-  flexDirection: "column",
-  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-  fontSize: 13,
-  color: "#e8eef8",
-  background: "rgba(8, 12, 24, 0.96)",
-  border: "1px solid rgba(120, 160, 220, 0.3)",
-  borderRadius: 10,
-  boxShadow: "0 16px 48px rgba(0, 0, 0, 0.5)",
 };
 
 const modalHeaderStyle: CSSProperties = {
@@ -79,7 +57,7 @@ const modalHeaderStyle: CSSProperties = {
   alignItems: "center",
   justifyContent: "space-between",
   padding: "14px 16px",
-  borderBottom: "1px solid rgba(120, 160, 220, 0.2)",
+  borderBottom: `1px solid ${HUD_COLORS.borderSubtle}`,
 };
 
 const listStyle: CSSProperties = {
@@ -95,9 +73,9 @@ const rowStyle: CSSProperties = {
   gap: 12,
   padding: "10px 12px",
   marginTop: 8,
-  borderRadius: 6,
-  border: "1px solid rgba(120, 160, 220, 0.18)",
-  background: "rgba(16, 22, 38, 0.45)",
+  borderRadius: HUD_RADIUS.sm,
+  border: `1px solid ${HUD_COLORS.borderSubtle}`,
+  background: HUD_COLORS.rowBg,
 };
 
 function formatWhen(iso: string): string {
@@ -248,22 +226,14 @@ export function SaveLoadControls({
       <div style={barStyle} role="group" aria-label="Save and load">
         <button
           type="button"
-          style={{
-            ...buttonStyle,
-            opacity: saving || slotsFull ? 0.55 : 1,
-            cursor: saving || slotsFull ? "not-allowed" : "pointer",
-          }}
+          style={hudActionButton(saving || slotsFull)}
           disabled={saving || slotsFull}
           title={slotsFull ? `All ${maxSlots} save slots in use` : "Save current city"}
           onClick={() => void handleSave()}
         >
           {saving ? "Saving…" : "Save"}
         </button>
-        <button
-          type="button"
-          style={buttonStyle}
-          onClick={() => setLoadOpen(true)}
-        >
+        <button type="button" style={hudActionButton()} onClick={() => setLoadOpen(true)}>
           Load
         </button>
         <span style={slotBadgeStyle} aria-live="polite">
@@ -274,18 +244,13 @@ export function SaveLoadControls({
       {actionMessage ? (
         <div
           style={{
-            position: "absolute",
-            top: 96,
-            left: 12,
-            zIndex: 15,
-            padding: "6px 10px",
-            fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-            fontSize: 11,
-            color: "#c8e8ff",
-            background: "rgba(8, 12, 24, 0.88)",
-            border: "1px solid rgba(120, 160, 220, 0.25)",
-            borderRadius: 6,
-            pointerEvents: "none",
+            ...HUD_ZONE.toast,
+            ...hudPanel({
+              padding: "6px 10px",
+              fontSize: 11,
+              color: HUD_COLORS.toast,
+              pointerEvents: "none",
+            }),
           }}
         >
           {actionMessage}
@@ -300,7 +265,7 @@ export function SaveLoadControls({
           aria-labelledby="load-saves-title"
           onClick={() => setLoadOpen(false)}
         >
-          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+          <div style={hudModalShell()} onClick={(e) => e.stopPropagation()}>
             <div style={modalHeaderStyle}>
               <div>
                 <div id="load-saves-title" style={{ fontWeight: 700 }}>
@@ -312,7 +277,7 @@ export function SaveLoadControls({
               </div>
               <button
                 type="button"
-                style={{ ...buttonStyle, padding: "4px 10px", fontSize: 11 }}
+                style={{ ...hudActionButton(), padding: "4px 10px", fontSize: 11 }}
                 onClick={() => setLoadOpen(false)}
               >
                 Close
@@ -323,7 +288,7 @@ export function SaveLoadControls({
               {listLoading ? (
                 <div style={{ padding: 12, opacity: 0.7 }}>Loading saves…</div>
               ) : listError ? (
-                <div style={{ padding: 12, color: "#ffb4b4" }}>{listError}</div>
+                <div style={{ padding: 12, color: HUD_COLORS.error }}>{listError}</div>
               ) : saves.length === 0 ? (
                 <div style={{ padding: 12, opacity: 0.7 }}>No saves yet.</div>
               ) : (
@@ -337,7 +302,7 @@ export function SaveLoadControls({
                     </div>
                     <button
                       type="button"
-                      style={{ ...buttonStyle, padding: "6px 12px", fontSize: 11 }}
+                      style={{ ...hudActionButton(), padding: "6px 12px", fontSize: 11 }}
                       onClick={() => handleLoad(slot)}
                     >
                       Load

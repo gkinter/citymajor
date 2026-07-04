@@ -1,8 +1,13 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import type { SimResources } from "@/lib/sim-bridge";
 import { hudEraBadgeStyle, hudEraName } from "@/lib/era";
+import {
+  HUD_ZONE,
+  hudLabel,
+  hudPanel,
+} from "@/lib/hud-theme";
+import type { SimResources } from "@/lib/sim-bridge";
 
 function formatFunds(cityFunds: number): string {
   const abs = Math.abs(cityFunds);
@@ -20,29 +25,14 @@ type ResourcesHudProps = {
 };
 
 export function ResourcesHud({ resources }: ResourcesHudProps) {
-  const panelStyle: CSSProperties = {
-    position: "absolute",
-    top: 12,
-    left: "50%",
-    transform: "translateX(-50%)",
+  const panelStyle = hudPanel({
+    ...HUD_ZONE.resources,
     display: "flex",
     gap: 20,
-    padding: "8px 16px",
-    fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-    fontSize: 12,
-    lineHeight: 1.4,
-    color: "#e8eef8",
-    background: "rgba(8, 12, 24, 0.82)",
-    border: "1px solid rgba(120, 160, 220, 0.25)",
-    borderRadius: 8,
+    padding: "6px 16px",
     pointerEvents: "none",
     whiteSpace: "nowrap",
-  };
-
-  const labelStyle: CSSProperties = {
-    opacity: 0.65,
-    marginRight: 6,
-  };
+  });
 
   const era = resources?.era ?? 0;
   const eraBadgeStyle: CSSProperties = {
@@ -59,19 +49,19 @@ export function ResourcesHud({ resources }: ResourcesHudProps) {
   return (
     <div style={panelStyle}>
       <div>
-        <span style={labelStyle}>Pop</span>
+        <span style={hudLabel()}>Pop</span>
         {resources ? formatPopulation(resources.population) : "—"}
       </div>
       <div>
-        <span style={labelStyle}>Funds</span>
+        <span style={hudLabel()}>Funds</span>
         {resources ? formatFunds(resources.cityFunds) : "—"}
       </div>
       <div>
-        <span style={labelStyle}>Tick</span>
+        <span style={hudLabel()}>Tick</span>
         {resources ? resources.tick.toLocaleString() : "—"}
       </div>
       <div>
-        <span style={labelStyle}>Era</span>
+        <span style={hudLabel()}>Era</span>
         {resources ? (
           <span style={eraBadgeStyle}>{hudEraName(era)}</span>
         ) : (

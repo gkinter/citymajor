@@ -1,43 +1,20 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import {
+  HUD_COLORS,
+  HUD_RADIUS,
+  hudActionButton,
+  hudSlidePanel,
+} from "@/lib/hud-theme";
 import type { NarrativeEventResponse } from "@/lib/narrative-templates";
-
-const panelShell: CSSProperties = {
-  position: "absolute",
-  top: 0,
-  right: 0,
-  width: "min(420px, 92vw)",
-  height: "100%",
-  zIndex: 20,
-  display: "flex",
-  flexDirection: "column",
-  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-  fontSize: 13,
-  lineHeight: 1.55,
-  color: "#e8eef8",
-  background: "rgba(8, 12, 24, 0.92)",
-  borderLeft: "1px solid rgba(120, 160, 220, 0.3)",
-  boxShadow: "-8px 0 32px rgba(0, 0, 0, 0.45)",
-  pointerEvents: "auto",
-};
 
 const headerStyle: CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   padding: "14px 16px",
-  borderBottom: "1px solid rgba(120, 160, 220, 0.2)",
-};
-
-const closeButtonStyle: CSSProperties = {
-  padding: "4px 10px",
-  border: "1px solid rgba(120, 160, 220, 0.25)",
-  borderRadius: 6,
-  background: "rgba(16, 22, 38, 0.6)",
-  color: "#e8eef8",
-  cursor: "pointer",
-  fontSize: 12,
+  borderBottom: `1px solid ${HUD_COLORS.borderSubtle}`,
 };
 
 const bodyStyle: CSSProperties = {
@@ -49,9 +26,9 @@ const bodyStyle: CSSProperties = {
 const optionStyle: CSSProperties = {
   marginTop: 12,
   padding: "10px 12px",
-  borderRadius: 6,
-  border: "1px solid rgba(120, 160, 220, 0.18)",
-  background: "rgba(16, 22, 38, 0.45)",
+  borderRadius: HUD_RADIUS.sm,
+  border: `1px solid ${HUD_COLORS.borderSubtle}`,
+  background: HUD_COLORS.rowBg,
 };
 
 function formatQuota(remaining: number | undefined): string {
@@ -80,7 +57,7 @@ export function HeraldPanel({
   if (!open) return null;
 
   return (
-    <aside style={panelShell} role="dialog" aria-label="Daily Herald" aria-modal="true">
+    <aside style={hudSlidePanel()} role="dialog" aria-label="Daily Herald" aria-modal="true">
       <header style={headerStyle}>
         <div>
           <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: "0.04em" }}>
@@ -90,7 +67,12 @@ export function HeraldPanel({
             narrative remaining today: {formatQuota(quotaRemaining)}
           </div>
         </div>
-        <button type="button" style={closeButtonStyle} onClick={onClose} aria-label="Close">
+        <button
+          type="button"
+          style={{ ...hudActionButton(), padding: "4px 10px", fontSize: 12 }}
+          onClick={onClose}
+          aria-label="Close"
+        >
           ✕
         </button>
       </header>
@@ -99,7 +81,7 @@ export function HeraldPanel({
         {loading ? (
           <div style={{ opacity: 0.75 }}>Fetching today&apos;s lead story…</div>
         ) : error ? (
-          <div style={{ color: "#ff9aa8" }}>{error}</div>
+          <div style={{ color: HUD_COLORS.error }}>{error}</div>
         ) : event ? (
           <>
             <div

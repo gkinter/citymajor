@@ -1,0 +1,89 @@
+/**
+ * CityMajor /play HUD — cyan glass design tokens.
+ * Mid-fidelity CS-lite aesthetic (not pixel art).
+ */
+
+:root {
+  /* Core palette */
+  --hud-text: #e8eef8;
+  --hud-text-muted: rgba(232, 238, 248, 0.65);
+  --hud-text-dim: rgba(232, 238, 248, 0.45);
+  --hud-text-disabled: rgba(232, 238, 248, 0.35);
+
+  /* Cyan accent */
+  --hud-accent: #5ec8ff;
+  --hud-accent-highlight: #9fd4ff;
+  --hud-accent-soft: rgba(94, 200, 255, 0.15);
+  --hud-accent-border: rgba(94, 200, 255, 0.7);
+  --hud-accent-ring: rgba(94, 200, 255, 0.35);
+
+  /* Glass panels */
+  --hud-border: rgba(120, 160, 220, 0.25);
+  --hud-border-subtle: rgba(120, 160, 220, 0.18);
+  --hud-border-strong: rgba(120, 160, 220, 0.3);
+  --hud-panel-bg: rgba(8, 12, 24, 0.82);
+  --hud-panel-bg-solid: rgba(8, 12, 24, 0.96);
+  --hud-panel-bg-soft: rgba(8, 12, 24, 0.65);
+  --hud-button-bg: rgba(16, 22, 38, 0.6);
+  --hud-row-bg: rgba(16, 22, 38, 0.45);
+
+  /* Feedback */
+  --hud-error: #ff9aa8;
+  --hud-toast: #c8e8ff;
+  --hud-overlay: rgba(4, 8, 16, 0.72);
+
+  /* Typography */
+  --hud-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --hud-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Shape */
+  --hud-radius-sm: 6px;
+  --hud-radius-md: 8px;
+  --hud-radius-lg: 10px;
+
+  /* Layout — tuned for 1280×720, no overlap */
+  --hud-inset: 12px;
+  --hud-top-row: 8px;
+  --hud-resources-top: 42px;
+  --hud-left-stack-top: 50px;
+  --hud-toast-top: 94px;
+  --hud-bottom-inset: 12px;
+
+  /* Z-index layers */
+  --hud-z-base: 10;
+  --hud-z-controls: 15;
+  --hud-z-panel: 20;
+  --hud-z-modal: 40;
+}
+
+.hud-wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 18px 6px;
+  font-family: var(--hud-font-sans);
+  pointer-events: none;
+  user-select: none;
+}
+
+.hud-wordmark__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hud-text);
+  text-shadow: 0 0 24px rgba(94, 200, 255, 0.35);
+}
+
+.hud-wordmark__subtitle {
+  margin: 0;
+  font-family: var(--hud-font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--hud-accent-highlight);
+  opacity: 0.75;
+}

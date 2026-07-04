@@ -1,6 +1,12 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import {
+  HUD_COLORS,
+  HUD_ZONE,
+  hudInfoPanel,
+  hudLabel,
+} from "@/lib/hud-theme";
 import type { FpsStats } from "@/lib/types";
 import type { ZoningTool } from "@/lib/zoning";
 
@@ -10,28 +16,21 @@ type FpsHudProps = {
   activeTool?: ZoningTool;
 };
 
+const sectionTitle: CSSProperties = {
+  fontWeight: 700,
+  marginBottom: 4,
+  fontSize: 11,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  color: HUD_COLORS.textMuted,
+};
+
 export function FpsHud({ stats, totalBuildings, activeTool }: FpsHudProps) {
   const simLabel = stats.simSource === "wasm" ? "WASM sim" : "procedural";
 
-  const panelStyle: CSSProperties = {
-        position: "absolute",
-        top: 12,
-        left: 12,
-        padding: "10px 14px",
-        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-        fontSize: 12,
-        lineHeight: 1.5,
-        color: "#e8eef8",
-        background: "rgba(8, 12, 24, 0.82)",
-        border: "1px solid rgba(120, 160, 220, 0.25)",
-        borderRadius: 8,
-        pointerEvents: "none",
-        minWidth: 220,
-  };
-
   return (
-    <div style={panelStyle}>
-      <div style={{ fontWeight: 700, marginBottom: 4 }}>CityMajor Web M0</div>
+    <div style={{ ...HUD_ZONE.bottomLeft, ...hudInfoPanel() }}>
+      <div style={sectionTitle}>Diagnostics</div>
       <div>Data: {simLabel}</div>
       <div>FPS: {stats.fps || "—"}</div>
       <div>DPR: {stats.dpr.toFixed(2)}</div>
@@ -39,16 +38,15 @@ export function FpsHud({ stats, totalBuildings, activeTool }: FpsHudProps) {
         Chunks: {stats.visibleChunks}/64 · Buildings: {stats.visibleBuildings}/
         {totalBuildings}
       </div>
-      <div>
-        LOD L0–L3: {stats.lodCounts.join(" / ")}
-      </div>
+      <div>LOD L0–L3: {stats.lodCounts.join(" / ")}</div>
       {activeTool ? (
         <div style={{ marginTop: 4, opacity: 0.85 }}>
-          Tool: {activeTool}
+          <span style={hudLabel()}>Tool</span>
+          {activeTool}
         </div>
       ) : null}
       {stats.pickedTile ? (
-        <div style={{ marginTop: 6, color: "#9fd4ff" }}>
+        <div style={{ marginTop: 6, color: HUD_COLORS.accentHighlight }}>
           Picked tile ({stats.pickedTile.tileX}, {stats.pickedTile.tileZ}) · chunk{" "}
           {stats.pickedTile.chunkIndex}
         </div>

@@ -1,3 +1,5 @@
+@import "../styles/hud-tokens.css";
+
 * {
   box-sizing: border-box;
 }

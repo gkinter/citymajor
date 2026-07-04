@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:wasm": "bash ./wasm/build-wasm.sh",
+    "dev:wasm": "pnpm build:wasm && pnpm dev"
   },
   "dependencies": {
     "@citymajor/sim-types": "workspace:*",

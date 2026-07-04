@@ -1,15 +1,14 @@
 "use client";
 
 import type { FpsStats } from "@/lib/types";
-import { getCityData } from "@/lib/city-data";
-import { useMemo } from "react";
 
 type FpsHudProps = {
   stats: FpsStats;
+  totalBuildings: number;
 };
 
-export function FpsHud({ stats }: FpsHudProps) {
-  const totalBuildings = useMemo(() => getCityData().buildings.length, []);
+export function FpsHud({ stats, totalBuildings }: FpsHudProps) {
+  const simLabel = stats.simSource === "wasm" ? "WASM sim" : "procedural";
 
   return (
     <div
@@ -30,6 +29,7 @@ export function FpsHud({ stats }: FpsHudProps) {
       }}
     >
       <div style={{ fontWeight: 700, marginBottom: 4 }}>CityMajor Web M0</div>
+      <div>Data: {simLabel}</div>
       <div>FPS: {stats.fps || "—"}</div>
       <div>DPR: {stats.dpr.toFixed(2)}</div>
       <div>

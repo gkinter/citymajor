@@ -4,7 +4,9 @@
   "scripts": {
     "dev": "pnpm --filter @citymajor/web dev",
     "build": "pnpm --filter @citymajor/web build",
-    "start": "pnpm --filter @citymajor/web start"
+    "start": "pnpm --filter @citymajor/web start",
+    "build:wasm": "bash web/wasm/build-wasm.sh",
+    "dev:wasm": "pnpm build:wasm && pnpm dev"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

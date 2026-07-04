@@ -43,6 +43,8 @@ export type FpsStats = {
   dpr: number;
   visibleChunks: number;
   visibleBuildings: number;
+  totalBuildings: number;
   lodCounts: [number, number, number, number];
   pickedTile: PickResult;
+  simSource?: "wasm" | "procedural";
 };

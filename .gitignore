@@ -69,6 +69,8 @@ node_modules/
 out/
 web/.next/
 web/out/
+web/public/dotnet/
+!web/public/dotnet/.gitkeep
 *.tsbuildinfo
 next-env.d.ts
 .env*.local

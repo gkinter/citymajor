@@ -6,6 +6,7 @@ import {
   computeStories,
   deriveEra,
 } from "@citymajor/sim-types";
+import type { SimSnapshot } from "./sim-bridge";
 import {
   CHUNK_SIZE,
   CHUNKS_PER_AXIS,
@@ -126,6 +127,54 @@ export function generateCityData(seed = 0x63697479): CityData {
       stories,
       chunkIndex,
       heat: rand(),
+    };
+
+    buildings.push(building);
+    if (!buildingsByArchetypeKey[key]) buildingsByArchetypeKey[key] = [];
+    buildingsByArchetypeKey[key].push(building);
+    chunkBuildingIndices[chunkIndex].push(building.id);
+  }
+
+  const archetypeKeys = Object.keys(buildingsByArchetypeKey).sort();
+
+  return { buildings, buildingsByArchetypeKey, archetypeKeys, chunkBuildingIndices };
+}
+
+/**
+ * Build CityData from a WASM sim render snapshot (GetRenderSnapshot JSON).
+ * Maps sim building pool slots into R3F instancing buckets.
+ */
+export function cityDataFromSnapshot(snapshot: SimSnapshot): CityData {
+  const buildings: BuildingInstance[] = [];
+  const buildingsByArchetypeKey: Record<string, BuildingInstance[]> = {};
+  const chunkBuildingIndices: number[][] = Array.from(
+    { length: CHUNKS_PER_AXIS * CHUNKS_PER_AXIS },
+    () => [],
+  );
+
+  for (let i = 0; i < snapshot.buildings.length; i++) {
+    const b = snapshot.buildings[i];
+    const typeId = b.typeId;
+    const category = classifyBuilding(typeId);
+    const key = archetypeKey(typeId);
+    const era = deriveEra(typeId);
+    const zone = ZONE_BY_CATEGORY[category];
+    const stories = computeStories(category, b.level);
+    const chunkIndex = chunkIndexForTile(b.tileX, b.tileZ);
+    const heat = (b.condition / 255) * 0.5 + b.level * 0.1;
+
+    const building: BuildingInstance = {
+      id: b.id,
+      tileX: b.tileX,
+      tileZ: b.tileZ,
+      typeId,
+      archetypeKey: key,
+      category,
+      era,
+      zone,
+      stories,
+      chunkIndex,
+      heat,
     };
 
     buildings.push(building);

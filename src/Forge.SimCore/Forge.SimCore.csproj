@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Forge.Engine</RootNamespace>
+    <AssemblyName>Forge.SimCore</AssemblyName>
+  </PropertyGroup>
+
+  <!-- Engine-agnostic core: no SDL / OpenGL / ImGui packages -->
+  <ItemGroup>
+    <Compile Include="..\Forge.Engine\Core\Config.cs" Link="Core\Config.cs" />
+    <Compile Include="..\Forge.Engine\Core\EventBus.cs" Link="Core\EventBus.cs" />
+    <Compile Include="..\Forge.Engine\Data\*.cs" Link="Data\%(Filename)%(Extension)" />
+    <Compile Include="..\Forge.Engine\Math\Pathfinding.cs" Link="Math\Pathfinding.cs" />
+    <Compile Include="..\Forge.Engine\Math\SimplexNoise.cs" Link="Math\SimplexNoise.cs" />
+    <Compile Include="..\Forge.Engine\Simulation\CommandQueue.cs" Link="Simulation\CommandQueue.cs" />
+    <Compile Include="..\Forge.Engine\Simulation\DoubleBuffer.cs" Link="Simulation\DoubleBuffer.cs" />
+    <Compile Include="..\Forge.Engine\Simulation\SimSnapshot.cs" Link="Simulation\SimSnapshot.cs" />
+    <Compile Include="..\Forge.Engine\Simulation\WorldState.cs" Link="Simulation\WorldState.cs" />
+    <Compile Include="..\Forge.Game\Simulation\*.cs" Link="Game\Simulation\%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

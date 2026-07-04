@@ -11,6 +11,7 @@ export function PlayClient() {
     dpr: 1,
     visibleChunks: 0,
     visibleBuildings: 0,
+    totalBuildings: 0,
     lodCounts: [0, 0, 0, 0],
     pickedTile: null,
   });
@@ -21,7 +22,7 @@ export function PlayClient() {
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <CityCanvas onStats={setStats} />
-      <FpsHud stats={stats} />
+      <FpsHud stats={stats} totalBuildings={stats.totalBuildings} />
     </div>
   );
 }

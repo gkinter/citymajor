@@ -13,12 +13,6 @@ namespace Forge.SimWasm;
 /// </summary>
 public sealed class WasmSimHost
 {
-    private static readonly JsonSerializerOptions RenderSnapshotJsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        TypeInfoResolver = JsonContext.Default,
-    };
-
     private Config _config = null!;
     private WorldState _state = null!;
     private EventBus _eventBus = null!;
@@ -146,7 +140,7 @@ public sealed class WasmSimHost
 
         var snap = SimSnapshot.CaptureFrom(_state);
         var dto = SimSnapshotDto.From(snap, _state, _events, _economy);
-        return JsonSerializer.Serialize(dto, RenderSnapshotJsonOptions);
+        return JsonSerializer.Serialize(dto, JsonContext.Default.SimSnapshotDto);
     }
 
     public string GetStatusJson()

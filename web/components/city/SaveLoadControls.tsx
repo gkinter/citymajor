@@ -383,10 +383,15 @@ export function SaveLoadControls({
                     </div>
                     <button
                       type="button"
-                      style={{ ...hudActionButton(), padding: "6px 12px", fontSize: 11 }}
+                      style={{
+                        ...hudActionButton(loadingSlotId === slot.id),
+                        padding: "6px 12px",
+                        fontSize: 11,
+                      }}
+                      disabled={loadingSlotId === slot.id}
                       onClick={() => void handleLoad(slot)}
                     >
-                      Load
+                      {loadingSlotId === slot.id ? "Loading…" : "Load"}
                     </button>
                   </div>
                 ))

@@ -69,6 +69,7 @@ type SimExports = {
   PaintZone?: (x: number, y: number, zoneType: number) => void;
   Bulldoze?: (x: number, y: number) => void;
   PlaceRoad?: (x: number, y: number) => void;
+  EnqueueResearch?: (techId: number) => boolean;
 };
 
 let sim: SimExports | null = null;
@@ -212,6 +213,7 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
   const paintZone = source.PaintZone ?? source.paintZone;
   const bulldoze = source.Bulldoze ?? source.bulldoze;
   const placeRoad = source.PlaceRoad ?? source.placeRoad;
+  const enqueueResearch = source.EnqueueResearch ?? source.enqueueResearch;
   if (
     typeof init !== "function" ||
     typeof tick !== "function" ||
@@ -240,6 +242,10 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
     PlaceRoad:
       typeof placeRoad === "function"
         ? (placeRoad as (x: number, y: number) => void)
+        : undefined,
+    EnqueueResearch:
+      typeof enqueueResearch === "function"
+        ? (enqueueResearch as (techId: number) => boolean)
         : undefined,
   };
 }
@@ -413,6 +419,12 @@ function placeRoadTile(tileX: number, tileZ: number) {
   publishSnapshot();
 }
 
+function enqueueResearchTech(techId: number) {
+  if (techId < 0) return;
+  const ok = sim?.EnqueueResearch?.(techId) ?? false;
+  if (ok) publishResourceUpdate();
+}
+
 function clampSpeedLevel(level: number): 0 | 1 | 2 | 3 {
   if (level <= 0) return 0;
   if (level >= 3) return 3;
@@ -465,6 +477,9 @@ function handleCommand(command: SimCommand) {
       break;
     case "bulldoze":
       bulldozeTile(command.tileX, command.tileZ);
+      break;
+    case "enqueue_research":
+      enqueueResearchTech(command.techId);
       break;
     case "herald_choice":
       console.info("[CityMajor] Herald council choice (stub)", command);

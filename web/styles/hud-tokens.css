@@ -48,6 +48,8 @@
   --hud-left-stack-top: 50px;
   --hud-toast-top: 94px;
   --hud-bottom-inset: 12px;
+  --hud-ticker-height: 28px;
+  --hud-bottom-stack: calc(var(--hud-bottom-inset) + var(--hud-ticker-height) + 6px);
 
   /* Z-index layers */
   --hud-z-base: 10;
@@ -94,13 +96,13 @@
 .hud-onboarding__spotlight--resources {
   top: 38px;
   left: 50%;
-  width: min(380px, 72vw);
+  width: min(720px, 92vw);
   height: 36px;
   transform: translateX(-50%);
 }
 
 .hud-onboarding__spotlight--zoning {
-  bottom: 6px;
+  bottom: calc(var(--hud-ticker-height) + 10px);
   left: 50%;
   width: min(520px, 92vw);
   height: 48px;
@@ -450,6 +452,89 @@
   text-align: right;
 }
 
+/* Resources HUD — Pop, funds, approval, happiness, monthly budget */
+.hud-resources {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-family: var(--hud-font-mono);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--hud-text);
+}
+
+.hud-resources__stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  white-space: nowrap;
+}
+
+.hud-resources__label {
+  opacity: 0.65;
+  margin-right: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hud-resources__value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--hud-text);
+}
+
+.hud-resources__value--good {
+  color: #7dffb2;
+}
+
+.hud-resources__value--warn {
+  color: #e8d44a;
+}
+
+.hud-resources__value--bad {
+  color: var(--hud-error);
+}
+
+.hud-resources__sub {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
+}
+
+.hud-resources__sub--good {
+  color: #7dffb2;
+}
+
+.hud-resources__sub--bad {
+  color: var(--hud-error);
+}
+
+.hud-resources__budget {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+}
+
+.hud-resources__budget-in {
+  color: #7dffb2;
+  font-weight: 600;
+}
+
+.hud-resources__budget-sep {
+  color: var(--hud-text-dim);
+  font-size: 10px;
+}
+
+.hud-resources__budget-out {
+  color: var(--hud-error);
+  font-weight: 600;
+}
+
 /* ── Crisis warning modal (GAMEPLAY_LOOP #9) ── */
 
 .hud-crisis {
@@ -519,4 +604,165 @@
 
 .hud-crisis__dismiss:hover {
   background: rgba(94, 200, 255, 0.25);
+}
+
+/* ── Era transition fanfare (GAMEPLAY_LOOP #11) ── */
+
+.hud-era {
+  position: fixed;
+  inset: 0;
+  z-index: var(--hud-z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--hud-overlay);
+  font-family: var(--hud-font-mono);
+  pointer-events: auto;
+  animation: hud-era-fade-in 0.35s ease;
+}
+
+@keyframes hud-era-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hud-era__card {
+  width: min(480px, 100%);
+  padding: 22px 24px 20px;
+  background: var(--hud-panel-bg-solid);
+  border: 1px solid var(--hud-accent-border);
+  border-radius: var(--hud-radius-lg);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(94, 200, 255, 0.08) inset;
+  color: var(--hud-text);
+  text-align: center;
+  animation: hud-era-card-rise 0.45s ease;
+}
+
+@keyframes hud-era-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hud-era__eyebrow {
+  margin: 0 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hud-accent-highlight);
+}
+
+.hud-era__title {
+  margin: 0 0 12px;
+  font-family: var(--hud-font-sans);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--hud-text);
+}
+
+.hud-era__body {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--hud-text-muted);
+}
+
+.hud-era__badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hud-accent-highlight);
+  background: var(--hud-accent-soft);
+  border: 1px solid var(--hud-accent-border);
+}
+
+/* ── News ticker (GAMEPLAY_LOOP #10) ── */
+
+.hud-ticker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--hud-ticker-height);
+  display: flex;
+  align-items: stretch;
+  z-index: var(--hud-z-base);
+  background: var(--hud-panel-bg-solid);
+  border-top: 1px solid var(--hud-border-subtle);
+  font-family: var(--hud-font-mono);
+  font-size: 11px;
+  color: var(--hud-text-muted);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hud-ticker__label {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hud-accent-highlight);
+  background: var(--hud-accent-soft);
+  border-right: 1px solid var(--hud-border-subtle);
+}
+
+.hud-ticker__viewport {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.hud-ticker__track {
+  display: flex;
+  width: max-content;
+  animation: hud-ticker-scroll 45s linear infinite;
+}
+
+.hud-ticker__text {
+  white-space: nowrap;
+  padding-right: 4rem;
+  color: var(--hud-toast);
+}
+
+@keyframes hud-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-ticker__track {
+    animation: none;
+    transform: none;
+  }
+
+  .hud-ticker__text:last-child {
+    display: none;
+  }
 }

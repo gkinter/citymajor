@@ -12,6 +12,7 @@ export type SimCommand =
   | { type: "place_road"; tileX: number; tileZ: number }
   | { type: "zone_paint"; tileX: number; tileZ: number; zoneType: number }
   | { type: "bulldoze"; tileX: number; tileZ: number }
+  | { type: "enqueue_research"; techId: number }
   | { type: "set_speed"; level: GameSpeedLevel }
   | { type: "pause" }
   | { type: "resume" }

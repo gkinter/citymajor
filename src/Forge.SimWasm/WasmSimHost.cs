@@ -64,7 +64,7 @@ public sealed class WasmSimHost
         worldSize = NextPowerOfTwo(Math.Clamp(worldSize, WasmConfig.MinWorldSize, WasmConfig.MaxWorldSize));
 
         _config = new Config { WorldSize = worldSize, ChunkSize = WasmConfig.ChunkSize };
-        _state = new WorldState(worldSize, maxHouseholds: 10240, maxBuildings: 5120,
+        _state = new WorldState(worldSize, maxHouseholds: 8192, maxBuildings: 4096,
             maxRoadNodes: 16384, maxVehicles: 256);
         _eventBus = new EventBus();
 
@@ -171,6 +171,13 @@ public sealed class WasmSimHost
         _state.Tiles.ZoneType[idx] = 0;
         _state.Tiles.ZoneDensity[idx] = 0;
         // Building demolition lands in a follow-up command.
+    }
+
+    /// <summary>Enqueue a technology for research. Returns true if added to the queue.</summary>
+    public bool EnqueueResearch(int techId)
+    {
+        if (!IsInitialized) return false;
+        return _research.EnqueueResearch(techId, _state);
     }
 
     /// <summary>Place a single dirt-road tile and refresh neighbor connection flags.</summary>
@@ -670,23 +677,7 @@ public sealed class SimSnapshotDto
         EventSystem? events = null,
         EconomySystem? economy = null)
     {
-        var buildings = new BuildingDto[snap.BuildingCount];
-        for (int i = 0; i < snap.BuildingCount; i++)
-        {
-            var b = snap.Buildings[i];
-            int slot = FindBuildingSlot(state, b.GridX, b.GridY, b.TypeId);
-            buildings[i] = new BuildingDto
-            {
-                Id = slot >= 0 ? slot : i,
-                TypeId = b.TypeId,
-                TileX = b.GridX,
-                TileZ = b.GridY,
-                Level = b.Level,
-                State = b.State,
-                Condition = b.Condition,
-            };
-        }
-
+        var buildings = CollectBuildings(state);
         var zones = CollectZones(state);
         var roads = CollectRoads(state);
 
@@ -732,6 +723,31 @@ public sealed class SimSnapshotDto
         return result;
     }
 
+    /// <summary>
+    /// Walk allocated building pool slots — indices are sparse, not 0..Count-1.
+    /// SimSnapshot.CaptureFrom still packs by Count; WASM JSON uses pool slots directly.
+    /// </summary>
+    private static BuildingDto[] CollectBuildings(WorldState state)
+    {
+        var pool = state.Buildings;
+        var list = new List<BuildingDto>(pool.Count);
+        for (int i = 0; i < pool.Capacity; i++)
+        {
+            if (!pool.IsActive(i)) continue;
+            list.Add(new BuildingDto
+            {
+                Id = i,
+                TypeId = pool.TypeId[i],
+                TileX = pool.GridX[i],
+                TileZ = pool.GridY[i],
+                Level = pool.Level[i],
+                State = pool.State[i],
+                Condition = pool.Condition[i],
+            });
+        }
+        return list.ToArray();
+    }
+
     private static ZoneDto[] CollectZones(WorldState state)
     {
         var tiles = state.Tiles;
@@ -762,17 +778,6 @@ public sealed class SimSnapshotDto
         return list.ToArray();
     }
 
-    private static int FindBuildingSlot(WorldState state, int x, int y, ushort typeId)
-    {
-        var pool = state.Buildings;
-        for (int i = 0; i < pool.Capacity; i++)
-        {
-            if (!pool.IsActive(i)) continue;
-            if (pool.GridX[i] == x && pool.GridY[i] == y && pool.TypeId[i] == typeId)
-                return i;
-        }
-        return -1;
-    }
 }
 
 public sealed class BuildingDto

@@ -46,6 +46,12 @@ public static partial class Program
     }
 
     [JSExport]
+    public static bool EnqueueResearch(int techId)
+    {
+        return _host?.EnqueueResearch(techId) ?? false;
+    }
+
+    [JSExport]
     public static string GetStatus()
     {
         return _host?.GetStatusJson()

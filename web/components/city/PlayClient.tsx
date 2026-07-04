@@ -97,8 +97,6 @@ export function PlayClient() {
   simResourcesRef.current = simResources;
   const heraldedEventIdsRef = useRef<Set<number>>(new Set());
   const prevEraRef = useRef<number | null>(null);
-  const simResourcesRef = useRef(simResources);
-  simResourcesRef.current = simResources;
   const simApiRef = useRef(simApi);
   simApiRef.current = simApi;
 

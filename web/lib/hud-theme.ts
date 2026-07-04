@@ -86,7 +86,7 @@ export const HUD_ZONE = {
   },
   bottomCenter: {
     position: "absolute",
-    bottom: 12,
+    bottom: 46,
     left: "50%",
     transform: "translateX(-50%)",
     zIndex: HUD_Z.base,

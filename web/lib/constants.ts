@@ -43,3 +43,6 @@ export const CRISIS_LOW_APPROVAL_SESSION_KEY = "citymajor_crisis_low_approval_di
 
 /** Mayor approval below this percent triggers the low-approval warning (0–100). */
 export const LOW_APPROVAL_WARNING_THRESHOLD = 30;
+
+/** Duration of the era-transition fanfare modal (GAMEPLAY_LOOP #11). */
+export const ERA_TRANSITION_FANFARE_MS = 3000;

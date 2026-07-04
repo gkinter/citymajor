@@ -53,6 +53,7 @@ type HeraldPanelProps = {
   loading: boolean;
   error: string | null;
   quotaRemaining?: number;
+  specialEdition?: boolean;
   onOptionSelect?: (optionId: string) => void;
 };
 
@@ -63,6 +64,7 @@ export function HeraldPanel({
   loading,
   error,
   quotaRemaining,
+  specialEdition = false,
   onOptionSelect,
 }: HeraldPanelProps) {
   if (!open) return null;
@@ -72,10 +74,12 @@ export function HeraldPanel({
       <header style={headerStyle}>
         <div>
           <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: "0.04em" }}>
-            The Daily Herald
+            {specialEdition ? "The Daily Herald — Special Edition" : "The Daily Herald"}
           </div>
           <div style={{ opacity: 0.65, fontSize: 11, marginTop: 2 }}>
-            narrative remaining today: {formatQuota(quotaRemaining)}
+            {specialEdition
+              ? "commemorative era milestone"
+              : `narrative remaining today: ${formatQuota(quotaRemaining)}`}
           </div>
         </div>
         <button

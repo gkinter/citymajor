@@ -43,7 +43,7 @@ Open http://localhost:5174 — click **Run 1000 ticks**. The worker loads `Forge
 
 | Export | Description |
 |--------|-------------|
-| `Init(worldSize)` | Creates 256×256 (default) world with **10,240 HH / 5,120 building** pools (`SIM_V1_GAP_MATRIX` M2), seeds map + starter city (~220 buildings) |
+| `Init(worldSize)` | Creates 256×256 (default) world, seeds map + starter city (~220 buildings) |
 | `Tick(dtSeconds)` | Advances simulation; returns `tickCount` |
 | `GetRenderSnapshot()` | JSON string — see schema below |
 | `GetStatus()` | JSON metadata: tick count, population, city funds, era, tick intervals, included vs stubbed systems |
@@ -144,7 +144,7 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 - `WasmTrafficLite` — BPR-lite traffic (SB-3685 partial; see performance budget below)
 - `ZoneGrowthSystem`, `BudgetSystem`, `PoliticsSystem`, `EventSystem`, `ResearchSystem`, `CulturalDNASystem`
 - **Event effects (partial parity):** `RunDayTick` calls `ApplyEventEffectsToState` after `UpdateEvents`, matching desktop `IronAndOakGame` — applies aggregate happiness / approval modifiers from active events. Tile-local effects (crime, fire, pollution, etc.) remain inside `EventSystem.UpdateEvents`.
-- Engine data: `WorldState` (pools: 10,240 households, 5,120 buildings), `SimSnapshot`, `MapGenerator`, tile/building pools
+- Engine data: `WorldState`, `SimSnapshot`, `MapGenerator`, tile/building pools
 
 **Traffic modes (`GetStatus().trafficMode`):**
 

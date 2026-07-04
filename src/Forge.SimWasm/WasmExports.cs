@@ -50,6 +50,9 @@ public static partial class Program
         {
             initialized = _host.IsInitialized,
             tickCount = _host.TickCount,
+            population = _host.Population,
+            cityFunds = _host.CityFunds,
+            era = _host.Era,
             systems = new[]
             {
                 "EconomySystem",

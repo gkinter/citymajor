@@ -27,8 +27,14 @@ export type BuildingSnapshot = {
   condition: number;
 };
 
-export type SimSnapshot = {
+export type SimResources = {
   tick: number;
+  population: number;
+  cityFunds: number;
+  era: number;
+};
+
+export type SimSnapshot = SimResources & {
   buildings: BuildingSnapshot[];
   /** Sparse zoned tiles (non-zero zoneType). */
   zones?: ZoneSnapshot[];

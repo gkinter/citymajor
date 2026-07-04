@@ -5,8 +5,10 @@ import type { Entitlements } from "@/lib/entitlements";
 import type { FpsStats } from "@/lib/types";
 import type { ZoningTool } from "@/lib/zoning";
 import { FpsHud } from "@/components/city/FpsHud";
+import { ResourcesHud } from "@/components/city/ResourcesHud";
 import { CityCanvas } from "@/components/city/CityCanvas";
 import { ZoningToolbar } from "@/components/city/ZoningToolbar";
+import type { SimResources } from "@/lib/sim-bridge";
 
 export function PlayClient() {
   const [activeTool, setActiveTool] = useState<ZoningTool>("residential");
@@ -21,6 +23,7 @@ export function PlayClient() {
   });
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
   const [entitlementsError, setEntitlementsError] = useState<string | null>(null);
+  const [simResources, setSimResources] = useState<SimResources | null>(null);
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -55,7 +58,9 @@ export function PlayClient() {
       <CityCanvas
         activeTool={activeTool}
         onStats={setStats}
+        onSimResources={setSimResources}
       />
+      <ResourcesHud resources={simResources} />
       <FpsHud
         stats={stats}
         totalBuildings={stats.totalBuildings}

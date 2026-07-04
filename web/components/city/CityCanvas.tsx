@@ -6,7 +6,7 @@ import type { FpsStats, PickResult, CityData } from "@/lib/types";
 import { cityDataFromSnapshot, getCityData } from "@/lib/city-data";
 import { createChunkStates } from "@/lib/chunks";
 import { MAX_DPR } from "@/lib/constants";
-import { createSimBridge, type SimBridge } from "@/lib/sim-bridge";
+import { createSimBridge, type SimBridge, type SimResources } from "@/lib/sim-bridge";
 import type { ZoningTool, ZoneTile } from "@/lib/zoning";
 import { ENGINE_ZONE_TYPE } from "@/lib/zoning";
 import { CityScene } from "./CityScene";
@@ -15,9 +15,10 @@ import { AdaptiveDpr } from "./AdaptiveDpr";
 type CityCanvasProps = {
   activeTool: ZoningTool;
   onStats: (stats: FpsStats) => void;
+  onSimResources?: (resources: SimResources) => void;
 };
 
-export function CityCanvas({ activeTool, onStats }: CityCanvasProps) {
+export function CityCanvas({ activeTool, onStats, onSimResources }: CityCanvasProps) {
   const [city, setCity] = useState<CityData>(() => getCityData());
   const [zones, setZones] = useState<ZoneTile[]>([]);
   const [simSource, setSimSource] = useState<"wasm" | "procedural">(
@@ -66,6 +67,12 @@ export function CityCanvas({ activeTool, onStats }: CityCanvasProps) {
         bridge.onSnapshot((snapshot) => {
           setCity(cityDataFromSnapshot(snapshot));
           if (snapshot.zones) setZones(snapshot.zones);
+          onSimResources?.({
+            tick: snapshot.tick,
+            population: snapshot.population,
+            cityFunds: snapshot.cityFunds,
+            era: snapshot.era,
+          });
         });
         startTickLoop();
       } catch (err) {

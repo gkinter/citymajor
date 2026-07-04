@@ -36,6 +36,9 @@ public sealed class WasmSimHost
 
     public bool IsInitialized { get; private set; }
     public long TickCount => _state?.TickCount ?? 0;
+    public int Population => _state?.Population ?? 0;
+    public long CityFunds => _state?.CityFunds ?? 0;
+    public int Era => _state?.Era ?? 0;
 
     public void Init(int worldSize = WasmConfig.DefaultWorldSize)
     {
@@ -381,6 +384,9 @@ public sealed class WasmSimHost
 public sealed class SimSnapshotDto
 {
     public long Tick { get; init; }
+    public int Population { get; init; }
+    public long CityFunds { get; init; }
+    public int Era { get; init; }
     public BuildingDto[] Buildings { get; init; } = [];
     public ZoneDto[] Zones { get; init; } = [];
 
@@ -408,6 +414,9 @@ public sealed class SimSnapshotDto
         return new SimSnapshotDto
         {
             Tick = snap.TickCount,
+            Population = state.Population,
+            CityFunds = state.CityFunds,
+            Era = state.Era,
             Buildings = buildings,
             Zones = zones,
         };
@@ -459,6 +468,7 @@ public sealed class ZoneDto
     public byte ZoneType { get; init; }
 }
 
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(SimSnapshotDto))]
 [JsonSerializable(typeof(BuildingDto))]
 [JsonSerializable(typeof(ZoneDto))]

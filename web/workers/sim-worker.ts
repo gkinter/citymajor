@@ -136,12 +136,18 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
 }
 
 function readSnapshot(): SimSnapshot {
-  if (!sim) return { tick: 0, buildings: [], zones: [] };
+  if (!sim) {
+    return { tick: 0, population: 0, cityFunds: 0, era: 0, buildings: [], zones: [] };
+  }
 
-  const parsed = JSON.parse(sim.GetRenderSnapshot()) as SimSnapshot;
+  const parsed = JSON.parse(sim.GetRenderSnapshot()) as Partial<SimSnapshot>;
   const grid = ensureZoneGrid(worldSize);
   return {
-    ...parsed,
+    tick: parsed.tick ?? 0,
+    population: parsed.population ?? 0,
+    cityFunds: parsed.cityFunds ?? 0,
+    era: parsed.era ?? 0,
+    buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
   };
 }

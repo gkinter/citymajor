@@ -43,6 +43,17 @@ export type TrafficSnapshot = {
   density: number;
 };
 
+/** Per-tile service coverage on zoned land (0–1 each). */
+export type ServiceCoverageSnapshot = {
+  tileX: number;
+  tileZ: number;
+  health: number;
+  police: number;
+  fire: number;
+};
+
+export type ServiceViewMode = "off" | "health" | "police" | "fire";
+
 export type BuildingSnapshot = {
   id: number;
   typeId: number;
@@ -89,6 +100,8 @@ export type SimResources = {
   population: number;
   /** Present when WASM status JSON includes householdCount. */
   householdCount?: number;
+  /** WASM GetStatus — net population change per game month when exported. */
+  populationGrowthRate?: number;
   cityFunds: number;
   era: number;
   /** WASM GetStatus — progress toward next era (WasmConfig thresholds). */
@@ -107,11 +120,19 @@ export type SimResources = {
   approval?: number;
   /** City happiness (0–1). */
   happiness?: number;
+  /** WASM GetStatus — building pool count; used to detect growth without full render diff. */
+  buildingCount?: number;
   /** Current-month income / expense totals from BudgetSystem ledgers. */
   monthlyIncome?: number;
   monthlyExpenses?: number;
   /** Live EventSystem instances from WASM GetStatus / snapshot. */
   activeEvents?: ActiveEventSnapshot[];
+  /** WASM GetStatus — mean health coverage over zoned tiles (0–1). */
+  healthcareCoverage?: number;
+  /** WASM GetStatus — mean police coverage over zoned tiles (0–1). */
+  policeCoverage?: number;
+  /** WASM GetStatus — mean fire coverage over zoned tiles (0–1). */
+  fireCoverage?: number;
 };
 
 /** Strip render payload from a full sim snapshot for HUD consumers. */
@@ -121,6 +142,7 @@ export function resourcesFromSnapshot(snapshot: SimSnapshot): SimResources {
     zones: _zones,
     roads: _roads,
     traffic: _traffic,
+    serviceCoverage: _serviceCoverage,
     ...resources
   } = snapshot;
   return resources;
@@ -134,6 +156,8 @@ export type SimSnapshot = SimResources & {
   roads?: RoadSnapshot[];
   /** Sparse road tiles with congestion density (≥0.01). */
   traffic?: TrafficSnapshot[];
+  /** Sparse zoned tiles with health/police/fire coverage (0–1). */
+  serviceCoverage?: ServiceCoverageSnapshot[];
 };
 
 export interface SimBridge {

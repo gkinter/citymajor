@@ -3,6 +3,7 @@
 import type {
   ActiveEventSnapshot,
   RoadSnapshot,
+  ServiceCoverageSnapshot,
   SimCommand,
   SimSnapshot,
   ZoneSnapshot,
@@ -36,10 +37,15 @@ type WasmStatus = {
   researchPoints?: number;
   researchRate?: number;
   techCount?: number;
+  currentResearchId?: number;
+  currentResearchProgress?: number;
+  currentResearchMonthsRemaining?: number;
+  unlockedTechIds?: number[];
   approval?: number;
   happiness?: number;
   monthlyIncome?: number;
   monthlyExpenses?: number;
+  buildingCount?: number;
   eraProgress?: {
     nextEra?: number;
     nextEraName?: string;
@@ -60,6 +66,9 @@ type WasmStatus = {
     tileX?: number;
     tileY?: number;
   }>;
+  healthcareCoverage?: number;
+  policeCoverage?: number;
+  fireCoverage?: number;
 };
 
 type SimExports = {
@@ -95,6 +104,8 @@ const SNAPSHOT_MIN_MS = 250;
 /** Lightweight GetStatus polls for HUD between full render snapshots. */
 const RESOURCE_MIN_MS = 100;
 let lastPublished: SimSnapshot | null = null;
+/** Tracks WASM building pool count to force render snapshots when ZoneGrowthSystem spawns. */
+let lastPublishedBuildingCount: number | null = null;
 /** Optimistic zone grid — merged into snapshots when WASM lacks zone data. */
 let zoneGrid: Uint8Array | null = null;
 /** Optimistic road flags grid — merged into snapshots for placed roads. */
@@ -285,11 +296,32 @@ function parseActiveEvents(
   return events.length > 0 ? events : undefined;
 }
 
+function parseServiceCoverage(
+  raw: unknown,
+): ServiceCoverageSnapshot[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const tiles: ServiceCoverageSnapshot[] = [];
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null) continue;
+    const t = item as Record<string, unknown>;
+    if (typeof t.tileX !== "number" || typeof t.tileZ !== "number") continue;
+    tiles.push({
+      tileX: t.tileX,
+      tileZ: t.tileZ,
+      health: typeof t.health === "number" ? t.health : 0,
+      police: typeof t.police === "number" ? t.police : 0,
+      fire: typeof t.fire === "number" ? t.fire : 0,
+    });
+  }
+  return tiles.length > 0 ? tiles : undefined;
+}
+
 function readStatus(): Pick<
   SimSnapshot,
   | "tick"
   | "population"
   | "householdCount"
+  | "populationGrowthRate"
   | "cityFunds"
   | "era"
   | "residentialDemand"
@@ -302,8 +334,12 @@ function readStatus(): Pick<
   | "happiness"
   | "monthlyIncome"
   | "monthlyExpenses"
+  | "buildingCount"
   | "eraProgress"
   | "activeEvents"
+  | "healthcareCoverage"
+  | "policeCoverage"
+  | "fireCoverage"
 > | null {
   if (!sim?.GetStatus) return null;
   try {
@@ -331,6 +367,7 @@ function readStatus(): Pick<
       tick: parsed.tick ?? parsed.tickCount ?? 0,
       population: parsed.population ?? 0,
       householdCount: parsed.householdCount,
+      populationGrowthRate: parsed.populationGrowthRate,
       cityFunds: parsed.cityFunds ?? 0,
       era: parsed.era ?? 0,
       residentialDemand: parsed.residentialDemand,
@@ -343,8 +380,12 @@ function readStatus(): Pick<
       happiness: parsed.happiness,
       monthlyIncome: parsed.monthlyIncome,
       monthlyExpenses: parsed.monthlyExpenses,
+      buildingCount: parsed.buildingCount,
       eraProgress,
       activeEvents: parseActiveEvents(parsed.activeEvents),
+      healthcareCoverage: parsed.healthcareCoverage,
+      policeCoverage: parsed.policeCoverage,
+      fireCoverage: parsed.fireCoverage,
     };
   } catch {
     return null;
@@ -371,6 +412,9 @@ function readSnapshot(): SimSnapshot {
   return {
     tick: parsed.tick ?? status?.tick ?? 0,
     population: parsed.population ?? status?.population ?? 0,
+    householdCount: parsed.householdCount ?? status?.householdCount,
+    populationGrowthRate:
+      parsed.populationGrowthRate ?? status?.populationGrowthRate,
     cityFunds: parsed.cityFunds ?? status?.cityFunds ?? 0,
     era: parsed.era ?? status?.era ?? 0,
     residentialDemand:
@@ -380,6 +424,13 @@ function readSnapshot(): SimSnapshot {
     researchPoints: parsed.researchPoints ?? status?.researchPoints,
     researchRate: parsed.researchRate ?? status?.researchRate,
     techCount: parsed.techCount ?? status?.techCount,
+    currentResearchId: parsed.currentResearchId ?? status?.currentResearchId,
+    currentResearchProgress:
+      parsed.currentResearchProgress ?? status?.currentResearchProgress,
+    currentResearchMonthsRemaining:
+      parsed.currentResearchMonthsRemaining ??
+      status?.currentResearchMonthsRemaining,
+    unlockedTechIds: parsed.unlockedTechIds ?? status?.unlockedTechIds,
     approval: parsed.approval ?? status?.approval,
     happiness: parsed.happiness ?? status?.happiness,
     monthlyIncome: parsed.monthlyIncome ?? status?.monthlyIncome,
@@ -387,16 +438,23 @@ function readSnapshot(): SimSnapshot {
     eraProgress: parsed.eraProgress ?? status?.eraProgress,
     activeEvents:
       parseActiveEvents(parsed.activeEvents) ?? status?.activeEvents,
+    healthcareCoverage:
+      parsed.healthcareCoverage ?? status?.healthcareCoverage,
+    policeCoverage: parsed.policeCoverage ?? status?.policeCoverage,
+    fireCoverage: parsed.fireCoverage ?? status?.fireCoverage,
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),
     traffic: parsed.traffic ?? [],
+    serviceCoverage: parseServiceCoverage(parsed.serviceCoverage),
   };
 }
 
 function publishSnapshot() {
   const snapshot = readSnapshot();
   lastPublished = snapshot;
+  lastPublishedBuildingCount =
+    readStatus()?.buildingCount ?? snapshot.buildings.length;
   post({ type: "snapshot", snapshot });
 }
 
@@ -495,6 +553,7 @@ function loadSnapshot(snapshot: SimSnapshot) {
   simAccumMs = 0;
   lastSnapshotMs = 0;
   lastResourceMs = 0;
+  lastPublishedBuildingCount = null;
   publishSnapshot();
   post({ type: "load_complete", ok: true });
 }
@@ -539,7 +598,13 @@ function handleCommand(command: SimCommand) {
           simAccumMs = SIM_TICK_MS * MAX_TICKS_PER_MESSAGE;
         }
         if (simTicked) {
-          if (now - lastSnapshotMs >= SNAPSHOT_MIN_MS) {
+          const status = readStatus();
+          const wasmBuildingCount = status?.buildingCount;
+          const buildingCountChanged =
+            wasmBuildingCount !== undefined &&
+            wasmBuildingCount !== lastPublishedBuildingCount;
+
+          if (buildingCountChanged || now - lastSnapshotMs >= SNAPSHOT_MIN_MS) {
             lastSnapshotMs = now;
             lastResourceMs = now;
             publishSnapshot();
@@ -596,6 +661,7 @@ ctx.onmessage = async (event: MessageEvent<WorkerInbound>) => {
       lastSnapshotMs = 0;
       lastResourceMs = 0;
       lastPublished = null;
+      lastPublishedBuildingCount = null;
       publishSnapshot();
       post({ type: "ready" });
     } catch (err) {

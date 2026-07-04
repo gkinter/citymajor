@@ -45,6 +45,8 @@ import { EraProgressPanel } from "@/components/city/EraProgressPanel";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
 import { SpeedToolbar } from "@/components/city/SpeedToolbar";
 import { ZoningToolbar } from "@/components/city/ZoningToolbar";
+import { ServicesToolbar } from "@/components/city/ServicesToolbar";
+import type { ServiceViewMode } from "@/lib/sim-bridge";
 import {
   isResidentialZonePaint,
   OnboardingOverlay,
@@ -141,6 +143,14 @@ export function PlayClient() {
     window.localStorage.setItem(GRAPHICS_QUALITY_STORAGE_KEY, tier);
   }, []);
 
+  const handleTrafficOverlayToggle = useCallback((enabled: boolean) => {
+    setShowTrafficOverlay(enabled);
+    window.localStorage.setItem(
+      TRAFFIC_OVERLAY_STORAGE_KEY,
+      enabled ? "on" : "off",
+    );
+  }, []);
+
   const fetchHeraldStory = useCallback(async (simEvent?: ActiveEventSnapshot) => {
     if (simEvent) {
       setHeraldLoading(true);
@@ -160,7 +170,10 @@ export function PlayClient() {
       return;
     }
 
-    const coverage = statsRef.current.healthcareCoverage ?? 0.5;
+    const coverage =
+      simResourcesRef.current?.healthcareCoverage ??
+      statsRef.current.healthcareCoverage ??
+      0.5;
     const resources = simResourcesRef.current;
     const bucket: SimStateBucket = deriveNarrativeBucket({
       healthcareCoverage: coverage,
@@ -367,6 +380,7 @@ export function PlayClient() {
         showTrafficOverlay={showTrafficOverlay}
         activeEvents={simResources?.activeEvents}
         onEventMarkerClick={openHerald}
+        showTrafficOverlay={showTrafficOverlay}
         onStats={setStats}
         onSimResources={setSimResources}
         onSimApi={setSimApi}
@@ -396,6 +410,7 @@ export function PlayClient() {
         brushSize={brushSize}
         onToolChange={setActiveTool}
         onBrushSizeChange={setBrushSize}
+        rci={resolveRci(simResources)}
       />
 
       <div

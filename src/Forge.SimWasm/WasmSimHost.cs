@@ -44,7 +44,26 @@ public sealed class WasmSimHost
     public float ResearchPoints => _state?.ResearchPoints ?? 0f;
     public float ResearchRate => _state?.ResearchRate ?? 0f;
     public int EventDefinitionCount => _events?.Definitions.Count ?? 0;
-    public int TechCount => _research?.TechCount ?? 0;
+    /// <summary>Count of unlocked technologies (not catalog size).</summary>
+    public int UnlockedTechCount =>
+        _state is null ? 0 : ResearchSystem.CountUnlockedTechs(_state);
+    public int CurrentResearchId => _state?.CurrentResearchId ?? -1;
+    public float CurrentResearchProgress => _state?.CurrentResearchProgress ?? 0f;
+    /// <summary>Estimated game-months until the active queue item completes.</summary>
+    public float CurrentResearchMonthsRemaining
+    {
+        get
+        {
+            if (_research is null || _state is null) return 0f;
+            if (_research.ResearchQueue[0] == -1) return 0f;
+            float rate = _state.ResearchRate;
+            if (rate <= 0f) return -1f;
+            int techId = _research.ResearchQueue[0];
+            float cost = _research.GetEffectiveCost(techId);
+            float remaining = Math.Max(0f, cost - _research.QueueProgress[0]);
+            return remaining / rate;
+        }
+    }
     public WasmTrafficMode TrafficMode => WasmTrafficMode.Lite;
     public ActiveEventDto[] ActiveEvents => CollectActiveEvents();
     public float ResidentialDemand => _economy?.ResidentialDemand ?? 0f;
@@ -54,10 +73,34 @@ public sealed class WasmSimHost
     public float Happiness => _state?.Happiness ?? 0f;
     public long MonthlyIncome => _state?.Income.Total ?? 0;
     public long MonthlyExpenses => _state?.Expenses.Total ?? 0;
+    public int BuildingCount => _state?.Buildings.Count ?? 0;
     public EraProgressSnapshot EraProgress =>
         _state is null || _research is null
             ? new EraProgressSnapshot()
             : WasmEraDeriver.GetEraProgress(_state, _research);
+
+    /// <summary>City-wide average health coverage over zoned tiles (0–1).</summary>
+    public float HealthcareCoverage =>
+        _services is null || _state is null ? 0f : ComputeAverageCoverage(_services.HealthCoverage);
+
+    /// <summary>City-wide average police coverage over zoned tiles (0–1).</summary>
+    public float PoliceCoverage =>
+        _services is null || _state is null ? 0f : ComputeAverageCoverage(_services.PoliceCoverage);
+
+    /// <summary>City-wide average fire coverage over zoned tiles (0–1).</summary>
+    public float FireCoverage =>
+        _services is null || _state is null ? 0f : ComputeAverageCoverage(_services.FireCoverage);
+
+    public int[] CollectUnlockedTechIds()
+    {
+        if (_state is null) return [];
+        var ids = new List<int>();
+        for (int i = 0; i < ResearchSystem.MaxTechnologies; i++)
+        {
+            if (_state.IsTechUnlocked(i)) ids.Add(i);
+        }
+        return ids.ToArray();
+    }
 
     public void Init(int worldSize = WasmConfig.DefaultWorldSize)
     {
@@ -139,7 +182,7 @@ public sealed class WasmSimHost
         if (!IsInitialized) return "{}";
 
         var snap = SimSnapshot.CaptureFrom(_state);
-        var dto = SimSnapshotDto.From(snap, _state, _events, _economy);
+        var dto = SimSnapshotDto.From(snap, _state, _events, _economy, _services);
         return JsonSerializer.Serialize(dto, JsonContext.Default.SimSnapshotDto);
     }
 
@@ -332,6 +375,24 @@ public sealed class WasmSimHost
         int idx = _state.Tiles.Index(x, y);
         if (_state.Tiles.RoadFlags[idx] == 0) return;
         _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y);
+    }
+
+    /// <summary>Mean influence-map value across all zoned tiles.</summary>
+    private float ComputeAverageCoverage(InfluenceMap map)
+    {
+        var tiles = _state.Tiles;
+        double sum = 0;
+        int count = 0;
+        for (int y = 0; y < tiles.Size; y++)
+        for (int x = 0; x < tiles.Size; x++)
+        {
+            int idx = tiles.Index(x, y);
+            if (tiles.ZoneType[idx] == 0) continue;
+            sum += Math.Clamp(map.GetValue(x, y), 0f, 1f);
+            count++;
+        }
+
+        return count == 0 ? 0f : (float)(sum / count);
     }
 
     private void RunDayTick()
@@ -689,16 +750,27 @@ public sealed class WasmStatusDto
     public float Happiness { get; init; }
     public long MonthlyIncome { get; init; }
     public long MonthlyExpenses { get; init; }
+    public int BuildingCount { get; init; }
     public float ResearchPoints { get; init; }
     public float ResearchRate { get; init; }
     public int EventDefinitionCount { get; init; }
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
     public int TechCount { get; init; }
+    public int CurrentResearchId { get; init; } = -1;
+    public float CurrentResearchProgress { get; init; }
+    public float CurrentResearchMonthsRemaining { get; init; }
+    public int[] UnlockedTechIds { get; init; } = [];
     public string TrafficMode { get; init; } = "";
     public TickIntervalsDto TickIntervals { get; init; } = new();
     public TrafficLiteInfoDto TrafficLite { get; init; } = new();
     public string[] Systems { get; init; } = [];
     public string[] Stubbed { get; init; } = [];
+    /// <summary>Mean health coverage over zoned tiles (0–1) from ServiceSystem.</summary>
+    public float HealthcareCoverage { get; init; }
+    /// <summary>Mean police coverage over zoned tiles (0–1).</summary>
+    public float PoliceCoverage { get; init; }
+    /// <summary>Mean fire coverage over zoned tiles (0–1).</summary>
+    public float FireCoverage { get; init; }
 
     public static WasmStatusDto From(WasmSimHost host) => new()
     {
@@ -718,6 +790,7 @@ public sealed class WasmStatusDto
         Happiness = host.Happiness,
         MonthlyIncome = host.MonthlyIncome,
         MonthlyExpenses = host.MonthlyExpenses,
+        BuildingCount = host.BuildingCount,
         ResearchPoints = host.ResearchPoints,
         ResearchRate = host.ResearchRate,
         EventDefinitionCount = host.EventDefinitionCount,
@@ -756,6 +829,9 @@ public sealed class WasmStatusDto
             "TrafficSystem full (500 zones — desktop only; WASM uses lite mode)",
             "TradeSystem (not wired in spike)",
         ],
+        HealthcareCoverage = host.HealthcareCoverage,
+        PoliceCoverage = host.PoliceCoverage,
+        FireCoverage = host.FireCoverage,
     };
 }
 
@@ -782,18 +858,22 @@ public sealed class SimSnapshotDto
     public RoadDto[] Roads { get; init; } = [];
     /// <summary>Sparse road tiles with congestion density (0–1).</summary>
     public TrafficDto[] Traffic { get; init; } = [];
+    /// <summary>Sparse zoned tiles with per-service coverage (0–1).</summary>
+    public ServiceCoverageDto[] ServiceCoverage { get; init; } = [];
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
         WorldState state,
         EventSystem? events = null,
-        EconomySystem? economy = null)
+        EconomySystem? economy = null,
+        ServiceSystem? services = null)
     {
         var buildings = CollectBuildings(state);
         var zones = CollectZones(state);
         var roads = CollectRoads(state);
         var traffic = CollectTraffic(state);
+        var serviceCoverage = services is null ? [] : CollectServiceCoverage(state, services);
 
         return new SimSnapshotDto
         {
@@ -813,6 +893,7 @@ public sealed class SimSnapshotDto
             Zones = zones,
             Roads = roads,
             Traffic = traffic,
+            ServiceCoverage = serviceCoverage,
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
         };
     }
@@ -909,6 +990,35 @@ public sealed class SimSnapshotDto
         return list.ToArray();
     }
 
+    private static ServiceCoverageDto[] CollectServiceCoverage(WorldState state, ServiceSystem services)
+    {
+        var tiles = state.Tiles;
+        var health = services.HealthCoverage;
+        var police = services.PoliceCoverage;
+        var fire = services.FireCoverage;
+        var list = new List<ServiceCoverageDto>(512);
+        for (int y = 0; y < tiles.Size; y++)
+        for (int x = 0; x < tiles.Size; x++)
+        {
+            int idx = tiles.Index(x, y);
+            if (tiles.ZoneType[idx] == 0) continue;
+
+            float h = Math.Clamp(health.GetValue(x, y), 0f, 1f);
+            float p = Math.Clamp(police.GetValue(x, y), 0f, 1f);
+            float f = Math.Clamp(fire.GetValue(x, y), 0f, 1f);
+            list.Add(new ServiceCoverageDto
+            {
+                TileX = x,
+                TileZ = y,
+                Health = h,
+                Police = p,
+                Fire = f,
+            });
+        }
+
+        return list.ToArray();
+    }
+
 }
 
 public sealed class BuildingDto
@@ -943,6 +1053,15 @@ public sealed class TrafficDto
     public float Density { get; init; }
 }
 
+public sealed class ServiceCoverageDto
+{
+    public int TileX { get; init; }
+    public int TileZ { get; init; }
+    public float Health { get; init; }
+    public float Police { get; init; }
+    public float Fire { get; init; }
+}
+
 public sealed class ActiveEventDto
 {
     public int EventId { get; init; }
@@ -963,6 +1082,8 @@ public sealed class ActiveEventDto
 [JsonSerializable(typeof(RoadDto[]))]
 [JsonSerializable(typeof(TrafficDto))]
 [JsonSerializable(typeof(TrafficDto[]))]
+[JsonSerializable(typeof(ServiceCoverageDto))]
+[JsonSerializable(typeof(ServiceCoverageDto[]))]
 [JsonSerializable(typeof(ActiveEventDto))]
 [JsonSerializable(typeof(ActiveEventDto[]))]
 [JsonSerializable(typeof(WasmStatusDto))]

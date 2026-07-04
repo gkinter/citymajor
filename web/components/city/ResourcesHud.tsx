@@ -9,6 +9,7 @@ import {
 } from "@/lib/hud-theme";
 import { LOW_HAPPINESS_APPROVAL } from "@/lib/sim-metrics";
 import type { RciDemand, SimResources } from "@/lib/sim-bridge";
+import { formatGrowthPerMonth } from "@/lib/population-growth";
 import { resolveRci } from "@/lib/zoning-economy";
 
 function formatFunds(cityFunds: number): string {
@@ -103,9 +104,14 @@ function RciMeter({ label, demand }: RciMeterProps) {
 
 type ResourcesHudProps = {
   resources: SimResources | null;
+  /** Client-estimated or WASM-exported net population change per game month. */
+  populationGrowthPerMonth?: number | null;
 };
 
-export function ResourcesHud({ resources }: ResourcesHudProps) {
+export function ResourcesHud({
+  resources,
+  populationGrowthPerMonth = null,
+}: ResourcesHudProps) {
   const panelStyle = hudPanel({
     ...HUD_ZONE.resources,
     display: "flex",
@@ -133,6 +139,8 @@ export function ResourcesHud({ resources }: ResourcesHudProps) {
     resources && hasMonthlyBudget(resources)
       ? resources.monthlyIncome! - resources.monthlyExpenses!
       : null;
+  const growthRate =
+    resources?.populationGrowthRate ?? populationGrowthPerMonth ?? null;
 
   return (
     <div style={panelStyle}>
@@ -142,6 +150,28 @@ export function ResourcesHud({ resources }: ResourcesHudProps) {
           <span className="hud-resources__value">
             {resources ? formatPopulation(resources.population) : "—"}
           </span>
+          {resources?.householdCount !== undefined ? (
+            <span
+              className="hud-resources__sub"
+              title="Households tracked by PopulationSystem"
+            >
+              ({resources.householdCount.toLocaleString()} homes)
+            </span>
+          ) : null}
+          {growthRate !== null ? (
+            <span
+              className={`hud-resources__sub ${
+                growthRate > 0
+                  ? "hud-resources__sub--good"
+                  : growthRate < 0
+                    ? "hud-resources__sub--bad"
+                    : ""
+              }`}
+              title="Net population change per game month"
+            >
+              ({formatGrowthPerMonth(growthRate)})
+            </span>
+          ) : null}
         </div>
 
         <div className="hud-resources__stat">

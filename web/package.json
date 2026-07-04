@@ -9,7 +9,8 @@
     "lint": "next lint",
     "build:wasm": "bash ./wasm/build-wasm.sh",
     "dev:wasm": "pnpm build:wasm && pnpm dev",
-    "smoke:play": "node ./scripts/smoke-play.mjs"
+    "smoke:play": "node ./scripts/smoke-play.mjs",
+    "generate:gltf-placeholders": "node ./scripts/generate-placeholder-gltf.mjs"
   },
   "dependencies": {
     "@citymajor/sim-types": "workspace:*",
@@ -23,6 +24,7 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@gltf-transform/core": "^4.2.1",
     "playwright": "^1.51.1",
     "@types/node": "^22.15.3",
     "@types/react": "^19.1.2",

@@ -37,3 +37,7 @@ All `.glb` files in these directories MUST:
 1. Have their pivot point positioned at the bottom-center (0, 0, 0 ground plane).
 2. Be scaled to represent exactly 1 simulation story in height (unit scale).
 3. Be optimized (textures compressed, unnecessary nodes flattened).
+
+## Placeholders (until Meshy)
+
+Five procedural placeholder modules ship with the R3F spike. Regenerate via `pnpm generate:gltf-placeholders` in `web/`. See `docs/MESHY_ASSET_PIPELINE.md` and `web/lib/gltf-catalog.ts` for paths and replacement workflow.

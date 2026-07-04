@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { z } from "zod";
 import type { Tier } from "@/lib/entitlements";
 import { entitlementsForTier } from "@/lib/entitlements";
+import { getUserIdFromRequest } from "@/lib/user-identity";
 
 const QuotaFileSchema = z.record(
   z.string(),
@@ -48,8 +49,13 @@ function persistStore(store: QuotaStore): void {
   }
 }
 
+/**
+ * Server-side identity — pulled ONLY from the signed HTTP-only identity
+ * cookie so clients cannot impersonate another user's quota by setting
+ * request headers.
+ */
 export function userKeyFromRequest(req: Request): string {
-  return req.headers.get("x-citymajor-user") ?? "default-user";
+  return getUserIdFromRequest(req) ?? "anonymous";
 }
 
 function usageForUser(store: QuotaStore, userKey: string): number {

@@ -70,6 +70,7 @@ type SimExports = {
   Bulldoze?: (x: number, y: number) => void;
   PlaceRoad?: (x: number, y: number) => void;
   EnqueueResearch?: (techId: number) => boolean;
+  LoadSnapshot?: (snapshotJson: string) => boolean;
 };
 
 let sim: SimExports | null = null;
@@ -214,6 +215,7 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
   const bulldoze = source.Bulldoze ?? source.bulldoze;
   const placeRoad = source.PlaceRoad ?? source.placeRoad;
   const enqueueResearch = source.EnqueueResearch ?? source.enqueueResearch;
+  const loadSnapshot = source.LoadSnapshot ?? source.loadSnapshot;
   if (
     typeof init !== "function" ||
     typeof tick !== "function" ||
@@ -246,6 +248,10 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
     EnqueueResearch:
       typeof enqueueResearch === "function"
         ? (enqueueResearch as (techId: number) => boolean)
+        : undefined,
+    LoadSnapshot:
+      typeof loadSnapshot === "function"
+        ? (loadSnapshot as (snapshotJson: string) => boolean)
         : undefined,
   };
 }

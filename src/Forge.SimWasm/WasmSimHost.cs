@@ -13,6 +13,12 @@ namespace Forge.SimWasm;
 /// </summary>
 public sealed class WasmSimHost
 {
+    private static readonly JsonSerializerOptions RenderSnapshotJsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        TypeInfoResolver = JsonContext.Default,
+    };
+
     private Config _config = null!;
     private WorldState _state = null!;
     private EventBus _eventBus = null!;
@@ -140,7 +146,7 @@ public sealed class WasmSimHost
 
         var snap = SimSnapshot.CaptureFrom(_state);
         var dto = SimSnapshotDto.From(snap, _state, _events, _economy);
-        return JsonSerializer.Serialize(dto, JsonContext.Default.SimSnapshotDto);
+        return JsonSerializer.Serialize(dto, RenderSnapshotJsonOptions);
     }
 
     public string GetStatusJson()
@@ -196,6 +202,114 @@ public sealed class WasmSimHost
         RefreshRoadFlagsAt(x + 1, y);
         RefreshRoadFlagsAt(x, y - 1);
         RefreshRoadFlagsAt(x, y + 1);
+    }
+
+    public bool EnqueueResearch(int techId)
+    {
+        if (!IsInitialized || _research is null) return false;
+        return _research.EnqueueResearch(techId, _state);
+    }
+
+    /// <summary>
+    /// Restore simulation state from a Layer-C JSON snapshot (save/load v1).
+    /// Re-inits the world shell, clears starter content, then applies saved tiles/buildings/scalars.
+    /// </summary>
+    public bool LoadSnapshotFromJson(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return false;
+
+        SimSnapshotDto? dto;
+        try
+        {
+            dto = JsonSerializer.Deserialize(json, JsonContext.Default.SimSnapshotDto);
+        }
+        catch
+        {
+            return false;
+        }
+
+        if (dto is null) return false;
+
+        int size = _config?.WorldSize ?? WasmConfig.DefaultWorldSize;
+        Init(size);
+        ApplySnapshotDto(dto);
+        return true;
+    }
+
+    private void ApplySnapshotDto(SimSnapshotDto dto)
+    {
+        ClearBuildings();
+        ClearZonesAndRoads();
+
+        foreach (var zone in dto.Zones)
+        {
+            if (!_state.Tiles.InBounds(zone.TileX, zone.TileZ)) continue;
+            PaintZone(zone.TileX, zone.TileZ, zone.ZoneType);
+        }
+
+        foreach (var road in dto.Roads)
+        {
+            if (!_state.Tiles.InBounds(road.TileX, road.TileZ)) continue;
+            int idx = _state.Tiles.Index(road.TileX, road.TileZ);
+            _state.Tiles.RoadFlags[idx] = road.RoadFlags != 0 ? road.RoadFlags : (byte)0x01;
+            _state.Roads.AddNode(road.TileX, road.TileZ);
+        }
+
+        foreach (var building in dto.Buildings)
+        {
+            if (!_state.Tiles.InBounds(building.TileX, building.TileZ)) continue;
+
+            int slot = _state.Buildings.Allocate();
+            if (slot < 0) break;
+
+            _state.Buildings.GridX[slot] = building.TileX;
+            _state.Buildings.GridY[slot] = building.TileZ;
+            _state.Buildings.Width[slot] = 1;
+            _state.Buildings.Height[slot] = 1;
+            _state.Buildings.TypeId[slot] = building.TypeId;
+            _state.Buildings.Level[slot] = building.Level == 0 ? (byte)1 : building.Level;
+            _state.Buildings.State[slot] = building.State == 0 ? (byte)1 : building.State;
+            _state.Buildings.Condition[slot] = building.Condition == 0 ? (byte)255 : building.Condition;
+            _state.Buildings.Occupants[slot] = 0;
+            _state.Buildings.MaxOccupants[slot] = 48;
+        }
+
+        _state.TickCount = dto.Tick;
+        _state.Population = dto.Population;
+        _state.CityFunds = dto.CityFunds;
+        _state.Era = dto.Era;
+        _state.Happiness = dto.Happiness;
+        _state.ApprovalRating = Math.Clamp(dto.Approval / 100f, 0f, 1f);
+        _state.Income.Reset();
+        _state.Expenses.Reset();
+        if (dto.MonthlyIncome > 0)
+            _state.Income.PropertyTax = dto.MonthlyIncome;
+        if (dto.MonthlyExpenses > 0)
+            _state.Expenses.Infrastructure = dto.MonthlyExpenses;
+
+        _trafficLiteAccumulator = 0;
+        _trafficEdgeBatchAccumulator = 0;
+        _dayAccumulator = 0;
+        _monthAccumulator = 0;
+        _populationStaggerBucket = 0;
+    }
+
+    private void ClearBuildings()
+    {
+        var pool = _state.Buildings;
+        for (int i = 0; i < pool.Capacity; i++)
+        {
+            if (pool.IsActive(i))
+                pool.Free(i);
+        }
+    }
+
+    private void ClearZonesAndRoads()
+    {
+        var tiles = _state.Tiles;
+        Array.Clear(tiles.ZoneType, 0, tiles.ZoneType.Length);
+        Array.Clear(tiles.ZoneDensity, 0, tiles.ZoneDensity.Length);
+        Array.Clear(tiles.RoadFlags, 0, tiles.RoadFlags.Length);
     }
 
     private byte ComputeRoadFlags(int x, int y)
@@ -818,8 +932,11 @@ public sealed class ActiveEventDto
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(SimSnapshotDto))]
 [JsonSerializable(typeof(BuildingDto))]
+[JsonSerializable(typeof(BuildingDto[]))]
 [JsonSerializable(typeof(ZoneDto))]
+[JsonSerializable(typeof(ZoneDto[]))]
 [JsonSerializable(typeof(RoadDto))]
+[JsonSerializable(typeof(RoadDto[]))]
 [JsonSerializable(typeof(ActiveEventDto))]
 [JsonSerializable(typeof(ActiveEventDto[]))]
 [JsonSerializable(typeof(WasmStatusDto))]

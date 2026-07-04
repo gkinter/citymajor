@@ -145,11 +145,15 @@ export function PlayClient() {
     const resources = simResourcesRef.current;
     const bucket: SimStateBucket = deriveNarrativeBucket({
       healthcareCoverage: coverage,
-      approval: resources?.approval,
-      cityFunds: resources?.cityFunds,
-      residentialDemand: resources?.residentialDemand,
-      commercialDemand: resources?.commercialDemand,
-      industrialDemand: resources?.industrialDemand,
+      ...(resources
+        ? {
+            approval: resources.approval,
+            cityFunds: resources.cityFunds,
+            residentialDemand: resources.residentialDemand,
+            commercialDemand: resources.commercialDemand,
+            industrialDemand: resources.industrialDemand,
+          }
+        : {}),
     });
 
     setHeraldLoading(true);

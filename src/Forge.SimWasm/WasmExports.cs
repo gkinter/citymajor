@@ -57,4 +57,10 @@ public static partial class Program
         return _host?.GetStatusJson()
             ?? JsonSerializer.Serialize(new WasmStatusDto(), JsonContext.Default.WasmStatusDto);
     }
+
+    [JSExport]
+    public static bool LoadSnapshot(string snapshotJson)
+    {
+        return _host?.LoadSnapshotFromJson(snapshotJson) ?? false;
+    }
 }

@@ -16,6 +16,7 @@ export type SimCommand =
   | { type: "set_speed"; level: GameSpeedLevel }
   | { type: "pause" }
   | { type: "resume" }
+  | { type: "load_snapshot"; snapshot: SimSnapshot }
   | {
       type: "herald_choice";
       optionId: string;

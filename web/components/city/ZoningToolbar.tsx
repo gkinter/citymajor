@@ -22,7 +22,7 @@ import {
   zoningToolColor,
   zoningToolShortLabel,
 } from "@/lib/zoning";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type ZoningToolbarProps = {
   activeTool: ZoningTool;
@@ -40,7 +40,11 @@ export function ZoningToolbar({
   onBrushSizeChange,
   rci = null,
 }: ZoningToolbarProps) {
-  const [feedbackOn, setFeedbackOn] = useState(() => isPaintFeedbackEnabled());
+  const [feedbackOn, setFeedbackOn] = useState(false);
+
+  useEffect(() => {
+    setFeedbackOn(isPaintFeedbackEnabled());
+  }, []);
   const activeColor = zoningToolColor(activeTool);
   const showBrush = true;
 

@@ -117,7 +117,7 @@ export async function runPlayChecks(page, options = {}) {
     window.localStorage.setItem("citymajor_onboarding_done", "1");
   });
 
-  await page.goto(`${BASE_URL}/play`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE_URL}/play`, { waitUntil: "domcontentloaded" });
 
   const hud = page.getByText("Diagnostics");
   await hud.waitFor({ state: "visible" });

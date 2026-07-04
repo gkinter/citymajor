@@ -1,4 +1,5 @@
 import { ShopClient } from "@/components/shop/ShopClient";
+import { isStripeCheckoutEnabled } from "@/lib/stripe";
 
 export const metadata = {
   title: "Shop — CityMajor",
@@ -6,5 +7,5 @@ export const metadata = {
 };
 
 export default function ShopPage() {
-  return <ShopClient />;
+  return <ShopClient stripeCheckoutEnabled={isStripeCheckoutEnabled()} />;
 }

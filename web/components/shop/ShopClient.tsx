@@ -14,7 +14,11 @@ const FOUNDER_BENEFITS = [
   "Credits name listing",
 ] as const;
 
-export function ShopClient() {
+type ShopClientProps = {
+  stripeCheckoutEnabled?: boolean;
+};
+
+export function ShopClient({ stripeCheckoutEnabled = false }: ShopClientProps) {
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkingOut, setCheckingOut] = useState(false);
@@ -40,11 +44,35 @@ export function ShopClient() {
     void loadEntitlements();
   }, [loadEntitlements]);
 
-  async function handleMockCheckout() {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") === "success") {
+      setSuccess(true);
+      void loadEntitlements();
+    }
+  }, [loadEntitlements]);
+
+  async function handleCheckout() {
     setCheckingOut(true);
     setError(null);
     setSuccess(false);
     try {
+      if (stripeCheckoutEnabled) {
+        const res = await fetch("/api/checkout/founder-pass", {
+          method: "POST",
+          credentials: "include",
+        });
+        const body = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
+        if (!res.ok) {
+          throw new Error(body?.error ?? `Checkout failed (${res.status})`);
+        }
+        if (!body?.url) {
+          throw new Error("Stripe checkout URL missing");
+        }
+        window.location.href = body.url;
+        return;
+      }
+
       const res = await fetch("/api/me/entitlements", {
         method: "POST",
         credentials: "include",
@@ -52,8 +80,8 @@ export function ShopClient() {
         body: JSON.stringify({ tier: "founder_pass" }),
       });
       if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(body?.error ?? `Checkout failed (${res.status})`);
+        const mockBody = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(mockBody?.error ?? `Checkout failed (${res.status})`);
       }
       const data = (await res.json()) as Entitlements;
       setEntitlements(data);
@@ -66,6 +94,9 @@ export function ShopClient() {
   }
 
   const hasFounderPass = entitlements?.tier === "founder_pass";
+  const checkoutLabel = stripeCheckoutEnabled
+    ? "Buy Founder Pass"
+    : "Buy Founder Pass (mock checkout)";
 
   return (
     <div style={styles.page}>
@@ -95,9 +126,9 @@ export function ShopClient() {
               type="button"
               style={styles.button}
               disabled={checkingOut}
-              onClick={() => void handleMockCheckout()}
+              onClick={() => void handleCheckout()}
             >
-              {checkingOut ? "Processing…" : "Buy Founder Pass (mock checkout)"}
+              {checkingOut ? "Processing…" : checkoutLabel}
             </button>
           )}
 

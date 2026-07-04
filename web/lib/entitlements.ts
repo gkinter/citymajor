@@ -35,24 +35,6 @@ export function entitlementsForTier(
   return { tier, ...limits, narrativeEventsRemaining: remaining };
 }
 
-/** Mock identity — header `X-CityMajor-Tier` overrides cookie for dev. */
-export function resolveTierFromRequest(req: Request): Tier {
-  const headerTier = req.headers.get("x-citymajor-tier");
-  if (headerTier) {
-    const parsed = TierSchema.safeParse(headerTier);
-    if (parsed.success) return parsed.data;
-  }
-
-  const cookie = req.headers.get("cookie") ?? "";
-  const match = cookie.match(/(?:^|;\s*)citymajor_tier=(free|founder_pass)(?:;|$)/);
-  if (match) {
-    const parsed = TierSchema.safeParse(match[1]);
-    if (parsed.success) return parsed.data;
-  }
-
-  return "free";
-}
-
 export const SetTierBodySchema = z.object({
   tier: TierSchema,
 });

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveTierFromRequest } from "@/lib/entitlements";
+import { resolveTierFromRequest } from "@/lib/resolve-tier";
 import {
   consumeNarrativeEvent,
   getNarrativeEventsRemaining,

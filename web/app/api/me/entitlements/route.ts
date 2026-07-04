@@ -3,8 +3,8 @@ import {
   EntitlementsSchema,
   SetTierBodySchema,
   entitlementsForTier,
-  resolveTierFromRequest,
 } from "@/lib/entitlements";
+import { resolveTierFromRequest } from "@/lib/resolve-tier";
 import {
   getNarrativeEventsRemaining,
   userKeyFromRequest,

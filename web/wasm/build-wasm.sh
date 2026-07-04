@@ -8,19 +8,16 @@ unset NODE_OPTIONS
 
 dotnet workload restore src/Forge.SimWasm/Forge.SimWasm.csproj
 
-PUBLISH_ERR="$(mktemp)"
-if ! dotnet publish src/Forge.SimWasm/Forge.SimWasm.csproj -c Release -r browser-wasm --self-contained 2>"$PUBLISH_ERR"; then
-  echo "dotnet publish failed — stderr:" >&2
-  cat "$PUBLISH_ERR" >&2
-  echo "falling back to msbuild Publish" >&2
-  rm -f "$PUBLISH_ERR"
+PUBLISH_LOG="$(mktemp)"
+trap 'rm -f "$PUBLISH_LOG"' EXIT
+if ! dotnet publish src/Forge.SimWasm/Forge.SimWasm.csproj -c Release -r browser-wasm --self-contained >"$PUBLISH_LOG" 2>&1; then
+  echo "dotnet publish failed — see log below (if MSB1008 on .NET 10 SDK, falling back to msbuild Publish):" >&2
+  tail -n 40 "$PUBLISH_LOG" >&2
   dotnet msbuild src/Forge.SimWasm/Forge.SimWasm.csproj \
     -t:Publish \
     -p:Configuration=Release \
     -p:RuntimeIdentifier=browser-wasm \
     -p:SelfContained=true
-else
-  rm -f "$PUBLISH_ERR"
 fi
 
 APP_BUNDLE="src/Forge.SimWasm/bin/Release/net8.0/browser-wasm/AppBundle"

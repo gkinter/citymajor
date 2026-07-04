@@ -2,7 +2,9 @@
 
 > Working title: **CityMajor**
 > Name candidates: Brickborn, CityMajor, Smoke & Steeple
-> Version: 1.0 | March 2026 | Confidential
+> Version: 1.1 (web pivot) | July 2026 | Confidential
+>
+> **Play:** browser client at **`/play`** — preview deploys on `*.apps.softblaze.net` ([`docs/DEPLOY_WEB.md`](../DEPLOY_WEB.md)). **v1 scope:** [`WEB_V1_SCOPE.md`](./WEB_V1_SCOPE.md).
 
 ---
 
@@ -27,44 +29,61 @@
 
 ## 1. Executive Summary
 
+> **Web v1 (2026):** CityMajor ships **browser-only** — Next.js shell, **R3F mesh 3D** canvas, C# simulation via WASM. Monetization: **free core + Founder Pass ($24.99)** + cosmetic shop. Locked launch parameters live in [`WEB_V1_SCOPE.md`](./WEB_V1_SCOPE.md). Steam, pixel art, and 100K-household scale below are **original vision** retained for simulation and economy design depth.
+
 ### Elevator Pitch
 
-CityMajor is a deep retro pixel-art city builder where you shape a city across 200 years of history — from gas-lit cobblestones to gleaming smart cities. It plays like **SimCity 4 meets Victoria 3**: zone and build like a classic city builder, or take direct control of your economy like an industrial planner. A single slider lets you choose your level of economic control at any time, from pure free market to full central planning. An embedded LLM gives every citizen a voice, every council meeting a debate, and every newspaper a headline that actually reflects what is happening in your city.
+CityMajor is a deep city builder you play **in the browser** — open `/play`, no install. You shape a city across history with **SimCity 4 meets Victoria 3** depth: zone and build like a classic city builder, or take direct control of your economy like an industrial planner. A single slider — the **Economic Control Spectrum** — lets you choose your level of economic control at any time, from pure free market to full central planning.
+
+The city is rendered as **mid-fidelity mesh 3D** (React Three Fiber + Three.js): modular GLTF building kits, `InstancedMesh` LOD, and hero landmarks assembled from WASM simulation snapshots. An embedded **Herald** narrative layer (backend LLM with template fallback) gives citizens a voice, council meetings a debate, and the daily newspaper headlines grounded in real simulation data.
 
 ### Unique Selling Points
 
 1. **The Economic Control Spectrum** — A continuous slider from laissez-faire capitalism to total planned economy. No other city builder lets you choose your economic ideology and live with the consequences.
 2. **Two play styles, one game** — Casual city builders zone and watch their city grow. Strategy players micromanage production chains, set wages, and negotiate trade deals. Switch between both at any time.
-3. **200 years of history** — Five distinct eras from 1850 to 2050+, each transforming your city's technology, architecture, politics, and culture. Your Victorian industrial town becomes a modern metropolis.
-4. **LLM-powered narrative** — AI mayors negotiate trade deals in natural language. Citizens write letters to the editor. Council factions debate your policies. A daily newspaper reports on your city with procedurally generated stories grounded in real simulation data.
-5. **Deep emergent simulation** — 100K households with individual satisfaction, cultural DNA, and political leanings. 45 tradeable goods across 20 production chains. 6 political factions that form organically. 70+ laws. 154 technologies. The simulation produces genuine emergence; the LLM gives it a voice.
-6. **Songs of Conquest-quality pixel art** — Hand-crafted isometric sprites at 64x32 tiles with 5 era-specific palettes, full day/night cycles, seasonal changes, and weather effects.
+3. **Historical depth (phased)** — Full design spans five eras from 1850 to 2050+, each transforming technology, architecture, politics, and culture. **Web v1 ships one era arc** (Frontier → Industrial); see [`WEB_V1_SCOPE.md`](./WEB_V1_SCOPE.md).
+4. **LLM-powered narrative** — AI mayors negotiate trade deals in natural language. Citizens write letters to the editor. Council factions debate your policies. The Daily Herald reports on your city with stories grounded in simulation data. Free tier: 10 LLM events/day; **Founder Pass: unlimited**.
+5. **Deep emergent simulation** — Households with individual satisfaction, cultural DNA, and political leanings. Tradeable goods across production chains. Political factions that form organically. Laws and technologies that unlock over time. The simulation produces genuine emergence; the LLM gives it a voice. *(Original vision: 100K households; **web v1: ~10K** at 256×256 — same systems, scoped scale.)*
+6. **Zero-install mesh 3D** — Playable instantly at `/play`. R3F perspective camera, era-modular GLTF archetypes, and LOD bands from street-level detail to city overview — no 50 GB download, no Steam gate for v1.
 
 ### Target Audience
 
-**Primary**: City builder enthusiasts aged 20-45 who have played SimCity, Cities: Skylines, or Anno and want more depth without sacrificing accessibility. Players who watched Victoria 3 streams and thought "I wish I could see this as a city, not a map."
+**Primary**: City builder enthusiasts aged 20–45 who have played SimCity, Cities: Skylines, or Anno and want more depth without sacrificing accessibility — especially players who will not install a native client for a first session.
 
-**Secondary**: Grand strategy players (Paradox audience) looking for something more visual and intimate. Management sim fans (Factorio, Satisfactory) who enjoy production chains. Retro/pixel art game collectors.
+**Secondary**: Grand strategy players (Paradox audience) looking for something more visual and intimate. Management sim fans (Factorio, Satisfactory) who enjoy production chains. Browser-first players who share `/play` links.
 
-**Estimated addressable audience**: 2-5 million players across Steam, based on comparable titles (Cities: Skylines sold 12M+, Anno 1800 sold 2.5M+, Workers & Resources sold 500K+ in EA).
+**Addressable audience**: Web F2P city builders and simulation fans (browser + shareable URL); conversion via Founder Pass and cosmetics. Original Steam sizing (2–5M units from comparable premium titles) is **historical reference only** — not the v1 go-to-market.
 
-### Platform & Price
+### Platform & Price (Web v1)
+
+| Milestone | Platform | Price | Notes |
+|-----------|----------|-------|-------|
+| Preview / beta | **Browser** — `/play` on `*.apps.softblaze.net` | **Free** (core sim) | WASM sim + procedural fallback; see [`DEPLOY_WEB.md`](../DEPLOY_WEB.md) |
+| **Founder Pass** | Browser | **$24.99** one-time | Unlimited Herald LLM, 20 cloud saves, founder cosmetics, era-2 early access — sim never paywalled |
+| Cosmetic shop | Browser (Stripe) | Optional skins | Facade packs; sim-neutral |
+| Production domain | Browser | Free core + above | Public URL TBD post-preview |
+
+<details>
+<summary><strong>Original vision — Steam native + pixel art (not v1)</strong></summary>
 
 | Milestone | Platform | Price | Target Date |
 |-----------|----------|-------|-------------|
 | Demo (Steam Next Fest) | Steam (Windows) | Free | Q3 2027 |
 | Early Access launch | Steam (Windows) | $24.99 | Q1 2028 |
-| EA major updates (3-4) | Steam (Windows) | $24.99 | 2028-2029 |
 | 1.0 Release | Steam (Windows, Linux, macOS) | $29.99 | Q4 2029 |
-| Console port (stretch) | Switch 2, PS5, Xbox | $34.99 | 2030+ |
+
+Songs of Conquest–quality isometric pixel art (64×32 tiles), Forge Engine native renderer, 100K households, 1024×1024 maps — superseded for v1 by mesh 3D and web scale. See [`WEB_V1_SCOPE.md`](./WEB_V1_SCOPE.md) and §"Web v1 pivot (2026-07)".
+</details>
 
 ### Team
 
-Solo developer with AI-assisted development pipeline. Art contracted to pixel art specialists. Music and SFX licensed or commissioned. LLM integration uses self-hosted open-source models (zero ongoing API cost).
+Solo developer with AI-assisted development pipeline. **3D assets** via modular GLTF kits and Meshy-generated hero landmarks (see `MESHY_*.md` ADRs). Music and SFX licensed or commissioned. LLM at launch via **backend API** (quota + Founder Pass entitlements); template fallback always available — no player-side model required.
 
 ---
 
 ## 2. Game Identity
+
+> **Delivery:** Everything below describes **what CityMajor is** as a simulation and player fantasy. **How it ships in v1** — browser URL, R3F renderer, WASM tick rate, household cap, single era arc — is locked in [`WEB_V1_SCOPE.md`](./WEB_V1_SCOPE.md). Steam, pixel rendering, and full 5-era / 100K-household scale are **original vision**, not the current launch path.
 
 ### What Makes This Different
 
@@ -73,6 +92,8 @@ Every city builder on the market forces you into one of two boxes: either you ar
 CityMajor breaks this false dichotomy. The Economic Control Spectrum is a continuous slider that determines how much of the economy the player directly controls. At 0%, you are playing a polished SimCity-like experience: zone residential, commercial, and industrial areas, lay roads, build services, set tax rates, and watch your city grow organically. At 100%, you are running a centrally planned economy: you decide what every factory produces, at what price, for whom, and in what quantity. You allocate housing, assign labor, set import quotas, and negotiate five-year plans.
 
 Most players will land somewhere in the middle. Maybe you control the energy sector and public transit but let private businesses handle retail and food. Maybe you nationalize steel production because your city needs it for a bridge megaproject, then privatize it once the project is done. The slider is not a menu selection — it is a lived experience. You feel the friction of central planning (corruption, inefficiency, shortages) and the chaos of free markets (inequality, boom-bust cycles, monopolies). The economic ideology you choose shapes your city's culture, politics, architecture, and destiny.
+
+On the web, you experience this through an **R3F mesh city** that updates from WASM snapshots — zoning paint on the canvas, economic dashboards in HTML overlays, Herald stories in a side panel — without leaving the browser tab.
 
 ### The Dual Play-Style System
 
@@ -88,21 +109,27 @@ This mode is for the player who wants Victoria 3's economic depth rendered as a 
 
 ### LLM-Powered Narrative
 
-City builders have always been silent. Your citizens are numbers. Your advisors are tooltip text. Your newspaper is a scrolling ticker of canned messages. CityMajor uses a self-hosted language model (Qwen 2.5, running locally) to transform simulation data into narrative.
+City builders have always been silent. Your citizens are numbers. Your advisors are tooltip text. Your newspaper is a scrolling ticker of canned messages. CityMajor uses a **backend language model** (with deterministic template fallback) to transform simulation data into narrative.
 
 When you raise taxes, the LLM does not just show "-5% approval." It generates a letter from a factory owner explaining that the tax increase will force layoffs. The Business faction's representative argues in the city council that you are destroying jobs. The Daily Herald runs an editorial titled "Mayor's Tax Grab Threatens Industrial Core." A citizen named Maria Kowalski, who works at the affected factory, writes to the letters column worried about her mortgage.
 
-None of this is scripted. The LLM receives structured simulation data — tax rate changed from 12% to 18%, 340 industrial jobs at risk, Business faction approval dropped 15 points, 3 factories in red on operating costs — and produces narrative that reflects reality. The stories are grounded. They reference real buildings, real neighborhoods, real policy decisions. They make the city feel alive in a way no city builder has achieved.
+None of this is scripted. The LLM receives structured simulation data — tax rate changed from 12% to 18%, industrial jobs at risk, Business faction approval dropped, factories in the red on operating costs — and produces narrative that reflects reality. The stories are grounded. They reference real buildings, real neighborhoods, real policy decisions. They make the city feel alive in a way no city builder has achieved.
 
-### Five Eras, 200 Years
+**Web v1:** Herald runs through the API — free players get a daily quota; **Founder Pass** removes the cap. Templates ensure the game remains playable offline from narrative perspective when quotas are exhausted.
 
-Your city begins in 1850 as a frontier settlement with dirt roads and horse-drawn carts. Over 200 years of game time, it transforms through five distinct eras, each bringing new technologies, building types, social challenges, and visual styles. The transition is not a menu toggle — it is earned through research, population growth, and economic development. Your choices in early eras constrain and enable options in later ones. A city that industrialized heavily in Era 2 faces different environmental and political challenges in Era 4 than one that stayed agrarian. History is path-dependent, and so is your city.
+### Five Eras, 200 Years *(full vision)*
+
+Your city begins in 1850 as a frontier settlement with dirt roads and horse-drawn carts. Over 200 years of game time, it transforms through five distinct eras, each bringing new technologies, building types, social challenges, and visual styles. The transition is not a menu toggle — it is earned through research, population growth, and economic development. Your choices in early eras constrain and enable options in later ones.
+
+> **Web v1:** One era arc only (Frontier → Industrial). Full five-era progression is post-v1; see [`WEB_V1_SCOPE.md`](./WEB_V1_SCOPE.md).
 
 ### Emergent Culture and Politics
 
 Every household in CityMajor has a Cultural DNA — an 8-dimensional vector encoding values like individualism vs. collectivism, tradition vs. progress, religiosity, work ethic, and environmental concern. Cultural DNA drifts over time based on the neighborhood, laws, education, media, and life events. When enough households in a district share cultural traits, that district develops a character: the bohemian arts quarter, the conservative suburb, the immigrant enclave, the tech hub.
 
 Six political factions emerge from these cultural patterns: Industrialists, Progressives, Traditionalists, Greens, Populists, and Technocrats. They do not exist as fixed entities — they coalesce when enough citizens share political leanings. They lobby for laws, organize protests, run candidates in elections, and react to your policies. A planned economy empowers Industrialists and Populists; a free market empowers Progressives and Technocrats. Your economic choices reshape your political landscape.
+
+*(Original vision: 100K households; web v1 sim targets ~10K — same Cultural DNA and faction logic at scoped population.)*
 
 ---
 

@@ -109,11 +109,23 @@ function heatColorRamp(t: number): string {
   return `#${_color.getHexString()}`;
 }
 
+/** Deterministic 90° yaw per tile (matches sim window-seed mixing). */
+export function tileYawRadians(
+  tileX: number,
+  tileZ: number,
+  typeId: number,
+): number {
+  const hash =
+    (tileX * 73856093) ^ (tileZ * 19349669) ^ (typeId * 83492791);
+  return ((hash >>> 0) % 4) * (Math.PI / 2);
+}
+
 export function composeInstanceMatrix(
   tileX: number,
   tileZ: number,
   visual: LodVisual,
   hidden: boolean,
+  rotationY = 0,
 ): THREE.Matrix4 {
   if (hidden) {
     return _matrix.compose(
@@ -124,10 +136,52 @@ export function composeInstanceMatrix(
   }
 
   const y = visual.scale[1] / 2;
+  _quat.setFromAxisAngle(_position.set(0, 1, 0), rotationY);
   return _matrix.compose(
     _position.set(tileX + 0.5, y, tileZ + 0.5),
-    _quat.identity(),
+    _quat,
     _scale.set(visual.scale[0], visual.scale[1], visual.scale[2]),
+  );
+}
+
+export type GltfFootprint = {
+  width: number;
+  height: number;
+  depth: number;
+  /** Local-space min Y before scaling (model footing). */
+  minY: number;
+};
+
+/**
+ * Fit a GLTF module to tile footprint with per-tile yaw.
+ * Scales non-uniformly so authored meshes sit flush on the tile grid.
+ */
+export function composeGltfInstanceMatrix(
+  tileX: number,
+  tileZ: number,
+  targetScale: [number, number, number],
+  footprint: GltfFootprint,
+  rotationY: number,
+  hidden: boolean,
+): THREE.Matrix4 {
+  if (hidden) {
+    return _matrix.compose(
+      _position.set(tileX + 0.5, 0, tileZ + 0.5),
+      _quat.identity(),
+      _scale.set(0, 0, 0),
+    );
+  }
+
+  const sx = targetScale[0] / Math.max(footprint.width, 0.001);
+  const sy = targetScale[1] / Math.max(footprint.height, 0.001);
+  const sz = targetScale[2] / Math.max(footprint.depth, 0.001);
+  const y = -footprint.minY * sy;
+
+  _quat.setFromAxisAngle(_position.set(0, 1, 0), rotationY);
+  return _matrix.compose(
+    _position.set(tileX + 0.5, y, tileZ + 0.5),
+    _quat,
+    _scale.set(sx, sy, sz),
   );
 }
 

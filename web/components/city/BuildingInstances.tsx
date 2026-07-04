@@ -10,8 +10,12 @@ import {
   composeInstanceMatrix,
   lodVisualForBuilding,
   metalnessForCategory,
+  tileYawRadians,
 } from "@/lib/lod";
-import { GltfBuildingBucket } from "./GltfBuildingBucket";
+import {
+  GltfBuildingBucket,
+  groupBuildingsByCatalogKey,
+} from "./GltfBuildingBucket";
 
 type BuildingInstancesProps = {
   city: CityData;
@@ -22,7 +26,8 @@ type BuildingInstancesProps = {
 
 /**
  * One InstancedMesh per archetype key (sim-types taxonomy).
- * At LOD L0, catalog GLTF assets replace boxes via GltfBuildingBucket.
+ * At LOD L0, catalog GLTF assets replace boxes via GltfBuildingBucket
+ * (grouped by shipped catalog key with era/category fallback).
  */
 export function BuildingInstances({
   city,
@@ -43,6 +48,11 @@ export function BuildingInstances({
     [city],
   );
 
+  const gltfBuckets = useMemo(
+    () => groupBuildingsByCatalogKey(city.buildings),
+    [city.buildings],
+  );
+
   useFrame(() => {
     for (const { key, buildings, useGltf } of buckets) {
       const mesh = meshRefs.current[key];
@@ -61,6 +71,11 @@ export function BuildingInstances({
         const gltfCoversL0 =
           useGltf && !hidden && lod === 0 && !visual.wireframe;
         const showBox = !gltfCoversL0;
+        const rotationY = tileYawRadians(
+          building.tileX,
+          building.tileZ,
+          building.typeId,
+        );
 
         mesh.setMatrixAt(
           i,
@@ -69,6 +84,7 @@ export function BuildingInstances({
             building.tileZ,
             showBox ? visual : { scale: [0, 0, 0], color: visual.color, opacity: 0 },
             hidden || !showBox,
+            showBox ? rotationY : 0,
           ),
         );
         if (!colorsRef.current[i]) colorsRef.current[i] = new THREE.Color();
@@ -89,37 +105,36 @@ export function BuildingInstances({
 
   return (
     <>
-      {buckets.map(({ key, buildings, category, useGltf }) => (
-        <group key={key}>
-          {useGltf && buildings.length > 0 ? (
-            <Suspense fallback={null}>
-              <GltfBuildingBucket
-                archetypeKey={key}
-                buildings={buildings}
-                chunks={chunks}
-                dayNightFactor={dayNightFactor}
-              />
-            </Suspense>
-          ) : null}
-          {buildings.length > 0 ? (
-            <instancedMesh
-              ref={(el) => {
-                meshRefs.current[key] = el;
-              }}
-              args={[undefined, undefined, buildings.length]}
-              frustumCulled={false}
-              castShadow
-              receiveShadow
-            >
-              <boxGeometry args={[1, 1, 1]} />
-              <meshStandardMaterial
-                vertexColors
-                roughness={0.65}
-                metalness={metalnessForCategory(category)}
-              />
-            </instancedMesh>
-          ) : null}
-        </group>
+      {gltfBuckets.map(({ catalogKey, buildings }) => (
+        <Suspense key={catalogKey} fallback={null}>
+          <GltfBuildingBucket
+            catalogKey={catalogKey}
+            buildings={buildings}
+            chunks={chunks}
+            dayNightFactor={dayNightFactor}
+          />
+        </Suspense>
+      ))}
+      {buckets.map(({ key, buildings, category }) => (
+        buildings.length > 0 ? (
+          <instancedMesh
+            key={key}
+            ref={(el) => {
+              meshRefs.current[key] = el;
+            }}
+            args={[undefined, undefined, buildings.length]}
+            frustumCulled={false}
+            castShadow
+            receiveShadow
+          >
+            <boxGeometry args={[1, 1, 1]} />
+            <meshStandardMaterial
+              vertexColors
+              roughness={0.65}
+              metalness={metalnessForCategory(category)}
+            />
+          </instancedMesh>
+        ) : null
       ))}
     </>
   );

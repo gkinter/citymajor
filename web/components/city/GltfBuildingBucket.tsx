@@ -4,48 +4,68 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { resolveGltfPath } from "@/lib/gltf-catalog";
+import { resolveCatalogKey, resolveGltfPath } from "@/lib/gltf-catalog";
 import {
-  composeInstanceMatrix,
+  composeGltfInstanceMatrix,
   lodVisualForBuilding,
   metalnessForCategory,
+  tileYawRadians,
+  type GltfFootprint,
 } from "@/lib/lod";
 import type { BuildingInstance, ChunkState } from "@/lib/types";
 
 type GltfBuildingBucketProps = {
-  archetypeKey: string;
+  catalogKey: string;
   buildings: BuildingInstance[];
   chunks: ChunkState[];
   dayNightFactor?: number;
 };
 
-function firstMeshGeometry(root: THREE.Object3D): THREE.BufferGeometry {
-  let found: THREE.BufferGeometry | null = null;
+function meshFootprint(root: THREE.Object3D): {
+  geometry: THREE.BufferGeometry;
+  footprint: GltfFootprint;
+} {
+  let geometry: THREE.BufferGeometry | null = null;
   root.traverse((child) => {
-    if (!found && child instanceof THREE.Mesh) {
-      found = child.geometry.clone();
+    if (!geometry && child instanceof THREE.Mesh) {
+      geometry = child.geometry.clone();
     }
   });
-  return found ?? new THREE.BoxGeometry(1, 1, 1);
+
+  const geom = geometry ?? new THREE.BoxGeometry(1, 1, 1);
+  geom.computeBoundingBox();
+  const box = geom.boundingBox ?? new THREE.Box3();
+  const size = new THREE.Vector3();
+  box.getSize(size);
+
+  return {
+    geometry: geom,
+    footprint: {
+      width: size.x,
+      height: size.y,
+      depth: size.z,
+      minY: box.min.y,
+    },
+  };
 }
 
 /**
- * Instanced GLTF bucket for one archetype at LOD L0.
- * Geometry is cloned from the loaded GLTF scene for InstancedMesh batching.
+ * Instanced GLTF bucket for one shipped catalog key at LOD L0.
+ * Multiple sim archetype variants can share the same GLB module.
  */
 export function GltfBuildingBucket({
-  archetypeKey,
+  catalogKey,
   buildings,
   chunks,
   dayNightFactor = 0,
 }: GltfBuildingBucketProps) {
-  const path = resolveGltfPath(archetypeKey)!;
+  const path = resolveGltfPath(catalogKey)!;
 
   const { scene } = useGLTF(path);
   const meshRef = useRef<THREE.InstancedMesh | null>(null);
   const colorsRef = useRef<THREE.Color[]>([]);
 
-  const geometry = useMemo(() => firstMeshGeometry(scene), [scene]);
+  const { geometry, footprint } = useMemo(() => meshFootprint(scene), [scene]);
   const category = buildings[0]?.category;
 
   useFrame(() => {
@@ -58,17 +78,22 @@ export function GltfBuildingBucket({
       const hidden = !chunk?.visible;
       const lod = chunk?.visible ? chunk.lod : 3;
       const visual = lodVisualForBuilding(building, 0, dayNightFactor);
+      const rotationY = tileYawRadians(
+        building.tileX,
+        building.tileZ,
+        building.typeId,
+      );
 
       const showGltf = !hidden && lod === 0 && !visual.wireframe;
 
       mesh.setMatrixAt(
         i,
-        composeInstanceMatrix(
+        composeGltfInstanceMatrix(
           building.tileX,
           building.tileZ,
-          showGltf
-            ? visual
-            : { scale: [0, 0, 0], color: visual.color, opacity: 0 },
+          visual.scale,
+          footprint,
+          rotationY,
           !showGltf,
         ),
       );
@@ -99,4 +124,23 @@ export function GltfBuildingBucket({
       />
     </instancedMesh>
   );
+}
+
+/** Group buildings by shipped catalog key for GLTF instancing. */
+export function groupBuildingsByCatalogKey(
+  buildings: BuildingInstance[],
+): { catalogKey: string; buildings: BuildingInstance[] }[] {
+  const buckets = new Map<string, BuildingInstance[]>();
+
+  for (const building of buildings) {
+    const catalogKey = resolveCatalogKey(building.archetypeKey);
+    if (!catalogKey) continue;
+    const list = buckets.get(catalogKey);
+    if (list) list.push(building);
+    else buckets.set(catalogKey, [building]);
+  }
+
+  return [...buckets.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([catalogKey, grouped]) => ({ catalogKey, buildings: grouped }));
 }

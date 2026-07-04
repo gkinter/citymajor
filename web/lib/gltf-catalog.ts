@@ -93,17 +93,73 @@ export const GLTF_CATALOG: Record<ShippedGltfKey, string> = {
   ind_future_00: "/assets/gltf/future/ind_future_00.glb",
 };
 
+export type ParsedArchetypeKey = {
+  category: string;
+  era: GltfEraSlug;
+  variant: number;
+};
+
+/** Parse `{category}_{era}_{variant}` keys from sim-types `archetypeKey()`. */
+export function parseArchetypeKey(key: string): ParsedArchetypeKey | null {
+  for (const era of ERA_SLUGS) {
+    const marker = `_${era}_`;
+    const idx = key.indexOf(marker);
+    if (idx === -1) continue;
+    const category = key.slice(0, idx);
+    const variant = Number.parseInt(key.slice(idx + marker.length), 10);
+    if (!Number.isFinite(variant)) return null;
+    return { category, era, variant };
+  }
+  return null;
+}
+
+function shippedKeysForCategoryEra(category: string, era: GltfEraSlug): ShippedGltfKey[] {
+  const prefix = `${category}_${era}_`;
+  return SHIPPED_GLTF_KEYS.filter((k) => k.startsWith(prefix));
+}
+
+/**
+ * Map any sim archetype key to a shipped catalog key (same category × era).
+ * Variants without a dedicated GLB reuse era representatives for visual variety.
+ */
+export function resolveCatalogKey(archetypeKey: string): ShippedGltfKey | null {
+  if (archetypeKey in GLTF_CATALOG) {
+    return archetypeKey as ShippedGltfKey;
+  }
+
+  const parsed = parseArchetypeKey(archetypeKey);
+  if (!parsed) return null;
+
+  const { category, era, variant } = parsed;
+  const exact = `${category}_${era}_${String(variant).padStart(2, "0")}`;
+  if (exact in GLTF_CATALOG) {
+    return exact as ShippedGltfKey;
+  }
+
+  const candidates = shippedKeysForCategoryEra(category, era);
+  if (candidates.length > 0) {
+    return candidates[variant % candidates.length]!;
+  }
+
+  if (category === "svc" && "svc_modern_00" in GLTF_CATALOG) {
+    return "svc_modern_00";
+  }
+
+  return null;
+}
+
 /** Resolve catalog path, falling back to era-derived path for unknown variants. */
 export function resolveGltfPath(key: string): string | null {
-  if (key in GLTF_CATALOG) {
-    return GLTF_CATALOG[key as ShippedGltfKey];
+  const catalogKey = resolveCatalogKey(key);
+  if (catalogKey) {
+    return GLTF_CATALOG[catalogKey];
   }
   return gltfPublicPath(key);
 }
 
-/** True when a shipped GLB exists for this archetype (catalog or era path). */
+/** True when a shipped GLB can be resolved for this archetype key. */
 export function hasGltfAsset(key: string): boolean {
-  return key in GLTF_CATALOG;
+  return resolveCatalogKey(key) !== null;
 }
 
 /** All catalog GLB URLs for play-page preload. */

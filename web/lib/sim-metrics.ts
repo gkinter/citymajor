@@ -15,13 +15,15 @@ export const PROSPERITY_FUNDS = 500_000;
 
 export type NarrativeMetricsInput = {
   healthcareCoverage: number;
-} & Pick<
-  SimResources,
-  | "approval"
-  | "cityFunds"
-  | "residentialDemand"
-  | "commercialDemand"
-  | "industrialDemand"
+} & Partial<
+  Pick<
+    SimResources,
+    | "approval"
+    | "cityFunds"
+    | "residentialDemand"
+    | "commercialDemand"
+    | "industrialDemand"
+  >
 >;
 
 /**

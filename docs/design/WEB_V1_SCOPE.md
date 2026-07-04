@@ -159,7 +159,7 @@ When a design doc contradicts this charter, **this charter wins** for v1 shippin
 | `ERA_ARC_V1.md` — tech/building/event subset IDs | Not yet authored |
 | `SAVE_FORMAT_WEB.md` — cloud + WASM binary | Not yet authored |
 | `WASM_SIM_BRIDGE.md` — snapshot layout, worker protocol | Not yet authored |
-| `DATA_BRIDGE.md` — `buildings.json` ↔ TypeId ↔ GLTF | Not yet authored |
+| `DATA_BRIDGE.md` — `buildings.json` ↔ TypeId ↔ GLTF | [Authored](./DATA_BRIDGE.md) |
 
 ---
 

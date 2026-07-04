@@ -80,6 +80,13 @@ let worldSize = 256;
 /** Sim tick rate — decouple from display RAF to keep 256×256 WASM within budget. */
 const SIM_TICK_HZ = 8;
 const SIM_TICK_MS = 1000 / SIM_TICK_HZ;
+/**
+ * Max sim ticks to catch up in a single "tick" message. Guards against a
+ * runaway `while (simAccumMs >= SIM_TICK_MS)` spiral after a long tab-hidden
+ * pause / GC stall / dev-tools throttle where `deltaMs` can be seconds.
+ * At 8 Hz this caps catch-up work at ~1.5s of sim time per real frame.
+ */
+const MAX_TICKS_PER_MESSAGE = 12;
 let simAccumMs = 0;
 let lastSnapshotMs = 0;
 let lastResourceMs = 0;
@@ -501,10 +508,20 @@ function handleCommand(command: SimCommand) {
         simAccumMs += command.deltaMs * speedLevel;
         const now = performance.now();
         let simTicked = false;
-        while (simAccumMs >= SIM_TICK_MS) {
+        let ticksThisMessage = 0;
+        while (
+          simAccumMs >= SIM_TICK_MS &&
+          ticksThisMessage < MAX_TICKS_PER_MESSAGE
+        ) {
           simAccumMs -= SIM_TICK_MS;
           sim.Tick(SIM_TICK_MS / 1000);
           simTicked = true;
+          ticksThisMessage += 1;
+        }
+        // Drop backlog beyond the catch-up cap so the sim recovers cleanly
+        // after long pauses instead of trying to run seconds of ticks now.
+        if (simAccumMs > SIM_TICK_MS * MAX_TICKS_PER_MESSAGE) {
+          simAccumMs = SIM_TICK_MS * MAX_TICKS_PER_MESSAGE;
         }
         if (simTicked) {
           if (now - lastSnapshotMs >= SNAPSHOT_MIN_MS) {

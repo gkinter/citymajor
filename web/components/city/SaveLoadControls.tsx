@@ -158,6 +158,10 @@ export function SaveLoadControls({
     void refreshList();
   }, [refreshList]);
 
+  useEffect(() => {
+    if (loadOpen) void refreshList();
+  }, [loadOpen, refreshList]);
+
   const handleSave = useCallback(async () => {
     if (!simApi) {
       setActionMessage("Sim not ready yet");
@@ -199,12 +203,16 @@ export function SaveLoadControls({
       setActionMessage(`Saved "${parsed.data.save.name}"`);
       onSlotsChanged?.();
       onSaveSuccess?.();
+      // Refresh so a subsequent Load dialog open shows the new slot without
+      // needing a full page reload — refreshList also covers concurrent edits
+      // from another tab.
+      void refreshList();
     } catch (err) {
       setActionMessage(err instanceof Error ? err.message : "Save failed");
     } finally {
       setSaving(false);
     }
-  }, [simApi, onSlotsChanged, onSaveSuccess]);
+  }, [simApi, onSlotsChanged, onSaveSuccess, refreshList]);
 
   const handleLoad = useCallback(
     (slot: SaveSlot) => {

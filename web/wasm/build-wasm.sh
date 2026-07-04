@@ -23,7 +23,14 @@ if [[ ! -d "$APP_BUNDLE/_framework" ]]; then
   exit 1
 fi
 
-rm -rf web/public/dotnet
-mkdir -p web/public/dotnet
-cp -R "$APP_BUNDLE"/* web/public/dotnet/
-echo "WASM bundle -> web/public/dotnet/ (_framework/blazor.boot.json included)"
+# Publish to BOTH sinks:
+#   • web/public/dotnet/       — Next.js app (`/dotnet` served at runtime)
+#   • web/wasm/public/dotnet/  — standalone Vite spike (root=web/wasm/, serves public/)
+# The spike's src/main.ts hard-codes WASM_BASE='/dotnet' and vite.config.ts uses
+# root='.', so the bundle must live under web/wasm/public/dotnet to resolve.
+for SINK in web/public/dotnet web/wasm/public/dotnet; do
+  rm -rf "$SINK"
+  mkdir -p "$SINK"
+  cp -R "$APP_BUNDLE"/* "$SINK"/
+  echo "WASM bundle -> $SINK/ (_framework/blazor.boot.json included)"
+done

@@ -116,10 +116,12 @@ Path resolution: `web/lib/gltf-catalog.ts` — `gltfPublicPath(key)` → `/asset
    - `residential` + `density ≥ 2` → `res_high` (base **200**)
    - `commercial` → `com` (base **300**)
    - `industrial` → `ind` (base **400**)
-   - `service` → `svc` (base **0** — see gaps §6)
-2. **Era band** from `era` field: `typeId += era * 20`.
+   - `service` → `svc` (base **0** — era-agnostic; see gaps §6)
+2. **Era band** from `era` field: `typeId += era * 20` **(zone categories only — services skip this step, see rule 4)**.
 3. **Variant index** within `(prefix, era)`: sort JSON entries by `id` ascending; assign `00` … `19` in order.
-4. **TypeId** = `categoryBase + era * 20 + variantIndex` (svc: `variantIndex` only, 0–19).
+4. **TypeId**:
+   - Zone categories (`res_low`, `res_high`, `com`, `ind`): `TypeId = categoryBase + era * 20 + variantIndex`.
+   - `service`: `TypeId = variantIndex` (0–19 only). This matches §3.2's `svc_modern_{typeId % 20:02d}` rule, where `deriveEra()` always returns `modern` regardless of the JSON `era` field. **Services are era-agnostic in v1** — the 36 JSON service entries across all eras must be collapsed to a single 20-slot pool (see §6 for the collision-resolution proposal).
 
 ### 4.3 Hero / non-zone buildings (`infrastructure`, `special`)
 

@@ -152,6 +152,12 @@ export type SimClientApi = {
 
 const DEFAULT_WASM_URL = "/dotnet";
 const DEFAULT_WORLD_SIZE = 256;
+/**
+ * Cap init() so a worker that never posts `ready` (bad WASM URL, missing
+ * blazor.boot.json, module-load exception before the postMessage handler is
+ * installed) rejects instead of leaving the caller hanging forever.
+ */
+const INIT_TIMEOUT_MS = 15_000;
 
 type WorkerInbound =
   | { type: "init"; wasmBaseUrl: string; worldSize: number }
@@ -182,42 +188,80 @@ export function createSimBridge(): SimBridge {
   return {
     async init(wasmUrl = DEFAULT_WASM_URL, worldSize = DEFAULT_WORLD_SIZE) {
       worker = new Worker(new URL("../workers/sim-worker.ts", import.meta.url));
-
-      worker.addEventListener("error", (event) => {
-        notifyError(new Error(event.message || "Worker error"));
-      });
-      worker.addEventListener("messageerror", () => {
-        notifyError(new Error("Worker message deserialization error"));
-      });
+      const localWorker = worker;
 
       await new Promise<void>((resolve, reject) => {
+        let settled = false;
+        const settle = (fn: () => void) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timeoutId);
+          localWorker.removeEventListener("message", onMessage);
+          localWorker.removeEventListener("error", onWorkerError);
+          localWorker.removeEventListener("messageerror", onWorkerMessageError);
+          fn();
+        };
+
         const onMessage = (event: MessageEvent<WorkerOutbound>) => {
           const msg = event.data;
           if (msg.type === "ready") {
-            worker?.removeEventListener("message", onMessage);
-            resolve();
+            settle(resolve);
           } else if (msg.type === "snapshot") {
             notify(msg.snapshot);
           } else if (msg.type === "error") {
-            worker?.removeEventListener("message", onMessage);
             const err = new Error(msg.message);
             notifyError(err);
-            reject(err);
+            settle(() => reject(err));
           }
         };
 
-        worker!.addEventListener("message", onMessage);
-        worker!.postMessage({
+        const onWorkerError = (event: ErrorEvent) => {
+          const err = new Error(event.message || "Worker error before ready");
+          notifyError(err);
+          settle(() => reject(err));
+        };
+
+        const onWorkerMessageError = () => {
+          const err = new Error(
+            "Worker message deserialization error before ready",
+          );
+          notifyError(err);
+          settle(() => reject(err));
+        };
+
+        const timeoutId = setTimeout(() => {
+          const err = new Error(
+            `Sim worker init timed out after ${INIT_TIMEOUT_MS}ms`,
+          );
+          notifyError(err);
+          settle(() => reject(err));
+        }, INIT_TIMEOUT_MS);
+
+        localWorker.addEventListener("message", onMessage);
+        localWorker.addEventListener("error", onWorkerError);
+        localWorker.addEventListener("messageerror", onWorkerMessageError);
+        localWorker.postMessage({
           type: "init",
           wasmBaseUrl: wasmUrl,
           worldSize,
         } satisfies WorkerInbound);
       });
 
-      worker.addEventListener("message", (event: MessageEvent<WorkerOutbound>) => {
-        const msg = event.data;
-        if (msg.type === "snapshot") notify(msg.snapshot);
-        if (msg.type === "error") notifyError(new Error(msg.message));
+      // Post-ready runtime listeners — errors after init flow through
+      // onError callbacks instead of rejecting the (already-resolved) init.
+      localWorker.addEventListener(
+        "message",
+        (event: MessageEvent<WorkerOutbound>) => {
+          const msg = event.data;
+          if (msg.type === "snapshot") notify(msg.snapshot);
+          if (msg.type === "error") notifyError(new Error(msg.message));
+        },
+      );
+      localWorker.addEventListener("error", (event) => {
+        notifyError(new Error(event.message || "Worker error"));
+      });
+      localWorker.addEventListener("messageerror", () => {
+        notifyError(new Error("Worker message deserialization error"));
       });
     },
 

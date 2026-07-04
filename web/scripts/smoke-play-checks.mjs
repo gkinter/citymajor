@@ -98,10 +98,17 @@ export async function runPlayChecks(page, options = {}) {
     );
   }
 
+  // Anything not on the WASM-fallback allowlist should FAIL the smoke run —
+  // silently downgrading to `console.warn` masked several real regressions on
+  // /play (missing textures, worker crashes) that only surfaced in prod.
   const blocking = consoleErrors.filter(
     (e) => !e.includes("WASM sim unavailable"),
   );
   if (blocking.length > 0) {
-    console.warn(`[${tag}] console errors:`, blocking.slice(0, 5));
+    fail(
+      tag,
+      `Unexpected console errors on /play (${blocking.length}): ${blocking.slice(0, 5).join(" | ")}`,
+    );
   }
+  pass(tag, "no unexpected console errors");
 }

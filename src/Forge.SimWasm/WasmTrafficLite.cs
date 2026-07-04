@@ -28,6 +28,14 @@ public sealed class WasmTrafficLite
     private int _edgeCount;
     private int _edgeBatchCursor;
 
+    /// <summary>
+    /// Cached node → first-outgoing-edge offset. Invalidated only when
+    /// <see cref="UpdateEdgeData"/> rebuilds the edge table (roads changed);
+    /// avoids rebuilding this on every Dijkstra invocation during
+    /// AssignAllOrNothing, which is O(V + E) per O-D pair.
+    /// </summary>
+    private int[]? _nodeEdgeStart;
+
     public float[] EdgeCongestion { get; private set; } = Array.Empty<float>();
 
     public void Tick(WorldState state, double dt)
@@ -127,12 +135,15 @@ public sealed class WasmTrafficLite
     private void UpdateEdgeData(WorldState state)
     {
         _edgeCount = state.Roads.EdgeCount;
+        int nodeCount = state.Roads.NodeCount;
+
         if (_edgeCount == 0)
         {
             _edgeVolume = Array.Empty<float>();
             _edgeCapacity = Array.Empty<float>();
             _edgeFreeFlow = Array.Empty<float>();
             EdgeCongestion = Array.Empty<float>();
+            _nodeEdgeStart = nodeCount > 0 ? new int[nodeCount] : Array.Empty<int>();
             return;
         }
 
@@ -140,10 +151,12 @@ public sealed class WasmTrafficLite
         _edgeCapacity = new float[_edgeCount];
         _edgeFreeFlow = new float[_edgeCount];
         EdgeCongestion = new float[_edgeCount];
+        _nodeEdgeStart = new int[nodeCount];
 
         int edgeIdx = 0;
-        for (int n = 0; n < state.Roads.NodeCount; n++)
+        for (int n = 0; n < nodeCount; n++)
         {
+            _nodeEdgeStart[n] = edgeIdx;
             foreach (var (_, cost, level) in state.Roads.GetNeighbors(n))
             {
                 if (edgeIdx >= _edgeCount) break;
@@ -276,7 +289,7 @@ public sealed class WasmTrafficLite
                 int destNode = _zoneCentroidNode[dest];
                 if (destNode < 0) continue;
 
-                var path = FindShortestPathEdges(state, originNode, destNode, edgeTimes);
+                var path = FindShortestPathEdges(state, originNode, destNode, edgeTimes, _nodeEdgeStart);
                 foreach (int edgeIdx in path)
                 {
                     if (edgeIdx >= 0 && edgeIdx < targetVolume.Length)
@@ -287,7 +300,7 @@ public sealed class WasmTrafficLite
     }
 
     private static List<int> FindShortestPathEdges(
-        WorldState state, int startNode, int endNode, float[] edgeTimes)
+        WorldState state, int startNode, int endNode, float[] edgeTimes, int[]? nodeEdgeStart)
     {
         var result = new List<int>();
         if (startNode == endNode) return result;
@@ -308,13 +321,19 @@ public sealed class WasmTrafficLite
         var pq = new PriorityQueue<int, float>();
         pq.Enqueue(startNode, 0);
 
-        var nodeEdgeStart = new int[nodeCount];
-        int runningEdge = 0;
-        for (int n = 0; n < nodeCount; n++)
+        // Reuse the cached node → first-outgoing-edge map when available; only
+        // rebuild locally as a safety fallback (should not happen once
+        // UpdateEdgeData has run).
+        if (nodeEdgeStart == null || nodeEdgeStart.Length < nodeCount)
         {
-            nodeEdgeStart[n] = runningEdge;
-            foreach (var _ in state.Roads.GetNeighbors(n))
-                runningEdge++;
+            nodeEdgeStart = new int[nodeCount];
+            int runningEdge = 0;
+            for (int n = 0; n < nodeCount; n++)
+            {
+                nodeEdgeStart[n] = runningEdge;
+                foreach (var _ in state.Roads.GetNeighbors(n))
+                    runningEdge++;
+            }
         }
 
         while (pq.Count > 0)

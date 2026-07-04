@@ -93,14 +93,19 @@ export function CityCanvas({
     bridgeRef.current = bridge;
     let cancelled = false;
     let raf = 0;
-    let last = performance.now();
+    // Deliberately `null` until the first RAF callback so the first `deltaMs`
+    // we forward to the worker is a real inter-frame delta, not the entire
+    // `await bridge.init(...)` window (which can be hundreds of ms of WASM
+    // load time and would cause a giant first tick / spiral in the worker).
+    let last: number | null = null;
 
     const startTickLoop = () => {
+      last = null;
       const loop = (now: number) => {
         if (cancelled) return;
-        const delta = now - last;
+        const delta = last === null ? 0 : now - last;
         last = now;
-        bridge.send({ type: "tick", deltaMs: delta });
+        if (delta > 0) bridge.send({ type: "tick", deltaMs: delta });
         raf = requestAnimationFrame(loop);
       };
       raf = requestAnimationFrame(loop);

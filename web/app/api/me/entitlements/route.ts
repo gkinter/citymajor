@@ -31,7 +31,8 @@ export async function GET(req: Request) {
  * writing the `citymajor_tier` cookie without payment.
  */
 export async function POST(req: Request) {
-  if (process.env.NODE_ENV === "production") {
+  const isProduction = process.env.NODE_ENV === "production";
+  if (isProduction) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

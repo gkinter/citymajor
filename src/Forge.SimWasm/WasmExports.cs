@@ -13,11 +13,23 @@ public static partial class Program
         _host.Init(worldSize > 0 ? worldSize : WasmConfig.DefaultWorldSize);
     }
 
+    /// <summary>
+    /// Browser-delivered delta may spike (tab throttling, GC pause). Clamp to a
+    /// sane window so a single frame can't advance the sim past
+    /// <see cref="MaxTickDtSeconds"/>; the caller catches up via the worker
+    /// accumulator loop instead of a runaway multi-second step here.
+    /// </summary>
+    private const double MinTickDtSeconds = 0.001;
+    private const double MaxTickDtSeconds = 0.25;
+
     [JSExport]
     public static double Tick(double dtSeconds)
     {
         if (_host is null) return 0;
-        _host.Tick(dtSeconds > 0 ? dtSeconds : 0.1);
+        double dt = dtSeconds > 0 ? dtSeconds : 0.1;
+        if (dt < MinTickDtSeconds) dt = MinTickDtSeconds;
+        else if (dt > MaxTickDtSeconds) dt = MaxTickDtSeconds;
+        _host.Tick(dt);
         return _host.TickCount;
     }
 

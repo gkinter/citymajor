@@ -22,6 +22,9 @@ const OUT_ROOT = join(REPO_ROOT, "web/public/assets/gltf");
 const MESHY_BASE = "https://api.meshy.ai/openapi/v2/text-to-3d";
 const DEFAULT_POLL_MS = 5_000;
 const DEFAULT_TARGET_POLYCOUNT = 8_000;
+// Cap per-task wait so a stuck Meshy job (rare but observed on refine) can't
+// hang the batch indefinitely. 30 min covers slow refine at Meshy p99.
+const DEFAULT_POLL_TIMEOUT_MS = 30 * 60 * 1000;
 
 /** @typedef {{ key: string; prompt: string; category: string; era: string }} MeshyJob */
 /** @typedef {{ pipeline_version: string; meshy_model: string; export_format: string; jobs: MeshyJob[] }} MeshyManifest */
@@ -124,9 +127,11 @@ async function meshyFetch(apiKey, method, pathSuffix = "", body) {
  * @param {string} apiKey
  * @param {string} taskId
  * @param {number} pollMs
+ * @param {number} [timeoutMs]
  */
-async function pollTask(apiKey, taskId, pollMs) {
-  for (;;) {
+async function pollTask(apiKey, taskId, pollMs, timeoutMs = DEFAULT_POLL_TIMEOUT_MS) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
     const task = await meshyFetch(apiKey, "GET", taskId);
     const status = task.status;
     const progress = task.progress ?? 0;
@@ -140,6 +145,9 @@ async function pollTask(apiKey, taskId, pollMs) {
     process.stdout.write(`  … ${status} ${progress}%\r`);
     await sleep(pollMs);
   }
+  throw new Error(
+    `Meshy task ${taskId} did not finish within ${Math.round(timeoutMs / 1000)}s (timeout)`,
+  );
 }
 
 /**

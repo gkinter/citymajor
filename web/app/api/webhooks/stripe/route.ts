@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { handleStripeWebhookEvent } from "@/lib/stripe-webhook";
-import { getStripeClient, getStripeWebhookSecret, isStripeCheckoutEnabled } from "@/lib/stripe";
+import { getStripeClient, getStripeWebhookSecret, isStripeCheckoutEnabled, isStripeWebhookEnabled } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export async function GET() {
     status: "ok",
     endpoint: "/api/webhooks/stripe",
     checkoutConfigured: isStripeCheckoutEnabled(),
-    webhookSecretConfigured: Boolean(getStripeWebhookSecret()),
+    webhookConfigured: isStripeWebhookEnabled(),
   });
 }
 

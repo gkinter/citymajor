@@ -3,6 +3,7 @@ import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
 import {
   getFounderPassPriceId,
   getStripeClient,
+  getStripePublishableKey,
   isStripeCheckoutEnabled,
 } from "@/lib/stripe";
 
@@ -10,7 +11,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json({ configured: isStripeCheckoutEnabled() });
+  return NextResponse.json({
+    configured: isStripeCheckoutEnabled(),
+    publishableKey: getStripePublishableKey(),
+  });
 }
 
 export async function POST(req: Request) {

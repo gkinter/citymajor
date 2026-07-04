@@ -116,14 +116,42 @@ The `wasm` stage runs `dotnet publish` for browser WASM — under-provisioned bu
 
 ### 8. Runtime environment variables (optional)
 
-M0 preview needs **no secrets**. Omit Stripe vars unless testing checkout:
+M0 preview needs **no secrets**. Omit Stripe vars unless testing live Founder Pass checkout.
 
 | Variable | Required | Notes |
 |----------|----------|-------|
 | `PORT` | No | `3000` (set in Dockerfile) |
 | `HOSTNAME` | No | `0.0.0.0` (set in Dockerfile) |
 | `NODE_ENV` | No | `production` (set in Dockerfile) |
-| `STRIPE_*` | No | See [Environment variables](#environment-variables) |
+| `STRIPE_*` | No | See [Stripe on Coolify](#stripe-on-coolify-optional) |
+
+#### Stripe on Coolify (optional)
+
+Live checkout needs **runtime** secrets plus a **build-time** publishable key. Omit all Stripe vars to keep the mock cookie checkout on `/shop`.
+
+**UI path:** Application → **Environment Variables** → **Add**
+
+| Key | Example (test mode) | Build time | Runtime | Purpose |
+|-----|---------------------|------------|---------|---------|
+| `STRIPE_SECRET_KEY` | `sk_test_…` | **No** | **Yes** | Server-side Checkout Session creation |
+| `STRIPE_FOUNDER_PASS_PRICE_ID` | `price_…` | **No** | **Yes** | Founder Pass Stripe Price ID |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_…` | **No** | **Yes** | Verifies `POST /api/webhooks/stripe` |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_test_…` | **Yes** | **No** | Inlined at Next.js build; safe to expose in browser |
+
+Register the webhook endpoint in the [Stripe Dashboard](https://dashboard.stripe.com/webhooks): `https://citymajor.apps.softblaze.net/api/webhooks/stripe` (or your preview FQDN).
+
+**CLI stubs** (replace `…` with real test-mode values from Stripe Dashboard — never commit them):
+
+```bash
+coolify env-set citymajor-web STRIPE_SECRET_KEY sk_test_...
+coolify env-set citymajor-web STRIPE_FOUNDER_PASS_PRICE_ID price_...
+coolify env-set citymajor-web STRIPE_WEBHOOK_SECRET whsec_...
+coolify env-set citymajor-web NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY pk_test_...
+# Mark NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as build-time in Coolify UI if CLI omits the flag
+coolify deploy citymajor-web --force
+```
+
+Local parity: copy `web/.env.example` → `web/.env.local` and fill placeholders.
 
 ### 9. First deploy
 
@@ -205,8 +233,9 @@ The M0 spike runs with in-memory stubs — no secrets required for preview.
 | `STRIPE_SECRET_KEY` | No | — | Enables live Founder Pass Checkout; omit for mock cookie flow |
 | `STRIPE_FOUNDER_PASS_PRICE_ID` | No | — | Stripe Price ID for Founder Pass (`price_…`) |
 | `STRIPE_WEBHOOK_SECRET` | No | — | Verifies `POST /api/webhooks/stripe` (register Coolify FQDN + `/api/webhooks/stripe`) |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | No | — | Stripe publishable key (`pk_test_…` / `pk_live_…`); **build-time** Docker arg / Coolify env |
 
-Without Stripe vars, `/shop` uses the mock entitlements cookie path. See `web/.env.example`.
+Without Stripe vars, `/shop` uses the mock entitlements cookie path. Checkout reads `STRIPE_SECRET_KEY` + `STRIPE_FOUNDER_PASS_PRICE_ID` server-side; webhooks require `STRIPE_WEBHOOK_SECRET`. See `web/.env.example` and [Stripe on Coolify](#stripe-on-coolify-optional).
 
 ## COOP / COEP headers (SharedArrayBuffer)
 

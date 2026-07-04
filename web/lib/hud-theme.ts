@@ -51,13 +51,22 @@ export const HUD_ZONE = {
     top: 10,
     left: "50%",
     transform: "translateX(-50%)",
-    zIndex: HUD_Z.base + 2,
+    zIndex: HUD_Z.base,
+    pointerEvents: "none",
   },
   topRight: {
     position: "absolute",
     top: 8,
     right: 12,
     zIndex: HUD_Z.controls,
+  },
+  /** Top-right interactive cluster — above Era Quest panel and decorative wordmark. */
+  topRightActions: {
+    position: "absolute",
+    top: 8,
+    right: 12,
+    zIndex: HUD_Z.panel + 1,
+    pointerEvents: "auto",
   },
   resources: {
     position: "absolute",

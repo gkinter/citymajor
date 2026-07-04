@@ -438,7 +438,7 @@ export function PlayClient() {
 
       <div
         style={{
-          ...HUD_ZONE.topRight,
+          ...HUD_ZONE.topRightActions,
           display: "flex",
           alignItems: "center",
           gap: 8,

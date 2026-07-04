@@ -8,7 +8,8 @@ import {
 } from "@/lib/hud-theme";
 import {
   TECH_CATALOG_TOTAL,
-  TECH_PREVIEW_LIST,
+  TECH_V1_CATALOG,
+  techIdFromCatalogId,
   type TechPreview,
 } from "@/lib/tech-catalog";
 
@@ -44,8 +45,10 @@ type ResearchPanelProps = {
   techCount?: number;
   researchPoints?: number;
   researchRate?: number;
-  /** Override preview list (defaults to static catalog slice). */
+  /** Override catalog (defaults to WEB v1 Frontier + Industrial subset). */
   technologies?: TechPreview[];
+  /** Called when the player clicks a tech to enqueue research. */
+  onEnqueueResearch?: (techId: number) => void;
 };
 
 export function ResearchPanel({
@@ -54,7 +57,8 @@ export function ResearchPanel({
   techCount,
   researchPoints,
   researchRate,
-  technologies = TECH_PREVIEW_LIST,
+  technologies = TECH_V1_CATALOG,
+  onEnqueueResearch,
 }: ResearchPanelProps) {
   if (!open) return null;
 
@@ -105,26 +109,53 @@ export function ResearchPanel({
         </div>
 
         <div className="hud-research-list__heading">
-          Preview catalog ({technologies.length} of {catalogTotal})
+          Technologies ({technologies.length})
         </div>
 
         <ul className="hud-research-list">
-          {technologies.map((tech) => (
-            <li key={tech.id} className="hud-research-list__item">
-              <div className="hud-research-list__row">
-                <span className="hud-research-list__id">{tech.id}</span>
-                <span className="hud-research-list__name">{tech.name}</span>
-                <span className="hud-research-list__cost">{tech.cost_rp} RP</span>
-              </div>
-              <div className="hud-research-list__meta">
-                {tech.era} · {tech.category}
-                {tech.prerequisites.length > 0
-                  ? ` · req ${tech.prerequisites.join(", ")}`
-                  : ""}
-              </div>
-              <p className="hud-research-list__desc">{tech.description}</p>
-            </li>
-          ))}
+          {technologies.map((tech) => {
+            const techId = techIdFromCatalogId(tech.id);
+            const canEnqueue = onEnqueueResearch !== undefined && techId >= 0;
+
+            return (
+              <li key={tech.id} className="hud-research-list__item">
+                <button
+                  type="button"
+                  className="hud-research-list__enqueue"
+                  disabled={!canEnqueue}
+                  onClick={() => {
+                    if (canEnqueue) onEnqueueResearch(techId);
+                  }}
+                  aria-label={`Enqueue research: ${tech.name}`}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    margin: 0,
+                    padding: 0,
+                    border: "none",
+                    background: "transparent",
+                    color: "inherit",
+                    font: "inherit",
+                    textAlign: "left",
+                    cursor: canEnqueue ? "pointer" : "default",
+                  }}
+                >
+                  <div className="hud-research-list__row">
+                    <span className="hud-research-list__id">{tech.id}</span>
+                    <span className="hud-research-list__name">{tech.name}</span>
+                    <span className="hud-research-list__cost">{tech.cost_rp} RP</span>
+                  </div>
+                  <div className="hud-research-list__meta">
+                    {tech.era} · {tech.category}
+                    {tech.prerequisites.length > 0
+                      ? ` · req ${tech.prerequisites.join(", ")}`
+                      : ""}
+                  </div>
+                  <p className="hud-research-list__desc">{tech.description}</p>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </aside>

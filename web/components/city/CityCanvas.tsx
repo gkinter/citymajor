@@ -158,27 +158,42 @@ export function CityCanvas({
       raf = requestAnimationFrame(loop);
     };
 
+    let fellBack = false;
+    const handleWorkerFailure = (err: unknown) => {
+      if (fellBack || cancelled) return;
+      fellBack = true;
+      console.warn(
+        "[CityMajor] WASM sim unavailable — using procedural city fallback",
+        err,
+      );
+      cancelAnimationFrame(raf);
+      raf = 0;
+      setBridgeReady(false);
+      setSimSource("procedural");
+      setCity(getCityData());
+      setZones([]);
+      setRoads([]);
+      setTraffic([]);
+      setServiceCoverage([]);
+      setSimResources(null);
+    };
+
+    // Subscribe before init so the worker's first snapshot (posted before
+    // `ready`) and any init-time errors reach the UI immediately.
+    const unsubscribeSnapshot = bridge.onSnapshot(applySnapshot);
+    const unsubscribeError = bridge.onError(handleWorkerFailure);
+
     (async () => {
       try {
         await bridge.init("/dotnet", 256);
-        if (cancelled) return;
+        if (cancelled || fellBack) return;
 
         setSimSource("wasm");
-        bridge.onSnapshot((snapshot) => {
-          applySnapshot(snapshot);
-        });
         bridge.send({ type: "set_speed", level: gameSpeedRef.current });
         setBridgeReady(true);
         startTickLoop();
       } catch (err) {
-        console.warn(
-          "[CityMajor] WASM sim unavailable — using procedural city fallback",
-          err,
-        );
-        if (!cancelled) {
-          setSimSource("procedural");
-          setCity(getCityData());
-        }
+        handleWorkerFailure(err);
       }
     })();
 
@@ -186,6 +201,8 @@ export function CityCanvas({
       cancelled = true;
       cancelAnimationFrame(raf);
       setBridgeReady(false);
+      unsubscribeSnapshot();
+      unsubscribeError();
       bridge.dispose();
       bridgeRef.current = null;
     };

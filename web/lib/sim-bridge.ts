@@ -202,7 +202,8 @@ const DEFAULT_WORLD_SIZE = 256;
  * blazor.boot.json, module-load exception before the postMessage handler is
  * installed) rejects instead of leaving the caller hanging forever.
  */
-const INIT_TIMEOUT_MS = 15_000;
+/** Cold WASM bundle download + dotnet boot can exceed 15s on slow links. */
+const INIT_TIMEOUT_MS = 45_000;
 
 type WorkerInbound =
   | { type: "init"; wasmBaseUrl: string; worldSize: number }
@@ -262,10 +263,14 @@ export function createSimBridge(): SimBridge {
 
   return {
     async init(wasmUrl = DEFAULT_WASM_URL, worldSize = DEFAULT_WORLD_SIZE) {
-      worker = new Worker(new URL("../workers/sim-worker.ts", import.meta.url));
+      worker = new Worker(
+        new URL("../workers/sim-worker.ts", import.meta.url),
+        { type: "module" },
+      );
       const localWorker = worker;
 
-      await new Promise<void>((resolve, reject) => {
+      try {
+        await new Promise<void>((resolve, reject) => {
         let settled = false;
         const settle = (fn: () => void) => {
           if (settled) return;
@@ -320,7 +325,12 @@ export function createSimBridge(): SimBridge {
           wasmBaseUrl: wasmUrl,
           worldSize,
         } satisfies WorkerInbound);
-      });
+        });
+      } catch (err) {
+        localWorker.terminate();
+        if (worker === localWorker) worker = null;
+        throw err;
+      }
 
       // Post-ready runtime listeners — errors after init flow through
       // onError callbacks instead of rejecting the (already-resolved) init.

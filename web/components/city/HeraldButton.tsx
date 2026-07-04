@@ -11,6 +11,8 @@ type HeraldButtonProps = {
   disabled: boolean;
   title: string;
   onClick: () => void;
+  /** When true, skip absolute top-right positioning (use inside a cluster). */
+  embedded?: boolean;
 };
 
 export function HeraldButton({
@@ -18,12 +20,13 @@ export function HeraldButton({
   disabled,
   title,
   onClick,
+  embedded = false,
 }: HeraldButtonProps) {
   return (
     <button
       type="button"
       style={{
-        ...HUD_ZONE.topRight,
+        ...(embedded ? {} : HUD_ZONE.topRight),
         ...hudActionButton(disabled),
         display: "flex",
         alignItems: "center",

@@ -64,7 +64,7 @@ public sealed class WasmSimHost
         worldSize = NextPowerOfTwo(Math.Clamp(worldSize, WasmConfig.MinWorldSize, WasmConfig.MaxWorldSize));
 
         _config = new Config { WorldSize = worldSize, ChunkSize = WasmConfig.ChunkSize };
-        _state = new WorldState(worldSize, maxHouseholds: 8192, maxBuildings: 4096,
+        _state = new WorldState(worldSize, maxHouseholds: 10240, maxBuildings: 5120,
             maxRoadNodes: 16384, maxVehicles: 256);
         _eventBus = new EventBus();
 

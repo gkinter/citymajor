@@ -41,6 +41,8 @@ export type BuildingSnapshot = {
 export type SimResources = {
   tick: number;
   population: number;
+  /** Present when WASM status JSON includes householdCount. */
+  householdCount?: number;
   cityFunds: number;
   era: number;
 };

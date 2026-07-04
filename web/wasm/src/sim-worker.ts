@@ -48,8 +48,43 @@ async function loadWasm(baseUrl: string) {
   const config = api.getConfig();
   const assemblyName = (config.mainAssemblyName ?? 'Forge.SimWasm.dll').replace(/\.dll$/i, '');
   const raw = await api.getAssemblyExports(assemblyName);
-  // JSExport methods on partial Program are exported at assembly root.
-  return raw;
+  return resolveExports(raw as Record<string, unknown>);
+}
+
+type WasmSimExports = {
+  Init: (worldSize: number) => void;
+  Tick: (dt: number) => number;
+  GetRenderSnapshot: () => string;
+  GetStatus: () => string;
+};
+
+function resolveExports(raw: Record<string, unknown>): WasmSimExports {
+  const forge = raw.Forge as Record<string, unknown> | undefined;
+  const simWasm = forge?.SimWasm as Record<string, unknown> | undefined;
+  const program = simWasm?.Program as Record<string, unknown> | undefined;
+  const source =
+    program ?? (raw.Program as Record<string, unknown> | undefined) ?? raw;
+  const init = source.Init ?? source.init;
+  const tick = source.Tick ?? source.tick;
+  const getRenderSnapshot =
+    source.GetRenderSnapshot ?? source.getRenderSnapshot;
+  const getStatus = source.GetStatus ?? source.getStatus;
+  if (
+    typeof init !== 'function' ||
+    typeof tick !== 'function' ||
+    typeof getRenderSnapshot !== 'function' ||
+    typeof getStatus !== 'function'
+  ) {
+    throw new TypeError(
+      `Missing sim exports. Keys: ${JSON.stringify(Object.keys(raw))}`,
+    );
+  }
+  return {
+    Init: init as (worldSize: number) => void,
+    Tick: tick as (dt: number) => number,
+    GetRenderSnapshot: getRenderSnapshot as () => string,
+    GetStatus: getStatus as () => string,
+  };
 }
 
 ctx.onmessage = async (event: MessageEvent<WorkerInbound>) => {

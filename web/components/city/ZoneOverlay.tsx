@@ -28,6 +28,7 @@ export function ZoneOverlay({ zones }: ZoneOverlayProps) {
     const mesh = meshRef.current;
     if (!mesh) return;
 
+    // Sparse zone list — instance index follows array order, not grid coords.
     const count = Math.min(zones.length, MAX_INSTANCES);
     for (let i = 0; i < count; i++) {
       const tile = zones[i]!;
@@ -51,7 +52,7 @@ export function ZoneOverlay({ zones }: ZoneOverlayProps) {
   return (
     <instancedMesh
       ref={meshRef}
-      args={[undefined, undefined, Math.min(zones.length, MAX_INSTANCES)]}
+      args={[undefined, undefined, MAX_INSTANCES]}
       frustumCulled={false}
     >
       <planeGeometry args={[1, 1]} />

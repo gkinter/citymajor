@@ -449,3 +449,74 @@
   color: var(--hud-text-dim);
   text-align: right;
 }
+
+/* ── Crisis warning modal (GAMEPLAY_LOOP #9) ── */
+
+.hud-crisis {
+  position: fixed;
+  inset: 0;
+  z-index: var(--hud-z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--hud-overlay);
+  font-family: var(--hud-font-mono);
+  pointer-events: auto;
+}
+
+.hud-crisis__card {
+  width: min(440px, 100%);
+  padding: 18px 20px 16px;
+  background: var(--hud-panel-bg-solid);
+  border: 1px solid var(--hud-border-strong);
+  border-radius: var(--hud-radius-lg);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  color: var(--hud-text);
+}
+
+.hud-crisis__eyebrow {
+  margin: 0 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hud-error);
+}
+
+.hud-crisis__title {
+  margin: 0 0 10px;
+  font-family: var(--hud-font-sans);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--hud-text);
+}
+
+.hud-crisis__body {
+  margin: 0 0 16px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--hud-text-muted);
+}
+
+.hud-crisis__footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.hud-crisis__dismiss {
+  padding: 8px 16px;
+  border: 1px solid var(--hud-accent-border);
+  border-radius: var(--hud-radius-sm);
+  background: var(--hud-accent-soft);
+  color: var(--hud-text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hud-crisis__dismiss:hover {
+  background: rgba(94, 200, 255, 0.25);
+}

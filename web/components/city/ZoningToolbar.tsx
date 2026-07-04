@@ -42,7 +42,7 @@ export function ZoningToolbar({
 }: ZoningToolbarProps) {
   const [feedbackOn, setFeedbackOn] = useState(() => isPaintFeedbackEnabled());
   const activeColor = zoningToolColor(activeTool);
-  const showBrush = activeTool !== "road";
+  const showBrush = true;
 
   const toggleFeedback = useCallback(() => {
     const next = !feedbackOn;

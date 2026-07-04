@@ -94,7 +94,7 @@ export function zoningDemandHint(
     return "Clear zones to prepare land for redevelopment";
   }
   if (tool === "road") {
-    return "Road tool — coming soon";
+    return "Paint roads to connect zones and unlock growth";
   }
 
   const demand = zoningDemandForTool(tool, rci);

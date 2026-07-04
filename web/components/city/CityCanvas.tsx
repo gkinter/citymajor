@@ -5,11 +5,15 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import type { FpsStats, PickResult, CityData } from "@/lib/types";
 import { cityDataFromSnapshot, getCityData } from "@/lib/city-data";
 import { createChunkStates } from "@/lib/chunks";
-import { MAX_DPR } from "@/lib/constants";
+import { LOW_APPROVAL_WARNING_THRESHOLD, MAX_DPR } from "@/lib/constants";
+import { LOW_HAPPINESS_APPROVAL } from "@/lib/sim-metrics";
 import type { GraphicsQualityTier } from "@/lib/constants";
 import {
   createSimBridge,
+  type ActiveEventSnapshot,
   type GameSpeedLevel,
+  type ServiceCoverageSnapshot,
+  type ServiceViewMode,
   type SimBridge,
   type SimClientApi,
   type SimResources,
@@ -17,17 +21,42 @@ import {
   resourcesFromSnapshot,
 } from "@/lib/sim-bridge";
 import { estimateHealthcareCoverage } from "@/lib/sim-metrics";
-import type { ZoningTool, ZoneTile, RoadTile } from "@/lib/zoning";
-import { ENGINE_ZONE_TYPE } from "@/lib/zoning";
+import type { ZoningTool, ZoneTile, RoadTile, TrafficTile, PaintBrushSize } from "@/lib/zoning";
+import {
+  brushTileOffsets,
+  ENGINE_ZONE_TYPE,
+  paintRoadBrush,
+  paintZoneBrush,
+} from "@/lib/zoning";
+import { playPaintFeedback } from "@/lib/paint-feedback";
 import { CityScene } from "./CityScene";
 import { AdaptiveDpr } from "./AdaptiveDpr";
 import { CityPostProcessing } from "./CityPostProcessing";
 import { Minimap } from "./Minimap";
 
+function skyColorForApproval(approval: number | undefined): string {
+  const base = { r: 0x0b, g: 0x10, b: 0x20 };
+  if (approval === undefined) {
+    return `#${base.r.toString(16).padStart(2, "0")}${base.g.toString(16).padStart(2, "0")}${base.b.toString(16).padStart(2, "0")}`;
+  }
+  if (approval < LOW_APPROVAL_WARNING_THRESHOLD) {
+    return "#2a0f14";
+  }
+  if (approval < LOW_HAPPINESS_APPROVAL) {
+    return "#1a1220";
+  }
+  return `#${base.r.toString(16).padStart(2, "0")}${base.g.toString(16).padStart(2, "0")}${base.b.toString(16).padStart(2, "0")}`;
+}
+
 type CityCanvasProps = {
   activeTool: ZoningTool;
+  brushSize: PaintBrushSize;
   gameSpeed: GameSpeedLevel;
   qualityTier: GraphicsQualityTier;
+  activeEvents?: ActiveEventSnapshot[];
+  onEventMarkerClick?: (event: ActiveEventSnapshot) => void;
+  showTrafficOverlay?: boolean;
+  serviceViewMode: ServiceViewMode;
   onStats: (stats: FpsStats) => void;
   onSimResources?: (resources: SimResources) => void;
   onSimApi?: (api: SimClientApi | null) => void;
@@ -36,8 +65,13 @@ type CityCanvasProps = {
 
 export function CityCanvas({
   activeTool,
+  brushSize,
   gameSpeed,
   qualityTier,
+  activeEvents,
+  onEventMarkerClick,
+  showTrafficOverlay = true,
+  serviceViewMode,
   onStats,
   onSimResources,
   onSimApi,
@@ -46,12 +80,17 @@ export function CityCanvas({
   const [city, setCity] = useState<CityData>(() => getCityData());
   const [zones, setZones] = useState<ZoneTile[]>([]);
   const [roads, setRoads] = useState<RoadTile[]>([]);
+  const [traffic, setTraffic] = useState<TrafficTile[]>([]);
+  const [serviceCoverage, setServiceCoverage] = useState<ServiceCoverageSnapshot[]>(
+    [],
+  );
+  const [simResources, setSimResources] = useState<SimResources | null>(null);
   const [simSource, setSimSource] = useState<"wasm" | "procedural">("procedural");
   const [bridgeReady, setBridgeReady] = useState(false);
   const chunks = useMemo(() => createChunkStates(), []);
   const healthcareCoverage = useMemo(
-    () => estimateHealthcareCoverage(city),
-    [city],
+    () => simResources?.healthcareCoverage ?? estimateHealthcareCoverage(city),
+    [simResources?.healthcareCoverage, city],
   );
   const [dpr, setDpr] = useState(
     () => Math.min(MAX_DPR, typeof window !== "undefined" ? window.devicePixelRatio : 1),
@@ -81,7 +120,17 @@ export function CityCanvas({
           roadFlags: r.roadFlags,
         })),
       );
-      onSimResources?.(resourcesFromSnapshot(snapshot));
+      setTraffic(
+        (snapshot.traffic ?? []).map((t) => ({
+          tileX: t.tileX,
+          tileZ: t.tileZ,
+          density: t.density,
+        })),
+      );
+      setServiceCoverage(snapshot.serviceCoverage ?? []);
+      const resources = resourcesFromSnapshot(snapshot);
+      setSimResources(resources);
+      onSimResources?.(resources);
     },
     [onSimResources],
   );
@@ -174,32 +223,51 @@ export function CityCanvas({
       if (!bridge) return;
 
       if (activeTool === "road") {
-        bridge.send({
-          type: "place_road",
-          tileX: pick.tileX,
-          tileZ: pick.tileZ,
-        });
+        setRoads((prev) =>
+          paintRoadBrush(prev, pick.tileX, pick.tileZ, 1, brushSize),
+        );
+        for (const [dx, dz] of brushTileOffsets(brushSize)) {
+          bridge.send({
+            type: "place_road",
+            tileX: pick.tileX + dx,
+            tileZ: pick.tileZ + dz,
+          });
+        }
+        playPaintFeedback("road");
         return;
       }
 
       if (activeTool === "bulldoze") {
-        bridge.send({
-          type: "bulldoze",
-          tileX: pick.tileX,
-          tileZ: pick.tileZ,
-        });
+        setZones((prev) =>
+          paintZoneBrush(prev, pick.tileX, pick.tileZ, 0, brushSize),
+        );
+        for (const [dx, dz] of brushTileOffsets(brushSize)) {
+          const tileX = pick.tileX + dx;
+          const tileZ = pick.tileZ + dz;
+          bridge.send({ type: "bulldoze", tileX, tileZ });
+        }
+        playPaintFeedback("bulldoze");
         return;
       }
 
-      bridge.send({
-        type: "zone_paint",
-        tileX: pick.tileX,
-        tileZ: pick.tileZ,
-        zoneType: ENGINE_ZONE_TYPE[activeTool],
-      });
-      onZonePainted?.(ENGINE_ZONE_TYPE[activeTool]);
+      const zoneType = ENGINE_ZONE_TYPE[activeTool];
+      setZones((prev) =>
+        paintZoneBrush(prev, pick.tileX, pick.tileZ, zoneType, brushSize),
+      );
+      for (const [dx, dz] of brushTileOffsets(brushSize)) {
+        const tileX = pick.tileX + dx;
+        const tileZ = pick.tileZ + dz;
+        bridge.send({
+          type: "zone_paint",
+          tileX,
+          tileZ,
+          zoneType,
+        });
+      }
+      playPaintFeedback("zone");
+      onZonePainted?.(zoneType);
     },
-    [activeTool, onZonePainted],
+    [activeTool, brushSize, onZonePainted],
   );
 
   useEffect(() => {
@@ -225,6 +293,11 @@ export function CityCanvas({
     onStats(latestStats.current);
   };
 
+  const skyColor = useMemo(
+    () => skyColorForApproval(simResources?.approval),
+    [simResources?.approval],
+  );
+
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <Canvas
@@ -233,17 +306,27 @@ export function CityCanvas({
         gl={{ antialias: true, powerPreference: "high-performance" }}
         style={{ width: "100%", height: "100%" }}
       >
-        <color attach="background" args={["#0b1020"]} />
+        <color attach="background" args={[skyColor]} />
         <Suspense fallback={null}>
           <CityScene
             city={city}
             chunks={chunks}
             zones={zones}
             roads={roads}
+            traffic={traffic}
+            showTrafficOverlay={showTrafficOverlay}
+            serviceCoverage={serviceCoverage}
+            serviceViewMode={serviceViewMode}
             pickedTile={pickedTile}
+            activeEvents={activeEvents}
+            onEventMarkerClick={onEventMarkerClick}
             onPick={handlePick}
             onStats={handleStats}
             dpr={dpr}
+            population={simResources?.population ?? 0}
+            householdCount={simResources?.householdCount}
+            era={simResources?.era ?? 0}
+            eraProgress={simResources?.eraProgress}
           />
           <AdaptiveDpr dpr={dpr} onDprChange={setDpr} />
           <CityPostProcessing qualityTier={qualityTier} />

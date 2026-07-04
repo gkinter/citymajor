@@ -11,6 +11,7 @@
     "dev:wasm": "pnpm build:wasm && pnpm dev",
     "smoke:play": "node ./scripts/smoke-play.mjs",
     "smoke:all": "node ./scripts/smoke-all.mjs",
+    "perf:gate": "node ./scripts/perf-gate.mjs",
     "generate:gltf-placeholders": "node ./scripts/generate-placeholder-gltf.mjs"
   },
   "dependencies": {

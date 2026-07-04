@@ -9,6 +9,7 @@
  * Run (terminal 2, from web/ or repo root):
  *   pnpm smoke:play
  *   BASE_URL=http://127.0.0.1:3000 node web/scripts/smoke-play.mjs
+ *   PERF_GATE=1 pnpm smoke:play   # smoke + FPS threshold gate
  *
  * First run: npx playwright install chromium
  */

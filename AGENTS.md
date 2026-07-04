@@ -30,10 +30,11 @@ cd "../citymajor-${TOPIC}"
 | `pnpm build` | Production Next.js build |
 | `pnpm smoke:all` | HTTP + copy checks on `/`, `/shop`, `/play` + WebGL (needs `pnpm dev` running) |
 | `pnpm smoke:play` | `/play` only smoke |
+| `pnpm perf:gate` | WebGL FPS threshold gate on `/play` (≥30 FPS integrated; needs `pnpm dev`) |
 
 **WASM:** `pnpm build:wasm` runs `web/wasm/build-wasm.sh` — `dotnet publish` on `src/Forge.SimWasm`, copies `AppBundle` to `web/public/dotnet/`. Re-run after any C# sim change. Without WASM, `/play` falls back to procedural city data (HUD shows `Data: procedural`).
 
-**Smoke:** Prereq is a running dev server (`pnpm dev` or `pnpm dev:wasm`). First run: `npx playwright install chromium`. Optional: `SCREENSHOT=1 pnpm smoke:all` saves `test-results/smoke-play.png`.
+**Smoke:** Prereq is a running dev server (`pnpm dev` or `pnpm dev:wasm`). First run: `npx playwright install chromium`. Optional: `SCREENSHOT=1 pnpm smoke:all` saves `test-results/smoke-play.png`. Smoke records a single HUD FPS snapshot (warn-only if `—`); **`pnpm perf:gate`** samples FPS over 5s and fails below **30** (WEB_V1_SCOPE §4). Optional: `PERF_GATE=1 pnpm smoke:play` runs smoke + perf gate in one session.
 
 ## Key paths
 
@@ -50,6 +51,7 @@ web/public/dotnet/            → WASM bundle output (_framework/blazor.boot.jso
 web/public/assets/gltf/       → Era archetype GLTF kits
 web/packages/sim-types/       → Shared TS types for sim snapshots
 web/scripts/smoke-all.mjs     → Full smoke suite
+web/scripts/perf-gate.mjs   → WebGL FPS gate (≥30 integrated, WEB_V1_SCOPE §4)
 src/Forge.SimWasm/            → C# sim → browser WASM host
 src/Forge.SimCore/            → Core simulation logic
 src/Forge.Game/               → Game rules, economy, zoning

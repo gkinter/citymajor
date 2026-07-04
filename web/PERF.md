@@ -72,7 +72,37 @@ Environment:
 | `HEADLESS` | `1` | Set `0` to watch the browser |
 | `WASM_EXPECTED` | unset | Set `1` to fail if HUD is not `WASM sim` |
 
-Checks: `/play` HTTP 200, COOP/COEP headers, HUD text, `<canvas>` + WebGL context, buildings count in HUD. **Headless Chromium often reports FPS `—`** — the script warns but does not fail; use the interactive benchmark below for FPS targets.
+Checks: `/play` HTTP 200, COOP/COEP headers, HUD text, `<canvas>` + WebGL context, buildings count in HUD. **Headless Chromium often reports FPS `—`** on a single HUD read — use `pnpm perf:gate` for sampled threshold enforcement (≥30 FPS integrated target per WEB_V1_SCOPE §4).
+
+### Perf gate (FPS threshold)
+
+Script: `web/scripts/perf-gate.mjs` (Playwright + Chromium). Enforces **≥30 FPS** min sample (integrated GPU target from [`WEB_V1_SCOPE.md`](../docs/design/WEB_V1_SCOPE.md) §4).
+
+**Terminal 1** — start the app (same as smoke).
+
+**Terminal 2**:
+
+```bash
+pnpm perf:gate
+# or from web/:
+cd web && pnpm perf:gate
+```
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `MIN_FPS` | `30` | Floor for min sampled FPS (integrated GPU) |
+| `PERF_WARMUP_MS` | `3500` | Wait after canvas mount before sampling |
+| `PERF_SAMPLE_MS` | `5000` | HUD poll window |
+| `PERF_POLL_MS` | `500` | HUD poll interval |
+| `PERF_USE_RAF_FALLBACK` | `1` | Use `requestAnimationFrame` when HUD shows `—` |
+| `PERF_GATE_STRICT` | `0` | Set `1` to fail when no samples (no fallback) or on software-renderer skip |
+| `PERF_SOFT_RENDERER_MAX` | `15` | Headless max FPS below this ⇒ skip gate (unless strict) |
+| `PERF_REPORT` | `1` | Write `test-results/perf-gate.json` |
+| `HEADLESS` | `1` | Set `0` to watch the browser |
+
+Combine with smoke: `PERF_GATE=1 pnpm smoke:play` runs the full smoke suite then enforces the FPS gate on the same page session.
+
+Discrete GPU CI (optional): `MIN_FPS=60 pnpm perf:gate`.
 
 ### Local benchmark (fill in after interactive `/play` session)
 

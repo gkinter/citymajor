@@ -1,4 +1,7 @@
 import { BASE_URL, fail, pass, WASM_EXPECTED } from "./smoke-lib.mjs";
+import { runPerfGate } from "./perf-gate.mjs";
+
+const PERF_GATE = process.env.PERF_GATE === "1";
 
 /**
  * GET /api/saves — list endpoint must return a well-formed envelope.
@@ -177,11 +180,15 @@ export async function runPlayChecks(page, options = {}) {
   const fpsMatch = hudText.match(/FPS:\s*(\d+|—)/);
   const fps = fpsMatch?.[1];
   if (fps && fps !== "—") {
-    pass(tag, `FPS reported: ${fps}`);
+    pass(tag, `FPS snapshot: ${fps}`);
   } else {
     console.warn(
-      `[${tag}] WARN: FPS still — (headless GPU may be slow); canvas + HUD OK`,
+      `[${tag}] WARN: FPS still — (headless GPU may be slow); use pnpm perf:gate for sampled threshold check`,
     );
+  }
+
+  if (PERF_GATE) {
+    await runPerfGate(page, { tag: `${tag}-perf`, skipNavigate: true });
   }
 
   // Anything not on the WASM-fallback allowlist should FAIL the smoke run —

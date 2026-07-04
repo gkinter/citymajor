@@ -13,14 +13,38 @@ public static class WasmConfig
     /// <summary>Starter buildings at init — scaled from world area, capped for pool limits.</summary>
     public const int TargetStarterBuildings = 220;
 
-    /// <summary>Traffic tick interval in sim seconds (stub runs at most this often).</summary>
+    /// <summary>Legacy stub interval — superseded by <see cref="TrafficLiteInterval"/>.</summary>
     public const double TrafficStubInterval = 2.0;
+
+    /// <summary>
+    /// Full BPR-lite Frank-Wolfe interval in sim seconds (SB-3685).
+    /// Runs at most this often — never every 8 Hz sim tick.
+    /// </summary>
+    public const double TrafficLiteInterval = 5.0;
+
+    /// <summary>Zone count for lite O-D matrix (8×8 on 256×256 world).</summary>
+    public const int TrafficLiteZoneCount = 64;
+
+    /// <summary>Max Frank-Wolfe iterations per lite traffic tick.</summary>
+    public const int TrafficLiteFrankWolfeIterations = 4;
+
+    /// <summary>Edge batches for partial BPR refresh between full lite ticks.</summary>
+    public const int TrafficLiteEdgeBatchCount = 4;
+
+    /// <summary>Partial edge BPR refresh interval in sim seconds (cheap subset update).</summary>
+    public const double TrafficLiteEdgeBatchInterval = 0.5;
 
     /// <summary>
     /// L1 simulation interval in sim seconds — one game day. EconomySystem.DailyTick runs
     /// when this accumulator elapses (SB-3690).
     /// </summary>
     public const double GameDayInterval = 1.0;
+
+    /// <summary>
+    /// L2 simulation interval in sim seconds — one game month (30 game days).
+    /// PopulationSystem.MonthlyTick and other month-tier systems run when this elapses (SB-3689).
+    /// </summary>
+    public const double GameMonthInterval = GameDayInterval * 30.0;
 
     // Era derivation thresholds (SB-3692 partial — visual eras, no tech_tree.json)
 

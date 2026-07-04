@@ -4,17 +4,25 @@ import { CreateSaveBodySchema, listSaves, createSave } from "@/lib/save-store";
 import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
 
 export async function GET(req: Request) {
-  const { newCookie } = ensureUserId(req);
-  // Even when we mint a fresh cookie, the request itself has no verified
-  // identity yet, so listSaves returns the "anonymous" bucket for this
-  // first response and subsequent requests will use the signed cookie.
+  let newCookie: ReturnType<typeof ensureUserId>["newCookie"];
+  try {
+    ({ newCookie } = ensureUserId(req));
+  } catch (err) {
+    console.error("[api/saves] ensureUserId failed:", err);
+    return NextResponse.json(
+      { error: "Session configuration error" },
+      { status: 500 },
+    );
+  }
+
   const tier = resolveTierFromRequest(req);
   try {
     return applyUserIdCookie(
       NextResponse.json(listSaves(req, tier)),
       newCookie,
     );
-  } catch {
+  } catch (err) {
+    console.error("[api/saves] listSaves failed:", err);
     return applyUserIdCookie(
       NextResponse.json({ error: "Save store unavailable" }, { status: 500 }),
       newCookie,
@@ -23,7 +31,17 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { newCookie } = ensureUserId(req);
+  let newCookie: ReturnType<typeof ensureUserId>["newCookie"];
+  try {
+    ({ newCookie } = ensureUserId(req));
+  } catch (err) {
+    console.error("[api/saves] ensureUserId failed:", err);
+    return NextResponse.json(
+      { error: "Session configuration error" },
+      { status: 500 },
+    );
+  }
+
   const tier = resolveTierFromRequest(req);
 
   let body: unknown;

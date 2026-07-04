@@ -7,9 +7,11 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
+import { ensureDataDir, resolveDataDir } from "@/lib/data-dir";
 
-const DATA_DIR = join(process.cwd(), ".data");
-const BLOBS_DIR = join(DATA_DIR, "blobs");
+function blobsDir(): string {
+  return join(resolveDataDir(), "blobs");
+}
 
 /** CMJR / snapshot blobs — `saves/{userId}/{saveId}.cmjr` or `.json` stub. */
 export function blobKeyForSave(userId: string, saveId: string, ext = "json"): string {
@@ -32,7 +34,7 @@ export function getBlobBackend(): BlobBackend {
 }
 
 function localPathForKey(key: string): string {
-  return join(BLOBS_DIR, key);
+  return join(blobsDir(), key);
 }
 
 function ensureParentDir(filePath: string): void {
@@ -42,6 +44,7 @@ function ensureParentDir(filePath: string): void {
 
 /** Write blob to local disk (always). R2 upload is v1.5 — skipped when creds absent. */
 export function putBlob(key: string, body: string | Buffer): void {
+  ensureDataDir();
   const localPath = localPathForKey(key);
   ensureParentDir(localPath);
   const tmp = `${localPath}.tmp`;

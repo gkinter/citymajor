@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 import type { Tier } from "@/lib/entitlements";
@@ -12,6 +12,7 @@ import {
   putBlob,
 } from "@/lib/save-blob-store";
 import { getUserIdFromRequest } from "@/lib/user-identity";
+import { ensureDataDir, resolveDataDir } from "@/lib/data-dir";
 
 /** JSON-only stub — no CMJR blob yet (SAVE_FORMAT_WEB §6.1). */
 export const FORMAT_VERSION_JSON_STUB = 0;
@@ -59,10 +60,17 @@ export const SaveListResponseSchema = z.object({
   storageBackend: z.enum(["local", "r2"]),
 });
 
-const DATA_DIR = join(process.cwd(), ".data");
-const SAVES_FILE = join(DATA_DIR, "saves.json");
-const SAVES_TMP_FILE = `${SAVES_FILE}.tmp`;
-const SAVES_BACKUP_FILE = `${SAVES_FILE}.bak`;
+function savesFilePath(): string {
+  return join(resolveDataDir(), "saves.json");
+}
+
+function savesTmpFilePath(): string {
+  return `${savesFilePath()}.tmp`;
+}
+
+function savesBackupFilePath(): string {
+  return `${savesFilePath()}.bak`;
+}
 
 const SavesFileSchema = z.record(z.string(), z.array(z.unknown()));
 
@@ -118,15 +126,20 @@ function normalizeSlot(raw: unknown): SaveSlot {
 }
 
 function readFromDisk(): Store {
-  if (!existsSync(SAVES_FILE)) return {};
+  const savesFile = savesFilePath();
+  const savesBackup = savesBackupFilePath();
+  if (!existsSync(savesFile)) return {};
   let raw: unknown;
   try {
-    raw = JSON.parse(readFileSync(SAVES_FILE, "utf8"));
+    raw = JSON.parse(readFileSync(savesFile, "utf8"));
   } catch (err) {
-    if (existsSync(SAVES_BACKUP_FILE)) {
+    console.error("[save-store] saves.json unreadable:", savesFile, err);
+    if (existsSync(savesBackup)) {
       try {
-        raw = JSON.parse(readFileSync(SAVES_BACKUP_FILE, "utf8"));
-      } catch {
+        raw = JSON.parse(readFileSync(savesBackup, "utf8"));
+        console.warn("[save-store] Recovered from backup:", savesBackup);
+      } catch (backupErr) {
+        console.error("[save-store] Backup also unreadable:", savesBackup, backupErr);
         throw new Error("saves.json is corrupt and backup unreadable", { cause: err });
       }
     } else {
@@ -136,6 +149,7 @@ function readFromDisk(): Store {
 
   const parsed = SavesFileSchema.safeParse(raw);
   if (!parsed.success) {
+    console.error("[save-store] saves.json failed schema validation:", parsed.error.message);
     throw new Error("saves.json failed schema validation", { cause: parsed.error });
   }
 
@@ -148,7 +162,12 @@ function readFromDisk(): Store {
 
 function loadStore(): Store {
   if (memoryStoreLoaded) return memoryStore;
-  memoryStore = readFromDisk();
+  try {
+    memoryStore = readFromDisk();
+  } catch (err) {
+    console.error("[save-store] loadStore failed, using empty store:", err);
+    memoryStore = {};
+  }
   memoryStoreLoaded = true;
   return memoryStore;
 }
@@ -156,12 +175,20 @@ function loadStore(): Store {
 function persistStore(store: Store): void {
   memoryStore = store;
   memoryStoreLoaded = true;
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
-  if (existsSync(SAVES_FILE)) {
-    copyFileSync(SAVES_FILE, SAVES_BACKUP_FILE);
+  const savesFile = savesFilePath();
+  const savesTmp = savesTmpFilePath();
+  const savesBackup = savesBackupFilePath();
+  try {
+    ensureDataDir();
+    if (existsSync(savesFile)) {
+      copyFileSync(savesFile, savesBackup);
+    }
+    writeFileSync(savesTmp, JSON.stringify(store, null, 2), "utf8");
+    renameSync(savesTmp, savesFile);
+  } catch (err) {
+    console.error("[save-store] persistStore failed:", savesFile, err);
+    throw err;
   }
-  writeFileSync(SAVES_TMP_FILE, JSON.stringify(store, null, 2), "utf8");
-  renameSync(SAVES_TMP_FILE, SAVES_FILE);
 }
 
 function userKey(req: Request): string {

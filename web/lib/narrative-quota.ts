@@ -1,8 +1,9 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 import type { Tier } from "@/lib/entitlements";
 import { entitlementsForTier } from "@/lib/entitlements";
+import { ensureDataDir, resolveDataDir } from "@/lib/data-dir";
 import { getUserIdFromRequest } from "@/lib/user-identity";
 
 const QuotaFileSchema = z.record(
@@ -15,8 +16,9 @@ const QuotaFileSchema = z.record(
 
 type QuotaStore = z.infer<typeof QuotaFileSchema>;
 
-const DATA_DIR = join(process.cwd(), ".data");
-const QUOTA_FILE = join(DATA_DIR, "narrative-quota.json");
+function quotaFilePath(): string {
+  return join(resolveDataDir(), "narrative-quota.json");
+}
 
 let memoryStore: QuotaStore = {};
 
@@ -27,13 +29,15 @@ function todayKey(): string {
 function loadStore(): QuotaStore {
   if (Object.keys(memoryStore).length > 0) return memoryStore;
 
+  const quotaFile = quotaFilePath();
   try {
-    if (existsSync(QUOTA_FILE)) {
-      const raw = JSON.parse(readFileSync(QUOTA_FILE, "utf8")) as unknown;
+    if (existsSync(quotaFile)) {
+      const raw = JSON.parse(readFileSync(quotaFile, "utf8")) as unknown;
       memoryStore = QuotaFileSchema.parse(raw);
       return memoryStore;
     }
-  } catch {
+  } catch (err) {
+    console.error("[narrative-quota] loadStore failed, using empty store:", quotaFile, err);
     memoryStore = {};
   }
   return memoryStore;
@@ -41,11 +45,12 @@ function loadStore(): QuotaStore {
 
 function persistStore(store: QuotaStore): void {
   memoryStore = store;
+  const quotaFile = quotaFilePath();
   try {
-    if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
-    writeFileSync(QUOTA_FILE, JSON.stringify(store, null, 2), "utf8");
-  } catch {
-    // Dev stub — in-memory only if filesystem is read-only.
+    ensureDataDir();
+    writeFileSync(quotaFile, JSON.stringify(store, null, 2), "utf8");
+  } catch (err) {
+    console.error("[narrative-quota] persistStore failed (in-memory only):", quotaFile, err);
   }
 }
 

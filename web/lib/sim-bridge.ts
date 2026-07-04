@@ -168,6 +168,11 @@ export function createSimBridge(): SimBridge {
   let worker: Worker | null = null;
   let latestSnapshot: SimSnapshot | null = null;
   const listeners = new Set<(snapshot: SimSnapshot) => void>();
+  const errorListeners = new Set<(error: Error) => void>();
+
+  const notifyError = (error: Error) => {
+    for (const listener of errorListeners) listener(error);
+  };
 
   const notify = (snapshot: SimSnapshot) => {
     latestSnapshot = snapshot;
@@ -177,6 +182,13 @@ export function createSimBridge(): SimBridge {
   return {
     async init(wasmUrl = DEFAULT_WASM_URL, worldSize = DEFAULT_WORLD_SIZE) {
       worker = new Worker(new URL("../workers/sim-worker.ts", import.meta.url));
+
+      worker.addEventListener("error", (event) => {
+        notifyError(new Error(event.message || "Worker error"));
+      });
+      worker.addEventListener("messageerror", () => {
+        notifyError(new Error("Worker message deserialization error"));
+      });
 
       await new Promise<void>((resolve, reject) => {
         const onMessage = (event: MessageEvent<WorkerOutbound>) => {
@@ -188,7 +200,9 @@ export function createSimBridge(): SimBridge {
             notify(msg.snapshot);
           } else if (msg.type === "error") {
             worker?.removeEventListener("message", onMessage);
-            reject(new Error(msg.message));
+            const err = new Error(msg.message);
+            notifyError(err);
+            reject(err);
           }
         };
 
@@ -201,7 +215,9 @@ export function createSimBridge(): SimBridge {
       });
 
       worker.addEventListener("message", (event: MessageEvent<WorkerOutbound>) => {
-        if (event.data.type === "snapshot") notify(event.data.snapshot);
+        const msg = event.data;
+        if (msg.type === "snapshot") notify(msg.snapshot);
+        if (msg.type === "error") notifyError(new Error(msg.message));
       });
     },
 
@@ -219,11 +235,17 @@ export function createSimBridge(): SimBridge {
       return () => listeners.delete(callback);
     },
 
+    onError(callback) {
+      errorListeners.add(callback);
+      return () => errorListeners.delete(callback);
+    },
+
     dispose() {
       worker?.postMessage({ type: "dispose" } satisfies WorkerInbound);
       worker?.terminate();
       worker = null;
       listeners.clear();
+      errorListeners.clear();
       latestSnapshot = null;
     },
   };
@@ -232,6 +254,7 @@ export function createSimBridge(): SimBridge {
 /** No-op bridge for tests or explicit stub mode. */
 export function createSimBridgeStub(): SimBridge {
   const listeners = new Set<(snapshot: SimSnapshot) => void>();
+  const errorListeners = new Set<(error: Error) => void>();
 
   return {
     async init() {},
@@ -243,8 +266,13 @@ export function createSimBridgeStub(): SimBridge {
       listeners.add(callback);
       return () => listeners.delete(callback);
     },
+    onError(callback) {
+      errorListeners.add(callback);
+      return () => errorListeners.delete(callback);
+    },
     dispose() {
       listeners.clear();
+      errorListeners.clear();
     },
   };
 }

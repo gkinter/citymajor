@@ -139,36 +139,42 @@ public sealed class SimSnapshot
         Array.Copy(state.Tiles.RoadFlags, roadFlagsCopy, tileCount);
         Array.Copy(state.Tiles.Traffic, trafficCopy, tileCount);
 
-        // Copy buildings (with extended fields for life system)
-        int bCount = state.Buildings.Count;
+        // Copy buildings — pool slots are sparse; Count is active total, not dense 0..Count-1
+        var buildingPool = state.Buildings;
+        int bCount = buildingPool.Count;
         var buildings = new BuildingSnapshot[bCount];
-        for (int i = 0; i < bCount; i++)
+        int buildingOut = 0;
+        for (int i = 0; i < buildingPool.Capacity && buildingOut < bCount; i++)
         {
-            buildings[i] = new BuildingSnapshot(
-                state.Buildings.GridX[i],
-                state.Buildings.GridY[i],
-                state.Buildings.TypeId[i],
-                state.Buildings.Level[i],
-                state.Buildings.State[i],
-                state.Buildings.Occupants[i],
-                state.Buildings.MaxOccupants[i],
-                state.Buildings.Condition[i]
+            if (!buildingPool.IsActive(i)) continue;
+            buildings[buildingOut++] = new BuildingSnapshot(
+                buildingPool.GridX[i],
+                buildingPool.GridY[i],
+                buildingPool.TypeId[i],
+                buildingPool.Level[i],
+                buildingPool.State[i],
+                buildingPool.Occupants[i],
+                buildingPool.MaxOccupants[i],
+                buildingPool.Condition[i]
             );
         }
 
-        // Copy vehicles (with extended fields for traffic renderer)
-        int vCount = state.Vehicles.Count;
+        // Copy vehicles — same sparse slot layout as buildings
+        var vehiclePool = state.Vehicles;
+        int vCount = vehiclePool.Count;
         var vehicles = new VehicleSnapshot[vCount];
-        for (int i = 0; i < vCount; i++)
+        int vehicleOut = 0;
+        for (int i = 0; i < vehiclePool.Capacity && vehicleOut < vCount; i++)
         {
-            vehicles[i] = new VehicleSnapshot(
-                state.Vehicles.WorldX[i],
-                state.Vehicles.WorldY[i],
-                state.Vehicles.TypeId[i],
-                state.Vehicles.Heading[i],
-                state.Vehicles.Speed[i],
-                state.Vehicles.MaxSpeed[i],
-                state.Vehicles.Flags[i]
+            if (!vehiclePool.IsActive(i)) continue;
+            vehicles[vehicleOut++] = new VehicleSnapshot(
+                vehiclePool.WorldX[i],
+                vehiclePool.WorldY[i],
+                vehiclePool.TypeId[i],
+                vehiclePool.Heading[i],
+                vehiclePool.Speed[i],
+                vehiclePool.MaxSpeed[i],
+                vehiclePool.Flags[i]
             );
         }
 

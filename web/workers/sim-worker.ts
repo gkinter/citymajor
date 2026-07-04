@@ -431,6 +431,52 @@ function enqueueResearchTech(techId: number) {
   if (ok) publishResourceUpdate();
 }
 
+function syncGridsFromSnapshot(snapshot: SimSnapshot) {
+  const zg = ensureZoneGrid(worldSize);
+  zg.fill(0);
+  for (const zone of snapshot.zones ?? []) {
+    if (
+      zone.tileX < 0 ||
+      zone.tileZ < 0 ||
+      zone.tileX >= worldSize ||
+      zone.tileZ >= worldSize
+    ) {
+      continue;
+    }
+    zg[zoneIndex(zone.tileX, zone.tileZ)] = zone.zoneType;
+  }
+
+  const rg = ensureRoadGrid(worldSize);
+  rg.fill(0);
+  for (const road of snapshot.roads ?? []) {
+    if (
+      road.tileX < 0 ||
+      road.tileZ < 0 ||
+      road.tileX >= worldSize ||
+      road.tileZ >= worldSize
+    ) {
+      continue;
+    }
+    rg[zoneIndex(road.tileX, road.tileZ)] = road.roadFlags || 1;
+  }
+}
+
+function loadSnapshot(snapshot: SimSnapshot) {
+  if (!sim) return;
+
+  const restored = sim.LoadSnapshot?.(JSON.stringify(snapshot)) ?? false;
+  if (!restored) {
+    post({ type: "error", message: "Failed to restore WASM snapshot" });
+    return;
+  }
+
+  syncGridsFromSnapshot(snapshot);
+  simAccumMs = 0;
+  lastSnapshotMs = 0;
+  lastResourceMs = 0;
+  publishSnapshot();
+}
+
 function clampSpeedLevel(level: number): 0 | 1 | 2 | 3 {
   if (level <= 0) return 0;
   if (level >= 3) return 3;
@@ -486,6 +532,9 @@ function handleCommand(command: SimCommand) {
       break;
     case "enqueue_research":
       enqueueResearchTech(command.techId);
+      break;
+    case "load_snapshot":
+      loadSnapshot(command.snapshot);
       break;
     case "herald_choice":
       console.info("[CityMajor] Herald council choice (stub)", command);

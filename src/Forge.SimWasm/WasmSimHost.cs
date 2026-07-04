@@ -179,13 +179,6 @@ public sealed class WasmSimHost
         // Building demolition lands in a follow-up command.
     }
 
-    /// <summary>Enqueue a technology for research. Returns true if added to the queue.</summary>
-    public bool EnqueueResearch(int techId)
-    {
-        if (!IsInitialized) return false;
-        return _research.EnqueueResearch(techId, _state);
-    }
-
     /// <summary>Place a single dirt-road tile and refresh neighbor connection flags.</summary>
     public void PlaceRoad(int x, int y)
     {
@@ -204,6 +197,7 @@ public sealed class WasmSimHost
         RefreshRoadFlagsAt(x, y + 1);
     }
 
+    /// <summary>Enqueue a technology for research. Returns true if added to the queue.</summary>
     public bool EnqueueResearch(int techId)
     {
         if (!IsInitialized || _research is null) return false;
@@ -283,9 +277,9 @@ public sealed class WasmSimHost
         _state.Income.Reset();
         _state.Expenses.Reset();
         if (dto.MonthlyIncome > 0)
-            _state.Income.PropertyTax = dto.MonthlyIncome;
+            _state.Income.ResidentialTax = dto.MonthlyIncome;
         if (dto.MonthlyExpenses > 0)
-            _state.Expenses.Infrastructure = dto.MonthlyExpenses;
+            _state.Expenses.InfrastructureMaintenance = dto.MonthlyExpenses;
 
         _trafficLiteAccumulator = 0;
         _trafficEdgeBatchAccumulator = 0;

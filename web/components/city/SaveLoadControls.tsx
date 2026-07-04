@@ -23,6 +23,7 @@ type SaveLoadControlsProps = {
   entitlements: Entitlements | null;
   onSlotsChanged?: () => void;
   onSaveSuccess?: () => void;
+  onLoadSuccess?: () => void;
 };
 
 const barStyle: CSSProperties = {
@@ -110,6 +111,7 @@ export function SaveLoadControls({
   entitlements,
   onSlotsChanged,
   onSaveSuccess,
+  onLoadSuccess,
 }: SaveLoadControlsProps) {
   const [loadOpen, setLoadOpen] = useState(false);
   const [saves, setSaves] = useState<SaveSlot[]>([]);
@@ -218,8 +220,9 @@ export function SaveLoadControls({
       simApi.applySnapshot(snapshot);
       setLoadOpen(false);
       setActionMessage(`Loaded "${slot.name}"`);
+      onLoadSuccess?.();
     },
-    [simApi],
+    [simApi, onLoadSuccess],
   );
 
   const slotsFull = slotCount >= maxSlots;

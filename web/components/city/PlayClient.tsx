@@ -299,6 +299,10 @@ export function PlayClient() {
     setSaveCompleted(true);
   }, []);
 
+  const handleLoadSuccess = useCallback(() => {
+    setSaveCompleted(true);
+  }, []);
+
   const quotaRemaining = entitlements?.narrativeEventsRemaining;
   const heraldDisabled =
     quotaRemaining !== undefined &&
@@ -324,6 +328,7 @@ export function PlayClient() {
         entitlements={entitlements}
         onSlotsChanged={refreshEntitlements}
         onSaveSuccess={handleSaveSuccess}
+        onLoadSuccess={handleLoadSuccess}
       />
       <ResourcesHud resources={simResources} />
       <EraProgressPanel resources={simResources} />

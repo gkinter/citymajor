@@ -131,6 +131,15 @@ export interface SimBridge {
   send(command: SimCommand): void;
   getSnapshot(): SimSnapshot | null;
   onSnapshot(callback: (snapshot: SimSnapshot) => void): () => void;
+  /**
+   * Subscribe to worker failures — includes:
+   *   • `{type:"error"}` messages posted by the worker after init
+   *   • uncaught worker exceptions (`Worker#error`)
+   *   • message deserialization errors (`Worker#messageerror`)
+   *
+   * Returns an unsubscribe function.
+   */
+  onError(callback: (error: Error) => void): () => void;
   dispose(): void;
 }
 

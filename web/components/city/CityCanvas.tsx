@@ -147,7 +147,9 @@ export function CityCanvas({
     }
     onSimApi?.({
       getSnapshot: () => bridge.getSnapshot(),
-      applySnapshot,
+      applySnapshot: (snapshot) => {
+        bridge.send({ type: "load_snapshot", snapshot });
+      },
       sendCommand: (command) => bridge.send(command),
     });
     return () => onSimApi?.(null);

@@ -6,8 +6,16 @@
 export type SimCommand =
   | { type: "tick"; deltaMs: number }
   | { type: "place_building"; tileX: number; tileZ: number; typeId: number }
+  | { type: "zone_paint"; tileX: number; tileZ: number; zoneType: number }
+  | { type: "bulldoze"; tileX: number; tileZ: number }
   | { type: "pause" }
   | { type: "resume" };
+
+export type ZoneSnapshot = {
+  tileX: number;
+  tileZ: number;
+  zoneType: number;
+};
 
 export type BuildingSnapshot = {
   id: number;
@@ -22,6 +30,8 @@ export type BuildingSnapshot = {
 export type SimSnapshot = {
   tick: number;
   buildings: BuildingSnapshot[];
+  /** Sparse zoned tiles (non-zero zoneType). */
+  zones?: ZoneSnapshot[];
 };
 
 export interface SimBridge {

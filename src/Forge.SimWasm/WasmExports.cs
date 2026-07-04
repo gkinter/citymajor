@@ -29,6 +29,18 @@ public static partial class Program
     }
 
     [JSExport]
+    public static void PaintZone(int x, int y, int zoneType)
+    {
+        _host?.PaintZone(x, y, (byte)zoneType);
+    }
+
+    [JSExport]
+    public static void Bulldoze(int x, int y)
+    {
+        _host?.Bulldoze(x, y);
+    }
+
+    [JSExport]
     public static string GetStatus()
     {
         if (_host is null)

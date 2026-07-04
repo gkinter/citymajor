@@ -3,10 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import type { Entitlements } from "@/lib/entitlements";
 import type { FpsStats } from "@/lib/types";
+import type { ZoningTool } from "@/lib/zoning";
 import { FpsHud } from "@/components/city/FpsHud";
 import { CityCanvas } from "@/components/city/CityCanvas";
+import { ZoningToolbar } from "@/components/city/ZoningToolbar";
 
 export function PlayClient() {
+  const [activeTool, setActiveTool] = useState<ZoningTool>("residential");
   const [stats, setStats] = useState<FpsStats>({
     fps: 0,
     dpr: 1,
@@ -49,8 +52,16 @@ export function PlayClient() {
 
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
-      <CityCanvas onStats={setStats} />
-      <FpsHud stats={stats} totalBuildings={stats.totalBuildings} />
+      <CityCanvas
+        activeTool={activeTool}
+        onStats={setStats}
+      />
+      <FpsHud
+        stats={stats}
+        totalBuildings={stats.totalBuildings}
+        activeTool={activeTool}
+      />
+      <ZoningToolbar activeTool={activeTool} onToolChange={setActiveTool} />
       <div
         style={{
           position: "absolute",

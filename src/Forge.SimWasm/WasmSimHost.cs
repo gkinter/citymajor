@@ -101,6 +101,28 @@ public sealed class WasmSimHost
         return JsonSerializer.Serialize(dto, JsonContext.Default.SimSnapshotDto);
     }
 
+    public void PaintZone(int x, int y, byte zoneType)
+    {
+        if (!IsInitialized || !_state.Tiles.InBounds(x, y)) return;
+
+        int idx = _state.Tiles.Index(x, y);
+        if (_state.Tiles.TerrainType[idx] == (byte)TerrainId.Water) return;
+        if (_state.Tiles.TerrainType[idx] == (byte)TerrainId.Rock) return;
+
+        _state.Tiles.ZoneType[idx] = zoneType;
+        _state.Tiles.ZoneDensity[idx] = zoneType == 0 ? (byte)0 : (byte)1;
+    }
+
+    public void Bulldoze(int x, int y)
+    {
+        if (!IsInitialized || !_state.Tiles.InBounds(x, y)) return;
+
+        int idx = _state.Tiles.Index(x, y);
+        _state.Tiles.ZoneType[idx] = 0;
+        _state.Tiles.ZoneDensity[idx] = 0;
+        // Building demolition lands in a follow-up command.
+    }
+
     private void RunDayTick()
     {
         _economy.DailyTick(_state, DayInterval);
@@ -305,6 +327,7 @@ public sealed class SimSnapshotDto
 {
     public long Tick { get; init; }
     public BuildingDto[] Buildings { get; init; } = [];
+    public ZoneDto[] Zones { get; init; } = [];
 
     public static SimSnapshotDto From(SimSnapshot snap, WorldState state)
     {
@@ -325,11 +348,29 @@ public sealed class SimSnapshotDto
             };
         }
 
+        var zones = CollectZones(state);
+
         return new SimSnapshotDto
         {
             Tick = snap.TickCount,
             Buildings = buildings,
+            Zones = zones,
         };
+    }
+
+    private static ZoneDto[] CollectZones(WorldState state)
+    {
+        var tiles = state.Tiles;
+        var list = new List<ZoneDto>(256);
+        for (int y = 0; y < tiles.Size; y++)
+        for (int x = 0; x < tiles.Size; x++)
+        {
+            int idx = tiles.Index(x, y);
+            byte zoneType = tiles.ZoneType[idx];
+            if (zoneType == 0) continue;
+            list.Add(new ZoneDto { TileX = x, TileZ = y, ZoneType = zoneType });
+        }
+        return list.ToArray();
     }
 
     private static int FindBuildingSlot(WorldState state, int x, int y, ushort typeId)
@@ -356,6 +397,14 @@ public sealed class BuildingDto
     public byte Condition { get; init; }
 }
 
+public sealed class ZoneDto
+{
+    public int TileX { get; init; }
+    public int TileZ { get; init; }
+    public byte ZoneType { get; init; }
+}
+
 [JsonSerializable(typeof(SimSnapshotDto))]
 [JsonSerializable(typeof(BuildingDto))]
+[JsonSerializable(typeof(ZoneDto))]
 internal partial class JsonContext : JsonSerializerContext;

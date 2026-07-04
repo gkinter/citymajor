@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import type { SimCommand, SimSnapshot } from "../lib/sim-bridge";
+import type { SimCommand, SimSnapshot, ZoneSnapshot } from "../lib/sim-bridge";
 
 type WorkerInbound =
   | { type: "init"; wasmBaseUrl: string; worldSize: number }
@@ -19,13 +19,66 @@ type SimExports = {
   Init: (worldSize: number) => void;
   Tick: (dt: number) => number;
   GetRenderSnapshot: () => string;
+  PaintZone?: (x: number, y: number, zoneType: number) => void;
+  Bulldoze?: (x: number, y: number) => void;
 };
 
 let sim: SimExports | null = null;
 let paused = false;
+let worldSize = 256;
+/** Optimistic zone grid — merged into snapshots when WASM lacks zone data. */
+let zoneGrid: Uint8Array | null = null;
 
 function post(message: WorkerOutbound) {
   ctx.postMessage(message);
+}
+
+function ensureZoneGrid(size: number) {
+  if (!zoneGrid || zoneGrid.length !== size * size) {
+    zoneGrid = new Uint8Array(size * size);
+  }
+  return zoneGrid;
+}
+
+function zoneIndex(tileX: number, tileZ: number) {
+  return tileX + tileZ * worldSize;
+}
+
+function collectZonesFromGrid(grid: Uint8Array): ZoneSnapshot[] {
+  const zones: ZoneSnapshot[] = [];
+  for (let z = 0; z < worldSize; z++) {
+    for (let x = 0; x < worldSize; x++) {
+      const idx = zoneIndex(x, z);
+      const zoneType = grid[idx];
+      if (zoneType !== 0) zones.push({ tileX: x, tileZ: z, zoneType });
+    }
+  }
+  return zones;
+}
+
+function mergeZones(
+  wasmZones: ZoneSnapshot[] | undefined,
+  grid: Uint8Array,
+): ZoneSnapshot[] {
+  if (!wasmZones?.length) return collectZonesFromGrid(grid);
+
+  const merged = new Map<string, number>();
+  for (const z of wasmZones) {
+    merged.set(`${z.tileX},${z.tileZ}`, z.zoneType);
+  }
+  for (let i = 0; i < grid.length; i++) {
+    if (grid[i] === 0) continue;
+    const x = i % worldSize;
+    const z = Math.floor(i / worldSize);
+    merged.set(`${x},${z}`, grid[i]);
+  }
+
+  const out: ZoneSnapshot[] = [];
+  for (const [key, zoneType] of merged) {
+    const [tileX, tileZ] = key.split(",").map(Number);
+    out.push({ tileX, tileZ, zoneType });
+  }
+  return out;
 }
 
 async function loadWasm(baseUrl: string): Promise<SimExports> {
@@ -50,6 +103,8 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
   const tick = source.Tick ?? source.tick;
   const getRenderSnapshot =
     source.GetRenderSnapshot ?? source.getRenderSnapshot;
+  const paintZone = source.PaintZone ?? source.paintZone;
+  const bulldoze = source.Bulldoze ?? source.bulldoze;
   if (
     typeof init !== "function" ||
     typeof tick !== "function" ||
@@ -63,16 +118,46 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
     Init: init as (worldSize: number) => void,
     Tick: tick as (dt: number) => number,
     GetRenderSnapshot: getRenderSnapshot as () => string,
+    PaintZone:
+      typeof paintZone === "function"
+        ? (paintZone as (x: number, y: number, zoneType: number) => void)
+        : undefined,
+    Bulldoze:
+      typeof bulldoze === "function"
+        ? (bulldoze as (x: number, y: number) => void)
+        : undefined,
   };
 }
 
 function readSnapshot(): SimSnapshot {
-  if (!sim) return { tick: 0, buildings: [] };
-  return JSON.parse(sim.GetRenderSnapshot()) as SimSnapshot;
+  if (!sim) return { tick: 0, buildings: [], zones: [] };
+
+  const parsed = JSON.parse(sim.GetRenderSnapshot()) as SimSnapshot;
+  const grid = ensureZoneGrid(worldSize);
+  return {
+    ...parsed,
+    zones: mergeZones(parsed.zones, grid),
+  };
 }
 
 function publishSnapshot() {
   post({ type: "snapshot", snapshot: readSnapshot() });
+}
+
+function paintZone(tileX: number, tileZ: number, zoneType: number) {
+  const grid = ensureZoneGrid(worldSize);
+  if (tileX < 0 || tileZ < 0 || tileX >= worldSize || tileZ >= worldSize) return;
+  grid[zoneIndex(tileX, tileZ)] = zoneType;
+  sim?.PaintZone?.(tileX, tileZ, zoneType);
+  publishSnapshot();
+}
+
+function bulldozeTile(tileX: number, tileZ: number) {
+  const grid = ensureZoneGrid(worldSize);
+  if (tileX < 0 || tileZ < 0 || tileX >= worldSize || tileZ >= worldSize) return;
+  grid[zoneIndex(tileX, tileZ)] = 0;
+  sim?.Bulldoze?.(tileX, tileZ);
+  publishSnapshot();
 }
 
 function handleCommand(command: SimCommand) {
@@ -94,6 +179,12 @@ function handleCommand(command: SimCommand) {
     case "place_building":
       // WASM placement API lands in a follow-up; tick-driven growth still runs.
       break;
+    case "zone_paint":
+      paintZone(command.tileX, command.tileZ, command.zoneType);
+      break;
+    case "bulldoze":
+      bulldozeTile(command.tileX, command.tileZ);
+      break;
   }
 }
 
@@ -102,13 +193,16 @@ ctx.onmessage = async (event: MessageEvent<WorkerInbound>) => {
 
   if (msg.type === "dispose") {
     sim = null;
+    zoneGrid = null;
     return;
   }
 
   if (msg.type === "init") {
     try {
+      worldSize = msg.worldSize || 256;
+      ensureZoneGrid(worldSize);
       sim = await loadWasm(msg.wasmBaseUrl);
-      sim.Init(msg.worldSize || 256);
+      sim.Init(worldSize);
       publishSnapshot();
       post({ type: "ready" });
     } catch (err) {

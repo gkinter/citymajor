@@ -1,21 +1,25 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FpsStats, PickResult, CityData } from "@/lib/types";
 import { cityDataFromSnapshot, getCityData } from "@/lib/city-data";
 import { createChunkStates } from "@/lib/chunks";
 import { MAX_DPR } from "@/lib/constants";
-import { createSimBridge } from "@/lib/sim-bridge";
+import { createSimBridge, type SimBridge } from "@/lib/sim-bridge";
+import type { ZoningTool, ZoneTile } from "@/lib/zoning";
+import { ENGINE_ZONE_TYPE } from "@/lib/zoning";
 import { CityScene } from "./CityScene";
 import { AdaptiveDpr } from "./AdaptiveDpr";
 
 type CityCanvasProps = {
+  activeTool: ZoningTool;
   onStats: (stats: FpsStats) => void;
 };
 
-export function CityCanvas({ onStats }: CityCanvasProps) {
+export function CityCanvas({ activeTool, onStats }: CityCanvasProps) {
   const [city, setCity] = useState<CityData>(() => getCityData());
+  const [zones, setZones] = useState<ZoneTile[]>([]);
   const [simSource, setSimSource] = useState<"wasm" | "procedural">(
     "procedural",
   );
@@ -24,6 +28,7 @@ export function CityCanvas({ onStats }: CityCanvasProps) {
     () => Math.min(MAX_DPR, typeof window !== "undefined" ? window.devicePixelRatio : 1),
   );
   const [pickedTile, setPickedTile] = useState<PickResult>(null);
+  const bridgeRef = useRef<SimBridge | null>(null);
   const latestStats = useRef<FpsStats>({
     fps: 0,
     dpr,
@@ -36,6 +41,7 @@ export function CityCanvas({ onStats }: CityCanvasProps) {
 
   useEffect(() => {
     const bridge = createSimBridge();
+    bridgeRef.current = bridge;
     let cancelled = false;
     let raf = 0;
     let last = performance.now();
@@ -59,6 +65,7 @@ export function CityCanvas({ onStats }: CityCanvasProps) {
         setSimSource("wasm");
         bridge.onSnapshot((snapshot) => {
           setCity(cityDataFromSnapshot(snapshot));
+          if (snapshot.zones) setZones(snapshot.zones);
         });
         startTickLoop();
       } catch (err) {
@@ -77,8 +84,36 @@ export function CityCanvas({ onStats }: CityCanvasProps) {
       cancelled = true;
       cancelAnimationFrame(raf);
       bridge.dispose();
+      bridgeRef.current = null;
     };
   }, []);
+
+  const handlePick = useCallback(
+    (pick: PickResult) => {
+      setPickedTile(pick);
+      if (!pick || activeTool === "road") return;
+
+      const bridge = bridgeRef.current;
+      if (!bridge) return;
+
+      if (activeTool === "bulldoze") {
+        bridge.send({
+          type: "bulldoze",
+          tileX: pick.tileX,
+          tileZ: pick.tileZ,
+        });
+        return;
+      }
+
+      bridge.send({
+        type: "zone_paint",
+        tileX: pick.tileX,
+        tileZ: pick.tileZ,
+        zoneType: ENGINE_ZONE_TYPE[activeTool],
+      });
+    },
+    [activeTool],
+  );
 
   useEffect(() => {
     latestStats.current = { ...latestStats.current, pickedTile, dpr, simSource };
@@ -108,8 +143,9 @@ export function CityCanvas({ onStats }: CityCanvasProps) {
         <CityScene
           city={city}
           chunks={chunks}
+          zones={zones}
           pickedTile={pickedTile}
-          onPick={setPickedTile}
+          onPick={handlePick}
           onStats={handleStats}
           dpr={dpr}
         />

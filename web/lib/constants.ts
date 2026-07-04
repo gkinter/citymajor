@@ -34,6 +34,9 @@ export type GraphicsQualityTier = "low" | "high";
 
 export const GRAPHICS_QUALITY_STORAGE_KEY = "citymajor_graphics_quality";
 
+/** Persist traffic heatmap overlay visibility on /play. */
+export const TRAFFIC_OVERLAY_STORAGE_KEY = "citymajor_traffic_overlay";
+
 /** Set when the /play guided onboarding tour is completed or dismissed. */
 export const ONBOARDING_STORAGE_KEY = "citymajor_onboarding_done";
 

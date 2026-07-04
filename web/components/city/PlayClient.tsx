@@ -22,7 +22,7 @@ import {
   TRAFFIC_OVERLAY_STORAGE_KEY,
   type GraphicsQualityTier,
 } from "@/lib/constants";
-import type { FpsStats } from "@/lib/types";
+import { PopulationGrowthTracker } from "@/lib/population-growth";
 import type { ZoningTool, PaintBrushSize } from "@/lib/zoning";
 import { ApprovalMoodOverlay } from "@/components/city/ApprovalMoodOverlay";
 import { CityCanvas } from "@/components/city/CityCanvas";
@@ -97,6 +97,9 @@ export function PlayClient() {
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
   const [entitlementsError, setEntitlementsError] = useState<string | null>(null);
   const [simResources, setSimResources] = useState<SimResources | null>(null);
+  const [populationGrowthPerMonth, setPopulationGrowthPerMonth] = useState<
+    number | null
+  >(null);
   const [simApi, setSimApi] = useState<SimClientApi | null>(null);
   const [heraldOpen, setHeraldOpen] = useState(false);
   const [heraldLoading, setHeraldLoading] = useState(false);
@@ -119,6 +122,7 @@ export function PlayClient() {
   const prevUnlockedTechRef = useRef<Set<number>>(new Set());
   const simApiRef = useRef(simApi);
   simApiRef.current = simApi;
+  const populationGrowthRef = useRef(new PopulationGrowthTracker());
 
   const refreshEntitlements = useCallback(async () => {
     try {
@@ -137,6 +141,12 @@ export function PlayClient() {
   useEffect(() => {
     void refreshEntitlements();
   }, [refreshEntitlements]);
+
+  const handleSimResources = useCallback((resources: SimResources) => {
+    populationGrowthRef.current.push(resources.tick, resources.population);
+    setPopulationGrowthPerMonth(populationGrowthRef.current.estimatePerMonth());
+    setSimResources(resources);
+  }, []);
 
   const handleQualityChange = useCallback((tier: GraphicsQualityTier) => {
     setQualityTier(tier);
@@ -380,9 +390,8 @@ export function PlayClient() {
         showTrafficOverlay={showTrafficOverlay}
         activeEvents={simResources?.activeEvents}
         onEventMarkerClick={openHerald}
-        showTrafficOverlay={showTrafficOverlay}
         onStats={setStats}
-        onSimResources={setSimResources}
+        onSimResources={handleSimResources}
         onSimApi={setSimApi}
         onZonePainted={handleZonePainted}
       />
@@ -398,7 +407,10 @@ export function PlayClient() {
         entitlements={entitlements}
         onSlotsChanged={refreshEntitlements}
       />
-      <ResourcesHud resources={simResources} />
+      <ResourcesHud
+        resources={simResources}
+        populationGrowthPerMonth={populationGrowthPerMonth}
+      />
       <EraProgressPanel resources={simResources} />
       <FpsHud
         stats={stats}

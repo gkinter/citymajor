@@ -10,22 +10,38 @@ import {
   updateChunkVisibility,
   visibleBuildingCount,
 } from "@/lib/chunks";
-import type { RoadTile, ZoneTile } from "@/lib/zoning";
+import type { RoadTile, TrafficTile, ZoneTile } from "@/lib/zoning";
+import type { ActiveEventSnapshot, EraProgress, ServiceCoverageSnapshot, ServiceViewMode } from "@/lib/sim-bridge";
 import { BuildingInstances } from "./BuildingInstances";
+import { CitizenDots } from "./CitizenDots";
 import { TerrainChunks } from "./TerrainChunks";
 import { TilePicker } from "./TilePicker";
 import { RoadOverlay } from "./RoadOverlay";
 import { ZoneOverlay } from "./ZoneOverlay";
+import { TrafficOverlay } from "./TrafficOverlay";
+import { ServiceCoverageOverlay } from "./ServiceCoverageOverlay";
+import { EventMarkers } from "./EventMarkers";
+import { EraLandmarkPlaceholder } from "./EraLandmarkPlaceholder";
 
 type CitySceneProps = {
   city: CityData;
   chunks: ChunkState[];
   zones: ZoneTile[];
   roads: RoadTile[];
+  traffic: TrafficTile[];
+  showTrafficOverlay: boolean;
+  serviceCoverage: ServiceCoverageSnapshot[];
+  serviceViewMode: ServiceViewMode;
   pickedTile: PickResult;
+  activeEvents?: ActiveEventSnapshot[];
+  era?: number;
+  eraProgress?: EraProgress;
+  onEventMarkerClick?: (event: ActiveEventSnapshot) => void;
   onPick: (pick: PickResult) => void;
   onStats: (stats: FpsStats) => void;
   dpr: number;
+  population?: number;
+  householdCount?: number;
 };
 
 export function CityScene({
@@ -33,10 +49,20 @@ export function CityScene({
   chunks,
   zones,
   roads,
+  traffic,
+  showTrafficOverlay,
+  serviceCoverage,
+  serviceViewMode,
   pickedTile,
+  activeEvents,
+  era = 0,
+  eraProgress,
+  onEventMarkerClick,
   onPick,
   onStats,
   dpr,
+  population = 0,
+  householdCount,
 }: CitySceneProps) {
   const { camera } = useThree();
   const fpsAccum = useRef({ frames: 0, last: performance.now(), fps: 0 });
@@ -89,8 +115,24 @@ export function CityScene({
       />
       <TerrainChunks chunks={chunks} pickedTile={pickedTile} />
       <RoadOverlay roads={roads} />
-      <ZoneOverlay zones={zones} />
+      <TrafficOverlay traffic={traffic} visible={showTrafficOverlay} />
+      {serviceViewMode === "off" ? (
+        <ZoneOverlay zones={zones} />
+      ) : (
+        <ServiceCoverageOverlay tiles={serviceCoverage} mode={serviceViewMode} />
+      )}
       <BuildingInstances city={city} chunks={chunks} />
+      <CitizenDots
+        city={city}
+        chunks={chunks}
+        population={population}
+        householdCount={householdCount}
+      />
+      <EventMarkers
+        activeEvents={activeEvents}
+        onEventClick={onEventMarkerClick}
+      />
+      <EraLandmarkPlaceholder era={era} eraProgress={eraProgress} />
       <TilePicker onPick={onPick} />
     </>
   );

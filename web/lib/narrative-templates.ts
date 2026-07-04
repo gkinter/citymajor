@@ -27,13 +27,21 @@ export const NarrativeEventRequestSchema = z.object({
 });
 export type NarrativeEventRequest = z.infer<typeof NarrativeEventRequestSchema>;
 
-export type NarrativeEventResponse = {
-  bucket: SimStateBucket;
-  headline: string;
-  body: string;
-  options: Array<{ id: string; label: string; tradeoff: string }>;
-  source: "template";
-};
+export const NarrativeOptionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  tradeoff: z.string(),
+});
+
+export const NarrativeEventResponseSchema = z.object({
+  bucket: SimStateBucketSchema,
+  headline: z.string(),
+  body: z.string(),
+  options: z.array(NarrativeOptionSchema),
+  source: z.literal("template"),
+});
+
+export type NarrativeEventResponse = z.infer<typeof NarrativeEventResponseSchema>;
 
 type TemplateEntry = Omit<NarrativeEventResponse, "bucket" | "source">;
 

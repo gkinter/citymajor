@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
+import { resolveTierFromRequest } from "@/lib/entitlements";
+import {
+  consumeNarrativeEvent,
+  getNarrativeEventsRemaining,
+  userKeyFromRequest,
+} from "@/lib/narrative-quota";
 import {
   NarrativeEventRequestSchema,
+  NarrativeEventResponseSchema,
   narrativeFromBucket,
   resolveBucket,
 } from "@/lib/narrative-templates";
@@ -21,6 +28,31 @@ export async function POST(req: Request) {
     );
   }
 
+  const tier = resolveTierFromRequest(req);
+  const userKey = userKeyFromRequest(req);
+  const remainingBefore = getNarrativeEventsRemaining(tier, userKey);
+
+  if (remainingBefore === 0) {
+    return NextResponse.json(
+      {
+        error: "Daily narrative quota exhausted",
+        narrativeEventsRemaining: 0,
+      },
+      { status: 429 },
+    );
+  }
+
+  const quota = consumeNarrativeEvent(userKey, tier);
+  if (!quota.ok) {
+    return NextResponse.json(
+      {
+        error: "Daily narrative quota exhausted",
+        narrativeEventsRemaining: 0,
+      },
+      { status: 429 },
+    );
+  }
+
   const bucket = resolveBucket(parsed.data.bucket, parsed.data.context);
   const event = narrativeFromBucket(bucket);
 
@@ -28,5 +60,9 @@ export async function POST(req: Request) {
     event.body = event.body.replace("the city", parsed.data.context.cityName);
   }
 
-  return NextResponse.json(event);
+  const payload = NarrativeEventResponseSchema.parse(event);
+  return NextResponse.json({
+    ...payload,
+    narrativeEventsRemaining: quota.remaining,
+  });
 }

@@ -104,7 +104,45 @@ Combine with smoke: `PERF_GATE=1 pnpm smoke:play` runs the full smoke suite then
 
 Discrete GPU CI (optional): `MIN_FPS=60 pnpm perf:gate`.
 
-### Local benchmark (fill in after interactive `/play` session)
+**Navigation:** `perf-gate.mjs` uses `waitUntil: "domcontentloaded"` (same as `smoke-play-checks.mjs`). Do not use `networkidle` on `/play` — the WASM sim worker and dev HMR keep the network busy and Playwright will time out even when the canvas is healthy.
+
+### Beast remote (no `beast perf:gate` subcommand)
+
+From the feature worktree root, sync + run Playwright **on Beast** against a dev server bound to localhost on the server (not port-forwarded from Mac):
+
+```bash
+# 1) Start Next dev on Beast (pick a free port, e.g. 3107)
+beast run 'export NODE_OPTIONS=; PORT=3107; cd /home/devops/citymajor-web-r3f-spike--<branch-slug>/web; setsid pnpm exec next dev -p $PORT > /tmp/citymajor-perf-dev.log 2>&1 < /dev/null &'
+
+# 2) Wait until /play returns HTTP 200 on Beast
+beast run 'PORT=3107; until curl -sf -o /dev/null http://localhost:$PORT/play; do sleep 2; done; echo ready'
+
+# 3) Perf gate (writes test-results/perf-gate.json on Beast)
+beast run 'cd /home/devops/citymajor-web-r3f-spike--<branch-slug>/web && BASE_URL=http://localhost:3107 HEADLESS=1 PERF_REPORT=1 pnpm perf:gate'
+
+# Optional: pull report to local web/test-results/
+rsync -az devops@beast:/home/devops/citymajor-web-r3f-spike--<branch-slug>/web/test-results/perf-gate.json web/test-results/
+```
+
+Replace `<branch-slug>` with the sanitized git branch (`feat/wasm-r3f-integration` → `feat-wasm-r3f-integration-2026-07-04`). `beast` prints the resolved remote path in its header.
+
+Canvas selector: `[data-testid="city-canvas"] canvas` (R3F main view). Minimap uses a separate 2D `<canvas>` outside that wrapper — do not drop the test id scope.
+
+### SB-3703 — automated run log (2026-07-04)
+
+Environment: Beast (Hetzner EPYC), headless Chromium, `BASE_URL=http://localhost:3107`, branch `feat/wasm-r3f-integration-2026-07-04`.
+
+| Check | Result |
+|-------|--------|
+| `pnpm smoke:play` | **PASS** — WebGL canvas + `data-engine=three.js r175`, 218/218 buildings, WASM sim |
+| `pnpm perf:gate` (default) | **PASS (skipped threshold)** — headless software renderer (`maxFps` 2 < 15) |
+| HUD FPS samples (5s window) | min **1**, max **2**, median **2**, avg **2** (`method: hud`) |
+| Smoke FPS snapshot | **3** |
+| Strict gate (`PERF_GATE_STRICT=1 PERF_SOFT_RENDERER_MAX=0`) | **FAIL** — min FPS 1 < 30 (expected on headless; not a product regression) |
+
+**Sign-off still open:** integrated/discrete interactive benchmarks (table below), `AdaptiveDpr` manual check, 5k-building WASM soak, [SB-3705](https://linear.app/softblaze/issue/SB-3705) QA matrix. Use `HEADLESS=0` on a GPU host or Mac interactive session for meaningful ≥30 FPS evidence.
+
+### Local benchmark (fill in after interactive `/play` session) (fill in after interactive `/play` session)
 
 ```
 Machine:

@@ -131,7 +131,7 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 |-------|----------|---------|
 | L0 (sub-day) | `TrafficLiteInterval` (5.0 sim s) | `WasmTrafficLite` — 64-zone Frank-Wolfe BPR (4 iter max) |
 | L0b (edge refresh) | `TrafficLiteEdgeBatchInterval` (0.5 sim s) | Partial BPR on ¼ of edges — no full O-D / FW |
-| L1 (game day) | `GameDayInterval` (1.0 sim s) | `EconomySystem.DailyTick`, `ServiceSystem`, `ZoneGrowthSystem`, `PoliticsSystem`, events |
+| L1 (game day) | `GameDayInterval` (1.0 sim s) | `EconomySystem.DailyTick`, `ServiceSystem`, `ZoneGrowthSystem`, `PoliticsSystem`, `EventSystem` daily tick + `ApplyEventEffectsToState` (happiness / approval aggregates) |
 | L2 (month) | `GameMonthInterval` (30.0 sim s) | `PopulationSystem.MonthlyTick` (migration, births/deaths), `BudgetSystem`, `ResearchSystem`, land-value recalc, **era derivation** |
 
 `WasmSimHost` accumulates sim time: `GameDayInterval` drives L1 daily ticks; `GameMonthInterval` (30 game days) drives L2 month ticks including `PopulationSystem.MonthlyTick` and staggered per-tick satisfaction updates (1/30 of households per sim tick). Population, household count, city treasury, **RCI demand** (`EconomySystem`), **approval / happiness** (`PoliticsSystem` / `WorldState`), and **monthly budget ledgers** (`BudgetSystem`) are exposed via `GetStatus()` and `GetRenderSnapshot()`.
@@ -143,6 +143,7 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 - `EconomySystem`, `PopulationSystem`, `ServiceSystem`
 - `WasmTrafficLite` — BPR-lite traffic (SB-3685 partial; see performance budget below)
 - `ZoneGrowthSystem`, `BudgetSystem`, `PoliticsSystem`, `EventSystem`, `ResearchSystem`, `CulturalDNASystem`
+- **Event effects (partial parity):** `RunDayTick` calls `ApplyEventEffectsToState` after `UpdateEvents`, matching desktop `IronAndOakGame` — applies aggregate happiness / approval modifiers from active events. Tile-local effects (crime, fire, pollution, etc.) remain inside `EventSystem.UpdateEvents`.
 - Engine data: `WorldState`, `SimSnapshot`, `MapGenerator`, tile/building pools
 
 **Traffic modes (`GetStatus().trafficMode`):**

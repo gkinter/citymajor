@@ -224,10 +224,33 @@ public sealed class WasmSimHost
         _zoneGrowth.Tick(_state, _economy);
         _events.DailyTick(_state);
         _events.UpdateEvents(_state, 1f);
+        ApplyEventEffectsToState(_state);
         _state.TickEvents();
         _politics.DailyTick(_state, WasmConfig.GameDayInterval);
 
         _state.AdvanceDay();
+    }
+
+    /// <summary>
+    /// Apply aggregate happiness / approval modifiers from active game events.
+    /// Mirrors <c>IronAndOakGame.ApplyEventEffectsToState</c> (partial parity — tile-local
+    /// effects are still applied inside <see cref="EventSystem.UpdateEvents"/>).
+    /// </summary>
+    private void ApplyEventEffectsToState(WorldState state)
+    {
+        if (_events.ActiveEventCount == 0) return;
+
+        float happinessMod = _events.GetAggregateEffect(EventSystem.EffectIndex.Happiness);
+        if (happinessMod != 0f)
+        {
+            state.Happiness = Math.Clamp(state.Happiness + happinessMod * 0.01f, 0f, 1f);
+        }
+
+        float approvalMod = _events.GetAggregateEffect(EventSystem.EffectIndex.ApprovalRatingChange);
+        if (approvalMod != 0f)
+        {
+            state.ApprovalRating = Math.Clamp(state.ApprovalRating + approvalMod * 0.01f, 0f, 1f);
+        }
     }
 
     private void RunMonthTick()

@@ -31,6 +31,15 @@ const optionStyle: CSSProperties = {
   background: HUD_COLORS.rowBg,
 };
 
+const optionButtonStyle: CSSProperties = {
+  ...optionStyle,
+  width: "100%",
+  textAlign: "left",
+  cursor: "pointer",
+  font: "inherit",
+  color: "inherit",
+};
+
 function formatQuota(remaining: number | undefined): string {
   if (remaining === undefined) return "…";
   if (remaining === Number.MAX_SAFE_INTEGER) return "∞";
@@ -44,6 +53,7 @@ type HeraldPanelProps = {
   loading: boolean;
   error: string | null;
   quotaRemaining?: number;
+  onOptionSelect?: (optionId: string) => void;
 };
 
 export function HeraldPanel({
@@ -53,6 +63,7 @@ export function HeraldPanel({
   loading,
   error,
   quotaRemaining,
+  onOptionSelect,
 }: HeraldPanelProps) {
   if (!open) return null;
 
@@ -105,10 +116,18 @@ export function HeraldPanel({
                   Council options
                 </div>
                 {event.options.map((opt) => (
-                  <div key={opt.id} style={optionStyle}>
+                  <button
+                    key={opt.id}
+                    type="button"
+                    style={optionButtonStyle}
+                    onClick={() => onOptionSelect?.(opt.id)}
+                    disabled={!onOptionSelect}
+                  >
                     <div style={{ fontWeight: 600 }}>{opt.label}</div>
-                    <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>{opt.tradeoff}</div>
-                  </div>
+                    <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>
+                      {opt.tradeoff}
+                    </div>
+                  </button>
                 ))}
               </div>
             ) : null}

@@ -9,7 +9,13 @@ import {
   type SimStateBucket,
 } from "@/lib/narrative-templates";
 import { deriveNarrativeBucket } from "@/lib/sim-metrics";
-import type { GameSpeedLevel, SimClientApi, SimResources } from "@/lib/sim-bridge";
+import { narrativeFromSimEvent } from "@/lib/event-catalog";
+import type {
+  ActiveEventSnapshot,
+  GameSpeedLevel,
+  SimClientApi,
+  SimResources,
+} from "@/lib/sim-bridge";
 import {
   GRAPHICS_QUALITY_STORAGE_KEY,
   type GraphicsQualityTier,
@@ -75,12 +81,16 @@ export function PlayClient() {
   const [heraldLoading, setHeraldLoading] = useState(false);
   const [heraldError, setHeraldError] = useState<string | null>(null);
   const [heraldEvent, setHeraldEvent] = useState<NarrativeEventResponse | null>(null);
+  const [heraldSimEvent, setHeraldSimEvent] = useState<ActiveEventSnapshot | null>(null);
   const [researchOpen, setResearchOpen] = useState(false);
   const [residentialZonePainted, setResidentialZonePainted] = useState(false);
   const [saveCompleted, setSaveCompleted] = useState(false);
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
+  const heraldedEventIdsRef = useRef<Set<number>>(new Set());
+  const simApiRef = useRef(simApi);
+  simApiRef.current = simApi;
 
   const refreshEntitlements = useCallback(async () => {
     try {
@@ -105,13 +115,30 @@ export function PlayClient() {
     window.localStorage.setItem(GRAPHICS_QUALITY_STORAGE_KEY, tier);
   }, []);
 
-  const fetchHeraldStory = useCallback(async () => {
+  const fetchHeraldStory = useCallback(async (simEvent?: ActiveEventSnapshot) => {
+    if (simEvent) {
+      setHeraldLoading(true);
+      setHeraldError(null);
+      setHeraldSimEvent(simEvent);
+      try {
+        setHeraldEvent(narrativeFromSimEvent(simEvent.typeId));
+      } catch (err) {
+        setHeraldError(
+          err instanceof Error ? err.message : "Failed to load Herald story",
+        );
+      } finally {
+        setHeraldLoading(false);
+      }
+      return;
+    }
+
     const coverage = statsRef.current.healthcareCoverage ?? 0.5;
     const bucket: SimStateBucket = deriveNarrativeBucket(coverage);
 
     setHeraldLoading(true);
     setHeraldError(null);
     setHeraldEvent(null);
+    setHeraldSimEvent(null);
 
     try {
       const res = await fetch("/api/narrative/event", {
@@ -157,10 +184,45 @@ export function PlayClient() {
     }
   }, [entitlements, refreshEntitlements]);
 
-  const openHerald = useCallback(() => {
-    setHeraldOpen(true);
-    void fetchHeraldStory();
-  }, [fetchHeraldStory]);
+  const openHerald = useCallback(
+    (simEvent?: ActiveEventSnapshot) => {
+      setHeraldOpen(true);
+      void fetchHeraldStory(simEvent);
+    },
+    [fetchHeraldStory],
+  );
+
+  useEffect(() => {
+    const events = simResources?.activeEvents;
+    if (!events?.length) return;
+
+    for (const event of events) {
+      if (event.phase !== "active") continue;
+      if (heraldedEventIdsRef.current.has(event.eventId)) continue;
+
+      heraldedEventIdsRef.current.add(event.eventId);
+      openHerald(event);
+      break;
+    }
+  }, [simResources?.activeEvents, openHerald]);
+
+  const handleHeraldOptionSelect = useCallback(
+    (optionId: string) => {
+      const simEvent = heraldSimEvent;
+      console.info("[CityMajor] Herald council choice", {
+        optionId,
+        eventTypeId: simEvent?.typeId,
+        eventId: simEvent?.eventId,
+      });
+      simApiRef.current?.sendCommand({
+        type: "herald_choice",
+        optionId,
+        eventTypeId: simEvent?.typeId,
+        eventId: simEvent?.eventId,
+      });
+    },
+    [heraldSimEvent],
+  );
 
   const handleZonePainted = useCallback((zoneType: number) => {
     if (isResidentialZonePaint(zoneType)) {
@@ -256,6 +318,7 @@ export function PlayClient() {
         loading={heraldLoading}
         error={heraldError}
         quotaRemaining={quotaRemaining}
+        onOptionSelect={handleHeraldOptionSelect}
       />
 
       <OnboardingOverlay

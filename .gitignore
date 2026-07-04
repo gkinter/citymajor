@@ -57,3 +57,13 @@ saves/
 
 ## Build artifacts
 publish/
+
+## Node / Next.js
+node_modules/
+.next/
+out/
+web/.next/
+web/out/
+*.tsbuildinfo
+next-env.d.ts
+.env*.local

@@ -22,6 +22,7 @@ type SaveLoadControlsProps = {
   simApi: SimClientApi | null;
   entitlements: Entitlements | null;
   onSlotsChanged?: () => void;
+  onSaveSuccess?: () => void;
 };
 
 const barStyle: CSSProperties = {
@@ -108,6 +109,7 @@ export function SaveLoadControls({
   simApi,
   entitlements,
   onSlotsChanged,
+  onSaveSuccess,
 }: SaveLoadControlsProps) {
   const [loadOpen, setLoadOpen] = useState(false);
   const [saves, setSaves] = useState<SaveSlot[]>([]);
@@ -194,12 +196,13 @@ export function SaveLoadControls({
       setMaxSlots(parsed.data.maxSlots);
       setActionMessage(`Saved "${parsed.data.save.name}"`);
       onSlotsChanged?.();
+      onSaveSuccess?.();
     } catch (err) {
       setActionMessage(err instanceof Error ? err.message : "Save failed");
     } finally {
       setSaving(false);
     }
-  }, [simApi, onSlotsChanged]);
+  }, [simApi, onSlotsChanged, onSaveSuccess]);
 
   const handleLoad = useCallback(
     (slot: SaveSlot) => {

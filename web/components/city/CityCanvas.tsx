@@ -14,6 +14,7 @@ import {
   type SimClientApi,
   type SimResources,
   type SimSnapshot,
+  resourcesFromSnapshot,
 } from "@/lib/sim-bridge";
 import { estimateHealthcareCoverage } from "@/lib/sim-metrics";
 import type { ZoningTool, ZoneTile, RoadTile } from "@/lib/zoning";
@@ -30,6 +31,7 @@ type CityCanvasProps = {
   onStats: (stats: FpsStats) => void;
   onSimResources?: (resources: SimResources) => void;
   onSimApi?: (api: SimClientApi | null) => void;
+  onZonePainted?: (zoneType: number) => void;
 };
 
 export function CityCanvas({
@@ -39,6 +41,7 @@ export function CityCanvas({
   onStats,
   onSimResources,
   onSimApi,
+  onZonePainted,
 }: CityCanvasProps) {
   const [city, setCity] = useState<CityData>(() => getCityData());
   const [zones, setZones] = useState<ZoneTile[]>([]);
@@ -80,12 +83,7 @@ export function CityCanvas({
           })),
         );
       }
-      onSimResources?.({
-        tick: snapshot.tick,
-        population: snapshot.population,
-        cityFunds: snapshot.cityFunds,
-        era: snapshot.era,
-      });
+      onSimResources?.(resourcesFromSnapshot(snapshot));
     },
     [onSimResources],
   );
@@ -150,6 +148,7 @@ export function CityCanvas({
     onSimApi?.({
       getSnapshot: () => bridge.getSnapshot(),
       applySnapshot,
+      sendCommand: (command) => bridge.send(command),
     });
     return () => onSimApi?.(null);
   }, [bridgeReady, applySnapshot, onSimApi]);
@@ -190,8 +189,9 @@ export function CityCanvas({
         tileZ: pick.tileZ,
         zoneType: ENGINE_ZONE_TYPE[activeTool],
       });
+      onZonePainted?.(ENGINE_ZONE_TYPE[activeTool]);
     },
-    [activeTool],
+    [activeTool, onZonePainted],
   );
 
   useEffect(() => {

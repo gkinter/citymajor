@@ -33,3 +33,13 @@ export const MAX_DPR = 2;
 export type GraphicsQualityTier = "low" | "high";
 
 export const GRAPHICS_QUALITY_STORAGE_KEY = "citymajor_graphics_quality";
+
+/** Set when the /play guided onboarding tour is completed or dismissed. */
+export const ONBOARDING_STORAGE_KEY = "citymajor_onboarding_done";
+
+/** Session-scoped dismiss flags for GAMEPLAY_LOOP #9 crisis warnings. */
+export const CRISIS_BANKRUPTCY_SESSION_KEY = "citymajor_crisis_bankruptcy_dismissed";
+export const CRISIS_LOW_APPROVAL_SESSION_KEY = "citymajor_crisis_low_approval_dismissed";
+
+/** Mayor approval below this percent triggers the low-approval warning (0–100). */
+export const LOW_APPROVAL_WARNING_THRESHOLD = 30;

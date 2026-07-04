@@ -17,15 +17,24 @@ import {
 import type { FpsStats } from "@/lib/types";
 import type { ZoningTool } from "@/lib/zoning";
 import { CityCanvas } from "@/components/city/CityCanvas";
+import { CrisisWarningModal } from "@/components/city/CrisisWarningModal";
 import { FpsHud } from "@/components/city/FpsHud";
 import { HeraldButton } from "@/components/city/HeraldButton";
 import { HeraldPanel } from "@/components/city/HeraldPanel";
+import { ResearchButton } from "@/components/city/ResearchButton";
+import { ResearchPanel } from "@/components/city/ResearchPanel";
+import { HUD_ZONE } from "@/lib/hud-theme";
 import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
+import { EraProgressPanel } from "@/components/city/EraProgressPanel";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
 import { SpeedToolbar } from "@/components/city/SpeedToolbar";
 import { ZoningToolbar } from "@/components/city/ZoningToolbar";
+import {
+  isResidentialZonePaint,
+  OnboardingOverlay,
+} from "@/components/city/OnboardingOverlay";
 
 const NarrativeApiResponseSchema = NarrativeEventResponseSchema.extend({
   narrativeEventsRemaining: z.number().int().nonnegative().optional(),
@@ -66,6 +75,9 @@ export function PlayClient() {
   const [heraldLoading, setHeraldLoading] = useState(false);
   const [heraldError, setHeraldError] = useState<string | null>(null);
   const [heraldEvent, setHeraldEvent] = useState<NarrativeEventResponse | null>(null);
+  const [researchOpen, setResearchOpen] = useState(false);
+  const [residentialZonePainted, setResidentialZonePainted] = useState(false);
+  const [saveCompleted, setSaveCompleted] = useState(false);
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -150,6 +162,16 @@ export function PlayClient() {
     void fetchHeraldStory();
   }, [fetchHeraldStory]);
 
+  const handleZonePainted = useCallback((zoneType: number) => {
+    if (isResidentialZonePaint(zoneType)) {
+      setResidentialZonePainted(true);
+    }
+  }, []);
+
+  const handleSaveSuccess = useCallback(() => {
+    setSaveCompleted(true);
+  }, []);
+
   const quotaRemaining = entitlements?.narrativeEventsRemaining;
   const heraldDisabled =
     quotaRemaining !== undefined &&
@@ -165,6 +187,7 @@ export function PlayClient() {
         onStats={setStats}
         onSimResources={setSimResources}
         onSimApi={setSimApi}
+        onZonePainted={handleZonePainted}
       />
       <HudWordmark />
       <SpeedToolbar speedLevel={gameSpeed} onSpeedChange={setGameSpeed} />
@@ -173,8 +196,10 @@ export function PlayClient() {
         simApi={simApi}
         entitlements={entitlements}
         onSlotsChanged={refreshEntitlements}
+        onSaveSuccess={handleSaveSuccess}
       />
       <ResourcesHud resources={simResources} />
+      <EraProgressPanel resources={simResources} />
       <FpsHud
         stats={stats}
         totalBuildings={stats.totalBuildings}
@@ -182,19 +207,46 @@ export function PlayClient() {
       />
       <ZoningToolbar activeTool={activeTool} onToolChange={setActiveTool} />
 
-      <HeraldButton
-        quotaLabel={entitlementsError ? "!" : formatQuota(quotaRemaining)}
-        disabled={heraldDisabled}
-        title={
-          entitlementsError
-            ? entitlementsError
-            : heraldDisabled
-              ? "Daily narrative quota exhausted"
-              : "Open the Daily Herald"
-        }
-        onClick={() => {
-          if (!heraldDisabled) openHerald();
+      <div
+        style={{
+          ...HUD_ZONE.topRight,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
         }}
+      >
+        <ResearchButton
+          badgeLabel={
+            simResources?.techCount !== undefined
+              ? String(simResources.techCount)
+              : "—"
+          }
+          title="Open research catalog"
+          onClick={() => setResearchOpen(true)}
+        />
+        <HeraldButton
+          embedded
+          quotaLabel={entitlementsError ? "!" : formatQuota(quotaRemaining)}
+          disabled={heraldDisabled}
+          title={
+            entitlementsError
+              ? entitlementsError
+              : heraldDisabled
+                ? "Daily narrative quota exhausted"
+                : "Open the Daily Herald"
+          }
+          onClick={() => {
+            if (!heraldDisabled) openHerald();
+          }}
+        />
+      </div>
+
+      <ResearchPanel
+        open={researchOpen}
+        onClose={() => setResearchOpen(false)}
+        techCount={simResources?.techCount}
+        researchPoints={simResources?.researchPoints}
+        researchRate={simResources?.researchRate}
       />
 
       <HeraldPanel
@@ -205,6 +257,15 @@ export function PlayClient() {
         error={heraldError}
         quotaRemaining={quotaRemaining}
       />
+
+      <OnboardingOverlay
+        residentialZonePainted={residentialZonePainted}
+        population={simResources?.population ?? null}
+        heraldOpen={heraldOpen}
+        saveCompleted={saveCompleted}
+      />
+
+      <CrisisWarningModal resources={simResources} />
     </div>
   );
 }

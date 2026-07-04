@@ -14,8 +14,9 @@ import {
 import type { SimClientApi, SimSnapshot } from "@/lib/sim-bridge";
 import {
   CreateSaveResponseSchema,
+  GetSaveResponseSchema,
   SaveListResponseSchema,
-  type SaveSlot,
+  type SaveSlotListItem,
 } from "@/lib/saves-client";
 
 type SaveLoadControlsProps = {
@@ -88,6 +89,26 @@ function formatWhen(iso: string): string {
   }
 }
 
+function isZoneSnapshot(value: unknown): value is SimSnapshot["zones"][number] {
+  if (typeof value !== "object" || value === null) return false;
+  const zone = value as Record<string, unknown>;
+  return (
+    typeof zone.tileX === "number" &&
+    typeof zone.tileZ === "number" &&
+    typeof zone.zoneType === "number"
+  );
+}
+
+function isRoadSnapshot(value: unknown): value is NonNullable<SimSnapshot["roads"]>[number] {
+  if (typeof value !== "object" || value === null) return false;
+  const road = value as Record<string, unknown>;
+  return (
+    typeof road.tileX === "number" &&
+    typeof road.tileZ === "number" &&
+    typeof road.roadFlags === "number"
+  );
+}
+
 function parseSimSnapshot(payload: Record<string, unknown>): SimSnapshot | null {
   if (
     typeof payload.tick !== "number" ||
@@ -98,7 +119,19 @@ function parseSimSnapshot(payload: Record<string, unknown>): SimSnapshot | null 
   ) {
     return null;
   }
-  return payload as SimSnapshot;
+
+  const zones = Array.isArray(payload.zones)
+    ? payload.zones.filter(isZoneSnapshot)
+    : [];
+  const roads = Array.isArray(payload.roads)
+    ? payload.roads.filter(isRoadSnapshot)
+    : [];
+
+  return {
+    ...(payload as SimSnapshot),
+    zones,
+    roads,
+  };
 }
 
 function defaultSaveName(): string {
@@ -114,13 +147,14 @@ export function SaveLoadControls({
   onLoadSuccess,
 }: SaveLoadControlsProps) {
   const [loadOpen, setLoadOpen] = useState(false);
-  const [saves, setSaves] = useState<SaveSlot[]>([]);
+  const [saves, setSaves] = useState<SaveSlotListItem[]>([]);
   const [slotCount, setSlotCount] = useState(0);
   const [maxSlots, setMaxSlots] = useState(entitlements?.maxSaveSlots ?? 3);
   const [listLoading, setListLoading] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loadingSlotId, setLoadingSlotId] = useState<string | null>(null);
 
   const refreshList = useCallback(async () => {
     setListLoading(true);
@@ -215,20 +249,42 @@ export function SaveLoadControls({
   }, [simApi, onSlotsChanged, onSaveSuccess, refreshList]);
 
   const handleLoad = useCallback(
-    (slot: SaveSlot) => {
+    async (slot: SaveSlotListItem) => {
       if (!simApi) {
         setActionMessage("Sim not ready yet");
         return;
       }
-      const snapshot = parseSimSnapshot(slot.payload);
-      if (!snapshot) {
-        setActionMessage(`Save "${slot.name}" has no restorable snapshot`);
-        return;
+      setListLoading(true);
+      setActionMessage(null);
+      try {
+        const res = await fetch(`/api/saves/${slot.id}`, { credentials: "include" });
+        const json: unknown = await res.json();
+        if (!res.ok) {
+          const message =
+            typeof json === "object" &&
+            json !== null &&
+            "error" in json &&
+            typeof (json as { error: unknown }).error === "string"
+              ? (json as { error: string }).error
+              : `HTTP ${res.status}`;
+          throw new Error(message);
+        }
+        const parsed = GetSaveResponseSchema.safeParse(json);
+        if (!parsed.success) throw new Error("Invalid save response");
+        const snapshot = parseSimSnapshot(parsed.data.save.payload ?? {});
+        if (!snapshot) {
+          setActionMessage(`Save "${slot.name}" has no restorable snapshot`);
+          return;
+        }
+        simApi.applySnapshot(snapshot);
+        setLoadOpen(false);
+        setActionMessage(`Loaded "${slot.name}"`);
+        onLoadSuccess?.();
+      } catch (err) {
+        setActionMessage(err instanceof Error ? err.message : "Load failed");
+      } finally {
+        setListLoading(false);
       }
-      simApi.applySnapshot(snapshot);
-      setLoadOpen(false);
-      setActionMessage(`Loaded "${slot.name}"`);
-      onLoadSuccess?.();
     },
     [simApi, onLoadSuccess],
   );
@@ -311,13 +367,17 @@ export function SaveLoadControls({
                     <div>
                       <div style={{ fontWeight: 600 }}>{slot.name}</div>
                       <div style={{ fontSize: 11, opacity: 0.65, marginTop: 4 }}>
+                        Pop {slot.summary.population.toLocaleString()} · $
+                        {slot.summary.cityFunds.toLocaleString()} · Era {slot.summary.era}
+                      </div>
+                      <div style={{ fontSize: 11, opacity: 0.5, marginTop: 2 }}>
                         Updated {formatWhen(slot.updatedAt)}
                       </div>
                     </div>
                     <button
                       type="button"
                       style={{ ...hudActionButton(), padding: "6px 12px", fontSize: 11 }}
-                      onClick={() => handleLoad(slot)}
+                      onClick={() => void handleLoad(slot)}
                     >
                       Load
                     </button>

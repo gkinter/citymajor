@@ -25,6 +25,7 @@ export function HeraldButton({
   return (
     <button
       type="button"
+      data-onboarding-target="herald"
       style={{
         ...(embedded ? {} : HUD_ZONE.topRight),
         ...hudActionButton(disabled),

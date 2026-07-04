@@ -24,7 +24,7 @@ export function NewsTicker({ activeEvents }: NewsTickerProps) {
   }, [activeEvents]);
 
   return (
-    <div className="hud-ticker" aria-live="polite" aria-label="City news ticker">
+    <div className="hud-ticker" aria-live="polite" aria-label="City news ticker" data-onboarding-target="news-ticker">
       <div className="hud-ticker__label" aria-hidden>
         News
       </div>

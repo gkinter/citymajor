@@ -1,12 +1,15 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { LOW_APPROVAL_WARNING_THRESHOLD } from "@/lib/constants";
 import { hudEraBadgeStyle, hudEraName } from "@/lib/era";
 import {
   HUD_ZONE,
   hudPanel,
 } from "@/lib/hud-theme";
+import { LOW_HAPPINESS_APPROVAL } from "@/lib/sim-metrics";
 import type { RciDemand, SimResources } from "@/lib/sim-bridge";
+import { resolveRci } from "@/lib/zoning-economy";
 
 function formatFunds(cityFunds: number): string {
   const abs = Math.abs(cityFunds);
@@ -53,40 +56,6 @@ function toneClass(tone: MetricTone, prefix: string): string {
 
 function clampDemand(value: number): number {
   return Math.max(-1, Math.min(1, value));
-}
-
-function hasWasmRci(resources: SimResources): boolean {
-  return (
-    resources.residentialDemand !== undefined &&
-    resources.commercialDemand !== undefined &&
-    resources.industrialDemand !== undefined
-  );
-}
-
-/** Fallback when WASM status lacks EconomySystem RCI fields (pre-rebuild bundle). */
-function mockRciFromSnapshot(resources: SimResources): RciDemand {
-  const pop = resources.population;
-  if (pop <= 0) {
-    return { residential: 0, commercial: 0, industrial: 0 };
-  }
-  const eraFactor = Math.min(1, (resources.era ?? 0) / 4);
-  return {
-    residential: clampDemand(pop / 12_000 - 0.15),
-    commercial: clampDemand(pop / 9_000 - 0.2),
-    industrial: clampDemand(eraFactor * 0.45 + pop / 20_000 - 0.25),
-  };
-}
-
-function resolveRci(resources: SimResources | null): RciDemand | null {
-  if (!resources) return null;
-  if (hasWasmRci(resources)) {
-    return {
-      residential: clampDemand(resources.residentialDemand!),
-      commercial: clampDemand(resources.commercialDemand!),
-      industrial: clampDemand(resources.industrialDemand!),
-    };
-  }
-  return mockRciFromSnapshot(resources);
 }
 
 function demandToDisplay(normalized: number): number {
@@ -196,14 +165,23 @@ export function ResourcesHud({ resources }: ResourcesHudProps) {
 
         {resources?.monthlyIncome !== undefined &&
         resources.monthlyExpenses !== undefined ? (
-          <div className="hud-resources__stat">
+          <div
+            className="hud-resources__stat"
+            title={`Monthly budget: ${formatFunds(resources.monthlyIncome)} income, ${formatFunds(resources.monthlyExpenses)} expenses`}
+          >
             <span className="hud-resources__label">Mo</span>
             <span className="hud-resources__budget">
-              <span className="hud-resources__budget-in">
+              <span
+                className="hud-resources__budget-in"
+                title="Monthly tax & fee income"
+              >
                 {formatCompactMoney(resources.monthlyIncome)}
               </span>
               <span className="hud-resources__budget-sep">/</span>
-              <span className="hud-resources__budget-out">
+              <span
+                className="hud-resources__budget-out"
+                title="Monthly service & upkeep expenses"
+              >
                 {formatCompactMoney(-resources.monthlyExpenses)}
               </span>
             </span>
@@ -211,7 +189,10 @@ export function ResourcesHud({ resources }: ResourcesHudProps) {
         ) : null}
 
         {resources?.approval !== undefined ? (
-          <div className="hud-resources__stat">
+          <div
+            className="hud-resources__stat"
+            title={`Mayor approval drives Herald unrest stories below ${LOW_HAPPINESS_APPROVAL}% and triggers a crisis warning below ${LOW_APPROVAL_WARNING_THRESHOLD}%.`}
+          >
             <span className="hud-resources__label">Approval</span>
             <span
               className={toneClass(
@@ -225,7 +206,10 @@ export function ResourcesHud({ resources }: ResourcesHudProps) {
         ) : null}
 
         {resources?.happiness !== undefined ? (
-          <div className="hud-resources__stat">
+          <div
+            className="hud-resources__stat"
+            title="Citizen satisfaction from services and living conditions. Sustained low happiness erodes mayor approval over time."
+          >
             <span className="hud-resources__label">Happy</span>
             <span
               className={toneClass(
@@ -259,7 +243,8 @@ export function ResourcesHud({ resources }: ResourcesHudProps) {
         <div
           className="hud-rci"
           aria-label="RCI demand"
-          title="Residential, Commercial, Industrial demand"
+          title="R/C/I demand — high values mean zone that type to grow"
+          data-onboarding-target="demand"
         >
           <RciMeter label="R" demand={rci.residential} />
           <RciMeter label="C" demand={rci.commercial} />

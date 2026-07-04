@@ -20,6 +20,7 @@ export function ResearchButton({
     <button
       type="button"
       className="hud-research-button"
+      data-onboarding-target="research"
       style={{
         ...hudActionButton(),
         display: "flex",

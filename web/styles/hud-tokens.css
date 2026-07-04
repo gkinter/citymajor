@@ -93,11 +93,11 @@
   border: none;
 }
 
-.hud-onboarding__spotlight--resources {
-  top: 38px;
+.hud-onboarding__spotlight--demand {
+  top: 34px;
   left: 50%;
-  width: min(720px, 92vw);
-  height: 36px;
+  width: min(920px, 96vw);
+  height: 52px;
   transform: translateX(-50%);
 }
 
@@ -109,18 +109,33 @@
   transform: translateX(-50%);
 }
 
+.hud-onboarding__spotlight--ticker {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--hud-ticker-height);
+  border-radius: 0;
+}
+
 .hud-onboarding__spotlight--herald {
   top: 4px;
   right: 8px;
-  width: 200px;
+  width: 168px;
   height: 40px;
 }
 
-.hud-onboarding__spotlight--save {
-  top: 46px;
-  left: 8px;
-  width: 200px;
+.hud-onboarding__spotlight--research {
+  top: 4px;
+  right: 184px;
+  width: 120px;
   height: 40px;
+}
+
+.hud-onboarding__spotlight--era {
+  top: 46px;
+  right: 8px;
+  width: min(288px, calc(100vw - 16px));
+  height: min(220px, 32vh);
 }
 
 .hud-onboarding__card {
@@ -362,6 +377,71 @@
   line-height: 1.45;
 }
 
+.hud-research-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(8, 12, 24, 0.55);
+  overflow: hidden;
+}
+
+.hud-research-progress__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--hud-accent), var(--hud-accent-highlight));
+  transition: width 0.25s ease;
+}
+
+.hud-research-progress__eta {
+  margin-top: 6px;
+  font-size: 10px;
+  opacity: 0.7;
+  letter-spacing: 0.03em;
+}
+
+.hud-research-list__item--locked {
+  opacity: 0.45;
+  filter: grayscale(0.35);
+}
+
+.hud-research-list__item--unlocked {
+  border-color: rgba(110, 200, 154, 0.35);
+  background: rgba(16, 32, 28, 0.5);
+}
+
+.hud-research-list__item--researching {
+  border-color: var(--hud-accent-border);
+  box-shadow: 0 0 0 1px rgba(94, 200, 255, 0.15);
+}
+
+.hud-research-list__item--available:hover {
+  border-color: var(--hud-accent-border);
+}
+
+.hud-research-list__badge {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hud-research-list__badge--done {
+  color: #6ec89a;
+}
+
+.hud-research-list__badge--active {
+  color: var(--hud-accent-highlight);
+  animation: hud-research-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes hud-research-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
 /* Classic R/C/I demand meters (-100..+100, center = equilibrium) */
 .hud-rci {
   display: flex;
@@ -450,6 +530,13 @@
   font-size: 9px;
   color: var(--hud-text-dim);
   text-align: right;
+}
+
+/* Zoning toolbar — highlight tools matching high RCI demand */
+.hud-zoning-btn--demand {
+  box-shadow:
+    0 0 0 1px rgba(125, 255, 178, 0.45),
+    0 0 12px rgba(125, 255, 178, 0.2);
 }
 
 /* Resources HUD — Pop, funds, approval, happiness, monthly budget */
@@ -606,6 +693,24 @@
   background: rgba(94, 200, 255, 0.25);
 }
 
+/* Approval mood — screen vignette when mayor approval is low */
+.hud-approval-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--hud-z-modal) - 2);
+  pointer-events: none;
+  box-shadow: inset 0 0 120px 40px rgba(180, 40, 50, 0.35);
+  transition: box-shadow 0.6s ease;
+}
+
+.hud-approval-vignette--strained {
+  box-shadow: inset 0 0 90px 28px rgba(140, 60, 40, 0.22);
+}
+
+.hud-approval-vignette--critical {
+  box-shadow: inset 0 0 140px 56px rgba(200, 30, 40, 0.45);
+}
+
 /* ── Era transition fanfare (GAMEPLAY_LOOP #11) ── */
 
 .hud-era {
@@ -753,6 +858,56 @@
   }
   to {
     transform: translateX(-50%);
+  }
+}
+
+/* ── In-world event markers (WASM activeEvents) ── */
+
+.event-marker {
+  --event-marker-color: #ffd166;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid color-mix(in srgb, var(--event-marker-color) 80%, white);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--event-marker-color) 22%, #0b1020);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--event-marker-color) 25%, transparent),
+    0 4px 14px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  pointer-events: auto;
+  animation: event-marker-pulse 1.6s ease-in-out infinite;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.event-marker:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--event-marker-color) 35%, transparent),
+    0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+.event-marker__glyph {
+  font-size: 18px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+@keyframes event-marker-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--event-marker-color) 25%, transparent),
+      0 4px 14px rgba(0, 0, 0, 0.45);
+  }
+  50% {
+    box-shadow:
+      0 0 0 10px color-mix(in srgb, var(--event-marker-color) 12%, transparent),
+      0 4px 14px rgba(0, 0, 0, 0.45);
   }
 }
 

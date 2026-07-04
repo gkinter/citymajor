@@ -8,7 +8,7 @@ import {
   type NarrativeEventResponse,
   type SimStateBucket,
 } from "@/lib/narrative-templates";
-import { deriveNarrativeBucket } from "@/lib/sim-metrics";
+import { deriveNarrativeBucket, explainNarrativeBucket } from "@/lib/sim-metrics";
 import { narrativeFromSimEvent } from "@/lib/event-catalog";
 import { narrativeFromEraTransition } from "@/lib/era-narrative";
 import type {
@@ -19,10 +19,12 @@ import type {
 } from "@/lib/sim-bridge";
 import {
   GRAPHICS_QUALITY_STORAGE_KEY,
+  TRAFFIC_OVERLAY_STORAGE_KEY,
   type GraphicsQualityTier,
 } from "@/lib/constants";
 import type { FpsStats } from "@/lib/types";
-import type { ZoningTool } from "@/lib/zoning";
+import type { ZoningTool, PaintBrushSize } from "@/lib/zoning";
+import { ApprovalMoodOverlay } from "@/components/city/ApprovalMoodOverlay";
 import { CityCanvas } from "@/components/city/CityCanvas";
 import { CrisisWarningModal } from "@/components/city/CrisisWarningModal";
 import { EraTransitionModal } from "@/components/city/EraTransitionModal";
@@ -32,9 +34,12 @@ import { HeraldButton } from "@/components/city/HeraldButton";
 import { HeraldPanel } from "@/components/city/HeraldPanel";
 import { ResearchButton } from "@/components/city/ResearchButton";
 import { ResearchPanel } from "@/components/city/ResearchPanel";
+import { HudToast } from "@/components/city/HudToast";
+import { techNameFromIndex } from "@/lib/tech-catalog";
 import { HUD_ZONE } from "@/lib/hud-theme";
 import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
+import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
 import { EraProgressPanel } from "@/components/city/EraProgressPanel";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
@@ -44,6 +49,7 @@ import {
   isResidentialZonePaint,
   OnboardingOverlay,
 } from "@/components/city/OnboardingOverlay";
+import { resolveRci } from "@/lib/zoning-economy";
 
 const NarrativeApiResponseSchema = NarrativeEventResponseSchema.extend({
   narrativeEventsRemaining: z.number().int().nonnegative().optional(),
@@ -61,11 +67,21 @@ function readStoredQualityTier(): GraphicsQualityTier {
   return stored === "low" ? "low" : "high";
 }
 
+function readStoredTrafficOverlay(): boolean {
+  if (typeof window === "undefined") return true;
+  const stored = window.localStorage.getItem(TRAFFIC_OVERLAY_STORAGE_KEY);
+  return stored !== "off";
+}
+
 export function PlayClient() {
   const [activeTool, setActiveTool] = useState<ZoningTool>("residential");
+  const [brushSize, setBrushSize] = useState<PaintBrushSize>(1);
   const [gameSpeed, setGameSpeed] = useState<GameSpeedLevel>(1);
   const [qualityTier, setQualityTier] = useState<GraphicsQualityTier>(() =>
     readStoredQualityTier(),
+  );
+  const [showTrafficOverlay, setShowTrafficOverlay] = useState(() =>
+    readStoredTrafficOverlay(),
   );
   const [stats, setStats] = useState<FpsStats>({
     fps: 0,
@@ -84,12 +100,13 @@ export function PlayClient() {
   const [heraldLoading, setHeraldLoading] = useState(false);
   const [heraldError, setHeraldError] = useState<string | null>(null);
   const [heraldEvent, setHeraldEvent] = useState<NarrativeEventResponse | null>(null);
+  const [heraldBucketReason, setHeraldBucketReason] = useState<string | null>(null);
   const [heraldSimEvent, setHeraldSimEvent] = useState<ActiveEventSnapshot | null>(null);
   const [heraldSpecialEdition, setHeraldSpecialEdition] = useState(false);
   const [eraTransitionEra, setEraTransitionEra] = useState<number | null>(null);
   const [researchOpen, setResearchOpen] = useState(false);
+  const [researchToast, setResearchToast] = useState<string | null>(null);
   const [residentialZonePainted, setResidentialZonePainted] = useState(false);
-  const [saveCompleted, setSaveCompleted] = useState(false);
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -97,6 +114,7 @@ export function PlayClient() {
   simResourcesRef.current = simResources;
   const heraldedEventIdsRef = useRef<Set<number>>(new Set());
   const prevEraRef = useRef<number | null>(null);
+  const prevUnlockedTechRef = useRef<Set<number>>(new Set());
   const simApiRef = useRef(simApi);
   simApiRef.current = simApi;
 
@@ -129,6 +147,7 @@ export function PlayClient() {
       setHeraldError(null);
       setHeraldSimEvent(simEvent);
       setHeraldSpecialEdition(false);
+      setHeraldBucketReason("Triggered by an active city event in the simulation");
       try {
         setHeraldEvent(narrativeFromSimEvent(simEvent.typeId));
       } catch (err) {
@@ -155,12 +174,25 @@ export function PlayClient() {
           }
         : {}),
     });
+    const { reason: bucketReason } = explainNarrativeBucket({
+      healthcareCoverage: coverage,
+      ...(resources
+        ? {
+            approval: resources.approval,
+            cityFunds: resources.cityFunds,
+            residentialDemand: resources.residentialDemand,
+            commercialDemand: resources.commercialDemand,
+            industrialDemand: resources.industrialDemand,
+          }
+        : {}),
+    });
 
     setHeraldLoading(true);
     setHeraldError(null);
     setHeraldEvent(null);
     setHeraldSimEvent(null);
     setHeraldSpecialEdition(false);
+    setHeraldBucketReason(bucketReason);
 
     try {
       const res = await fetch("/api/narrative/event", {
@@ -254,6 +286,30 @@ export function PlayClient() {
   }, []);
 
   useEffect(() => {
+    const ids = simResources?.unlockedTechIds;
+    if (!ids) return;
+
+    const prev = prevUnlockedTechRef.current;
+    const newlyUnlocked = ids.filter((id) => !prev.has(id));
+    prevUnlockedTechRef.current = new Set(ids);
+
+    if (newlyUnlocked.length === 0) return;
+
+    const names = newlyUnlocked
+      .map((id) => techNameFromIndex(id))
+      .filter((name): name is string => Boolean(name));
+
+    if (names.length === 0) return;
+
+    const label =
+      names.length === 1
+        ? names[0]
+        : `${names.slice(0, 2).join(", ")}${names.length > 2 ? ` +${names.length - 2}` : ""}`;
+
+    setResearchToast(`Research complete: ${label}`);
+  }, [simResources?.unlockedTechIds]);
+
+  useEffect(() => {
     const events = simResources?.activeEvents;
     if (!events?.length) return;
 
@@ -295,14 +351,6 @@ export function PlayClient() {
     }
   }, []);
 
-  const handleSaveSuccess = useCallback(() => {
-    setSaveCompleted(true);
-  }, []);
-
-  const handleLoadSuccess = useCallback(() => {
-    setSaveCompleted(true);
-  }, []);
-
   const quotaRemaining = entitlements?.narrativeEventsRemaining;
   const heraldDisabled =
     quotaRemaining !== undefined &&
@@ -313,8 +361,12 @@ export function PlayClient() {
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <CityCanvas
         activeTool={activeTool}
+        brushSize={brushSize}
         gameSpeed={gameSpeed}
         qualityTier={qualityTier}
+        showTrafficOverlay={showTrafficOverlay}
+        activeEvents={simResources?.activeEvents}
+        onEventMarkerClick={openHerald}
         onStats={setStats}
         onSimResources={setSimResources}
         onSimApi={setSimApi}
@@ -323,12 +375,14 @@ export function PlayClient() {
       <HudWordmark />
       <SpeedToolbar speedLevel={gameSpeed} onSpeedChange={setGameSpeed} />
       <QualityToolbar qualityTier={qualityTier} onQualityChange={handleQualityChange} />
+      <TrafficOverlayToggle
+        enabled={showTrafficOverlay}
+        onToggle={handleTrafficOverlayToggle}
+      />
       <SaveLoadControls
         simApi={simApi}
         entitlements={entitlements}
         onSlotsChanged={refreshEntitlements}
-        onSaveSuccess={handleSaveSuccess}
-        onLoadSuccess={handleLoadSuccess}
       />
       <ResourcesHud resources={simResources} />
       <EraProgressPanel resources={simResources} />
@@ -337,7 +391,12 @@ export function PlayClient() {
         totalBuildings={stats.totalBuildings}
         activeTool={activeTool}
       />
-      <ZoningToolbar activeTool={activeTool} onToolChange={setActiveTool} />
+      <ZoningToolbar
+        activeTool={activeTool}
+        brushSize={brushSize}
+        onToolChange={setActiveTool}
+        onBrushSizeChange={setBrushSize}
+      />
 
       <div
         style={{
@@ -379,7 +438,17 @@ export function PlayClient() {
         techCount={simResources?.techCount}
         researchPoints={simResources?.researchPoints}
         researchRate={simResources?.researchRate}
+        currentResearchId={simResources?.currentResearchId}
+        currentResearchProgress={simResources?.currentResearchProgress}
+        currentResearchMonthsRemaining={simResources?.currentResearchMonthsRemaining}
+        unlockedTechIds={simResources?.unlockedTechIds}
         onEnqueueResearch={handleEnqueueResearch}
+      />
+
+      <HudToast
+        message={researchToast}
+        onDismiss={() => setResearchToast(null)}
+        style={{ top: 130 }}
       />
 
       <HeraldPanel
@@ -393,14 +462,15 @@ export function PlayClient() {
         error={heraldError}
         quotaRemaining={quotaRemaining}
         specialEdition={heraldSpecialEdition}
+        bucketReason={heraldBucketReason}
         onOptionSelect={heraldSpecialEdition ? undefined : handleHeraldOptionSelect}
       />
 
       <OnboardingOverlay
         residentialZonePainted={residentialZonePainted}
-        population={simResources?.population ?? null}
+        demandVisible={resolveRci(simResources) !== null}
         heraldOpen={heraldOpen}
-        saveCompleted={saveCompleted}
+        researchOpen={researchOpen}
       />
 
       <CrisisWarningModal resources={simResources} />

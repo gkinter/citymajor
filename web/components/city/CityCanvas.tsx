@@ -19,11 +19,13 @@ import type { ZoningTool, ZoneTile, RoadTile } from "@/lib/zoning";
 import { ENGINE_ZONE_TYPE } from "@/lib/zoning";
 import { CityScene } from "./CityScene";
 import { AdaptiveDpr } from "./AdaptiveDpr";
+import { CityPostProcessing } from "./CityPostProcessing";
 import { Minimap } from "./Minimap";
 
 type CityCanvasProps = {
   activeTool: ZoningTool;
   gameSpeed: GameSpeedLevel;
+  qualityTier: GraphicsQualityTier;
   onStats: (stats: FpsStats) => void;
   onSimResources?: (resources: SimResources) => void;
   onSimApi?: (api: SimClientApi | null) => void;
@@ -32,6 +34,7 @@ type CityCanvasProps = {
 export function CityCanvas({
   activeTool,
   gameSpeed,
+  qualityTier,
   onStats,
   onSimResources,
   onSimApi,
@@ -234,6 +237,7 @@ export function CityCanvas({
             dpr={dpr}
           />
           <AdaptiveDpr dpr={dpr} onDprChange={setDpr} />
+          <CityPostProcessing qualityTier={qualityTier} />
         </Suspense>
       </Canvas>
       <Minimap zones={zones} city={city} />

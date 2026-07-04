@@ -32,6 +32,15 @@ export type ZoneTile = {
   zoneType: number;
 };
 
+export type RoadTile = {
+  tileX: number;
+  tileZ: number;
+  roadFlags: number;
+};
+
+/** Semi-transparent overlay tint for placed road tiles. */
+export const ROAD_OVERLAY_COLOR = "#6b7280";
+
 export const ZONING_TOOLS: {
   id: ZoningTool;
   label: string;
@@ -41,5 +50,5 @@ export const ZONING_TOOLS: {
   { id: "commercial", label: "Commercial" },
   { id: "industrial", label: "Industrial" },
   { id: "bulldoze", label: "Bulldoze" },
-  { id: "road", label: "Road", stub: true },
+  { id: "road", label: "Road" },
 ];

@@ -1,4 +1,8 @@
-import { BuildingCategory, resolveWallColor } from "@citymajor/sim-types";
+import {
+  BuildingCategory,
+  PIXELS_PER_STORY,
+  buildingVisualParams,
+} from "@citymajor/sim-types";
 import type { BuildingInstance } from "./types";
 import { ZONE_COLORS } from "./constants";
 import * as THREE from "three";
@@ -9,10 +13,16 @@ const _position = new THREE.Vector3();
 const _scale = new THREE.Vector3();
 const _quat = new THREE.Quaternion();
 
+/** World Y per isometric pixel (legacy storyH / PIXELS_PER_STORY). */
+const STORY_WORLD_HEIGHT = 0.35;
+const WORLD_HEIGHT_PER_PIXEL = STORY_WORLD_HEIGHT / PIXELS_PER_STORY;
+const SCAFFOLDING_COLOR = "#8f8f8f";
+
 export type LodVisual = {
   scale: [number, number, number];
   color: string;
   opacity: number;
+  wireframe?: boolean;
 };
 
 function isCompactResidential(category: BuildingCategory): boolean {
@@ -21,36 +31,55 @@ function isCompactResidential(category: BuildingCategory): boolean {
 
 /**
  * LOD visual params per level:
- * L0 full box, L1 simplified, L2 zone-colored flat, L3 heatmap block.
- * Wall colors use sim-types era material hints at L0/L1.
+ * L0/L1 use buildingVisualParams for height + wall colors; L2/L3 zone/heatmap.
  */
 export function lodVisualForBuilding(
   building: BuildingInstance,
   lod: 0 | 1 | 2 | 3,
+  dayNightFactor = 0,
 ): LodVisual {
   const compact = isCompactResidential(building.category);
   const baseW = compact ? 0.75 : 0.9;
   const baseD = compact ? 0.75 : 0.9;
-  const storyH = 0.35;
-  const fullH = building.stories * storyH;
-  const wallColor = resolveWallColor(building.typeId);
+
+  const params = buildingVisualParams(
+    building.typeId,
+    building.level,
+    building.condition,
+    dayNightFactor,
+    building.state,
+    building.tileX,
+    building.tileZ,
+  );
+
+  const worldH = params.heightPx * WORLD_HEIGHT_PER_PIXEL;
+  const wallColor = params.colors.base;
 
   switch (lod) {
-    case 0:
+    case 0: {
+      if (params.showScaffolding) {
+        return {
+          scale: [baseW, worldH, baseD],
+          color: SCAFFOLDING_COLOR,
+          opacity: 0.88,
+          wireframe: true,
+        };
+      }
       return {
-        scale: [baseW, fullH, baseD],
+        scale: [baseW, worldH, baseD],
         color: shadeColor(wallColor, 0.85 + building.heat * 0.15),
         opacity: 1,
       };
+    }
     case 1:
       return {
-        scale: [baseW * 0.92, fullH * 0.75, baseD * 0.92],
+        scale: [baseW * 0.92, worldH * 0.75, baseD * 0.92],
         color: shadeColor(wallColor, 0.7),
         opacity: 1,
       };
     case 2:
       return {
-        scale: [0.95, Math.max(0.25, fullH * 0.35), 0.95],
+        scale: [0.95, Math.max(0.25, worldH * 0.35), 0.95],
         color: ZONE_COLORS[building.zone],
         opacity: 0.92,
       };

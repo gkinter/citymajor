@@ -1,4 +1,4 @@
-import type { BuildingCategory, Era } from "@citymajor/sim-types";
+import type { BuildingCategory, BuildingState, Era } from "@citymajor/sim-types";
 import type { ZoneType } from "./constants";
 
 export type BuildingInstance = {
@@ -10,7 +10,12 @@ export type BuildingInstance = {
   category: BuildingCategory;
   era: Era;
   zone: ZoneType;
+  /** Sim building level (drives stories via sim-types). */
+  level: number;
   stories: number;
+  /** Sim condition 0–255 (construction progress + upkeep). */
+  condition: number;
+  state: BuildingState;
   chunkIndex: number;
   heat: number;
 };
@@ -47,4 +52,6 @@ export type FpsStats = {
   lodCounts: [number, number, number, number];
   pickedTile: PickResult;
   simSource?: "wasm" | "procedural";
+  /** 0–1 healthcare coverage heuristic from city buildings (M0). */
+  healthcareCoverage?: number;
 };

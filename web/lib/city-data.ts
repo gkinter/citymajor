@@ -1,5 +1,6 @@
 import {
   BuildingCategory,
+  BuildingState,
   TYPE_ID,
   archetypeKey,
   classifyBuilding,
@@ -124,7 +125,10 @@ export function generateCityData(seed = 0x63697479): CityData {
       category: classifyBuilding(typeId),
       era,
       zone,
+      level,
       stories,
+      condition: 255,
+      state: BuildingState.Operational,
       chunkIndex,
       heat: rand(),
     };
@@ -163,6 +167,12 @@ export function cityDataFromSnapshot(snapshot: SimSnapshot): CityData {
     const chunkIndex = chunkIndexForTile(b.tileX, b.tileZ);
     const heat = (b.condition / 255) * 0.5 + b.level * 0.1;
 
+    const state =
+      b.state >= BuildingState.Constructing &&
+      b.state <= BuildingState.Demolishing
+        ? (b.state as BuildingState)
+        : BuildingState.Operational;
+
     const building: BuildingInstance = {
       id: b.id,
       tileX: b.tileX,
@@ -172,7 +182,10 @@ export function cityDataFromSnapshot(snapshot: SimSnapshot): CityData {
       category,
       era,
       zone,
+      level: b.level,
       stories,
+      condition: b.condition,
+      state,
       chunkIndex,
       heat,
     };

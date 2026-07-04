@@ -14,13 +14,19 @@ import {
 type BuildingInstancesProps = {
   city: CityData;
   chunks: ChunkState[];
+  /** 0 = day, 1 = night — drives window glow threshold in buildingVisualParams. */
+  dayNightFactor?: number;
 };
 
 /**
  * One InstancedMesh per archetype key (sim-types taxonomy).
  * Draw-call count scales with unique keys in the procedural city (~100–200).
  */
-export function BuildingInstances({ city, chunks }: BuildingInstancesProps) {
+export function BuildingInstances({
+  city,
+  chunks,
+  dayNightFactor = 0,
+}: BuildingInstancesProps) {
   const meshRefs = useRef<Record<string, THREE.InstancedMesh | null>>({});
   const colorsRef = useRef<THREE.Color[]>([]);
 
@@ -39,12 +45,16 @@ export function BuildingInstances({ city, chunks }: BuildingInstancesProps) {
       const mesh = meshRefs.current[key];
       if (!mesh || !buildings.length) continue;
 
+      let bucketWireframe = false;
+
       for (let i = 0; i < buildings.length; i++) {
         const building = buildings[i];
         const chunk = chunks[building.chunkIndex];
         const hidden = !chunk?.visible;
         const lod = chunk?.visible ? chunk.lod : 0;
-        const visual = lodVisualForBuilding(building, lod);
+        const visual = lodVisualForBuilding(building, lod, dayNightFactor);
+        if (visual.wireframe) bucketWireframe = true;
+
         mesh.setMatrixAt(
           i,
           composeInstanceMatrix(building.tileX, building.tileZ, visual, hidden),
@@ -53,6 +63,11 @@ export function BuildingInstances({ city, chunks }: BuildingInstancesProps) {
         const c = colorsRef.current[i];
         c.set(visual.color);
         mesh.setColorAt(i, c);
+      }
+
+      const material = mesh.material;
+      if (material instanceof THREE.MeshStandardMaterial) {
+        material.wireframe = bucketWireframe;
       }
 
       mesh.instanceMatrix.needsUpdate = true;

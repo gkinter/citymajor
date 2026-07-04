@@ -7,11 +7,12 @@ export const EntitlementsSchema = z.object({
   tier: TierSchema,
   maxSaveSlots: z.number().int().positive(),
   maxNarrativeEventsPerDay: z.number().int().positive(),
+  narrativeEventsRemaining: z.number().int().nonnegative(),
   llmEnabled: z.boolean(),
 });
 export type Entitlements = z.infer<typeof EntitlementsSchema>;
 
-const TIER_LIMITS: Record<Tier, Omit<Entitlements, "tier">> = {
+const TIER_LIMITS: Record<Tier, Omit<Entitlements, "tier" | "narrativeEventsRemaining">> = {
   free: {
     maxSaveSlots: 3,
     maxNarrativeEventsPerDay: 10,
@@ -24,8 +25,14 @@ const TIER_LIMITS: Record<Tier, Omit<Entitlements, "tier">> = {
   },
 };
 
-export function entitlementsForTier(tier: Tier): Entitlements {
-  return { tier, ...TIER_LIMITS[tier] };
+export function entitlementsForTier(
+  tier: Tier,
+  narrativeEventsRemaining?: number,
+): Entitlements {
+  const limits = TIER_LIMITS[tier];
+  const remaining =
+    narrativeEventsRemaining ?? limits.maxNarrativeEventsPerDay;
+  return { tier, ...limits, narrativeEventsRemaining: remaining };
 }
 
 /** Mock identity — header `X-CityMajor-Tier` overrides cookie for dev. */

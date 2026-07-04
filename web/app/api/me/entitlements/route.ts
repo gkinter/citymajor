@@ -5,10 +5,16 @@ import {
   entitlementsForTier,
   resolveTierFromRequest,
 } from "@/lib/entitlements";
+import {
+  getNarrativeEventsRemaining,
+  userKeyFromRequest,
+} from "@/lib/narrative-quota";
 
 export async function GET(req: Request) {
   const tier = resolveTierFromRequest(req);
-  const entitlements = entitlementsForTier(tier);
+  const userKey = userKeyFromRequest(req);
+  const remaining = getNarrativeEventsRemaining(tier, userKey);
+  const entitlements = entitlementsForTier(tier, remaining);
   return NextResponse.json(EntitlementsSchema.parse(entitlements));
 }
 
@@ -29,7 +35,9 @@ export async function POST(req: Request) {
     );
   }
 
-  const entitlements = entitlementsForTier(parsed.data.tier);
+  const userKey = userKeyFromRequest(req);
+  const remaining = getNarrativeEventsRemaining(parsed.data.tier, userKey);
+  const entitlements = entitlementsForTier(parsed.data.tier, remaining);
   const response = NextResponse.json(EntitlementsSchema.parse(entitlements));
   response.cookies.set("citymajor_tier", parsed.data.tier, {
     httpOnly: true,

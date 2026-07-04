@@ -134,6 +134,7 @@ public sealed class WasmSimHost
         GenerateMap();
         SeedStarterCity();
         SeedStartingPopulation();
+        BootstrapServiceCoverage();
 
         IsInitialized = true;
     }
@@ -450,6 +451,24 @@ public sealed class WasmSimHost
             _culturalDna.YearlyTick(_state);
             _lastCulturalDnaYear = _state.Year;
         }
+    }
+
+    private void BootstrapServiceCoverage()
+    {
+        var pool = _state.Buildings;
+        for (int i = 0; i < pool.Capacity; i++)
+        {
+            if (!pool.IsActive(i)) continue;
+            _services.OnBuildingPlaced(new BuildingPlacedEvent
+            {
+                BuildingId = i,
+                TileX = pool.GridX[i],
+                TileY = pool.GridY[i],
+                TypeId = pool.TypeId[i],
+            }, _state);
+        }
+
+        _services.DailyTick(_state, WasmConfig.GameDayInterval);
     }
 
     private void GenerateMap()

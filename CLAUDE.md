@@ -16,12 +16,15 @@ Deep city-builder simulation — web-only mesh 3D (Cities: Skylines lite). Linea
 
 ## Web v1 scope (locked)
 
+**Full charter:** [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) — canonical locked v1 scope; supersedes conflicting rows in other design docs.
+
 | Parameter | Value |
 |-----------|-------|
 | Map | **256×256** tiles (64 chunks @ 32×32) |
 | Buildings | ~**5,000** max instanced (40–60 archetypes/era, not unique meshes) |
 | Households | ~**10,000** |
-| Eras | 1 arc (e.g. Frontier → Industrial) |
+| Eras | 1 arc (**Frontier → Industrial** only) |
+| Multiplayer | **None** in v1 |
 | FPS target | ≥30 integrated GPU, ≥60 discrete GPU with LOD active |
 
 ## Monetization
@@ -34,7 +37,7 @@ Deep city-builder simulation — web-only mesh 3D (Cities: Skylines lite). Linea
 app/              → Next.js pages, HUD overlays (HTML over canvas)
 components/       → React + R3F scene components
 lib/              → WASM bridge, sim snapshots, utilities
-docs/design/      → Game design (MASTER_GAME_CONCEPT, VISUAL_QUALITY_GUIDE, AI_ART_PIPELINE)
+docs/design/      → Game design (WEB_V1_SCOPE, MASTER_GAME_CONCEPT, BUILDING_ARCHETYPE_3D, MESHY_*)
 src/Forge.*       → Legacy C# sim + Forge renderer (sim → WASM; renderer obsolete)
 .claude/          → Claude Code configuration (kit-managed)
 ```

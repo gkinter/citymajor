@@ -19,7 +19,7 @@ public sealed class WasmSimHost
 
     private EconomySystem _economy = null!;
     private PopulationSystem _population = null!;
-    private WasmTrafficStub _traffic = null!;
+    private WasmTrafficLite _traffic = null!;
     private ServiceSystem _services = null!;
     private ZoneGrowthSystem _zoneGrowth = null!;
     private BudgetSystem _budget = null!;
@@ -28,17 +28,24 @@ public sealed class WasmSimHost
     private EventSystem _events = null!;
     private CulturalDNASystem _culturalDna = null!;
 
-    private double _trafficAccumulator;
+    private double _trafficLiteAccumulator;
+    private double _trafficEdgeBatchAccumulator;
     private double _dayAccumulator;
+    private double _monthAccumulator;
+    private int _populationStaggerBucket;
     private int _lastCulturalDnaYear;
 
     public bool IsInitialized { get; private set; }
     public long TickCount => _state?.TickCount ?? 0;
     public int Population => _state?.Population ?? 0;
+    public int HouseholdCount => _state?.Households.Count ?? 0;
     public long CityFunds => _state?.CityFunds ?? 0;
     public int Era => _state?.Era ?? 0;
     public float ResearchPoints => _state?.ResearchPoints ?? 0f;
     public float ResearchRate => _state?.ResearchRate ?? 0f;
+    public int EventDefinitionCount => _events?.Definitions.Count ?? 0;
+    public int TechCount => _research?.TechCount ?? 0;
+    public WasmTrafficMode TrafficMode => WasmTrafficMode.Lite;
 
     public void Init(int worldSize = WasmConfig.DefaultWorldSize)
     {
@@ -51,7 +58,7 @@ public sealed class WasmSimHost
 
         _economy = new EconomySystem();
         _population = new PopulationSystem();
-        _traffic = new WasmTrafficStub();
+        _traffic = new WasmTrafficLite();
         _services = new ServiceSystem(worldSize);
         _zoneGrowth = new ZoneGrowthSystem(worldSize);
         _budget = new BudgetSystem();
@@ -62,6 +69,8 @@ public sealed class WasmSimHost
 
         _budget.SetEventBus(_eventBus);
         _economy.SetEventBus(_eventBus);
+
+        LoadGameData();
 
         CulturalDNASystem.ApplyPreset(_state, "western_european");
         _lastCulturalDnaYear = _state.Year;
@@ -80,11 +89,22 @@ public sealed class WasmSimHost
 
         _state.TickCount++;
 
-        _trafficAccumulator += dt;
-        while (_trafficAccumulator >= WasmConfig.TrafficStubInterval)
+        // L1 staggered satisfaction — 1/30 of households per sim tick (spread load for 8 Hz budget)
+        _population.Tick(_state, _populationStaggerBucket);
+        _populationStaggerBucket = (_populationStaggerBucket + 1) % 30;
+
+        _trafficLiteAccumulator += dt;
+        while (_trafficLiteAccumulator >= WasmConfig.TrafficLiteInterval)
         {
-            _trafficAccumulator -= WasmConfig.TrafficStubInterval;
-            _traffic.Tick(_state, WasmConfig.TrafficStubInterval);
+            _trafficLiteAccumulator -= WasmConfig.TrafficLiteInterval;
+            _traffic.Tick(_state, WasmConfig.TrafficLiteInterval);
+        }
+
+        _trafficEdgeBatchAccumulator += dt;
+        while (_trafficEdgeBatchAccumulator >= WasmConfig.TrafficLiteEdgeBatchInterval)
+        {
+            _trafficEdgeBatchAccumulator -= WasmConfig.TrafficLiteEdgeBatchInterval;
+            _traffic.TickEdgeBatch(_state, WasmConfig.TrafficLiteEdgeBatchInterval);
         }
 
         _dayAccumulator += dt;
@@ -92,6 +112,13 @@ public sealed class WasmSimHost
         {
             _dayAccumulator -= WasmConfig.GameDayInterval;
             RunDayTick();
+        }
+
+        _monthAccumulator += dt;
+        while (_monthAccumulator >= WasmConfig.GameMonthInterval)
+        {
+            _monthAccumulator -= WasmConfig.GameMonthInterval;
+            RunMonthTick();
         }
     }
 
@@ -180,8 +207,7 @@ public sealed class WasmSimHost
         _state.TickEvents();
         _politics.DailyTick(_state, WasmConfig.GameDayInterval);
 
-        if (_state.AdvanceDay())
-            RunMonthTick();
+        _state.AdvanceDay();
     }
 
     private void RunMonthTick()
@@ -352,6 +378,27 @@ public sealed class WasmSimHost
         _state.Happiness = 0.6f;
     }
 
+    private void LoadGameData()
+    {
+        try
+        {
+            _events.LoadDefinitionsFromJson(WasmEmbeddedData.Read("events.json"));
+        }
+        catch
+        {
+            // Same degrade path as desktop when data pack is missing.
+        }
+
+        try
+        {
+            _research.LoadFromJson(WasmEmbeddedData.Read("technologies.json"));
+        }
+        catch
+        {
+            // Same degrade path as desktop when data pack is missing.
+        }
+    }
+
     private void FeedCrossSystemData()
     {
         float fundsRatio = Math.Clamp(_state.CityFunds / 100_000f, 0f, 1f);
@@ -431,6 +478,7 @@ public sealed class SimSnapshotDto
 {
     public long Tick { get; init; }
     public int Population { get; init; }
+    public int HouseholdCount { get; init; }
     public long CityFunds { get; init; }
     public int Era { get; init; }
     public BuildingDto[] Buildings { get; init; } = [];
@@ -463,6 +511,7 @@ public sealed class SimSnapshotDto
         {
             Tick = snap.TickCount,
             Population = state.Population,
+            HouseholdCount = state.Households.Count,
             CityFunds = state.CityFunds,
             Era = state.Era,
             Buildings = buildings,

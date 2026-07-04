@@ -58,31 +58,45 @@ public static partial class Program
             tick = _host.TickCount,
             tickCount = _host.TickCount,
             population = _host.Population,
+            householdCount = _host.HouseholdCount,
             cityFunds = _host.CityFunds,
             era = _host.Era,
             eraName = WasmEraDeriver.EraName(_host.Era),
             researchPoints = _host.ResearchPoints,
             researchRate = _host.ResearchRate,
+            eventDefinitionCount = _host.EventDefinitionCount,
+            techCount = _host.TechCount,
+            trafficMode = _host.TrafficMode.ToString().ToLowerInvariant(),
             tickIntervals = new
             {
                 gameDaySeconds = WasmConfig.GameDayInterval,
+                gameMonthSeconds = WasmConfig.GameMonthInterval,
+                trafficLiteSeconds = WasmConfig.TrafficLiteInterval,
+                trafficLiteEdgeBatchSeconds = WasmConfig.TrafficLiteEdgeBatchInterval,
                 trafficStubSeconds = WasmConfig.TrafficStubInterval,
+            },
+            trafficLite = new
+            {
+                zoneCount = WasmConfig.TrafficLiteZoneCount,
+                frankWolfeIterations = WasmConfig.TrafficLiteFrankWolfeIterations,
+                edgeBatchCount = WasmConfig.TrafficLiteEdgeBatchCount,
             },
             systems = new[]
             {
                 "EconomySystem",
                 "PopulationSystem",
+                "WasmTrafficLite (64-zone BPR Frank-Wolfe)",
                 "ServiceSystem",
                 "ZoneGrowthSystem",
                 "BudgetSystem",
                 "PoliticsSystem",
+                "EventSystem",
+                "ResearchSystem",
                 "CulturalDNASystem",
             },
             stubbed = new[]
             {
-                "TrafficSystem (WasmTrafficStub — no BPR assignment in browser)",
-                "EventSystem (no events.json in WASM bundle)",
-                "ResearchSystem (no tech_tree.json in WASM bundle)",
+                "TrafficSystem full (500 zones — desktop only; WASM uses lite mode)",
                 "TradeSystem (not wired in spike)",
                 "ProductionChain (not wired in spike)",
             },

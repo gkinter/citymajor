@@ -82,17 +82,26 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
   "initialized": true,
   "tickCount": 1000,
   "population": 842,
+  "householdCount": 128,
   "cityFunds": 51200,
   "era": 0,
   "eraName": "Frontier",
   "researchPoints": 12.5,
   "researchRate": 3.2,
+  "trafficMode": "lite",
   "tickIntervals": {
     "gameDaySeconds": 1.0,
-    "trafficStubSeconds": 2.0
+    "gameMonthSeconds": 30.0,
+    "trafficLiteSeconds": 5.0,
+    "trafficLiteEdgeBatchSeconds": 0.5
   },
-  "systems": ["EconomySystem", "PopulationSystem", "..."],
-  "stubbed": ["TrafficSystem (WasmTrafficStub — no BPR assignment in browser)", "..."]
+  "trafficLite": {
+    "zoneCount": 64,
+    "frankWolfeIterations": 4,
+    "edgeBatchCount": 4
+  },
+  "systems": ["EconomySystem", "WasmTrafficLite", "..."],
+  "stubbed": ["TrafficSystem full (500 zones — desktop only)", "..."]
 }
 ```
 
@@ -105,28 +114,50 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 
 | Layer | Interval | Systems |
 |-------|----------|---------|
-| L0 (sub-day) | `TrafficStubInterval` (2.0 sim s) | `WasmTrafficStub` — road occupancy only, no BPR |
+| L0 (sub-day) | `TrafficLiteInterval` (5.0 sim s) | `WasmTrafficLite` — 64-zone Frank-Wolfe BPR (4 iter max) |
+| L0b (edge refresh) | `TrafficLiteEdgeBatchInterval` (0.5 sim s) | Partial BPR on ¼ of edges — no full O-D / FW |
 | L1 (game day) | `GameDayInterval` (1.0 sim s) | `EconomySystem.DailyTick`, `ServiceSystem`, `ZoneGrowthSystem`, `PoliticsSystem`, events |
-| L2 (month) | every 30 game days | `PopulationSystem`, `BudgetSystem`, `ResearchSystem`, land-value recalc, **era derivation** |
+| L2 (month) | `GameMonthInterval` (30.0 sim s) | `PopulationSystem.MonthlyTick` (migration, births/deaths), `BudgetSystem`, `ResearchSystem`, land-value recalc, **era derivation** |
 
-`WasmSimHost` accumulates sim time and calls `EconomySystem.DailyTick` once per game day. Population and city treasury are exposed via `GetStatus()` and `GetRenderSnapshot()`.
+`WasmSimHost` accumulates sim time: `GameDayInterval` drives L1 daily ticks; `GameMonthInterval` (30 game days) drives L2 month ticks including `PopulationSystem.MonthlyTick` and staggered per-tick satisfaction updates (1/30 of households per sim tick). Population, household count, and city treasury are exposed via `GetStatus()` and `GetRenderSnapshot()`.
 
 **Era derivation (SB-3692 partial):** Without `tech_tree.json`, `WasmEraDeriver` sets `era` from tick count and research proxies (accumulated RP, heavy-industry tiles, educated population). The primary threshold is **Frontier → Industrial** (`EraIndustrialTickThreshold` = 1200 ticks, or RP ≥ 25 / heavy industry ≥ 3). HUD uses visual era names (Frontier … Future) with per-era badge colors.
 
 **Included (linked via `Forge.SimCore`):**
 
 - `EconomySystem`, `PopulationSystem`, `ServiceSystem`
-- `ZoneGrowthSystem`, `BudgetSystem`, `PoliticsSystem`, `CulturalDNASystem`
+- `WasmTrafficLite` — BPR-lite traffic (SB-3685 partial; see performance budget below)
+- `ZoneGrowthSystem`, `BudgetSystem`, `PoliticsSystem`, `EventSystem`, `ResearchSystem`, `CulturalDNASystem`
 - Engine data: `WorldState`, `SimSnapshot`, `MapGenerator`, tile/building pools
+
+**Traffic modes (`GetStatus().trafficMode`):**
+
+| Mode | Where | Description |
+|------|-------|-------------|
+| `stub` | Legacy spike | No-op placeholder (removed in SB-3685) |
+| `lite` | Browser WASM | 64 zones, 4 Frank-Wolfe iterations, gravity O-D from zone buildings |
+| `full` | Desktop | Full `TrafficSystem` (~500 zones, MNL mode choice, 5 FW iterations @ 2 Hz) |
 
 **Stubbed / degraded in spike:**
 
-- `TrafficSystem` — replaced by `WasmTrafficStub` (no BPR / Frank-Wolfe in browser)
-- `EventSystem` — no `events.json` bundled in WASM
-- `ResearchSystem` — no `tech_tree.json` bundled
+- `TrafficSystem` full — desktop only; WASM uses `lite` mode
 - `TradeSystem`, `ProductionChain` — not wired in `WasmSimHost`
 - `SimulationLoop` background thread — replaced by single-threaded `WasmSimHost`
 - Full 512×512 world — WASM v1 uses 256×256 (`WasmConfig.DefaultWorldSize`)
+
+## Performance budget (SB-3685)
+
+The R3F play page runs the sim worker at **8 Hz** (125 ms per tick). Traffic must not block that loop.
+
+| Work | Schedule | Target cost |
+|------|----------|-------------|
+| `WasmSimHost.Tick` (economy, population, …) | Every 8 Hz tick | ≤ 10 ms total |
+| `WasmTrafficLite.Tick` (full FW) | Every 5 sim s (`TrafficLiteInterval`) | ≤ 2 ms when it fires |
+| `WasmTrafficLite.TickEdgeBatch` | Every 0.5 sim s | ≤ 0.2 ms |
+
+Full Frank-Wolfe runs **at most once per 5 sim seconds**, not every 8 Hz tick. Between full runs, only a rotating ¼ of road edges get a cheap BPR congestion refresh. Desktop `TrafficSystem` (~500 zones, per-household O-D, 5 FW iterations at 2 Hz) remains native-only.
+
+Benchmark locally: open browser devtools → Performance tab → record 30 s of 8 Hz ticking on a 256×256 city with starter roads. Lite traffic spikes should appear as isolated ≤ 2 ms frames every ~40 sim ticks (5 s × 8 Hz), not sustained blocking.
 
 ## COOP / COEP and SharedArrayBuffer
 

@@ -13,4 +13,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Forge.SimCore\Forge.SimCore.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\base\data\events\events.json" LogicalName="events.json" />
+    <EmbeddedResource Include="..\..\base\data\tech\technologies.json" LogicalName="technologies.json" />
+  </ItemGroup>
 </Project>

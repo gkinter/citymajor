@@ -185,13 +185,13 @@ Zod schemas: `SaveSlotSchema`, `CreateSaveBodySchema` in `save-store.ts`; client
 
 | Method | Path | Auth | Body | Response |
 |--------|------|------|------|----------|
-| `GET` | `/api/saves` | session / `x-citymajor-user` stub | — | `{ saves, count, maxSlots, tier }` |
+| `GET` | `/api/saves` | HMAC cookie `citymajor_uid` (see `user-identity.ts`) | — | `{ saves, count, maxSlots, tier }` |
 | `POST` | `/api/saves` | same | `{ name, payload? }` | `{ save, count, maxSlots, tier }` or `403` slot full |
 | `GET` | `/api/saves/:id` | v1.5 | — | `SaveSlot` + signed `downloadUrl` |
 | `PUT` | `/api/saves/:id` | v1.5 | `{ name?, revision, blob upload complete }` | updated slot or `409` |
 | `DELETE` | `/api/saves/:id` | v1.5 | — | `204` |
 
-**v1 stub gaps:** No `GET/:id`, `PUT`, or `DELETE` yet. Tier resolved via `resolve-tier.ts` (cookie `citymajor_tier`, header `x-citymajor-tier`, or Stripe webhook → `tier-store.ts`).
+**v1 stub gaps:** No `GET/:id`, `PUT`, or `DELETE` yet. Tier resolved via `resolve-tier.ts` — production: Stripe webhook → `tier-store.ts` keyed by signed `citymajor_uid`; dev: mock `citymajor_tier` cookie or `X-CityMajor-Tier` header. See [SB-3693_AUTH_ENTITLEMENTS_GAP.md](./SB-3693_AUTH_ENTITLEMENTS_GAP.md).
 
 ### 5.3 Create flow (v1.5 target)
 
@@ -276,7 +276,7 @@ Source: `web/lib/entitlements.ts`.
 - `GET /api/saves` returns `maxSlots` so UI shows `slots 2/3` (`SaveLoadControls.tsx`).
 - Downgrade (Founder → free): **grandfather** existing saves; block **new** creates until `count <= 3`. No auto-delete.
 
-**User identity (v1 stub):** `x-citymajor-user` header or `"default-user"`. **v1.5:** Supabase `auth.uid()` with RLS `user_id = auth.uid()` on `save_slots` table.
+**User identity (v1):** HMAC-signed HTTP-only cookie `citymajor_uid` (`web/lib/user-identity.ts`); routes call `ensureUserId()` to mint/verify. **v1.5:** Supabase `auth.uid()` with RLS `user_id = auth.uid()` on `save_slots` table; optional merge from anonymous UUID on first login.
 
 ---
 

@@ -1,9 +1,26 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { setStoredTier } from "@/lib/tier-store";
-import { getStripeClient, getStripeWebhookSecret } from "@/lib/stripe";
+import { handleStripeWebhookEvent } from "@/lib/stripe-webhook";
+import { getStripeClient, getStripeWebhookSecret, isStripeCheckoutEnabled } from "@/lib/stripe";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+/**
+ * Stripe webhook endpoint skeleton.
+ *
+ * Register the deployment FQDN + `/api/webhooks/stripe` in the Stripe Dashboard.
+ * Requires `STRIPE_WEBHOOK_SECRET`; checkout session creation requires the other
+ * Stripe env vars (see `web/.env.example`).
+ */
+export async function GET() {
+  return NextResponse.json({
+    status: "ok",
+    endpoint: "/api/webhooks/stripe",
+    checkoutConfigured: isStripeCheckoutEnabled(),
+    webhookSecretConfigured: Boolean(getStripeWebhookSecret()),
+  });
+}
 
 export async function POST(req: Request) {
   const webhookSecret = getStripeWebhookSecret();
@@ -30,14 +47,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    if (session.metadata?.product === "founder_pass") {
-      const userKey =
-        session.metadata.userKey ?? session.client_reference_id ?? "default-user";
-      setStoredTier(userKey, "founder_pass");
-    }
+  const result = handleStripeWebhookEvent(event);
+
+  if (result.status === "ignored" && result.reason.startsWith("unhandled_")) {
+    console.info("[stripe-webhook] unhandled event", {
+      type: event.type,
+      id: event.id,
+    });
+  } else if (result.status === "ignored") {
+    console.warn("[stripe-webhook] ignored event", {
+      type: event.type,
+      id: event.id,
+      reason: result.reason,
+    });
+  } else if (result.status === "processed") {
+    console.info("[stripe-webhook] granted tier", {
+      type: event.type,
+      id: event.id,
+      userKey: result.userKey,
+      tier: result.tier,
+    });
   }
 
-  return NextResponse.json({ received: true });
+  // Always 200 for verified events — Stripe retries on non-2xx.
+  return NextResponse.json({ received: true, result: result.status });
 }

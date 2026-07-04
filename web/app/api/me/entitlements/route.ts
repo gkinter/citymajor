@@ -11,6 +11,16 @@ import {
 } from "@/lib/narrative-quota";
 import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+/**
+ * Return the caller's entitlements. Tier resolution is production-gated via
+ * `resolve-tier.ts` — production trusts only webhook-populated tier-store entries
+ * keyed by the signed `citymajor_uid` cookie, never mock cookies or dev headers.
+ */
 export async function GET(req: Request) {
   const { newCookie } = ensureUserId(req);
   const tier = resolveTierFromRequest(req);
@@ -28,11 +38,12 @@ export async function GET(req: Request) {
  *
  * SECURITY: gated to non-production only — leaving this handler exposed in
  * production would let any client self-grant `founder_pass` entitlements by
- * writing the `citymajor_tier` cookie without payment.
+ * writing the `citymajor_tier` cookie without payment. In production, paid
+ * tiers are granted exclusively by `POST /api/webhooks/stripe` after Stripe
+ * signature verification.
  */
 export async function POST(req: Request) {
-  const isProduction = process.env.NODE_ENV === "production";
-  if (isProduction) {
+  if (IS_PRODUCTION) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
@@ -66,7 +77,7 @@ export async function POST(req: Request) {
   response.cookies.set("citymajor_tier", parsed.data.tier, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
   });

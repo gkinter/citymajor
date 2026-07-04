@@ -3,23 +3,31 @@ import { TierSchema, type Tier } from "@/lib/entitlements";
 import { getUserIdFromRequest } from "@/lib/user-identity";
 
 /**
- * Resolve the caller's mock tier.
+ * Resolve the caller's tier for entitlement gating.
  *
- * Order:
- *   1. Signed `citymajor_tier` cookie (server-issued via /api/me/entitlements)
- *   2. Stored tier keyed by the verified user identity cookie
- *   3. Non-production dev override header `X-CityMajor-Tier`
- *   4. Free
+ * **Production** (per LIVE_SERVICES_ARCHITECTURE.md — never trust client grants):
+ *   1. Stored tier keyed by the HMAC-signed `citymajor_uid` cookie (Stripe webhook → tier-store)
+ *   2. `free`
  *
- * The dev header is intentionally NOT trusted in production so paying-tier
- * entitlements cannot be granted by a spoofed request header.
+ * **Non-production** (mock /shop checkout without Stripe):
+ *   1. `citymajor_tier` cookie (server-issued via POST /api/me/entitlements)
+ *   2. Stored tier from webhook replay or manual tier-store seed
+ *   3. Dev override header `X-CityMajor-Tier`
+ *   4. `free`
+ *
+ * Mock cookie and dev header paths are intentionally disabled in production so
+ * paying-tier entitlements cannot be self-granted without a verified payment.
  */
 export function resolveTierFromRequest(req: Request): Tier {
-  const cookie = req.headers.get("cookie") ?? "";
-  const match = cookie.match(/(?:^|;\s*)citymajor_tier=(free|founder_pass)(?:;|$)/);
-  if (match) {
-    const parsed = TierSchema.safeParse(match[1]);
-    if (parsed.success) return parsed.data;
+  const isProduction = process.env.NODE_ENV === "production";
+
+  if (!isProduction) {
+    const cookie = req.headers.get("cookie") ?? "";
+    const match = cookie.match(/(?:^|;\s*)citymajor_tier=(free|founder_pass)(?:;|$)/);
+    if (match) {
+      const parsed = TierSchema.safeParse(match[1]);
+      if (parsed.success) return parsed.data;
+    }
   }
 
   const userKey = getUserIdFromRequest(req);
@@ -28,7 +36,7 @@ export function resolveTierFromRequest(req: Request): Tier {
     if (storedTier) return storedTier;
   }
 
-  if (process.env.NODE_ENV !== "production") {
+  if (!isProduction) {
     const headerTier = req.headers.get("x-citymajor-tier");
     if (headerTier) {
       const parsed = TierSchema.safeParse(headerTier);

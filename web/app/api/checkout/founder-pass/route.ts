@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
-import { userKeyFromRequest } from "@/lib/narrative-quota";
+import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
 import {
   getFounderPassPriceId,
   getStripeClient,
   isStripeCheckoutEnabled,
 } from "@/lib/stripe";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   return NextResponse.json({ configured: isStripeCheckoutEnabled() });
@@ -18,8 +21,8 @@ export async function POST(req: Request) {
     );
   }
 
+  const { userId, newCookie } = ensureUserId(req);
   const origin = new URL(req.url).origin;
-  const userKey = userKeyFromRequest(req);
 
   try {
     const stripe = getStripeClient();
@@ -28,20 +31,29 @@ export async function POST(req: Request) {
       line_items: [{ price: getFounderPassPriceId(), quantity: 1 }],
       success_url: `${origin}/shop?checkout=success`,
       cancel_url: `${origin}/shop?checkout=cancelled`,
-      client_reference_id: userKey,
-      metadata: { userKey, product: "founder_pass" },
+      client_reference_id: userId,
+      metadata: { userKey: userId, product: "founder_pass" },
     });
 
     if (!session.url) {
-      return NextResponse.json(
-        { error: "Stripe did not return a checkout URL" },
-        { status: 502 },
+      return applyUserIdCookie(
+        NextResponse.json(
+          { error: "Stripe did not return a checkout URL" },
+          { status: 502 },
+        ),
+        newCookie,
       );
     }
 
-    return NextResponse.json({ url: session.url, sessionId: session.id });
+    return applyUserIdCookie(
+      NextResponse.json({ url: session.url, sessionId: session.id }),
+      newCookie,
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : "Checkout failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return applyUserIdCookie(
+      NextResponse.json({ error: message }, { status: 500 }),
+      newCookie,
+    );
   }
 }

@@ -9,22 +9,7 @@ import {
   getNarrativeEventsRemaining,
   userKeyFromRequest,
 } from "@/lib/narrative-quota";
-import { ensureUserId } from "@/lib/user-identity";
-
-function withIdentityCookie(
-  response: NextResponse,
-  newCookie?: { name: string; value: string; maxAge: number },
-): NextResponse {
-  if (!newCookie) return response;
-  response.cookies.set(newCookie.name, newCookie.value, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: newCookie.maxAge,
-  });
-  return response;
-}
+import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
 
 export async function GET(req: Request) {
   const { newCookie } = ensureUserId(req);
@@ -32,21 +17,31 @@ export async function GET(req: Request) {
   const userKey = userKeyFromRequest(req);
   const remaining = getNarrativeEventsRemaining(tier, userKey);
   const entitlements = entitlementsForTier(tier, remaining);
-  return withIdentityCookie(
+  return applyUserIdCookie(
     NextResponse.json(EntitlementsSchema.parse(entitlements)),
     newCookie,
   );
 }
 
-/** Dev stub: set mock tier via JSON body; sets `citymajor_tier` cookie. */
+/**
+ * Dev stub: set mock tier via JSON body; sets `citymajor_tier` cookie.
+ *
+ * SECURITY: gated to non-production only — leaving this handler exposed in
+ * production would let any client self-grant `founder_pass` entitlements by
+ * writing the `citymajor_tier` cookie without payment.
+ */
 export async function POST(req: Request) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const { newCookie } = ensureUserId(req);
 
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return withIdentityCookie(
+    return applyUserIdCookie(
       NextResponse.json({ error: "Invalid JSON body" }, { status: 400 }),
       newCookie,
     );
@@ -54,7 +49,7 @@ export async function POST(req: Request) {
 
   const parsed = SetTierBodySchema.safeParse(body);
   if (!parsed.success) {
-    return withIdentityCookie(
+    return applyUserIdCookie(
       NextResponse.json(
         { error: "Validation failed", details: parsed.error.flatten() },
         { status: 400 },
@@ -74,5 +69,5 @@ export async function POST(req: Request) {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
   });
-  return withIdentityCookie(response, newCookie);
+  return applyUserIdCookie(response, newCookie);
 }

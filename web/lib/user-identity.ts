@@ -1,4 +1,5 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import type { NextResponse } from "next/server";
 
 /**
  * User identity — verified via an HMAC-signed HTTP-only cookie so clients
@@ -90,6 +91,26 @@ export type IssuedUserIdCookie = {
   value: string;
   maxAge: number;
 };
+
+/** Shared security attributes for the signed user-id cookie. */
+export const USER_ID_COOKIE_OPTIONS = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  secure: process.env.NODE_ENV === "production",
+  path: "/",
+};
+
+export function applyUserIdCookie(
+  response: NextResponse,
+  cookie?: IssuedUserIdCookie,
+): NextResponse {
+  if (!cookie) return response;
+  response.cookies.set(cookie.name, cookie.value, {
+    ...USER_ID_COOKIE_OPTIONS,
+    maxAge: cookie.maxAge,
+  });
+  return response;
+}
 
 /**
  * Ensure the caller has a verified user identity. If the cookie is missing

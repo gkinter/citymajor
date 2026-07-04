@@ -1,22 +1,7 @@
 import { NextResponse } from "next/server";
 import { resolveTierFromRequest } from "@/lib/resolve-tier";
 import { CreateSaveBodySchema, listSaves, createSave } from "@/lib/save-store";
-import { ensureUserId } from "@/lib/user-identity";
-
-function withIdentityCookie(
-  response: NextResponse,
-  newCookie?: { name: string; value: string; maxAge: number },
-): NextResponse {
-  if (!newCookie) return response;
-  response.cookies.set(newCookie.name, newCookie.value, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: newCookie.maxAge,
-  });
-  return response;
-}
+import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
 
 export async function GET(req: Request) {
   const { newCookie } = ensureUserId(req);
@@ -24,7 +9,17 @@ export async function GET(req: Request) {
   // identity yet, so listSaves returns the "anonymous" bucket for this
   // first response and subsequent requests will use the signed cookie.
   const tier = resolveTierFromRequest(req);
-  return withIdentityCookie(NextResponse.json(listSaves(req, tier)), newCookie);
+  try {
+    return applyUserIdCookie(
+      NextResponse.json(listSaves(req, tier)),
+      newCookie,
+    );
+  } catch {
+    return applyUserIdCookie(
+      NextResponse.json({ error: "Save store unavailable" }, { status: 500 }),
+      newCookie,
+    );
+  }
 }
 
 export async function POST(req: Request) {
@@ -35,7 +30,7 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return withIdentityCookie(
+    return applyUserIdCookie(
       NextResponse.json({ error: "Invalid JSON body" }, { status: 400 }),
       newCookie,
     );
@@ -43,7 +38,7 @@ export async function POST(req: Request) {
 
   const parsed = CreateSaveBodySchema.safeParse(body);
   if (!parsed.success) {
-    return withIdentityCookie(
+    return applyUserIdCookie(
       NextResponse.json(
         { error: "Validation failed", details: parsed.error.flatten() },
         { status: 400 },
@@ -54,21 +49,23 @@ export async function POST(req: Request) {
 
   const result = await createSave(req, tier, parsed.data);
   if (!result.ok) {
-    return withIdentityCookie(
+    return applyUserIdCookie(
       NextResponse.json(
-        {
-          error: result.error,
-          maxSlots: result.maxSlots,
-          count: result.count,
-          tier,
-        },
+        result.status === 500
+          ? { error: result.error }
+          : {
+              error: result.error,
+              maxSlots: result.maxSlots,
+              count: result.count,
+              tier,
+            },
         { status: result.status },
       ),
       newCookie,
     );
   }
 
-  return withIdentityCookie(
+  return applyUserIdCookie(
     NextResponse.json(
       {
         save: result.save,

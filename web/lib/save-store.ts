@@ -44,12 +44,17 @@ let memoryStore: Store = {};
 let memoryStoreLoaded = false;
 
 function readFromDisk(): Store {
+  if (!existsSync(SAVES_FILE)) return {};
+  let raw: unknown;
   try {
-    if (!existsSync(SAVES_FILE)) return {};
-    const raw = JSON.parse(readFileSync(SAVES_FILE, "utf8")) as unknown;
+    raw = JSON.parse(readFileSync(SAVES_FILE, "utf8"));
+  } catch (err) {
+    throw new Error("saves.json is corrupt or unreadable", { cause: err });
+  }
+  try {
     return SavesFileSchema.parse(raw);
-  } catch {
-    return {};
+  } catch (err) {
+    throw new Error("saves.json failed schema validation", { cause: err });
   }
 }
 
@@ -63,15 +68,11 @@ function loadStore(): Store {
 function persistStore(store: Store): void {
   memoryStore = store;
   memoryStoreLoaded = true;
-  try {
-    if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
-    // Atomic write: stage to *.tmp then rename so a partial write or
-    // concurrent reader never sees a corrupted saves.json.
-    writeFileSync(SAVES_TMP_FILE, JSON.stringify(store, null, 2), "utf8");
-    renameSync(SAVES_TMP_FILE, SAVES_FILE);
-  } catch {
-    // Dev stub — in-memory only if filesystem is read-only.
-  }
+  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+  // Atomic write: stage to *.tmp then rename so a partial write or
+  // concurrent reader never sees a corrupted saves.json.
+  writeFileSync(SAVES_TMP_FILE, JSON.stringify(store, null, 2), "utf8");
+  renameSync(SAVES_TMP_FILE, SAVES_FILE);
 }
 
 /**
@@ -131,47 +132,62 @@ export function createSave(
       maxSlots: number;
       count: number;
     }
+  | {
+      ok: false;
+      status: 500;
+      error: string;
+    }
 > {
   return withWriteLock(() => {
-    // Reload fresh from disk inside the lock: the memory cache may be
-    // stale if another process wrote to saves.json since we last read.
-    memoryStore = readFromDisk();
-    memoryStoreLoaded = true;
+    try {
+      // Reload fresh from disk inside the lock: the memory cache may be
+      // stale if another process wrote to saves.json since we last read.
+      memoryStore = readFromDisk();
+      memoryStoreLoaded = true;
 
-    const store = memoryStore;
-    const key = userKey(req);
-    const saves = [...(store[key] ?? [])];
-    const maxSlots = entitlementsForTier(tier).maxSaveSlots;
+      const store = memoryStore;
+      const key = userKey(req);
+      const saves = [...(store[key] ?? [])];
+      const maxSlots = entitlementsForTier(tier).maxSaveSlots;
 
-    if (saves.length >= maxSlots) {
+      if (saves.length >= maxSlots) {
+        return {
+          ok: false as const,
+          status: 403 as const,
+          error: `Save slot limit reached (${maxSlots} for ${tier}). Delete a save or upgrade to Founder Pass.`,
+          maxSlots,
+          count: saves.length,
+        };
+      }
+
+      const now = new Date().toISOString();
+      const slot: SaveSlot = {
+        id: crypto.randomUUID(),
+        name: body.name,
+        createdAt: now,
+        updatedAt: now,
+        payload: body.payload ?? {},
+      };
+
+      saves.push(SaveSlotSchema.parse(slot));
+      persistStore({ ...store, [key]: saves });
+
+      return {
+        ok: true as const,
+        status: 201 as const,
+        save: slot,
+        count: saves.length,
+        maxSlots,
+      };
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Save store operation failed";
       return {
         ok: false as const,
-        status: 403 as const,
-        error: `Save slot limit reached (${maxSlots} for ${tier}). Delete a save or upgrade to Founder Pass.`,
-        maxSlots,
-        count: saves.length,
+        status: 500 as const,
+        error: message,
       };
     }
-
-    const now = new Date().toISOString();
-    const slot: SaveSlot = {
-      id: crypto.randomUUID(),
-      name: body.name,
-      createdAt: now,
-      updatedAt: now,
-      payload: body.payload ?? {},
-    };
-
-    saves.push(SaveSlotSchema.parse(slot));
-    persistStore({ ...store, [key]: saves });
-
-    return {
-      ok: true as const,
-      status: 201 as const,
-      save: slot,
-      count: saves.length,
-      maxSlots,
-    };
   });
 }
 

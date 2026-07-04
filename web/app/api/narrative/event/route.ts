@@ -11,22 +11,7 @@ import {
   narrativeFromBucket,
   resolveBucket,
 } from "@/lib/narrative-templates";
-import { ensureUserId } from "@/lib/user-identity";
-
-function withIdentityCookie(
-  response: NextResponse,
-  newCookie?: { name: string; value: string; maxAge: number },
-): NextResponse {
-  if (!newCookie) return response;
-  response.cookies.set(newCookie.name, newCookie.value, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: newCookie.maxAge,
-  });
-  return response;
-}
+import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
 
 export async function POST(req: Request) {
   const { newCookie } = ensureUserId(req);
@@ -35,7 +20,7 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return withIdentityCookie(
+    return applyUserIdCookie(
       NextResponse.json({ error: "Invalid JSON body" }, { status: 400 }),
       newCookie,
     );
@@ -43,7 +28,7 @@ export async function POST(req: Request) {
 
   const parsed = NarrativeEventRequestSchema.safeParse(body);
   if (!parsed.success) {
-    return withIdentityCookie(
+    return applyUserIdCookie(
       NextResponse.json(
         { error: "Validation failed", details: parsed.error.flatten() },
         { status: 400 },
@@ -57,7 +42,7 @@ export async function POST(req: Request) {
   const remainingBefore = getNarrativeEventsRemaining(tier, userKey);
 
   if (remainingBefore === 0) {
-    return withIdentityCookie(
+    return applyUserIdCookie(
       NextResponse.json(
         {
           error: "Daily narrative quota exhausted",
@@ -71,7 +56,7 @@ export async function POST(req: Request) {
 
   const quota = consumeNarrativeEvent(userKey, tier);
   if (!quota.ok) {
-    return withIdentityCookie(
+    return applyUserIdCookie(
       NextResponse.json(
         {
           error: "Daily narrative quota exhausted",
@@ -95,7 +80,7 @@ export async function POST(req: Request) {
   }
 
   const payload = NarrativeEventResponseSchema.parse(event);
-  return withIdentityCookie(
+  return applyUserIdCookie(
     NextResponse.json({
       ...payload,
       narrativeEventsRemaining: quota.remaining,

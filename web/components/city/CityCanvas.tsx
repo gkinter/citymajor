@@ -6,6 +6,7 @@ import type { FpsStats, PickResult, CityData } from "@/lib/types";
 import { cityDataFromSnapshot, getCityData } from "@/lib/city-data";
 import { createChunkStates } from "@/lib/chunks";
 import { MAX_DPR } from "@/lib/constants";
+import type { GraphicsQualityTier } from "@/lib/constants";
 import {
   createSimBridge,
   type GameSpeedLevel,

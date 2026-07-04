@@ -2,7 +2,8 @@
  * GLTF asset catalog — maps building archetype keys to public asset URLs.
  *
  * Placeholder meshes live under `public/assets/gltf/{era}/{key}.glb` until the
- * Meshy art pipeline delivers final assets. See docs/MESHY_ASSET_PIPELINE.md.
+ * Meshy art pipeline delivers final assets. See docs/MESHY_ASSET_PIPELINE.md
+ * and docs/design/DATA_BRIDGE.md.
  */
 
 const ERA_SLUGS = [
@@ -15,16 +16,40 @@ const ERA_SLUGS = [
 
 export type GltfEraSlug = (typeof ERA_SLUGS)[number];
 
-/** Spike placeholders — one per category × representative era. */
-export const PLACEHOLDER_ARCHETYPE_KEYS = [
+/**
+ * Archetype keys with shipped or documented GLB paths — aligned to
+ * `scripts/meshy/manifest.json` spike batch (one representative per category × era).
+ */
+export const SHIPPED_GLTF_KEYS = [
   "res_low_frontier_00",
+  "res_low_frontier_01",
   "com_frontier_00",
-  "ind_industrial_00",
+  "ind_frontier_00",
+  "res_low_industrial_00",
   "res_high_industrial_00",
+  "com_industrial_00",
+  "ind_industrial_00",
+  "res_low_postwar_00",
+  "res_high_postwar_00",
+  "com_postwar_00",
+  "ind_postwar_00",
+  "res_low_modern_00",
+  "res_high_modern_00",
+  "com_modern_00",
+  "ind_modern_00",
   "svc_modern_00",
+  "res_low_future_00",
+  "com_future_00",
+  "ind_future_00",
 ] as const;
 
-export type PlaceholderArchetypeKey = (typeof PLACEHOLDER_ARCHETYPE_KEYS)[number];
+export type ShippedGltfKey = (typeof SHIPPED_GLTF_KEYS)[number];
+
+/** @deprecated Use SHIPPED_GLTF_KEYS */
+export const PLACEHOLDER_ARCHETYPE_KEYS = SHIPPED_GLTF_KEYS;
+
+/** @deprecated Use ShippedGltfKey */
+export type PlaceholderArchetypeKey = ShippedGltfKey;
 
 /** Extract era folder slug from an archetype key (`res_low_frontier_05` → `frontier`). */
 export function eraSlugFromArchetypeKey(key: string): GltfEraSlug | null {
@@ -42,21 +67,36 @@ export function gltfPublicPath(key: string): string | null {
 }
 
 /**
- * Catalog of placeholder GLB modules shipped with the web client.
+ * Catalog of GLB modules shipped or documented with the web client.
  * Keys follow sim-types `archetypeKey()` convention (BUILDING_ARCHETYPE_3D ADR).
  */
-export const GLTF_CATALOG: Record<PlaceholderArchetypeKey, string> = {
+export const GLTF_CATALOG: Record<ShippedGltfKey, string> = {
   res_low_frontier_00: "/assets/gltf/frontier/res_low_frontier_00.glb",
+  res_low_frontier_01: "/assets/gltf/frontier/res_low_frontier_01.glb",
   com_frontier_00: "/assets/gltf/frontier/com_frontier_00.glb",
-  ind_industrial_00: "/assets/gltf/industrial/ind_industrial_00.glb",
+  ind_frontier_00: "/assets/gltf/frontier/ind_frontier_00.glb",
+  res_low_industrial_00: "/assets/gltf/industrial/res_low_industrial_00.glb",
   res_high_industrial_00: "/assets/gltf/industrial/res_high_industrial_00.glb",
+  com_industrial_00: "/assets/gltf/industrial/com_industrial_00.glb",
+  ind_industrial_00: "/assets/gltf/industrial/ind_industrial_00.glb",
+  res_low_postwar_00: "/assets/gltf/postwar/res_low_postwar_00.glb",
+  res_high_postwar_00: "/assets/gltf/postwar/res_high_postwar_00.glb",
+  com_postwar_00: "/assets/gltf/postwar/com_postwar_00.glb",
+  ind_postwar_00: "/assets/gltf/postwar/ind_postwar_00.glb",
+  res_low_modern_00: "/assets/gltf/modern/res_low_modern_00.glb",
+  res_high_modern_00: "/assets/gltf/modern/res_high_modern_00.glb",
+  com_modern_00: "/assets/gltf/modern/com_modern_00.glb",
+  ind_modern_00: "/assets/gltf/modern/ind_modern_00.glb",
   svc_modern_00: "/assets/gltf/modern/svc_modern_00.glb",
+  res_low_future_00: "/assets/gltf/future/res_low_future_00.glb",
+  com_future_00: "/assets/gltf/future/com_future_00.glb",
+  ind_future_00: "/assets/gltf/future/ind_future_00.glb",
 };
 
 /** Resolve catalog path, falling back to era-derived path for unknown variants. */
 export function resolveGltfPath(key: string): string | null {
   if (key in GLTF_CATALOG) {
-    return GLTF_CATALOG[key as PlaceholderArchetypeKey];
+    return GLTF_CATALOG[key as ShippedGltfKey];
   }
   return gltfPublicPath(key);
 }

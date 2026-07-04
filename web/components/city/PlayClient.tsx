@@ -10,6 +10,7 @@ import {
 } from "@/lib/narrative-templates";
 import { deriveNarrativeBucket } from "@/lib/sim-metrics";
 import { narrativeFromSimEvent } from "@/lib/event-catalog";
+import { narrativeFromEraTransition } from "@/lib/era-narrative";
 import type {
   ActiveEventSnapshot,
   GameSpeedLevel,
@@ -24,6 +25,8 @@ import type { FpsStats } from "@/lib/types";
 import type { ZoningTool } from "@/lib/zoning";
 import { CityCanvas } from "@/components/city/CityCanvas";
 import { CrisisWarningModal } from "@/components/city/CrisisWarningModal";
+import { EraTransitionModal } from "@/components/city/EraTransitionModal";
+import { NewsTicker } from "@/components/city/NewsTicker";
 import { FpsHud } from "@/components/city/FpsHud";
 import { HeraldButton } from "@/components/city/HeraldButton";
 import { HeraldPanel } from "@/components/city/HeraldPanel";
@@ -82,13 +85,20 @@ export function PlayClient() {
   const [heraldError, setHeraldError] = useState<string | null>(null);
   const [heraldEvent, setHeraldEvent] = useState<NarrativeEventResponse | null>(null);
   const [heraldSimEvent, setHeraldSimEvent] = useState<ActiveEventSnapshot | null>(null);
+  const [heraldSpecialEdition, setHeraldSpecialEdition] = useState(false);
+  const [eraTransitionEra, setEraTransitionEra] = useState<number | null>(null);
   const [researchOpen, setResearchOpen] = useState(false);
   const [residentialZonePainted, setResidentialZonePainted] = useState(false);
   const [saveCompleted, setSaveCompleted] = useState(false);
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
+  const simResourcesRef = useRef(simResources);
+  simResourcesRef.current = simResources;
   const heraldedEventIdsRef = useRef<Set<number>>(new Set());
+  const prevEraRef = useRef<number | null>(null);
+  const simResourcesRef = useRef(simResources);
+  simResourcesRef.current = simResources;
   const simApiRef = useRef(simApi);
   simApiRef.current = simApi;
 
@@ -120,6 +130,7 @@ export function PlayClient() {
       setHeraldLoading(true);
       setHeraldError(null);
       setHeraldSimEvent(simEvent);
+      setHeraldSpecialEdition(false);
       try {
         setHeraldEvent(narrativeFromSimEvent(simEvent.typeId));
       } catch (err) {
@@ -133,12 +144,21 @@ export function PlayClient() {
     }
 
     const coverage = statsRef.current.healthcareCoverage ?? 0.5;
-    const bucket: SimStateBucket = deriveNarrativeBucket(coverage);
+    const resources = simResourcesRef.current;
+    const bucket: SimStateBucket = deriveNarrativeBucket({
+      healthcareCoverage: coverage,
+      approval: resources?.approval,
+      cityFunds: resources?.cityFunds,
+      residentialDemand: resources?.residentialDemand,
+      commercialDemand: resources?.commercialDemand,
+      industrialDemand: resources?.industrialDemand,
+    });
 
     setHeraldLoading(true);
     setHeraldError(null);
     setHeraldEvent(null);
     setHeraldSimEvent(null);
+    setHeraldSpecialEdition(false);
 
     try {
       const res = await fetch("/api/narrative/event", {
@@ -147,7 +167,11 @@ export function PlayClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bucket,
-          context: { metricValue: coverage },
+          context: {
+            metricValue: coverage,
+            era:
+              resources?.era !== undefined ? String(resources.era) : undefined,
+          },
         }),
       });
 
@@ -192,6 +216,41 @@ export function PlayClient() {
     [fetchHeraldStory],
   );
 
+  const openEraHerald = useCallback((era: number) => {
+    setHeraldOpen(true);
+    setHeraldLoading(true);
+    setHeraldError(null);
+    setHeraldEvent(null);
+    setHeraldSimEvent(null);
+    setHeraldSpecialEdition(true);
+    try {
+      setHeraldEvent(narrativeFromEraTransition(era));
+    } catch (err) {
+      setHeraldError(
+        err instanceof Error ? err.message : "Failed to load Herald story",
+      );
+    } finally {
+      setHeraldLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const era = simResources?.era;
+    if (era === undefined) return;
+
+    const prev = prevEraRef.current;
+    prevEraRef.current = era;
+
+    if (prev === null || era <= prev) return;
+
+    setEraTransitionEra(era);
+    openEraHerald(era);
+  }, [simResources?.era, openEraHerald]);
+
+  const dismissEraTransition = useCallback(() => {
+    setEraTransitionEra(null);
+  }, []);
+
   useEffect(() => {
     const events = simResources?.activeEvents;
     if (!events?.length) return;
@@ -223,6 +282,10 @@ export function PlayClient() {
     },
     [heraldSimEvent],
   );
+
+  const handleEnqueueResearch = useCallback((techId: number) => {
+    simApiRef.current?.sendCommand({ type: "enqueue_research", techId });
+  }, []);
 
   const handleZonePainted = useCallback((zoneType: number) => {
     if (isResidentialZonePaint(zoneType)) {
@@ -313,12 +376,16 @@ export function PlayClient() {
 
       <HeraldPanel
         open={heraldOpen}
-        onClose={() => setHeraldOpen(false)}
+        onClose={() => {
+          setHeraldOpen(false);
+          setHeraldSpecialEdition(false);
+        }}
         event={heraldEvent}
         loading={heraldLoading}
         error={heraldError}
         quotaRemaining={quotaRemaining}
-        onOptionSelect={handleHeraldOptionSelect}
+        specialEdition={heraldSpecialEdition}
+        onOptionSelect={heraldSpecialEdition ? undefined : handleHeraldOptionSelect}
       />
 
       <OnboardingOverlay
@@ -329,6 +396,10 @@ export function PlayClient() {
       />
 
       <CrisisWarningModal resources={simResources} />
+
+      <EraTransitionModal era={eraTransitionEra} onDismiss={dismissEraTransition} />
+
+      <NewsTicker activeEvents={simResources?.activeEvents} />
     </div>
   );
 }

@@ -3,6 +3,7 @@
  * Procedural placeholder GLB building modules for CityMajor R3F spike.
  * Replace outputs via Meshy pipeline — see docs/MESHY_ASSET_PIPELINE.md
  */
+import { readFileSync } from "node:fs";
 import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +11,7 @@ import { Document, NodeIO } from "@gltf-transform/core";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_ROOT = join(__dirname, "../public/assets/gltf");
+const MANIFEST_PATH = join(__dirname, "../../scripts/meshy/manifest.json");
 
 /** @typedef {[number, number, number]} Vec3 */
 /** @typedef {[number, number, number, number]} Rgba */
@@ -147,62 +149,55 @@ function hexToRgba(hex) {
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255, 1];
 }
 
-/** @type {{ key: string; era: string; build: (doc: Document, scene: import('@gltf-transform/core').Scene) => void }[]} */
-const ARCHETYPES = [
-  {
-    key: "res_low_frontier_00",
-    era: "frontier",
-    build: (doc, scene) => {
-      addBox(doc, scene, [0.72, 0.42, 0.72], [0, 0.21, 0], hexToRgba("#8D6E63"));
-      addPyramid(doc, scene, 0.52, 0.28, [0, 0.56, 0], hexToRgba("#6D4C41"));
-    },
-  },
-  {
-    key: "com_frontier_00",
-    era: "frontier",
-    build: (doc, scene) => {
-      addBox(doc, scene, [0.78, 0.55, 0.78], [0, 0.275, 0], hexToRgba("#78909C"));
-      addBox(doc, scene, [0.82, 0.06, 0.82], [0, 0.58, 0], hexToRgba("#607D8B"));
-      addBox(doc, scene, [0.5, 0.04, 0.12], [0, 0.52, 0.38], hexToRgba("#546E7A"));
-    },
-  },
-  {
-    key: "ind_industrial_00",
-    era: "industrial",
-    build: (doc, scene) => {
-      addBox(doc, scene, [0.85, 0.38, 0.85], [0, 0.19, 0], hexToRgba("#37474F"));
-      addBox(doc, scene, [0.22, 0.18, 0.85], [-0.22, 0.47, 0], hexToRgba("#455A64"));
-      addBox(doc, scene, [0.22, 0.18, 0.85], [0, 0.55, 0], hexToRgba("#455A64"));
-      addBox(doc, scene, [0.22, 0.18, 0.85], [0.22, 0.47, 0], hexToRgba("#455A64"));
-      addBox(doc, scene, [0.1, 0.22, 0.1], [0.28, 0.49, 0.28], hexToRgba("#263238"));
-    },
-  },
-  {
-    key: "res_high_industrial_00",
-    era: "industrial",
-    build: (doc, scene) => {
-      addBox(doc, scene, [0.68, 1.05, 0.68], [0, 0.525, 0], hexToRgba("#C62828"));
-      addBox(doc, scene, [0.72, 0.05, 0.72], [0, 1.075, 0], hexToRgba("#B71C1C"));
-    },
-  },
-  {
-    key: "svc_modern_00",
-    era: "modern",
-    build: (doc, scene) => {
-      addBox(doc, scene, [0.75, 0.5, 0.75], [0, 0.25, 0], hexToRgba("#D9D9CC"));
-      addBox(doc, scene, [0.76, 0.12, 0.76], [0, 0.44, 0], hexToRgba("#5980CC"));
-    },
-  },
-];
+/** @param {string} category */
+function buildForCategory(category) {
+  switch (category) {
+    case "res_low":
+      return (doc, scene) => {
+        addBox(doc, scene, [0.72, 0.42, 0.72], [0, 0.21, 0], hexToRgba("#8D6E63"));
+        addPyramid(doc, scene, 0.52, 0.28, [0, 0.56, 0], hexToRgba("#6D4C41"));
+      };
+    case "res_high":
+      return (doc, scene) => {
+        addBox(doc, scene, [0.68, 1.05, 0.68], [0, 0.525, 0], hexToRgba("#C62828"));
+        addBox(doc, scene, [0.72, 0.05, 0.72], [0, 1.075, 0], hexToRgba("#B71C1C"));
+      };
+    case "com":
+      return (doc, scene) => {
+        addBox(doc, scene, [0.78, 0.55, 0.78], [0, 0.275, 0], hexToRgba("#78909C"));
+        addBox(doc, scene, [0.82, 0.06, 0.82], [0, 0.58, 0], hexToRgba("#607D8B"));
+        addBox(doc, scene, [0.5, 0.04, 0.12], [0, 0.52, 0.38], hexToRgba("#546E7A"));
+      };
+    case "ind":
+      return (doc, scene) => {
+        addBox(doc, scene, [0.85, 0.38, 0.85], [0, 0.19, 0], hexToRgba("#37474F"));
+        addBox(doc, scene, [0.22, 0.18, 0.85], [-0.22, 0.47, 0], hexToRgba("#455A64"));
+        addBox(doc, scene, [0.22, 0.18, 0.85], [0, 0.55, 0], hexToRgba("#455A64"));
+        addBox(doc, scene, [0.22, 0.18, 0.85], [0.22, 0.47, 0], hexToRgba("#455A64"));
+        addBox(doc, scene, [0.1, 0.22, 0.1], [0.28, 0.49, 0.28], hexToRgba("#263238"));
+      };
+    case "svc":
+      return (doc, scene) => {
+        addBox(doc, scene, [0.75, 0.5, 0.75], [0, 0.25, 0], hexToRgba("#D9D9CC"));
+        addBox(doc, scene, [0.76, 0.12, 0.76], [0, 0.44, 0], hexToRgba("#5980CC"));
+      };
+    default:
+      throw new Error(`Unknown category: ${category}`);
+  }
+}
+
+/** @type {{ key: string; era: string; category: string }[]} */
+const MANIFEST_JOBS = JSON.parse(readFileSync(MANIFEST_PATH, "utf8")).jobs;
 
 async function main() {
   const io = new NodeIO();
 
-  for (const spec of ARCHETYPES) {
-    const document = makeDocument((doc, scene) => spec.build(doc, scene));
-    const dir = join(OUT_ROOT, spec.era);
+  for (const job of MANIFEST_JOBS) {
+    const build = buildForCategory(job.category);
+    const document = makeDocument((doc, scene) => build(doc, scene));
+    const dir = join(OUT_ROOT, job.era);
     mkdirSync(dir, { recursive: true });
-    const outPath = join(dir, `${spec.key}.glb`);
+    const outPath = join(dir, `${job.key}.glb`);
     await io.write(outPath, document);
     console.log(`wrote ${outPath}`);
   }

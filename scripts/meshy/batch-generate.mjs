@@ -79,7 +79,9 @@ Options:
   --help, -h          Show this help
 
 Environment:
-  MESHY_API_KEY       Meshy API bearer token (required unless --dry-run)
+  MESHY_API_KEY       Meshy API bearer token (required unless --dry-run or MESHY_USE_MCP=1)
+  MESHY_USE_MCP=1     Use Softblaze Meshy MCP gateway when MESHY_API_KEY is unset
+  MESHY_MCP_URL       Override Meshy MCP endpoint (default ${DEFAULT_MCP_URL})
 `);
 }
 
@@ -130,6 +132,94 @@ async function meshyFetch(apiKey, method, pathSuffix = "", body) {
  * @param {number} pollMs
  * @param {number} [timeoutMs]
  */
+
+const DEFAULT_MCP_URL = "https://meshy.preview.softblaze.net/mcp";
+
+/**
+ * @param {string} toolName
+ * @param {Record<string, unknown>} toolArgs
+ */
+async function mcpToolCall(toolName, toolArgs) {
+  const url = process.env.MESHY_MCP_URL?.trim() || DEFAULT_MCP_URL;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: Date.now(),
+      method: "tools/call",
+      params: { name: toolName, arguments: toolArgs },
+    }),
+  });
+
+  const raw = await res.text();
+  if (!res.ok) {
+    throw new Error(`Meshy MCP ${toolName} HTTP ${res.status}: ${raw.slice(0, 200)}`);
+  }
+
+  const dataLine = raw.split("\n").find((line) => line.startsWith("data: "));
+  if (!dataLine) {
+    throw new Error(`Meshy MCP ${toolName} missing SSE data: ${raw.slice(0, 200)}`);
+  }
+
+  /** @type {{ error?: { message?: string }; result?: { structuredContent?: Record<string, unknown>; content?: { text?: string }[]; isError?: boolean } }} */
+  const envelope = JSON.parse(dataLine.slice("data: ".length));
+  if (envelope.error) {
+    throw new Error(`Meshy MCP ${toolName}: ${envelope.error.message ?? "unknown error"}`);
+  }
+  if (envelope.result?.isError) {
+    const msg = envelope.result.content?.[0]?.text ?? "tool error";
+    throw new Error(`Meshy MCP ${toolName}: ${msg}`);
+  }
+
+  const structured = envelope.result?.structuredContent;
+  if (structured && typeof structured === "object") return structured;
+
+  const textPayload = envelope.result?.content?.[0]?.text;
+  if (textPayload) {
+    try {
+      return JSON.parse(textPayload);
+    } catch {
+      return { raw: textPayload };
+    }
+  }
+
+  throw new Error(`Meshy MCP ${toolName}: empty response`);
+}
+
+/**
+ * @param {string} taskId
+ * @param {number} pollMs
+ * @param {number} [timeoutMs]
+ */
+async function pollTaskMcp(taskId, pollMs, timeoutMs = DEFAULT_POLL_TIMEOUT_MS) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const task = await mcpToolCall("meshy_get_task", {
+      task_id: taskId,
+      task_type: "text-to-3d",
+    });
+    const status = task.status;
+    const progress = task.progress ?? 0;
+
+    if (status === "SUCCEEDED") return task;
+    if (status === "FAILED") {
+      const msg = task.task_error?.message ?? "unknown error";
+      throw new Error(`Meshy task ${taskId} failed: ${msg}`);
+    }
+
+    process.stdout.write(`  … ${status} ${progress}%\r`);
+    await sleep(pollMs);
+  }
+  throw new Error(
+    `Meshy task ${taskId} did not finish within ${Math.round(timeoutMs / 1000)}s (timeout)`,
+  );
+}
+
+
 async function pollTask(apiKey, taskId, pollMs, timeoutMs = DEFAULT_POLL_TIMEOUT_MS) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -219,6 +309,67 @@ async function fixPivot(glbBytes) {
  * @param {MeshyManifest} manifest
  * @param {ReturnType<typeof parseArgs>} opts
  */
+
+/**
+ * @param {MeshyJob} job
+ * @param {MeshyManifest} manifest
+ * @param {ReturnType<typeof parseArgs>} opts
+ */
+async function runJobMcp(job, manifest, opts) {
+  const outDir = join(OUT_ROOT, job.era);
+  const outPath = join(outDir, `${job.key}.glb`);
+
+  if (opts.skipExisting && existsSync(outPath)) {
+    console.log(`skip ${job.key} (exists)`);
+    return;
+  }
+
+  console.log(`\n▶ ${job.key} (via Meshy MCP)`);
+  console.log(`  prompt: ${job.prompt.slice(0, 80)}${job.prompt.length > 80 ? "…" : ""}`);
+
+  const previewCreate = await mcpToolCall("meshy_text_to_3d", {
+    prompt: job.prompt,
+    mode: "preview",
+    ai_model: manifest.meshy_model,
+    target_polycount: DEFAULT_TARGET_POLYCOUNT,
+    should_remesh: true,
+    topology: "triangle",
+  });
+  const previewId = String(previewCreate.result ?? "");
+  if (!previewId) throw new Error(`Preview create missing task id for ${job.key}`);
+  console.log(`  preview task: ${previewId}`);
+
+  const previewTask = await pollTaskMcp(previewId, opts.pollMs);
+  const previewUrl = previewTask.model_urls?.glb;
+  if (!previewUrl) throw new Error(`Preview ${previewId} missing model_urls.glb`);
+
+  if (opts.previewOnly) {
+    console.log(`  preview-only: ${previewUrl}`);
+    return;
+  }
+
+  const refineCreate = await mcpToolCall("meshy_refine_3d", {
+    preview_task_id: previewId,
+    enable_pbr: true,
+  });
+  const refineId = String(refineCreate.result ?? refineCreate.id ?? "");
+  if (!refineId) throw new Error(`Refine create missing task id for ${job.key}`);
+  console.log(`  refine task: ${refineId}`);
+
+  const refineTask = await pollTaskMcp(refineId, opts.pollMs);
+  const refineUrl = refineTask.model_urls?.glb;
+  if (!refineUrl) throw new Error(`Refine ${refineId} missing model_urls.glb`);
+
+  console.log(`  download → ${outPath}`);
+  const glbBytes = await downloadBinary(refineUrl);
+  const document = await fixPivot(glbBytes);
+
+  mkdirSync(outDir, { recursive: true });
+  const io = new NodeIO();
+  await io.write(outPath, document);
+  console.log(`  ✓ wrote ${outPath}`);
+}
+
 async function runJob(apiKey, job, manifest, opts) {
   const outDir = join(OUT_ROOT, job.era);
   const outPath = join(outDir, `${job.key}.glb`);
@@ -307,10 +458,11 @@ async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const manifest = loadManifest();
   const apiKey = process.env.MESHY_API_KEY?.trim() ?? "";
-  const dryRun = opts.dryRun || !apiKey;
+  const useMcp = !opts.dryRun && !apiKey && process.env.MESHY_USE_MCP === "1";
+  const dryRun = opts.dryRun || (!apiKey && !useMcp);
 
-  if (!dryRun && !apiKey) {
-    console.error("MESHY_API_KEY is required (or pass --dry-run).");
+  if (!dryRun && !apiKey && !useMcp) {
+    console.error("MESHY_API_KEY is required (or set MESHY_USE_MCP=1, or pass --dry-run).");
     process.exit(1);
   }
 
@@ -329,7 +481,9 @@ async function main() {
   console.log(
     dryRun
       ? `Dry-run: ${jobs.length} job(s) from ${MANIFEST_PATH}`
-      : `Generating ${jobs.length} asset(s) via Meshy (${manifest.meshy_model})`,
+      : useMcp
+        ? `Generating ${jobs.length} asset(s) via Meshy MCP (${manifest.meshy_model})`
+        : `Generating ${jobs.length} asset(s) via Meshy (${manifest.meshy_model})`,
   );
 
   let failures = 0;
@@ -338,6 +492,8 @@ async function main() {
     try {
       if (dryRun) {
         dryRunJob(job, manifest);
+      } else if (useMcp) {
+        await runJobMcp(job, manifest, opts);
       } else {
         await runJob(apiKey, job, manifest, opts);
       }

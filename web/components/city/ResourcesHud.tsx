@@ -130,6 +130,12 @@ export function ResourcesHud({ resources }: ResourcesHudProps) {
           <span style={hudLabel()}>Pop</span>
           {resources ? formatPopulation(resources.population) : "—"}
         </div>
+        {resources?.householdCount !== undefined ? (
+          <div>
+            <span style={hudLabel()}>HH</span>
+            {formatPopulation(resources.householdCount)}
+          </div>
+        ) : null}
         <div>
           <span style={hudLabel()}>Funds</span>
           {resources ? formatFunds(resources.cityFunds) : "—"}

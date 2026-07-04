@@ -10,6 +10,11 @@ WORKDIR /app
 # ---------- wasm: optional .NET browser-wasm publish → web/public/dotnet/ ----------
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS wasm
 ARG BUILD_WASM=1
+# browser-wasm / emscripten tooling expects `python` on PATH
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 \
+ && ln -sf /usr/bin/python3 /usr/bin/python \
+ && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
 COPY src/ ./src/
 COPY base/ ./base/
@@ -51,7 +56,10 @@ ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs \
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl \
+ && rm -rf /var/lib/apt/lists/* \
+ && addgroup --system --gid 1001 nodejs \
  && adduser --system --uid 1001 --ingroup nodejs nextjs
 
 COPY --from=builder --chown=nextjs:nodejs /app/web/.next/standalone ./

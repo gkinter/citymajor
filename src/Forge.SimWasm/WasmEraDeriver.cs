@@ -4,8 +4,9 @@ using Forge.Game.Simulation;
 namespace Forge.SimWasm;
 
 /// <summary>
-/// Derives HUD/visual era from tick count and research proxies when tech_tree.json
-/// is not bundled in the WASM spike (SB-3692 partial).
+/// Derives HUD/visual era from research proxies (RP, population, industry) when
+/// tech_tree.json is not fully bundled in the WASM spike (SB-3692 partial).
+/// Tick count must not advance era — gates mirror ERA_ARC_DESIGN_V2 §6.C (SB-3718).
 /// </summary>
 public static class WasmEraDeriver
 {
@@ -34,15 +35,6 @@ public static class WasmEraDeriver
         if (era < 0) return "Unknown";
         if (era >= EraNames.Length) return EraNames[^1];
         return EraNames[era];
-    }
-
-    private static int EraFromTick(long tickCount)
-    {
-        if (tickCount >= WasmConfig.EraFutureTickThreshold) return 4;
-        if (tickCount >= WasmConfig.EraModernTickThreshold) return 3;
-        if (tickCount >= WasmConfig.EraPostwarTickThreshold) return 2;
-        if (tickCount >= WasmConfig.EraIndustrialTickThreshold) return 1;
-        return 0;
     }
 
     private static int EraFromResearch(WorldState state, ResearchSystem research)

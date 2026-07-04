@@ -39,6 +39,8 @@ public sealed class WasmSimHost
     public long TickCount => _state?.TickCount ?? 0;
     public int Population => _state?.Population ?? 0;
     public int HouseholdCount => _state?.Households.Count ?? 0;
+    /// <summary>Net population change from the last game month (PopulationSystem.MonthlyTick).</summary>
+    public int PopulationGrowthRate => _population?.LastMonthlyPopulationGrowth ?? 0;
     public long CityFunds => _state?.CityFunds ?? 0;
     public int Era => _state?.Era ?? 0;
     public float ResearchPoints => _state?.ResearchPoints ?? 0f;
@@ -758,6 +760,8 @@ public sealed class WasmStatusDto
     public long TickCount { get; init; }
     public int Population { get; init; }
     public int HouseholdCount { get; init; }
+    /// <summary>Net population change per game month from PopulationSystem.</summary>
+    public int PopulationGrowthRate { get; init; }
     public long CityFunds { get; init; }
     public int Era { get; init; }
     public string EraName { get; init; } = "";
@@ -798,6 +802,7 @@ public sealed class WasmStatusDto
         TickCount = host.TickCount,
         Population = host.Population,
         HouseholdCount = host.HouseholdCount,
+        PopulationGrowthRate = host.PopulationGrowthRate,
         CityFunds = host.CityFunds,
         Era = host.Era,
         EraName = WasmEraDeriver.EraName(host.Era),

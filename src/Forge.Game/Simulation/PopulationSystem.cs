@@ -76,6 +76,9 @@ public sealed class PopulationSystem
     // Random state for deterministic simulation
     private uint _rngState;
 
+    /// <summary>Net population change from the most recent MonthlyTick (births + immigration − deaths − emigration).</summary>
+    public int LastMonthlyPopulationGrowth { get; private set; }
+
     /// <summary>
     /// Create a new PopulationSystem with the given RNG seed.
     /// </summary>
@@ -141,6 +144,8 @@ public sealed class PopulationSystem
     {
         EnsureCapacity(state.Households.Capacity);
 
+        int populationBefore = state.Population;
+
         AgeHouseholds(state);
         int deaths = CalculateDeaths(state);
         int births = CalculateBirths(state);
@@ -151,6 +156,7 @@ public sealed class PopulationSystem
         UpdateWealthClasses(state);
         UpdateAverageHappiness(state);
         UpdatePopulationCount(state);
+        LastMonthlyPopulationGrowth = state.Population - populationBefore;
     }
 
     // =========================================================================

@@ -1,0 +1,1 @@
+/Users/fredericbeeg/softbla/softbla-claude-kit/agents/shared/i18n-checker.md

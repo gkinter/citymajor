@@ -1,0 +1,1 @@
+/Users/fredericbeeg/softbla/softbla-claude-kit/hooks/shared/pieces-research-check.sh

@@ -1,0 +1,2992 @@
+[
+  {
+    "id": "speed_limit",
+    "name": "Speed Limits",
+    "category": "traffic",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "max_speed_kmh",
+        "min": 20,
+        "max": 120,
+        "default": 50,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "accident_rate": -0.3,
+      "road_capacity": -0.1,
+      "noise": -0.15,
+      "citizen_safety": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": 0.05,
+      "property_owners": 0.1,
+      "intelligentsia": 0.05,
+      "religious": 0.0,
+      "newcomers": 0.0
+    },
+    "cost_monthly": 500,
+    "compliance_base": 0.7,
+    "tech_prerequisite": null,
+    "description": "Set maximum vehicle speed on city roads to reduce accidents and noise"
+  },
+  {
+    "id": "speed_cameras",
+    "name": "Speed Camera Network",
+    "category": "traffic",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "cameras_per_km2",
+        "min": 1,
+        "max": 20,
+        "default": 5,
+        "step": 1
+      },
+      {
+        "name": "fine_amount",
+        "min": 50,
+        "max": 500,
+        "default": 150,
+        "step": 25
+      }
+    ],
+    "effects": {
+      "accident_rate": -0.2,
+      "speed_limit_compliance": 0.35,
+      "citizen_privacy": -0.15,
+      "city_revenue": 0.05
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": -0.1,
+      "property_owners": 0.05,
+      "intelligentsia": -0.1,
+      "religious": 0.0,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 2500,
+    "compliance_base": 0.85,
+    "tech_prerequisite": "surveillance_systems",
+    "description": "Automated camera enforcement of speed limits with variable fines"
+  },
+  {
+    "id": "drunk_driving_limit",
+    "name": "Drunk Driving Laws",
+    "category": "traffic",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "bac_limit_permille",
+        "min": 0.0,
+        "max": 0.8,
+        "default": 0.5,
+        "step": 0.1
+      },
+      {
+        "name": "penalty_severity",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "accident_rate": -0.25,
+      "nightlife_appeal": -0.1,
+      "citizen_safety": 0.15,
+      "public_transit_usage": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": -0.05,
+      "property_owners": 0.1,
+      "intelligentsia": 0.1,
+      "religious": 0.2,
+      "newcomers": 0.0
+    },
+    "cost_monthly": 800,
+    "compliance_base": 0.6,
+    "tech_prerequisite": null,
+    "description": "Regulate blood alcohol limits for drivers and enforce through random checkpoints"
+  },
+  {
+    "id": "parking_regulations",
+    "name": "Parking Regulations",
+    "category": "traffic",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "hourly_rate",
+        "min": 0.5,
+        "max": 10.0,
+        "default": 2.0,
+        "step": 0.5
+      },
+      {
+        "name": "time_limit_hours",
+        "min": 1,
+        "max": 12,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "enforcement_level",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "traffic_congestion": -0.15,
+      "commercial_accessibility": -0.1,
+      "city_revenue": 0.08,
+      "public_transit_usage": 0.1,
+      "pedestrian_space": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": -0.1,
+      "property_owners": 0.05,
+      "intelligentsia": 0.1,
+      "religious": 0.0,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 1200,
+    "compliance_base": 0.65,
+    "tech_prerequisite": null,
+    "description": "Control on-street parking through time limits, pricing, and meter enforcement"
+  },
+  {
+    "id": "congestion_charge",
+    "name": "Congestion Charge Zone",
+    "category": "traffic",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "daily_charge",
+        "min": 2,
+        "max": 25,
+        "default": 8,
+        "step": 1
+      },
+      {
+        "name": "zone_radius_km",
+        "min": 1,
+        "max": 10,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "hours_active",
+        "min": 6,
+        "max": 24,
+        "default": 12,
+        "step": 2
+      }
+    ],
+    "effects": {
+      "traffic_congestion": -0.3,
+      "air_quality": 0.15,
+      "city_revenue": 0.12,
+      "public_transit_usage": 0.2,
+      "commercial_accessibility": -0.15,
+      "noise": -0.1
+    },
+    "faction_reactions": {
+      "business": -0.25,
+      "workers": -0.15,
+      "property_owners": 0.05,
+      "intelligentsia": 0.2,
+      "religious": 0.0,
+      "newcomers": -0.1
+    },
+    "cost_monthly": 5000,
+    "compliance_base": 0.8,
+    "tech_prerequisite": "smart_traffic_grid",
+    "description": "Charge vehicles entering the city center to reduce congestion and fund public transit"
+  },
+  {
+    "id": "low_emission_zone",
+    "name": "Low Emission Zone",
+    "category": "traffic",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "emission_standard",
+        "min": 1,
+        "max": 6,
+        "default": 4,
+        "step": 1
+      },
+      {
+        "name": "zone_coverage_pct",
+        "min": 10,
+        "max": 100,
+        "default": 40,
+        "step": 10
+      },
+      {
+        "name": "fine_amount",
+        "min": 50,
+        "max": 500,
+        "default": 200,
+        "step": 50
+      }
+    ],
+    "effects": {
+      "air_quality": 0.25,
+      "citizen_health": 0.1,
+      "traffic_congestion": -0.1,
+      "commercial_accessibility": -0.1,
+      "property_value": 0.05
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": -0.15,
+      "property_owners": 0.1,
+      "intelligentsia": 0.25,
+      "religious": 0.0,
+      "newcomers": -0.1
+    },
+    "cost_monthly": 3500,
+    "compliance_base": 0.6,
+    "tech_prerequisite": "emission_monitoring",
+    "description": "Restrict older high-polluting vehicles from designated city zones"
+  },
+  {
+    "id": "bicycle_helmet",
+    "name": "Bicycle Helmet Mandate",
+    "category": "traffic",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "age_threshold",
+        "min": 0,
+        "max": 18,
+        "default": 16,
+        "step": 2
+      },
+      {
+        "name": "fine_amount",
+        "min": 10,
+        "max": 100,
+        "default": 30,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "cyclist_fatality_rate": -0.35,
+      "cycling_rate": -0.1,
+      "citizen_safety": 0.05,
+      "healthcare_cost": -0.03
+    },
+    "faction_reactions": {
+      "business": 0.0,
+      "workers": -0.05,
+      "property_owners": 0.05,
+      "intelligentsia": -0.05,
+      "religious": 0.05,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 200,
+    "compliance_base": 0.5,
+    "tech_prerequisite": null,
+    "description": "Require helmets for cyclists under a configurable age threshold"
+  },
+  {
+    "id": "height_limit",
+    "name": "Building Height Limits",
+    "category": "building_codes",
+    "era_min": "pre_industrial",
+    "parameters": [
+      {
+        "name": "max_stories",
+        "min": 2,
+        "max": 80,
+        "default": 12,
+        "step": 2
+      },
+      {
+        "name": "heritage_zone_max",
+        "min": 2,
+        "max": 8,
+        "default": 4,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "housing_density": -0.2,
+      "skyline_character": 0.15,
+      "property_value_center": 0.1,
+      "construction_cost": -0.05,
+      "housing_supply": -0.15
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": -0.1,
+      "property_owners": 0.15,
+      "intelligentsia": 0.15,
+      "religious": 0.1,
+      "newcomers": -0.15
+    },
+    "cost_monthly": 300,
+    "compliance_base": 0.9,
+    "tech_prerequisite": null,
+    "description": "Restrict maximum building height to preserve skyline character and sunlight access"
+  },
+  {
+    "id": "setback_requirements",
+    "name": "Setback Requirements",
+    "category": "building_codes",
+    "era_min": "pre_industrial",
+    "parameters": [
+      {
+        "name": "front_setback_m",
+        "min": 0,
+        "max": 15,
+        "default": 5,
+        "step": 1
+      },
+      {
+        "name": "side_setback_m",
+        "min": 0,
+        "max": 10,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "rear_setback_m",
+        "min": 0,
+        "max": 15,
+        "default": 6,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "housing_density": -0.15,
+      "fire_spread_rate": -0.2,
+      "sunlight_access": 0.15,
+      "green_coverage": 0.1,
+      "land_use_efficiency": -0.15
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": 0.0,
+      "property_owners": -0.05,
+      "intelligentsia": 0.1,
+      "religious": 0.0,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 200,
+    "compliance_base": 0.85,
+    "tech_prerequisite": null,
+    "description": "Mandate minimum distances between buildings and property lines for safety and light"
+  },
+  {
+    "id": "fire_safety_code",
+    "name": "Fire Safety Code",
+    "category": "building_codes",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "code_strictness",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "sprinkler_threshold_sqm",
+        "min": 100,
+        "max": 1000,
+        "default": 500,
+        "step": 100
+      },
+      {
+        "name": "inspection_frequency_months",
+        "min": 3,
+        "max": 24,
+        "default": 12,
+        "step": 3
+      }
+    ],
+    "effects": {
+      "fire_damage_rate": -0.4,
+      "citizen_safety": 0.2,
+      "construction_cost": 0.15,
+      "insurance_cost": -0.2,
+      "building_permit_time": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": 0.1,
+      "property_owners": -0.1,
+      "intelligentsia": 0.1,
+      "religious": 0.05,
+      "newcomers": 0.0
+    },
+    "cost_monthly": 1500,
+    "compliance_base": 0.75,
+    "tech_prerequisite": null,
+    "description": "Enforce fire safety standards including sprinklers, exits, and material requirements"
+  },
+  {
+    "id": "earthquake_standards",
+    "name": "Earthquake Resistance Standards",
+    "category": "building_codes",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "seismic_rating",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "retrofit_deadline_years",
+        "min": 5,
+        "max": 30,
+        "default": 15,
+        "step": 5
+      }
+    ],
+    "effects": {
+      "earthquake_damage_rate": -0.5,
+      "construction_cost": 0.2,
+      "citizen_safety": 0.15,
+      "insurance_cost": -0.15,
+      "building_permit_time": 0.15
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": 0.1,
+      "property_owners": -0.15,
+      "intelligentsia": 0.15,
+      "religious": 0.05,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 2000,
+    "compliance_base": 0.65,
+    "tech_prerequisite": "structural_engineering",
+    "description": "Require seismic resistance ratings for new construction and mandate retrofitting of old buildings"
+  },
+  {
+    "id": "historic_preservation",
+    "name": "Historic Preservation Ordinance",
+    "category": "building_codes",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "protected_building_age_years",
+        "min": 25,
+        "max": 200,
+        "default": 75,
+        "step": 25
+      },
+      {
+        "name": "renovation_subsidy_pct",
+        "min": 0,
+        "max": 50,
+        "default": 20,
+        "step": 5
+      },
+      {
+        "name": "demolition_penalty",
+        "min": 1000,
+        "max": 100000,
+        "default": 25000,
+        "step": 5000
+      }
+    ],
+    "effects": {
+      "tourism_appeal": 0.2,
+      "cultural_value": 0.25,
+      "housing_supply": -0.1,
+      "construction_cost": 0.1,
+      "property_value_historic": 0.15
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": -0.05,
+      "property_owners": -0.1,
+      "intelligentsia": 0.3,
+      "religious": 0.2,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 1800,
+    "compliance_base": 0.7,
+    "tech_prerequisite": null,
+    "description": "Protect buildings older than a threshold age from demolition and require sympathetic renovation"
+  },
+  {
+    "id": "emission_limits",
+    "name": "Industrial Emission Limits",
+    "category": "environmental",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "strictness_level",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "fine_per_violation",
+        "min": 500,
+        "max": 50000,
+        "default": 10000,
+        "step": 2500
+      },
+      {
+        "name": "monitoring_frequency_days",
+        "min": 7,
+        "max": 90,
+        "default": 30,
+        "step": 7
+      }
+    ],
+    "effects": {
+      "air_quality": 0.3,
+      "citizen_health": 0.15,
+      "industrial_output": -0.15,
+      "industrial_operating_cost": 0.1,
+      "city_attractiveness": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.3,
+      "workers": -0.05,
+      "property_owners": 0.15,
+      "intelligentsia": 0.25,
+      "religious": 0.05,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 3000,
+    "compliance_base": 0.6,
+    "tech_prerequisite": null,
+    "description": "Cap pollutant emissions from factories and power plants with regular monitoring"
+  },
+  {
+    "id": "noise_ordinance",
+    "name": "Noise Ordinance",
+    "category": "environmental",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "daytime_limit_db",
+        "min": 50,
+        "max": 80,
+        "default": 65,
+        "step": 5
+      },
+      {
+        "name": "nighttime_limit_db",
+        "min": 30,
+        "max": 60,
+        "default": 45,
+        "step": 5
+      },
+      {
+        "name": "construction_hours_start",
+        "min": 6,
+        "max": 10,
+        "default": 7,
+        "step": 1
+      },
+      {
+        "name": "construction_hours_end",
+        "min": 17,
+        "max": 22,
+        "default": 19,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "noise": -0.25,
+      "citizen_happiness": 0.1,
+      "property_value_residential": 0.1,
+      "nightlife_appeal": -0.15,
+      "construction_speed": -0.1
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": 0.05,
+      "property_owners": 0.2,
+      "intelligentsia": 0.1,
+      "religious": 0.1,
+      "newcomers": 0.0
+    },
+    "cost_monthly": 600,
+    "compliance_base": 0.55,
+    "tech_prerequisite": null,
+    "description": "Regulate permissible noise levels during day and night with construction hour restrictions"
+  },
+  {
+    "id": "recycling_mandate",
+    "name": "Recycling Mandate",
+    "category": "environmental",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "separation_categories",
+        "min": 2,
+        "max": 7,
+        "default": 4,
+        "step": 1
+      },
+      {
+        "name": "non_compliance_fine",
+        "min": 25,
+        "max": 500,
+        "default": 100,
+        "step": 25
+      },
+      {
+        "name": "commercial_target_pct",
+        "min": 30,
+        "max": 90,
+        "default": 60,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "waste_volume": -0.3,
+      "landfill_usage": -0.25,
+      "resource_recovery": 0.2,
+      "citizen_inconvenience": 0.1,
+      "city_green_score": 0.15
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": -0.05,
+      "property_owners": 0.05,
+      "intelligentsia": 0.2,
+      "religious": 0.05,
+      "newcomers": -0.1
+    },
+    "cost_monthly": 2000,
+    "compliance_base": 0.5,
+    "tech_prerequisite": "waste_processing",
+    "description": "Require households and businesses to sort waste into configurable recycling categories"
+  },
+  {
+    "id": "plastic_ban",
+    "name": "Single-Use Plastic Ban",
+    "category": "environmental",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "ban_scope",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "phase_in_months",
+        "min": 3,
+        "max": 24,
+        "default": 12,
+        "step": 3
+      },
+      {
+        "name": "violation_fine",
+        "min": 100,
+        "max": 5000,
+        "default": 1000,
+        "step": 250
+      }
+    ],
+    "effects": {
+      "waste_volume": -0.15,
+      "ocean_pollution": -0.2,
+      "commercial_operating_cost": 0.05,
+      "city_green_score": 0.2,
+      "tourism_appeal": 0.05
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": -0.05,
+      "property_owners": 0.05,
+      "intelligentsia": 0.25,
+      "religious": 0.05,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 800,
+    "compliance_base": 0.55,
+    "tech_prerequisite": null,
+    "description": "Phase out single-use plastics from bags to packaging with escalating scope levels"
+  },
+  {
+    "id": "green_building_req",
+    "name": "Green Building Requirements",
+    "category": "environmental",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "energy_rating_min",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "solar_panel_pct",
+        "min": 0,
+        "max": 100,
+        "default": 30,
+        "step": 10
+      },
+      {
+        "name": "green_roof_pct",
+        "min": 0,
+        "max": 100,
+        "default": 20,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "energy_consumption": -0.2,
+      "air_quality": 0.1,
+      "construction_cost": 0.2,
+      "building_operating_cost": -0.15,
+      "city_green_score": 0.25,
+      "property_value": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": 0.0,
+      "property_owners": -0.1,
+      "intelligentsia": 0.3,
+      "religious": 0.0,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 1500,
+    "compliance_base": 0.7,
+    "tech_prerequisite": "green_architecture",
+    "description": "Mandate energy efficiency ratings, solar panels, and green roofs for new construction"
+  },
+  {
+    "id": "carbon_tax",
+    "name": "Carbon Tax",
+    "category": "environmental",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "rate_per_ton",
+        "min": 10,
+        "max": 200,
+        "default": 50,
+        "step": 10
+      },
+      {
+        "name": "exemption_threshold_tons",
+        "min": 0,
+        "max": 1000,
+        "default": 100,
+        "step": 50
+      },
+      {
+        "name": "revenue_recycling_pct",
+        "min": 0,
+        "max": 100,
+        "default": 50,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "carbon_emissions": -0.25,
+      "industrial_operating_cost": 0.15,
+      "city_revenue": 0.15,
+      "energy_price": 0.1,
+      "green_investment": 0.2,
+      "city_green_score": 0.2
+    },
+    "faction_reactions": {
+      "business": -0.3,
+      "workers": -0.1,
+      "property_owners": -0.05,
+      "intelligentsia": 0.3,
+      "religious": 0.0,
+      "newcomers": -0.1
+    },
+    "cost_monthly": 4000,
+    "compliance_base": 0.7,
+    "tech_prerequisite": "emission_monitoring",
+    "description": "Tax carbon dioxide emissions per ton with configurable exemptions and revenue recycling to citizens"
+  },
+  {
+    "id": "minimum_wage",
+    "name": "Minimum Wage",
+    "category": "labor",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "hourly_rate",
+        "min": 5,
+        "max": 25,
+        "default": 12,
+        "step": 1
+      },
+      {
+        "name": "youth_discount_pct",
+        "min": 0,
+        "max": 30,
+        "default": 15,
+        "step": 5
+      },
+      {
+        "name": "annual_adjustment_pct",
+        "min": 0,
+        "max": 5,
+        "default": 2,
+        "step": 0.5
+      }
+    ],
+    "effects": {
+      "worker_income": 0.2,
+      "poverty_rate": -0.15,
+      "small_business_cost": 0.15,
+      "unemployment_rate": 0.05,
+      "consumer_spending": 0.1,
+      "income_inequality": -0.1
+    },
+    "faction_reactions": {
+      "business": -0.25,
+      "workers": 0.3,
+      "property_owners": -0.1,
+      "intelligentsia": 0.15,
+      "religious": 0.1,
+      "newcomers": 0.15
+    },
+    "cost_monthly": 0,
+    "compliance_base": 0.75,
+    "tech_prerequisite": null,
+    "description": "Set a minimum hourly wage with optional youth discount and automatic annual adjustments"
+  },
+  {
+    "id": "work_hours_limit",
+    "name": "Work Hours Limit",
+    "category": "labor",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "max_weekly_hours",
+        "min": 30,
+        "max": 60,
+        "default": 40,
+        "step": 2
+      },
+      {
+        "name": "overtime_multiplier",
+        "min": 1.0,
+        "max": 3.0,
+        "default": 1.5,
+        "step": 0.25
+      },
+      {
+        "name": "mandatory_rest_days",
+        "min": 0,
+        "max": 2,
+        "default": 1,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "worker_health": 0.15,
+      "worker_productivity": 0.05,
+      "labor_cost": 0.1,
+      "citizen_happiness": 0.15,
+      "industrial_output": -0.1
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": 0.3,
+      "property_owners": -0.05,
+      "intelligentsia": 0.15,
+      "religious": 0.15,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 0,
+    "compliance_base": 0.65,
+    "tech_prerequisite": null,
+    "description": "Cap weekly working hours with mandatory overtime pay and guaranteed rest days"
+  },
+  {
+    "id": "child_labor_ban",
+    "name": "Child Labor Ban",
+    "category": "labor",
+    "era_min": "pre_industrial",
+    "parameters": [
+      {
+        "name": "minimum_work_age",
+        "min": 12,
+        "max": 18,
+        "default": 16,
+        "step": 1
+      },
+      {
+        "name": "max_hours_under_18",
+        "min": 10,
+        "max": 30,
+        "default": 20,
+        "step": 5
+      },
+      {
+        "name": "penalty_severity",
+        "min": 1,
+        "max": 5,
+        "default": 4,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "child_welfare": 0.3,
+      "education_enrollment": 0.25,
+      "labor_supply": -0.1,
+      "labor_cost": 0.05,
+      "city_reputation": 0.15
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": 0.1,
+      "property_owners": 0.0,
+      "intelligentsia": 0.3,
+      "religious": 0.2,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 400,
+    "compliance_base": 0.7,
+    "tech_prerequisite": null,
+    "description": "Prohibit employment of children under a configurable age with restricted hours for young workers"
+  },
+  {
+    "id": "union_rights",
+    "name": "Union Rights Act",
+    "category": "labor",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "collective_bargaining_strength",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "strike_protection_level",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "mandatory_union_representation_threshold",
+        "min": 10,
+        "max": 100,
+        "default": 50,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "worker_wages": 0.15,
+      "worker_satisfaction": 0.2,
+      "labor_cost": 0.15,
+      "industrial_flexibility": -0.15,
+      "income_inequality": -0.15,
+      "strike_frequency": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.3,
+      "workers": 0.35,
+      "property_owners": -0.1,
+      "intelligentsia": 0.1,
+      "religious": 0.0,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 300,
+    "compliance_base": 0.6,
+    "tech_prerequisite": null,
+    "description": "Protect workers' right to organize, bargain collectively, and strike without retaliation"
+  },
+  {
+    "id": "workplace_safety",
+    "name": "Workplace Safety Standards",
+    "category": "labor",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "safety_standard_level",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "inspection_frequency_months",
+        "min": 1,
+        "max": 12,
+        "default": 6,
+        "step": 1
+      },
+      {
+        "name": "violation_fine",
+        "min": 500,
+        "max": 50000,
+        "default": 10000,
+        "step": 2500
+      }
+    ],
+    "effects": {
+      "workplace_injury_rate": -0.35,
+      "worker_health": 0.2,
+      "industrial_operating_cost": 0.1,
+      "healthcare_cost": -0.1,
+      "worker_satisfaction": 0.15
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": 0.3,
+      "property_owners": -0.05,
+      "intelligentsia": 0.15,
+      "religious": 0.1,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 2500,
+    "compliance_base": 0.65,
+    "tech_prerequisite": null,
+    "description": "Mandate safety equipment, training, and regular inspections across all industries"
+  },
+  {
+    "id": "parental_leave",
+    "name": "Parental Leave Policy",
+    "category": "labor",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "maternity_weeks",
+        "min": 4,
+        "max": 52,
+        "default": 16,
+        "step": 4
+      },
+      {
+        "name": "paternity_weeks",
+        "min": 0,
+        "max": 26,
+        "default": 4,
+        "step": 2
+      },
+      {
+        "name": "pay_pct",
+        "min": 50,
+        "max": 100,
+        "default": 80,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "birth_rate": 0.15,
+      "worker_satisfaction": 0.2,
+      "gender_equality": 0.15,
+      "labor_cost": 0.1,
+      "child_welfare": 0.1,
+      "city_attractiveness": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": 0.3,
+      "property_owners": 0.0,
+      "intelligentsia": 0.2,
+      "religious": 0.15,
+      "newcomers": 0.15
+    },
+    "cost_monthly": 3500,
+    "compliance_base": 0.85,
+    "tech_prerequisite": null,
+    "description": "Guarantee paid leave for new parents with configurable duration and compensation levels"
+  },
+  {
+    "id": "public_drinking",
+    "name": "Public Drinking Ban",
+    "category": "social",
+    "era_min": "pre_industrial",
+    "parameters": [
+      {
+        "name": "ban_scope",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "fine_amount",
+        "min": 20,
+        "max": 500,
+        "default": 75,
+        "step": 25
+      },
+      {
+        "name": "designated_areas_allowed",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "public_disorder": -0.2,
+      "citizen_safety": 0.1,
+      "nightlife_appeal": -0.15,
+      "tourism_appeal": -0.05,
+      "litter": -0.1
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": -0.15,
+      "property_owners": 0.2,
+      "intelligentsia": -0.05,
+      "religious": 0.25,
+      "newcomers": -0.1
+    },
+    "cost_monthly": 400,
+    "compliance_base": 0.45,
+    "tech_prerequisite": null,
+    "description": "Restrict alcohol consumption in public spaces with optional designated drinking areas"
+  },
+  {
+    "id": "smoking_ban",
+    "name": "Public Smoking Ban",
+    "category": "social",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "indoor_ban_strictness",
+        "min": 1,
+        "max": 5,
+        "default": 4,
+        "step": 1
+      },
+      {
+        "name": "outdoor_buffer_m",
+        "min": 0,
+        "max": 25,
+        "default": 5,
+        "step": 5
+      },
+      {
+        "name": "fine_amount",
+        "min": 25,
+        "max": 500,
+        "default": 100,
+        "step": 25
+      }
+    ],
+    "effects": {
+      "citizen_health": 0.15,
+      "air_quality_indoor": 0.2,
+      "hospitality_revenue": -0.05,
+      "healthcare_cost": -0.1,
+      "citizen_freedom": -0.1
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": -0.05,
+      "property_owners": 0.1,
+      "intelligentsia": 0.15,
+      "religious": 0.15,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 300,
+    "compliance_base": 0.65,
+    "tech_prerequisite": null,
+    "description": "Ban smoking in enclosed public spaces with configurable outdoor buffer zones around entrances"
+  },
+  {
+    "id": "curfew",
+    "name": "Curfew Ordinance",
+    "category": "social",
+    "era_min": "pre_industrial",
+    "parameters": [
+      {
+        "name": "start_hour",
+        "min": 20,
+        "max": 24,
+        "default": 22,
+        "step": 1
+      },
+      {
+        "name": "end_hour",
+        "min": 4,
+        "max": 8,
+        "default": 6,
+        "step": 1
+      },
+      {
+        "name": "age_threshold",
+        "min": 14,
+        "max": 21,
+        "default": 18,
+        "step": 1
+      },
+      {
+        "name": "enforcement_level",
+        "min": 1,
+        "max": 5,
+        "default": 2,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "crime_rate": -0.15,
+      "youth_delinquency": -0.2,
+      "citizen_freedom": -0.25,
+      "nightlife_appeal": -0.3,
+      "citizen_happiness": -0.1
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": -0.15,
+      "property_owners": 0.15,
+      "intelligentsia": -0.25,
+      "religious": 0.2,
+      "newcomers": -0.2
+    },
+    "cost_monthly": 1500,
+    "compliance_base": 0.5,
+    "tech_prerequisite": null,
+    "description": "Restrict movement of people under an age threshold during nighttime hours"
+  },
+  {
+    "id": "pet_regulations",
+    "name": "Pet Ownership Regulations",
+    "category": "social",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "leash_required",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "step": 1
+      },
+      {
+        "name": "registration_required",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "step": 1
+      },
+      {
+        "name": "breed_restrictions",
+        "min": 0,
+        "max": 3,
+        "default": 1,
+        "step": 1
+      },
+      {
+        "name": "waste_cleanup_fine",
+        "min": 25,
+        "max": 300,
+        "default": 75,
+        "step": 25
+      }
+    ],
+    "effects": {
+      "public_cleanliness": 0.1,
+      "citizen_safety": 0.05,
+      "animal_welfare": 0.1,
+      "park_quality": 0.1,
+      "citizen_freedom": -0.05
+    },
+    "faction_reactions": {
+      "business": 0.0,
+      "workers": -0.05,
+      "property_owners": 0.1,
+      "intelligentsia": 0.05,
+      "religious": 0.0,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 300,
+    "compliance_base": 0.55,
+    "tech_prerequisite": null,
+    "description": "Regulate pet ownership including leash laws, registration, breed restrictions, and waste cleanup"
+  },
+  {
+    "id": "homelessness_policy",
+    "name": "Homelessness Policy",
+    "category": "social",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "approach",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "shelter_beds_per_1000",
+        "min": 1,
+        "max": 20,
+        "default": 5,
+        "step": 1
+      },
+      {
+        "name": "outreach_workers_per_10000",
+        "min": 0,
+        "max": 10,
+        "default": 3,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "homelessness_rate": -0.2,
+      "citizen_compassion": 0.15,
+      "public_order": 0.1,
+      "property_value": 0.05,
+      "healthcare_cost": -0.05,
+      "city_reputation": 0.1
+    },
+    "faction_reactions": {
+      "business": 0.05,
+      "workers": 0.1,
+      "property_owners": 0.1,
+      "intelligentsia": 0.2,
+      "religious": 0.25,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 5000,
+    "compliance_base": 0.9,
+    "tech_prerequisite": null,
+    "description": "Address homelessness through shelters, outreach, and housing-first programs at configurable scale"
+  },
+  {
+    "id": "drug_policy",
+    "name": "Drug Policy",
+    "category": "social",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "cannabis_stance",
+        "min": 1,
+        "max": 5,
+        "default": 2,
+        "step": 1
+      },
+      {
+        "name": "harm_reduction_funding",
+        "min": 0,
+        "max": 10000,
+        "default": 3000,
+        "step": 500
+      },
+      {
+        "name": "enforcement_severity",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "drug_abuse_rate": -0.1,
+      "crime_rate": -0.1,
+      "citizen_freedom": 0.1,
+      "healthcare_cost": 0.05,
+      "police_workload": -0.15,
+      "city_revenue": 0.05
+    },
+    "faction_reactions": {
+      "business": 0.0,
+      "workers": 0.05,
+      "property_owners": -0.1,
+      "intelligentsia": 0.15,
+      "religious": -0.25,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 3000,
+    "compliance_base": 0.6,
+    "tech_prerequisite": null,
+    "description": "Set drug enforcement policy from strict prohibition to harm reduction and decriminalization"
+  },
+  {
+    "id": "mixed_use_zoning",
+    "name": "Mixed-Use Zoning",
+    "category": "zoning",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "residential_commercial_ratio",
+        "min": 30,
+        "max": 80,
+        "default": 60,
+        "step": 10
+      },
+      {
+        "name": "zones_affected_pct",
+        "min": 10,
+        "max": 100,
+        "default": 40,
+        "step": 10
+      },
+      {
+        "name": "ground_floor_commercial_required",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "walkability": 0.25,
+      "traffic_congestion": -0.15,
+      "commercial_diversity": 0.2,
+      "property_value": 0.1,
+      "neighborhood_vitality": 0.2,
+      "noise_residential": 0.1
+    },
+    "faction_reactions": {
+      "business": 0.2,
+      "workers": 0.15,
+      "property_owners": 0.05,
+      "intelligentsia": 0.2,
+      "religious": 0.0,
+      "newcomers": 0.15
+    },
+    "cost_monthly": 500,
+    "compliance_base": 0.8,
+    "tech_prerequisite": null,
+    "description": "Allow residential and commercial uses in the same zone to create walkable vibrant neighborhoods"
+  },
+  {
+    "id": "affordable_housing_quota",
+    "name": "Affordable Housing Quota",
+    "category": "zoning",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "affordable_pct",
+        "min": 5,
+        "max": 40,
+        "default": 15,
+        "step": 5
+      },
+      {
+        "name": "income_threshold_median_pct",
+        "min": 40,
+        "max": 80,
+        "default": 60,
+        "step": 10
+      },
+      {
+        "name": "unit_threshold",
+        "min": 5,
+        "max": 50,
+        "default": 10,
+        "step": 5
+      }
+    ],
+    "effects": {
+      "housing_affordability": 0.25,
+      "income_inequality": -0.1,
+      "construction_cost": 0.1,
+      "housing_supply": -0.05,
+      "social_cohesion": 0.15,
+      "city_attractiveness": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": 0.25,
+      "property_owners": -0.15,
+      "intelligentsia": 0.2,
+      "religious": 0.15,
+      "newcomers": 0.25
+    },
+    "cost_monthly": 2000,
+    "compliance_base": 0.7,
+    "tech_prerequisite": null,
+    "description": "Require developers to include a percentage of below-market-rate units in new housing projects"
+  },
+  {
+    "id": "density_limits",
+    "name": "Density Limits",
+    "category": "zoning",
+    "era_min": "pre_industrial",
+    "parameters": [
+      {
+        "name": "max_units_per_hectare",
+        "min": 20,
+        "max": 500,
+        "default": 100,
+        "step": 20
+      },
+      {
+        "name": "floor_area_ratio_max",
+        "min": 0.5,
+        "max": 8.0,
+        "default": 2.5,
+        "step": 0.5
+      },
+      {
+        "name": "open_space_pct",
+        "min": 5,
+        "max": 40,
+        "default": 15,
+        "step": 5
+      }
+    ],
+    "effects": {
+      "housing_supply": -0.2,
+      "green_space": 0.15,
+      "infrastructure_strain": -0.15,
+      "traffic_congestion": -0.1,
+      "property_value": 0.1,
+      "housing_affordability": -0.15
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": -0.1,
+      "property_owners": 0.2,
+      "intelligentsia": 0.05,
+      "religious": 0.05,
+      "newcomers": -0.2
+    },
+    "cost_monthly": 300,
+    "compliance_base": 0.85,
+    "tech_prerequisite": null,
+    "description": "Control development density with unit caps, floor area ratios, and mandatory open space"
+  },
+  {
+    "id": "parking_minimums",
+    "name": "Parking Minimums",
+    "category": "zoning",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "spaces_per_residential_unit",
+        "min": 0.0,
+        "max": 3.0,
+        "default": 1.0,
+        "step": 0.5
+      },
+      {
+        "name": "spaces_per_100sqm_commercial",
+        "min": 0,
+        "max": 10,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "transit_zone_reduction_pct",
+        "min": 0,
+        "max": 100,
+        "default": 50,
+        "step": 25
+      }
+    ],
+    "effects": {
+      "parking_availability": 0.25,
+      "construction_cost": 0.15,
+      "housing_density": -0.15,
+      "car_dependency": 0.2,
+      "public_transit_usage": -0.1,
+      "housing_affordability": -0.1
+    },
+    "faction_reactions": {
+      "business": 0.1,
+      "workers": 0.05,
+      "property_owners": 0.1,
+      "intelligentsia": -0.2,
+      "religious": 0.0,
+      "newcomers": 0.0
+    },
+    "cost_monthly": 200,
+    "compliance_base": 0.9,
+    "tech_prerequisite": null,
+    "description": "Require minimum parking spaces for new developments with reductions near transit stations"
+  },
+  {
+    "id": "industrial_buffer",
+    "name": "Industrial Buffer Zone",
+    "category": "zoning",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "buffer_width_m",
+        "min": 50,
+        "max": 1000,
+        "default": 200,
+        "step": 50
+      },
+      {
+        "name": "buffer_use",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      },
+      {
+        "name": "noise_wall_required",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "residential_health_near_industry": 0.25,
+      "noise_residential": -0.2,
+      "air_quality_residential": 0.15,
+      "land_use_efficiency": -0.15,
+      "property_value_near_industry": 0.2,
+      "industrial_expansion_potential": -0.1
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": 0.1,
+      "property_owners": 0.2,
+      "intelligentsia": 0.15,
+      "religious": 0.05,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 800,
+    "compliance_base": 0.8,
+    "tech_prerequisite": null,
+    "description": "Mandate green buffer zones between industrial and residential areas to protect health and property values"
+  },
+  {
+    "id": "property_tax_rate",
+    "name": "Property Tax",
+    "category": "tax",
+    "era_min": "frontier",
+    "parameters": [
+      {
+        "name": "rate_percent",
+        "min": 0,
+        "max": 5,
+        "default": 2,
+        "step": 0.5
+      }
+    ],
+    "effects": {
+      "tax_revenue": 0.3,
+      "happiness": -0.05,
+      "property_value": -0.05
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": 0.0,
+      "property_owners": -0.3,
+      "intelligentsia": 0.0,
+      "religious": 0.0,
+      "newcomers": -0.1
+    },
+    "cost_monthly": 0,
+    "compliance_base": 0.9,
+    "tech_prerequisite": null,
+    "description": "Annual tax on property values, scaling with land and building assessments."
+  },
+  {
+    "id": "sales_tax",
+    "name": "Sales Tax",
+    "category": "tax",
+    "era_min": "frontier",
+    "parameters": [
+      {
+        "name": "rate_percent",
+        "min": 0,
+        "max": 12,
+        "default": 5,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "tax_revenue": 0.25,
+      "commerce": -0.08,
+      "happiness": -0.03,
+      "consumer_spending": -0.06
+    },
+    "faction_reactions": {
+      "business": -0.25,
+      "workers": -0.15,
+      "property_owners": -0.05,
+      "intelligentsia": 0.0,
+      "religious": 0.0,
+      "newcomers": -0.1
+    },
+    "cost_monthly": 0,
+    "compliance_base": 0.85,
+    "tech_prerequisite": null,
+    "description": "Percentage tax applied to retail goods and services at point of sale."
+  },
+  {
+    "id": "income_tax",
+    "name": "Income Tax",
+    "category": "tax",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "rate_percent",
+        "min": 0,
+        "max": 40,
+        "default": 15,
+        "step": 5
+      },
+      {
+        "name": "bracket_count",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "tax_revenue": 0.5,
+      "happiness": -0.1,
+      "immigration": -0.05,
+      "equality": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.3,
+      "workers": -0.1,
+      "property_owners": -0.2,
+      "intelligentsia": 0.1,
+      "religious": 0.0,
+      "newcomers": -0.15
+    },
+    "cost_monthly": 50,
+    "compliance_base": 0.8,
+    "tech_prerequisite": null,
+    "description": "Progressive tax on citizen earnings, with configurable brackets to shift burden toward higher incomes."
+  },
+  {
+    "id": "corporate_tax",
+    "name": "Corporate Tax",
+    "category": "tax",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "rate_percent",
+        "min": 0,
+        "max": 35,
+        "default": 15,
+        "step": 5
+      }
+    ],
+    "effects": {
+      "tax_revenue": 0.35,
+      "business_growth": -0.12,
+      "industry_attraction": -0.1,
+      "public_services": 0.08
+    },
+    "faction_reactions": {
+      "business": -0.4,
+      "workers": 0.1,
+      "property_owners": -0.1,
+      "intelligentsia": 0.1,
+      "religious": 0.0,
+      "newcomers": 0.0
+    },
+    "cost_monthly": 40,
+    "compliance_base": 0.75,
+    "tech_prerequisite": null,
+    "description": "Tax on business profits, funding public infrastructure at the cost of reduced corporate investment."
+  },
+  {
+    "id": "luxury_tax",
+    "name": "Luxury Tax",
+    "category": "tax",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "rate_percent",
+        "min": 0,
+        "max": 30,
+        "default": 10,
+        "step": 5
+      },
+      {
+        "name": "threshold_multiplier",
+        "min": 2,
+        "max": 10,
+        "default": 5,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "tax_revenue": 0.12,
+      "equality": 0.08,
+      "luxury_commerce": -0.15,
+      "wealthy_immigration": -0.1
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": 0.2,
+      "property_owners": -0.25,
+      "intelligentsia": 0.1,
+      "religious": 0.05,
+      "newcomers": 0.0
+    },
+    "cost_monthly": 20,
+    "compliance_base": 0.7,
+    "tech_prerequisite": null,
+    "description": "Surcharge on high-value goods and extravagant properties, redistributing wealth from the elite."
+  },
+  {
+    "id": "automation_tax",
+    "name": "Automation Tax",
+    "category": "tax",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "rate_per_robot",
+        "min": 0,
+        "max": 500,
+        "default": 100,
+        "step": 50
+      }
+    ],
+    "effects": {
+      "tax_revenue": 0.15,
+      "automation_adoption": -0.2,
+      "employment": 0.1,
+      "innovation": -0.08
+    },
+    "faction_reactions": {
+      "business": -0.35,
+      "workers": 0.3,
+      "property_owners": -0.05,
+      "intelligentsia": -0.1,
+      "religious": 0.0,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 30,
+    "compliance_base": 0.7,
+    "tech_prerequisite": "T045",
+    "description": "Per-unit levy on industrial robots and automated systems, slowing displacement of human labor."
+  },
+  {
+    "id": "tourism_tax",
+    "name": "Tourism Tax",
+    "category": "tax",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "rate_per_visitor",
+        "min": 0,
+        "max": 20,
+        "default": 5,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "tax_revenue": 0.1,
+      "tourism_appeal": -0.08,
+      "infrastructure_funding": 0.06,
+      "local_congestion": -0.04
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": 0.05,
+      "property_owners": 0.1,
+      "intelligentsia": 0.0,
+      "religious": 0.0,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 15,
+    "compliance_base": 0.85,
+    "tech_prerequisite": null,
+    "description": "Bed tax and visitor surcharge funding local infrastructure while mildly discouraging tourism."
+  },
+  {
+    "id": "free_transit",
+    "name": "Free Public Transit",
+    "category": "public_services",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "coverage_percent",
+        "min": 50,
+        "max": 100,
+        "default": 100,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "happiness": 0.12,
+      "traffic_congestion": -0.2,
+      "air_quality": 0.1,
+      "transit_ridership": 0.4,
+      "tax_revenue": -0.08
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": 0.35,
+      "property_owners": -0.15,
+      "intelligentsia": 0.2,
+      "religious": 0.05,
+      "newcomers": 0.25
+    },
+    "cost_monthly": 800,
+    "compliance_base": 1.0,
+    "tech_prerequisite": "T005",
+    "description": "Abolish fares on all public transit, funded entirely by city revenue. Massively boosts ridership."
+  },
+  {
+    "id": "universal_healthcare",
+    "name": "Universal Healthcare",
+    "category": "public_services",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "coverage_tier",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      },
+      {
+        "name": "copay_percent",
+        "min": 0,
+        "max": 30,
+        "default": 10,
+        "step": 5
+      }
+    ],
+    "effects": {
+      "health": 0.25,
+      "happiness": 0.15,
+      "life_expectancy": 0.1,
+      "immigration": 0.1,
+      "tax_revenue": -0.15
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": 0.35,
+      "property_owners": -0.15,
+      "intelligentsia": 0.2,
+      "religious": 0.1,
+      "newcomers": 0.3
+    },
+    "cost_monthly": 1200,
+    "compliance_base": 1.0,
+    "tech_prerequisite": "T050",
+    "description": "Government-funded healthcare for all residents. Higher tiers cover dental, vision, and mental health."
+  },
+  {
+    "id": "free_education",
+    "name": "Free Education",
+    "category": "public_services",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "max_level",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "education": 0.2,
+      "innovation": 0.1,
+      "happiness": 0.1,
+      "skilled_workforce": 0.15,
+      "tax_revenue": -0.1
+    },
+    "faction_reactions": {
+      "business": 0.1,
+      "workers": 0.3,
+      "property_owners": -0.1,
+      "intelligentsia": 0.35,
+      "religious": -0.1,
+      "newcomers": 0.25
+    },
+    "cost_monthly": 600,
+    "compliance_base": 1.0,
+    "tech_prerequisite": "T085",
+    "description": "State-funded education from primary through university. Level 1 = primary, 2 = secondary, 3 = tertiary."
+  },
+  {
+    "id": "public_housing",
+    "name": "Public Housing Program",
+    "category": "public_services",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "units_per_thousand",
+        "min": 5,
+        "max": 50,
+        "default": 20,
+        "step": 5
+      },
+      {
+        "name": "quality_tier",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "homelessness": -0.3,
+      "happiness": 0.08,
+      "property_value": -0.06,
+      "immigration": 0.12,
+      "crime": -0.05
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": 0.25,
+      "property_owners": -0.3,
+      "intelligentsia": 0.15,
+      "religious": 0.15,
+      "newcomers": 0.3
+    },
+    "cost_monthly": 500,
+    "compliance_base": 1.0,
+    "tech_prerequisite": "T029",
+    "description": "Government-built affordable housing complexes. Higher quality tiers cost more but reduce crime further."
+  },
+  {
+    "id": "unemployment_benefits",
+    "name": "Unemployment Benefits",
+    "category": "public_services",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "benefit_percent_of_wage",
+        "min": 20,
+        "max": 80,
+        "default": 50,
+        "step": 10
+      },
+      {
+        "name": "duration_months",
+        "min": 3,
+        "max": 24,
+        "default": 6,
+        "step": 3
+      }
+    ],
+    "effects": {
+      "happiness": 0.1,
+      "poverty": -0.15,
+      "workforce_participation": -0.05,
+      "crime": -0.08,
+      "tax_revenue": -0.06
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": 0.3,
+      "property_owners": -0.1,
+      "intelligentsia": 0.1,
+      "religious": 0.1,
+      "newcomers": 0.15
+    },
+    "cost_monthly": 350,
+    "compliance_base": 1.0,
+    "tech_prerequisite": "T088",
+    "description": "Safety net payments to citizens who lose their jobs, with configurable generosity and duration."
+  },
+  {
+    "id": "universal_basic_income",
+    "name": "Universal Basic Income",
+    "category": "public_services",
+    "era_min": "future",
+    "parameters": [
+      {
+        "name": "monthly_amount",
+        "min": 100,
+        "max": 2000,
+        "default": 800,
+        "step": 100
+      }
+    ],
+    "effects": {
+      "happiness": 0.2,
+      "poverty": -0.3,
+      "entrepreneurship": 0.1,
+      "workforce_participation": -0.08,
+      "crime": -0.12,
+      "tax_revenue": -0.3
+    },
+    "faction_reactions": {
+      "business": -0.25,
+      "workers": 0.3,
+      "property_owners": -0.2,
+      "intelligentsia": 0.2,
+      "religious": 0.1,
+      "newcomers": 0.35
+    },
+    "cost_monthly": 3000,
+    "compliance_base": 1.0,
+    "tech_prerequisite": "T102",
+    "description": "Unconditional monthly payment to every resident, replacing most targeted welfare programs."
+  },
+  {
+    "id": "press_freedom",
+    "name": "Press Freedom Act",
+    "category": "governance",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "protection_level",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "corruption": -0.15,
+      "transparency": 0.2,
+      "government_stability": -0.05,
+      "happiness": 0.08,
+      "scandal_risk": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": 0.1,
+      "property_owners": -0.05,
+      "intelligentsia": 0.35,
+      "religious": -0.05,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 30,
+    "compliance_base": 0.85,
+    "tech_prerequisite": null,
+    "description": "Constitutional protections for journalists and publishers. Higher levels shield whistleblowers and sources."
+  },
+  {
+    "id": "transparency_act",
+    "name": "Government Transparency Act",
+    "category": "governance",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "disclosure_level",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "corruption": -0.2,
+      "government_trust": 0.15,
+      "bureaucracy_speed": -0.05,
+      "transparency": 0.25
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": 0.15,
+      "property_owners": 0.05,
+      "intelligentsia": 0.3,
+      "religious": 0.0,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 60,
+    "compliance_base": 0.8,
+    "tech_prerequisite": null,
+    "description": "Mandatory public disclosure of budgets, contracts, and decision records. Higher levels require real-time open data."
+  },
+  {
+    "id": "anti_corruption",
+    "name": "Anti-Corruption Commission",
+    "category": "governance",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "enforcement_budget",
+        "min": 50,
+        "max": 500,
+        "default": 200,
+        "step": 50
+      },
+      {
+        "name": "independence_level",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "corruption": -0.25,
+      "government_trust": 0.2,
+      "bureaucracy_efficiency": 0.1,
+      "business_cost": 0.05
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": 0.2,
+      "property_owners": 0.05,
+      "intelligentsia": 0.25,
+      "religious": 0.1,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 200,
+    "compliance_base": 0.75,
+    "tech_prerequisite": null,
+    "description": "Independent body investigating graft and bribery. Higher independence makes it harder for officials to interfere."
+  },
+  {
+    "id": "digital_governance",
+    "name": "Digital Governance Platform",
+    "category": "governance",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "digitization_percent",
+        "min": 20,
+        "max": 100,
+        "default": 60,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "bureaucracy_speed": 0.25,
+      "government_trust": 0.1,
+      "corruption": -0.1,
+      "accessibility": 0.15,
+      "elderly_satisfaction": -0.05
+    },
+    "faction_reactions": {
+      "business": 0.2,
+      "workers": 0.1,
+      "property_owners": 0.1,
+      "intelligentsia": 0.25,
+      "religious": -0.05,
+      "newcomers": 0.15
+    },
+    "cost_monthly": 300,
+    "compliance_base": 0.9,
+    "tech_prerequisite": "T095",
+    "description": "Move permits, voting, and public records online. Faster service but may exclude the elderly and offline population."
+  },
+  {
+    "id": "participatory_budgeting",
+    "name": "Participatory Budgeting",
+    "category": "governance",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "budget_share_percent",
+        "min": 1,
+        "max": 25,
+        "default": 10,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "government_trust": 0.15,
+      "happiness": 0.08,
+      "civic_engagement": 0.2,
+      "project_efficiency": -0.05,
+      "populism_risk": 0.05
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": 0.25,
+      "property_owners": 0.0,
+      "intelligentsia": 0.2,
+      "religious": 0.05,
+      "newcomers": 0.15
+    },
+    "cost_monthly": 50,
+    "compliance_base": 0.95,
+    "tech_prerequisite": null,
+    "description": "Citizens directly vote on how a share of the city budget is spent. Builds trust but may fund populist projects."
+  },
+  {
+    "id": "data_privacy",
+    "name": "Data Privacy Act",
+    "category": "technology",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "strictness",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      },
+      {
+        "name": "penalty_multiplier",
+        "min": 1,
+        "max": 10,
+        "default": 3,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "citizen_trust": 0.15,
+      "tech_industry_growth": -0.1,
+      "data_breach_risk": -0.2,
+      "business_cost": 0.08
+    },
+    "faction_reactions": {
+      "business": -0.25,
+      "workers": 0.1,
+      "property_owners": 0.05,
+      "intelligentsia": 0.2,
+      "religious": 0.05,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 80,
+    "compliance_base": 0.7,
+    "tech_prerequisite": "T047",
+    "description": "Regulates how companies collect, store, and sell personal data. Strict levels require consent for every use."
+  },
+  {
+    "id": "ai_regulation",
+    "name": "AI Regulation Framework",
+    "category": "technology",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "restriction_level",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      },
+      {
+        "name": "audit_frequency_months",
+        "min": 3,
+        "max": 24,
+        "default": 6,
+        "step": 3
+      }
+    ],
+    "effects": {
+      "ai_safety": 0.2,
+      "innovation": -0.1,
+      "employment_stability": 0.1,
+      "tech_industry_growth": -0.08,
+      "citizen_trust": 0.1
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": 0.2,
+      "property_owners": 0.0,
+      "intelligentsia": 0.1,
+      "religious": 0.15,
+      "newcomers": 0.0
+    },
+    "cost_monthly": 120,
+    "compliance_base": 0.65,
+    "tech_prerequisite": "T095",
+    "description": "Mandatory audits and restrictions on AI systems used in hiring, policing, and public services."
+  },
+  {
+    "id": "autonomous_vehicle_rules",
+    "name": "Autonomous Vehicle Code",
+    "category": "technology",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "permitted_level",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "speed_limit_override",
+        "min": 0,
+        "max": 1,
+        "default": 0,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "traffic_accidents": -0.15,
+      "traffic_congestion": -0.1,
+      "taxi_employment": -0.2,
+      "innovation": 0.08,
+      "liability_complexity": 0.1
+    },
+    "faction_reactions": {
+      "business": 0.2,
+      "workers": -0.2,
+      "property_owners": 0.05,
+      "intelligentsia": 0.15,
+      "religious": -0.05,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 100,
+    "compliance_base": 0.8,
+    "tech_prerequisite": "T013",
+    "description": "Legal framework for self-driving vehicles. Higher permitted levels allow fully driverless operation on all roads."
+  },
+  {
+    "id": "drone_regulation",
+    "name": "Drone Regulation",
+    "category": "technology",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "commercial_allowed",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "step": 1
+      },
+      {
+        "name": "altitude_limit_meters",
+        "min": 50,
+        "max": 500,
+        "default": 120,
+        "step": 30
+      }
+    ],
+    "effects": {
+      "delivery_efficiency": 0.1,
+      "noise_pollution": 0.05,
+      "privacy_concern": 0.08,
+      "innovation": 0.05,
+      "air_safety": -0.03
+    },
+    "faction_reactions": {
+      "business": 0.15,
+      "workers": -0.05,
+      "property_owners": -0.1,
+      "intelligentsia": 0.1,
+      "religious": -0.05,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 60,
+    "compliance_base": 0.75,
+    "tech_prerequisite": "T047",
+    "description": "Rules governing drone flights over the city. Enabling commercial use unlocks drone delivery but raises noise and privacy concerns."
+  },
+  {
+    "id": "internet_censorship",
+    "name": "Internet Content Regulation",
+    "category": "technology",
+    "era_min": "modern",
+    "parameters": [
+      {
+        "name": "censorship_level",
+        "min": 0,
+        "max": 3,
+        "default": 1,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "misinformation": -0.15,
+      "happiness": -0.1,
+      "innovation": -0.12,
+      "government_control": 0.2,
+      "brain_drain": 0.08
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": -0.1,
+      "property_owners": 0.0,
+      "intelligentsia": -0.35,
+      "religious": 0.15,
+      "newcomers": -0.2
+    },
+    "cost_monthly": 150,
+    "compliance_base": 0.6,
+    "tech_prerequisite": "T047",
+    "description": "State filtering of online content. Level 0 is open internet; level 3 blocks foreign platforms and enforces keyword filtering."
+  },
+  {
+    "id": "religious_education",
+    "name": "Religious Education in Schools",
+    "category": "culture",
+    "era_min": "frontier",
+    "parameters": [
+      {
+        "name": "mandatory",
+        "min": 0,
+        "max": 1,
+        "default": 0,
+        "step": 1
+      },
+      {
+        "name": "faiths_included",
+        "min": 1,
+        "max": 5,
+        "default": 1,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "religious_satisfaction": 0.15,
+      "social_cohesion": 0.05,
+      "secular_satisfaction": -0.1,
+      "tolerance": 0.03
+    },
+    "faction_reactions": {
+      "business": 0.0,
+      "workers": 0.0,
+      "property_owners": 0.0,
+      "intelligentsia": -0.2,
+      "religious": 0.35,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 40,
+    "compliance_base": 0.9,
+    "tech_prerequisite": null,
+    "description": "Include religious studies in the school curriculum. More faiths included increases tolerance but dilutes each tradition."
+  },
+  {
+    "id": "arts_funding",
+    "name": "Public Arts Funding",
+    "category": "culture",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "budget_monthly",
+        "min": 50,
+        "max": 500,
+        "default": 150,
+        "step": 50
+      },
+      {
+        "name": "focus",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "culture": 0.15,
+      "happiness": 0.08,
+      "tourism_appeal": 0.1,
+      "property_value": 0.05,
+      "education": 0.03
+    },
+    "faction_reactions": {
+      "business": -0.05,
+      "workers": 0.05,
+      "property_owners": 0.1,
+      "intelligentsia": 0.3,
+      "religious": 0.0,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 150,
+    "compliance_base": 1.0,
+    "tech_prerequisite": null,
+    "description": "City grants for theaters, galleries, and public art. Focus: 1 = traditional, 2 = mixed, 3 = avant-garde."
+  },
+  {
+    "id": "heritage_protection",
+    "name": "Heritage Protection Ordinance",
+    "category": "culture",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "protected_radius_blocks",
+        "min": 1,
+        "max": 10,
+        "default": 3,
+        "step": 1
+      },
+      {
+        "name": "renovation_subsidy_percent",
+        "min": 0,
+        "max": 50,
+        "default": 20,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "culture": 0.1,
+      "tourism_appeal": 0.12,
+      "construction_speed": -0.1,
+      "property_value": 0.08,
+      "development_flexibility": -0.15
+    },
+    "faction_reactions": {
+      "business": -0.2,
+      "workers": 0.0,
+      "property_owners": 0.1,
+      "intelligentsia": 0.25,
+      "religious": 0.2,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 100,
+    "compliance_base": 0.8,
+    "tech_prerequisite": null,
+    "description": "Designate historic districts where demolition is banned and renovations must preserve original character."
+  },
+  {
+    "id": "language_policy",
+    "name": "Official Language Policy",
+    "category": "culture",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "official_languages",
+        "min": 1,
+        "max": 3,
+        "default": 1,
+        "step": 1
+      },
+      {
+        "name": "enforcement_level",
+        "min": 1,
+        "max": 3,
+        "default": 1,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "social_cohesion": 0.08,
+      "immigrant_integration": -0.1,
+      "bureaucracy_speed": 0.05,
+      "cultural_diversity": -0.05
+    },
+    "faction_reactions": {
+      "business": 0.05,
+      "workers": 0.05,
+      "property_owners": 0.0,
+      "intelligentsia": -0.1,
+      "religious": 0.05,
+      "newcomers": -0.25
+    },
+    "cost_monthly": 20,
+    "compliance_base": 0.85,
+    "tech_prerequisite": null,
+    "description": "Mandate official language(s) for government, signs, and schools. More languages cost more but welcome immigrants."
+  },
+  {
+    "id": "media_regulation",
+    "name": "Media Regulation",
+    "category": "culture",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "content_standards",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      },
+      {
+        "name": "foreign_ownership_limit_percent",
+        "min": 0,
+        "max": 100,
+        "default": 49,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "misinformation": -0.1,
+      "media_quality": 0.1,
+      "free_speech": -0.08,
+      "cultural_identity": 0.06
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": 0.0,
+      "property_owners": 0.0,
+      "intelligentsia": -0.15,
+      "religious": 0.1,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 40,
+    "compliance_base": 0.75,
+    "tech_prerequisite": "T039",
+    "description": "Broadcasting standards and ownership rules for newspapers, radio, and television. Limits foreign media influence."
+  },
+  {
+    "id": "vaccination_mandate",
+    "name": "Vaccination Mandate",
+    "category": "health",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "mandatory_vaccines",
+        "min": 1,
+        "max": 10,
+        "default": 5,
+        "step": 1
+      },
+      {
+        "name": "exemption_allowed",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "disease_resistance": 0.25,
+      "epidemic_risk": -0.3,
+      "child_mortality": -0.15,
+      "happiness": -0.05,
+      "workforce_health": 0.1
+    },
+    "faction_reactions": {
+      "business": 0.1,
+      "workers": 0.05,
+      "property_owners": 0.0,
+      "intelligentsia": 0.15,
+      "religious": -0.2,
+      "newcomers": -0.05
+    },
+    "cost_monthly": 100,
+    "compliance_base": 0.75,
+    "tech_prerequisite": "T052",
+    "description": "Require citizens to receive designated vaccines. Allowing exemptions reduces backlash but weakens herd immunity."
+  },
+  {
+    "id": "food_safety",
+    "name": "Food Safety Standards",
+    "category": "health",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "inspection_frequency",
+        "min": 1,
+        "max": 4,
+        "default": 2,
+        "step": 1
+      },
+      {
+        "name": "labeling_requirements",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "food_poisoning_risk": -0.2,
+      "health": 0.1,
+      "food_industry_cost": 0.08,
+      "consumer_trust": 0.12
+    },
+    "faction_reactions": {
+      "business": -0.15,
+      "workers": 0.1,
+      "property_owners": 0.0,
+      "intelligentsia": 0.1,
+      "religious": 0.05,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 80,
+    "compliance_base": 0.8,
+    "tech_prerequisite": null,
+    "description": "Regulate food production, storage, and labeling. Frequent inspections catch problems early but burden small producers."
+  },
+  {
+    "id": "air_quality_standards",
+    "name": "Air Quality Standards",
+    "category": "health",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "emission_limit_tier",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      },
+      {
+        "name": "vehicle_emission_standard",
+        "min": 1,
+        "max": 5,
+        "default": 3,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "air_quality": 0.2,
+      "health": 0.12,
+      "industry_cost": 0.1,
+      "respiratory_disease": -0.15,
+      "industry_attraction": -0.08
+    },
+    "faction_reactions": {
+      "business": -0.25,
+      "workers": 0.1,
+      "property_owners": 0.1,
+      "intelligentsia": 0.2,
+      "religious": 0.0,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 150,
+    "compliance_base": 0.7,
+    "tech_prerequisite": "T069",
+    "description": "Cap industrial and vehicle emissions. Strict standards dramatically improve public health but raise production costs."
+  },
+  {
+    "id": "water_quality",
+    "name": "Water Quality Act",
+    "category": "health",
+    "era_min": "industrial",
+    "parameters": [
+      {
+        "name": "treatment_standard",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1
+      },
+      {
+        "name": "testing_frequency_weekly",
+        "min": 1,
+        "max": 7,
+        "default": 3,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "water_quality": 0.2,
+      "health": 0.15,
+      "waterborne_disease": -0.25,
+      "industry_discharge_cost": 0.08
+    },
+    "faction_reactions": {
+      "business": -0.1,
+      "workers": 0.15,
+      "property_owners": 0.1,
+      "intelligentsia": 0.15,
+      "religious": 0.05,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 120,
+    "compliance_base": 0.85,
+    "tech_prerequisite": "T078",
+    "description": "Mandate water treatment and regular testing of municipal supply. Higher standards filter more contaminants."
+  },
+  {
+    "id": "mental_health_funding",
+    "name": "Mental Health Funding",
+    "category": "health",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "budget_monthly",
+        "min": 50,
+        "max": 400,
+        "default": 150,
+        "step": 50
+      },
+      {
+        "name": "community_clinics",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "mental_health": 0.2,
+      "happiness": 0.1,
+      "crime": -0.05,
+      "workforce_productivity": 0.08,
+      "suicide_rate": -0.15
+    },
+    "faction_reactions": {
+      "business": 0.05,
+      "workers": 0.15,
+      "property_owners": 0.0,
+      "intelligentsia": 0.2,
+      "religious": 0.1,
+      "newcomers": 0.1
+    },
+    "cost_monthly": 150,
+    "compliance_base": 1.0,
+    "tech_prerequisite": "T054",
+    "description": "Dedicated funding for counseling services, crisis hotlines, and community mental health clinics."
+  },
+  {
+    "id": "gambling_regulation",
+    "name": "Gambling Regulation",
+    "category": "gambling",
+    "era_min": "frontier",
+    "parameters": [
+      {
+        "name": "legality_level",
+        "min": 0,
+        "max": 3,
+        "default": 1,
+        "step": 1
+      },
+      {
+        "name": "casino_zone_limit",
+        "min": 0,
+        "max": 5,
+        "default": 1,
+        "step": 1
+      }
+    ],
+    "effects": {
+      "tax_revenue": 0.08,
+      "tourism_appeal": 0.1,
+      "crime": 0.06,
+      "addiction_rate": 0.08,
+      "entertainment": 0.1
+    },
+    "faction_reactions": {
+      "business": 0.2,
+      "workers": 0.05,
+      "property_owners": -0.1,
+      "intelligentsia": -0.1,
+      "religious": -0.35,
+      "newcomers": 0.05
+    },
+    "cost_monthly": 40,
+    "compliance_base": 0.7,
+    "tech_prerequisite": null,
+    "description": "Controls on gambling operations. Level 0 = banned, 1 = restricted zones, 2 = licensed citywide, 3 = unregulated."
+  },
+  {
+    "id": "lottery_establishment",
+    "name": "City Lottery",
+    "category": "gambling",
+    "era_min": "postwar",
+    "parameters": [
+      {
+        "name": "ticket_price",
+        "min": 1,
+        "max": 20,
+        "default": 5,
+        "step": 1
+      },
+      {
+        "name": "education_share_percent",
+        "min": 0,
+        "max": 100,
+        "default": 50,
+        "step": 10
+      }
+    ],
+    "effects": {
+      "tax_revenue": 0.06,
+      "education_funding": 0.05,
+      "addiction_rate": 0.03,
+      "entertainment": 0.05,
+      "poverty_trap_risk": 0.04
+    },
+    "faction_reactions": {
+      "business": 0.1,
+      "workers": 0.05,
+      "property_owners": 0.0,
+      "intelligentsia": -0.05,
+      "religious": -0.2,
+      "newcomers": 0.0
+    },
+    "cost_monthly": 20,
+    "compliance_base": 0.95,
+    "tech_prerequisite": null,
+    "description": "State-run lottery with proceeds directed to education or general fund. Cheap revenue but regressive by nature."
+  }
+]

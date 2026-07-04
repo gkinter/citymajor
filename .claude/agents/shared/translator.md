@@ -1,0 +1,1 @@
+/Users/fredericbeeg/softbla/softbla-claude-kit/agents/shared/translator.md

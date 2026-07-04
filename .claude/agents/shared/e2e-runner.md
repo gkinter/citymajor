@@ -1,0 +1,1 @@
+/Users/fredericbeeg/softbla/softbla-claude-kit/agents/shared/e2e-runner.md

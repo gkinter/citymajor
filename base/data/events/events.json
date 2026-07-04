@@ -1,0 +1,2393 @@
+[
+  {
+    "id": "fire",
+    "name": "Building Fire",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 2,
+    "base_probability": 0.04,
+    "duration_months": 1,
+    "effects": {
+      "happiness": -5,
+      "property_damage": 0.1,
+      "population": -2,
+      "fire_risk": 0.15
+    },
+    "trigger_conditions": {
+      "fire_risk_min": 0.3,
+      "has_wooden_buildings": true
+    },
+    "cascade_events": [
+      "homelessness",
+      "housing_crisis"
+    ],
+    "description": "A fire breaks out in a densely built area, consuming wooden structures and displacing families."
+  },
+  {
+    "id": "flood",
+    "name": "River Flood",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 3,
+    "base_probability": 0.025,
+    "duration_months": 2,
+    "effects": {
+      "happiness": -10,
+      "property_damage": 0.2,
+      "agriculture": -0.35,
+      "commerce": -0.15,
+      "disease_risk": 0.1
+    },
+    "trigger_conditions": {
+      "near_river": true,
+      "season": "spring"
+    },
+    "cascade_events": [
+      "disease_outbreak",
+      "homelessness"
+    ],
+    "description": "Swollen rivers burst their banks, inundating low-lying neighborhoods and destroying crops in the floodplain."
+  },
+  {
+    "id": "earthquake",
+    "name": "Earthquake",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 4,
+    "base_probability": 0.005,
+    "duration_months": 3,
+    "effects": {
+      "happiness": -20,
+      "property_damage": 0.4,
+      "population": -8,
+      "commerce": -0.25,
+      "infrastructure_damage": 0.3
+    },
+    "trigger_conditions": {
+      "seismic_zone": true
+    },
+    "cascade_events": [
+      "fire",
+      "homelessness",
+      "landslide"
+    ],
+    "description": "The ground shakes violently, toppling buildings and rupturing gas lines across the city."
+  },
+  {
+    "id": "tornado",
+    "name": "Tornado",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 3,
+    "base_probability": 0.015,
+    "duration_months": 1,
+    "effects": {
+      "happiness": -12,
+      "property_damage": 0.25,
+      "population": -3,
+      "agriculture": -0.2
+    },
+    "trigger_conditions": {
+      "terrain": "plains",
+      "season": "summer"
+    },
+    "cascade_events": [
+      "homelessness",
+      "fire"
+    ],
+    "description": "A violent funnel cloud tears through the outskirts, ripping roofs from buildings and scattering debris for miles."
+  },
+  {
+    "id": "hurricane",
+    "name": "Hurricane",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 5,
+    "base_probability": 0.003,
+    "duration_months": 2,
+    "effects": {
+      "happiness": -25,
+      "property_damage": 0.5,
+      "population": -12,
+      "commerce": -0.4,
+      "agriculture": -0.5,
+      "infrastructure_damage": 0.35
+    },
+    "trigger_conditions": {
+      "coastal": true,
+      "season": "autumn"
+    },
+    "cascade_events": [
+      "flood",
+      "fire",
+      "disease_outbreak",
+      "homelessness"
+    ],
+    "description": "A massive storm makes landfall, bringing catastrophic winds and a devastating storm surge that reshapes the coastline."
+  },
+  {
+    "id": "blizzard",
+    "name": "Blizzard",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 2,
+    "base_probability": 0.03,
+    "duration_months": 1,
+    "effects": {
+      "happiness": -8,
+      "commerce": -0.2,
+      "population": -1,
+      "heating_cost": 0.3,
+      "transport": -0.4
+    },
+    "trigger_conditions": {
+      "season": "winter",
+      "latitude_min": 35
+    },
+    "cascade_events": [
+      "housing_crisis"
+    ],
+    "description": "A brutal winter storm buries the city under feet of snow, halting commerce and stranding residents in their homes."
+  },
+  {
+    "id": "drought",
+    "name": "Drought",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 3,
+    "base_probability": 0.02,
+    "duration_months": 6,
+    "effects": {
+      "happiness": -8,
+      "agriculture": -0.5,
+      "water_supply": -0.4,
+      "fire_risk": 0.25,
+      "food_price": 0.3
+    },
+    "trigger_conditions": {
+      "rainfall_below": 0.3,
+      "season": "summer"
+    },
+    "cascade_events": [
+      "wildfire",
+      "recession",
+      "disease_outbreak"
+    ],
+    "description": "Months without rain parch the land, drying up wells and withering crops across the region."
+  },
+  {
+    "id": "heatwave",
+    "name": "Heatwave",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 2,
+    "base_probability": 0.035,
+    "duration_months": 2,
+    "effects": {
+      "happiness": -6,
+      "population": -2,
+      "productivity": -0.15,
+      "fire_risk": 0.2,
+      "energy_cost": 0.2
+    },
+    "trigger_conditions": {
+      "season": "summer",
+      "temperature_above": 95
+    },
+    "cascade_events": [
+      "drought",
+      "wildfire",
+      "disease_outbreak"
+    ],
+    "description": "Temperatures soar to dangerous levels for weeks, overwhelming hospitals and buckling rail lines."
+  },
+  {
+    "id": "disease_outbreak",
+    "name": "Disease Outbreak",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 3,
+    "base_probability": 0.015,
+    "duration_months": 4,
+    "effects": {
+      "happiness": -15,
+      "population": -5,
+      "commerce": -0.2,
+      "productivity": -0.25,
+      "healthcare_cost": 0.4
+    },
+    "trigger_conditions": {
+      "population_density_min": 500,
+      "sanitation_below": 0.4
+    },
+    "cascade_events": [
+      "pandemic",
+      "recession"
+    ],
+    "description": "A virulent illness spreads through crowded quarters, overwhelming clinics and forcing quarantines across affected districts."
+  },
+  {
+    "id": "wildfire",
+    "name": "Wildfire",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 3,
+    "base_probability": 0.02,
+    "duration_months": 2,
+    "effects": {
+      "happiness": -10,
+      "property_damage": 0.15,
+      "population": -3,
+      "agriculture": -0.25,
+      "air_quality": -0.4,
+      "timber": -0.3
+    },
+    "trigger_conditions": {
+      "fire_risk_min": 0.4,
+      "near_forest": true,
+      "season": "summer"
+    },
+    "cascade_events": [
+      "homelessness",
+      "landslide"
+    ],
+    "description": "A wall of flame races through the surrounding wilderness, consuming homesteads and blanketing the city in choking smoke."
+  },
+  {
+    "id": "landslide",
+    "name": "Landslide",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 2,
+    "base_probability": 0.01,
+    "duration_months": 1,
+    "effects": {
+      "happiness": -7,
+      "property_damage": 0.15,
+      "population": -2,
+      "transport": -0.3,
+      "infrastructure_damage": 0.1
+    },
+    "trigger_conditions": {
+      "terrain": "hills",
+      "recent_rainfall": true
+    },
+    "cascade_events": [
+      "homelessness"
+    ],
+    "description": "Rain-soaked hillsides give way, sending mud and rock cascading into neighborhoods built on the slopes."
+  },
+  {
+    "id": "tsunami",
+    "name": "Tsunami",
+    "category": "natural",
+    "era_min": "frontier",
+    "severity": 5,
+    "base_probability": 0.001,
+    "duration_months": 3,
+    "effects": {
+      "happiness": -30,
+      "property_damage": 0.6,
+      "population": -15,
+      "commerce": -0.5,
+      "agriculture": -0.4,
+      "infrastructure_damage": 0.45
+    },
+    "trigger_conditions": {
+      "coastal": true,
+      "seismic_zone": true
+    },
+    "cascade_events": [
+      "disease_outbreak",
+      "homelessness",
+      "flood"
+    ],
+    "description": "A towering wall of seawater surges inland without warning, obliterating the waterfront and sweeping entire blocks out to sea."
+  },
+  {
+    "id": "recession",
+    "name": "Economic Recession",
+    "category": "economic",
+    "era_min": "industrial",
+    "severity": 3,
+    "base_probability": 0.02,
+    "duration_months": 18,
+    "effects": {
+      "happiness": -10,
+      "commerce": -0.3,
+      "employment": -0.2,
+      "tax_revenue": -0.25,
+      "property_value": -0.15,
+      "construction": -0.3
+    },
+    "trigger_conditions": {
+      "economic_growth_below": -0.02,
+      "unemployment_above": 0.08
+    },
+    "cascade_events": [
+      "factory_closure",
+      "housing_crisis",
+      "protest",
+      "bank_run"
+    ],
+    "description": "The economy contracts sharply as businesses shutter, unemployment lines grow, and consumer confidence collapses."
+  },
+  {
+    "id": "boom",
+    "name": "Economic Boom",
+    "category": "economic",
+    "era_min": "industrial",
+    "severity": 1,
+    "base_probability": 0.02,
+    "duration_months": 24,
+    "effects": {
+      "happiness": 15,
+      "commerce": 0.3,
+      "employment": 0.2,
+      "tax_revenue": 0.3,
+      "property_value": 0.25,
+      "construction": 0.35,
+      "immigration": 0.15
+    },
+    "trigger_conditions": {
+      "economic_growth_above": 0.04,
+      "unemployment_below": 0.05
+    },
+    "cascade_events": [
+      "housing_bubble",
+      "immigration_wave",
+      "baby_boom"
+    ],
+    "description": "Prosperity sweeps the city as wages rise, new businesses open on every corner, and construction cranes dot the skyline."
+  },
+  {
+    "id": "market_crash",
+    "name": "Stock Market Crash",
+    "category": "economic",
+    "era_min": "modern",
+    "severity": 4,
+    "base_probability": 0.008,
+    "duration_months": 12,
+    "effects": {
+      "happiness": -18,
+      "commerce": -0.35,
+      "property_value": -0.3,
+      "tax_revenue": -0.3,
+      "employment": -0.15,
+      "investment": -0.5
+    },
+    "trigger_conditions": {
+      "market_speculation_above": 0.7,
+      "era_min": "modern"
+    },
+    "cascade_events": [
+      "recession",
+      "bank_run",
+      "protest"
+    ],
+    "description": "Panic selling wipes out fortunes overnight as the stock exchange plummets, dragging the real economy down with it."
+  },
+  {
+    "id": "oil_shock",
+    "name": "Oil Price Shock",
+    "category": "economic",
+    "era_min": "modern",
+    "severity": 3,
+    "base_probability": 0.012,
+    "duration_months": 8,
+    "effects": {
+      "happiness": -8,
+      "commerce": -0.15,
+      "transport": -0.3,
+      "energy_cost": 0.5,
+      "manufacturing": -0.2,
+      "inflation": 0.1
+    },
+    "trigger_conditions": {
+      "oil_dependency_above": 0.5
+    },
+    "cascade_events": [
+      "recession",
+      "strike",
+      "inflation"
+    ],
+    "description": "Global oil prices spike overnight, sending fuel costs soaring and squeezing every industry that depends on cheap energy."
+  },
+  {
+    "id": "housing_bubble",
+    "name": "Housing Bubble",
+    "category": "economic",
+    "era_min": "modern",
+    "severity": 3,
+    "base_probability": 0.01,
+    "duration_months": 12,
+    "effects": {
+      "property_value": -0.35,
+      "happiness": -12,
+      "construction": -0.4,
+      "bank_stability": -0.3,
+      "tax_revenue": -0.2
+    },
+    "trigger_conditions": {
+      "property_value_growth_above": 0.15,
+      "credit_availability_above": 0.7
+    },
+    "cascade_events": [
+      "recession",
+      "bank_run",
+      "housing_crisis",
+      "protest"
+    ],
+    "description": "Inflated property values come crashing down as overleveraged buyers default, leaving half-built developments abandoned across the city."
+  },
+  {
+    "id": "tech_breakthrough",
+    "name": "Technological Breakthrough",
+    "category": "economic",
+    "era_min": "industrial",
+    "severity": 1,
+    "base_probability": 0.01,
+    "duration_months": 24,
+    "effects": {
+      "happiness": 10,
+      "productivity": 0.25,
+      "employment": 0.1,
+      "commerce": 0.2,
+      "education": 0.15,
+      "property_value": 0.1
+    },
+    "trigger_conditions": {
+      "education_above": 0.6,
+      "research_funding_above": 0.3
+    },
+    "cascade_events": [
+      "boom",
+      "immigration_wave",
+      "startup_ipo"
+    ],
+    "description": "A local inventor's breakthrough puts the city on the map, attracting talent and investment from across the nation."
+  },
+  {
+    "id": "startup_ipo",
+    "name": "Major Startup IPO",
+    "category": "economic",
+    "era_min": "modern",
+    "severity": 1,
+    "base_probability": 0.008,
+    "duration_months": 6,
+    "effects": {
+      "happiness": 8,
+      "tax_revenue": 0.15,
+      "employment": 0.1,
+      "property_value": 0.1,
+      "commerce": 0.1,
+      "investment": 0.2
+    },
+    "trigger_conditions": {
+      "tech_sector_above": 0.4,
+      "education_above": 0.5
+    },
+    "cascade_events": [
+      "boom",
+      "gentrification_protest",
+      "housing_bubble"
+    ],
+    "description": "A homegrown startup goes public, minting millionaires and flooding the local economy with sudden new wealth."
+  },
+  {
+    "id": "factory_closure",
+    "name": "Major Factory Closure",
+    "category": "economic",
+    "era_min": "industrial",
+    "severity": 3,
+    "base_probability": 0.015,
+    "duration_months": 12,
+    "effects": {
+      "happiness": -15,
+      "employment": -0.15,
+      "commerce": -0.1,
+      "tax_revenue": -0.1,
+      "population": -5,
+      "property_value": -0.1
+    },
+    "trigger_conditions": {
+      "manufacturing_dependency_above": 0.3,
+      "global_competition_above": 0.5
+    },
+    "cascade_events": [
+      "recession",
+      "brain_drain",
+      "protest",
+      "strike"
+    ],
+    "description": "The city's largest employer padlocks its gates for the last time, throwing thousands out of work and gutting entire neighborhoods."
+  },
+  {
+    "id": "trade_war",
+    "name": "Trade War",
+    "category": "economic",
+    "era_min": "modern",
+    "severity": 2,
+    "base_probability": 0.01,
+    "duration_months": 12,
+    "effects": {
+      "commerce": -0.2,
+      "manufacturing": -0.15,
+      "happiness": -5,
+      "export_revenue": -0.3,
+      "import_cost": 0.25
+    },
+    "trigger_conditions": {
+      "trade_dependency_above": 0.4
+    },
+    "cascade_events": [
+      "factory_closure",
+      "recession"
+    ],
+    "description": "Retaliatory tariffs choke off trade routes, leaving warehouses full of goods that can no longer reach their markets."
+  },
+  {
+    "id": "currency_crisis",
+    "name": "Currency Crisis",
+    "category": "economic",
+    "era_min": "modern",
+    "severity": 4,
+    "base_probability": 0.005,
+    "duration_months": 8,
+    "effects": {
+      "happiness": -15,
+      "commerce": -0.25,
+      "import_cost": 0.5,
+      "inflation": 0.3,
+      "savings": -0.4,
+      "foreign_investment": -0.3
+    },
+    "trigger_conditions": {
+      "debt_ratio_above": 0.8,
+      "trade_deficit_above": 0.3
+    },
+    "cascade_events": [
+      "bank_run",
+      "recession",
+      "protest"
+    ],
+    "description": "The local currency plunges in value, wiping out savings and sending the price of imported goods through the roof."
+  },
+  {
+    "id": "bank_run",
+    "name": "Bank Run",
+    "category": "economic",
+    "era_min": "industrial",
+    "severity": 4,
+    "base_probability": 0.005,
+    "duration_months": 3,
+    "effects": {
+      "happiness": -20,
+      "commerce": -0.3,
+      "bank_stability": -0.5,
+      "savings": -0.3,
+      "investment": -0.4,
+      "trust": -0.35
+    },
+    "trigger_conditions": {
+      "bank_stability_below": 0.3,
+      "public_trust_below": 0.4
+    },
+    "cascade_events": [
+      "recession",
+      "market_crash",
+      "protest"
+    ],
+    "description": "Panicked depositors line up around the block to withdraw their savings before the banks run dry."
+  },
+  {
+    "id": "automation_layoffs",
+    "name": "Automation Wave",
+    "category": "economic",
+    "era_min": "modern",
+    "severity": 3,
+    "base_probability": 0.015,
+    "duration_months": 18,
+    "effects": {
+      "happiness": -10,
+      "employment": -0.2,
+      "productivity": 0.3,
+      "income_inequality": 0.2,
+      "commerce": -0.1,
+      "tax_revenue": 0.05
+    },
+    "trigger_conditions": {
+      "tech_sector_above": 0.5,
+      "manufacturing_above": 0.3
+    },
+    "cascade_events": [
+      "protest",
+      "strike",
+      "brain_drain",
+      "housing_crisis"
+    ],
+    "description": "Machines replace thousands of workers seemingly overnight as factories and offices automate their most routine jobs."
+  },
+  {
+    "id": "foreign_investment",
+    "name": "Foreign Investment Surge",
+    "category": "economic",
+    "era_min": "modern",
+    "severity": 1,
+    "base_probability": 0.012,
+    "duration_months": 12,
+    "effects": {
+      "happiness": 5,
+      "commerce": 0.2,
+      "employment": 0.15,
+      "construction": 0.25,
+      "property_value": 0.15,
+      "tax_revenue": 0.1
+    },
+    "trigger_conditions": {
+      "stability_above": 0.6,
+      "tax_rate_below": 0.3
+    },
+    "cascade_events": [
+      "boom",
+      "gentrification_protest",
+      "immigration_wave"
+    ],
+    "description": "International capital pours in, funding gleaming new developments and creating thousands of jobs across the city."
+  },
+  {
+    "id": "tourism_boom",
+    "name": "Tourism Boom",
+    "category": "economic",
+    "era_min": "modern",
+    "severity": 1,
+    "base_probability": 0.015,
+    "duration_months": 12,
+    "effects": {
+      "happiness": 8,
+      "commerce": 0.25,
+      "employment": 0.1,
+      "tax_revenue": 0.15,
+      "culture": 0.1,
+      "property_value": 0.05,
+      "traffic": 0.15
+    },
+    "trigger_conditions": {
+      "culture_above": 0.5,
+      "landmarks_min": 3,
+      "safety_above": 0.6
+    },
+    "cascade_events": [
+      "boom",
+      "gentrification_protest"
+    ],
+    "description": "The city becomes a destination as visitors flock to its attractions, filling hotels and breathing life into the local economy."
+  },
+  {
+    "id": "crypto_crash",
+    "name": "Cryptocurrency Crash",
+    "category": "economic",
+    "era_min": "modern",
+    "severity": 2,
+    "base_probability": 0.01,
+    "duration_months": 6,
+    "effects": {
+      "happiness": -8,
+      "commerce": -0.1,
+      "investment": -0.2,
+      "tech_sector": -0.15,
+      "property_value": -0.05,
+      "trust": -0.1
+    },
+    "trigger_conditions": {
+      "tech_sector_above": 0.5,
+      "speculation_above": 0.6
+    },
+    "cascade_events": [
+      "market_crash",
+      "protest"
+    ],
+    "description": "Speculative digital fortunes evaporate overnight, leaving a trail of bankruptcies and a generation of disillusioned investors."
+  },
+  {
+    "id": "strike",
+    "name": "Workers' Strike",
+    "category": "social",
+    "era_min": "industrial",
+    "severity": 2,
+    "base_probability": 0.025,
+    "duration_months": 2,
+    "effects": {
+      "happiness": -5,
+      "productivity": -0.25,
+      "commerce": -0.15,
+      "transport": -0.2,
+      "worker_rights": 0.15
+    },
+    "trigger_conditions": {
+      "worker_satisfaction_below": 0.3,
+      "income_inequality_above": 0.5
+    },
+    "cascade_events": [
+      "protest",
+      "factory_closure"
+    ],
+    "description": "Workers walk off the job demanding better pay and conditions, bringing key industries to a grinding halt."
+  },
+  {
+    "id": "protest",
+    "name": "Civil Protest",
+    "category": "social",
+    "era_min": "frontier",
+    "severity": 2,
+    "base_probability": 0.03,
+    "duration_months": 1,
+    "effects": {
+      "happiness": -3,
+      "commerce": -0.1,
+      "civic_engagement": 0.2,
+      "trust": -0.1,
+      "tourism": -0.05
+    },
+    "trigger_conditions": {
+      "public_trust_below": 0.4,
+      "happiness_below": 40
+    },
+    "cascade_events": [
+      "strike"
+    ],
+    "description": "Citizens take to the streets, voicing their grievances and demanding change from city leaders."
+  },
+  {
+    "id": "festival",
+    "name": "City Festival",
+    "category": "social",
+    "era_min": "frontier",
+    "severity": 1,
+    "base_probability": 0.05,
+    "duration_months": 1,
+    "effects": {
+      "happiness": 12,
+      "commerce": 0.15,
+      "tourism": 0.2,
+      "culture": 0.1,
+      "civic_engagement": 0.1
+    },
+    "trigger_conditions": {
+      "happiness_above": 50,
+      "culture_above": 0.3
+    },
+    "cascade_events": [
+      "tourism_boom"
+    ],
+    "description": "The city comes alive with music, food, and celebration as residents gather for the annual festival."
+  },
+  {
+    "id": "pandemic",
+    "name": "Pandemic",
+    "category": "social",
+    "era_min": "frontier",
+    "severity": 5,
+    "base_probability": 0.002,
+    "duration_months": 18,
+    "effects": {
+      "happiness": -25,
+      "population": -10,
+      "commerce": -0.4,
+      "employment": -0.15,
+      "productivity": -0.3,
+      "healthcare_cost": 0.6,
+      "education": -0.2,
+      "tourism": -0.8
+    },
+    "trigger_conditions": {
+      "population_density_min": 1000,
+      "healthcare_below": 0.3
+    },
+    "cascade_events": [
+      "recession",
+      "protest",
+      "brain_drain",
+      "housing_crisis"
+    ],
+    "description": "A deadly contagion sweeps through the population, overwhelming hospitals and forcing the city into prolonged lockdown."
+  },
+  {
+    "id": "sports_championship",
+    "name": "Sports Championship Win",
+    "category": "social",
+    "era_min": "modern",
+    "severity": 1,
+    "base_probability": 0.02,
+    "duration_months": 2,
+    "effects": {
+      "happiness": 15,
+      "commerce": 0.1,
+      "tourism": 0.15,
+      "civic_engagement": 0.15,
+      "property_value": 0.03
+    },
+    "trigger_conditions": {
+      "has_stadium": true,
+      "population_min": 50000
+    },
+    "cascade_events": [
+      "tourism_boom",
+      "festival"
+    ],
+    "description": "The home team brings the trophy back to the city, igniting wild celebrations and a surge of civic pride."
+  },
+  {
+    "id": "housing_crisis",
+    "name": "Housing Crisis",
+    "category": "social",
+    "era_min": "industrial",
+    "severity": 3,
+    "base_probability": 0.015,
+    "duration_months": 18,
+    "effects": {
+      "happiness": -15,
+      "population": -5,
+      "homelessness": 0.3,
+      "income_inequality": 0.15,
+      "crime": 0.1,
+      "civic_engagement": 0.1
+    },
+    "trigger_conditions": {
+      "housing_supply_below": 0.4,
+      "property_value_growth_above": 0.1
+    },
+    "cascade_events": [
+      "protest",
+      "gentrification_protest",
+      "brain_drain"
+    ],
+    "description": "Skyrocketing rents and a dire shortage of affordable units push working families to the margins of the city."
+  },
+  {
+    "id": "baby_boom",
+    "name": "Baby Boom",
+    "category": "social",
+    "era_min": "industrial",
+    "severity": 1,
+    "base_probability": 0.01,
+    "duration_months": 24,
+    "effects": {
+      "happiness": 8,
+      "population": 10,
+      "education_demand": 0.3,
+      "healthcare_demand": 0.2,
+      "housing_demand": 0.2,
+      "commerce": 0.05
+    },
+    "trigger_conditions": {
+      "happiness_above": 65,
+      "economic_growth_above": 0.03,
+      "healthcare_above": 0.5
+    },
+    "cascade_events": [
+      "housing_crisis",
+      "boom"
+    ],
+    "description": "Birth rates surge as optimism and prosperity encourage families to grow, straining schools and pediatric clinics."
+  },
+  {
+    "id": "brain_drain",
+    "name": "Brain Drain",
+    "category": "social",
+    "era_min": "modern",
+    "severity": 3,
+    "base_probability": 0.012,
+    "duration_months": 24,
+    "effects": {
+      "happiness": -5,
+      "population": -8,
+      "education": -0.2,
+      "productivity": -0.15,
+      "tech_sector": -0.2,
+      "tax_revenue": -0.1,
+      "innovation": -0.25
+    },
+    "trigger_conditions": {
+      "employment_below": 0.4,
+      "education_above": 0.5,
+      "happiness_below": 40
+    },
+    "cascade_events": [
+      "recession",
+      "factory_closure"
+    ],
+    "description": "The city's brightest graduates leave for better opportunities elsewhere, hollowing out the skilled workforce."
+  },
+  {
+    "id": "gentrification_protest",
+    "name": "Anti-Gentrification Protest",
+    "category": "social",
+    "era_min": "modern",
+    "severity": 2,
+    "base_probability": 0.015,
+    "duration_months": 3,
+    "effects": {
+      "happiness": -5,
+      "commerce": -0.05,
+      "civic_engagement": 0.2,
+      "trust": -0.15,
+      "property_value": -0.05,
+      "culture": 0.05
+    },
+    "trigger_conditions": {
+      "property_value_growth_above": 0.12,
+      "income_inequality_above": 0.5
+    },
+    "cascade_events": [
+      "protest",
+      "housing_crisis"
+    ],
+    "description": "Long-time residents rally against displacement as rising property values and luxury development transform their neighborhoods beyond recognition."
+  },
+  {
+    "id": "immigration_wave",
+    "name": "Immigration Wave",
+    "category": "social",
+    "era_min": "frontier",
+    "severity": 2,
+    "base_probability": 0.015,
+    "duration_months": 12,
+    "effects": {
+      "population": 12,
+      "happiness": -3,
+      "commerce": 0.1,
+      "employment": -0.05,
+      "culture": 0.15,
+      "housing_demand": 0.2,
+      "labor_supply": 0.2
+    },
+    "trigger_conditions": {
+      "employment_above": 0.6,
+      "economic_growth_above": 0.02
+    },
+    "cascade_events": [
+      "housing_crisis",
+      "cultural_festival",
+      "baby_boom"
+    ],
+    "description": "Waves of newcomers arrive seeking opportunity, bringing diverse skills and traditions but straining housing and services."
+  },
+  {
+    "id": "refugee_crisis",
+    "name": "Refugee Crisis",
+    "category": "social",
+    "era_min": "modern",
+    "severity": 3,
+    "base_probability": 0.008,
+    "duration_months": 18,
+    "effects": {
+      "population": 8,
+      "happiness": -8,
+      "housing_demand": 0.3,
+      "healthcare_demand": 0.25,
+      "education_demand": 0.2,
+      "tax_revenue": -0.1,
+      "civic_engagement": 0.1
+    },
+    "trigger_conditions": {
+      "global_conflict": true
+    },
+    "cascade_events": [
+      "housing_crisis",
+      "protest",
+      "cultural_festival"
+    ],
+    "description": "Displaced families fleeing conflict abroad arrive in large numbers, testing the city's capacity for compassion and resources."
+  },
+  {
+    "id": "cultural_festival",
+    "name": "Cultural Festival",
+    "category": "social",
+    "era_min": "frontier",
+    "severity": 1,
+    "base_probability": 0.04,
+    "duration_months": 1,
+    "effects": {
+      "happiness": 10,
+      "culture": 0.15,
+      "commerce": 0.1,
+      "tourism": 0.15,
+      "civic_engagement": 0.1,
+      "diversity": 0.05
+    },
+    "trigger_conditions": {
+      "culture_above": 0.4,
+      "diversity_above": 0.3
+    },
+    "cascade_events": [
+      "tourism_boom"
+    ],
+    "description": "The city celebrates its diverse heritage with a vibrant festival of music, art, and cuisine from around the world."
+  },
+  {
+    "id": "pride_parade",
+    "name": "Pride Parade",
+    "category": "social",
+    "era_min": "modern",
+    "severity": 1,
+    "base_probability": 0.03,
+    "duration_months": 1,
+    "effects": {
+      "happiness": 8,
+      "culture": 0.1,
+      "tourism": 0.1,
+      "civic_engagement": 0.15,
+      "commerce": 0.05,
+      "diversity": 0.1
+    },
+    "trigger_conditions": {
+      "culture_above": 0.4,
+      "happiness_above": 50,
+      "era_min": "modern"
+    },
+    "cascade_events": [
+      "tourism_boom",
+      "cultural_festival"
+    ],
+    "description": "Rainbow banners line the streets as thousands march in celebration of identity and inclusion, drawing visitors and media attention."
+  },
+  {
+    "id": 31,
+    "typeId": "election",
+    "category": "political",
+    "name": "General Election",
+    "description": "A heated general election is dividing the city along ideological lines.",
+    "minEra": 2,
+    "maxEra": 5,
+    "baseProbability": 0.0,
+    "durationDays": {
+      "min": 45,
+      "max": 45
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.6
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "approvalRatingVolatility": 0.2,
+      "policyUncertainty": 0.2,
+      "happiness": -0.05,
+      "commercialLoss": 0.05
+    },
+    "triggerConditions": {
+      "isElectionYear": true,
+      "minPopulation": 5000
+    },
+    "cascades": [
+      "protest"
+    ]
+  },
+  {
+    "id": 32,
+    "typeId": "referendum",
+    "category": "political",
+    "name": "City Referendum",
+    "description": "A contentious referendum on city expansion is splitting public opinion.",
+    "minEra": 2,
+    "maxEra": 5,
+    "baseProbability": 0.0,
+    "durationDays": {
+      "min": 21,
+      "max": 21
+    },
+    "severity": {
+      "min": 0.2,
+      "max": 0.5
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "policyUncertainty": 0.15,
+      "approvalRatingVolatility": 0.1,
+      "trafficDisruption": 0.05
+    },
+    "triggerConditions": {
+      "minPopulation": 3000
+    },
+    "cascades": []
+  },
+  {
+    "id": 33,
+    "typeId": "whistleblower",
+    "category": "political",
+    "name": "Whistleblower Expos\u00e9",
+    "description": "A city employee has leaked documents revealing misuse of public funds.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.001,
+    "durationDays": {
+      "min": 14,
+      "max": 45
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.7
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "approvalRatingPenalty": 0.15,
+      "happiness": -0.05,
+      "crimeIncrease": -0.05,
+      "taxRevenueMultiplier": -0.1
+    },
+    "triggerConditions": {
+      "minCorruption": 0.3
+    },
+    "cascades": [
+      "corruption_scandal",
+      "protest"
+    ]
+  },
+  {
+    "id": 34,
+    "typeId": "state_visit",
+    "category": "political",
+    "name": "State Visit",
+    "description": "A foreign head of state is visiting the city, boosting its international prestige.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.002,
+    "durationDays": {
+      "min": 3,
+      "max": 7
+    },
+    "severity": {
+      "min": 0.2,
+      "max": 0.5
+    },
+    "localized": true,
+    "spreadRadius": 3,
+    "effects": {
+      "happiness": 0.1,
+      "tourismIncome": 0.15,
+      "commercialBoost": 0.1,
+      "trafficDisruption": 0.2,
+      "approvalRatingBonus": 0.05
+    },
+    "triggerConditions": {
+      "minPopulation": 10000,
+      "minApproval": 0.4
+    },
+    "cascades": []
+  },
+  {
+    "id": 35,
+    "typeId": "corruption_scandal",
+    "category": "political",
+    "name": "Corruption Scandal",
+    "description": "A widespread corruption ring has been uncovered in the city administration.",
+    "minEra": 2,
+    "maxEra": 5,
+    "baseProbability": 0.001,
+    "durationDays": {
+      "min": 30,
+      "max": 90
+    },
+    "severity": {
+      "min": 0.4,
+      "max": 0.8
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": -0.15,
+      "approvalRatingPenalty": 0.25,
+      "crimeIncrease": 0.1,
+      "taxRevenueMultiplier": -0.15,
+      "immigrationPenalty": 0.1
+    },
+    "triggerConditions": {
+      "minCorruption": 0.4
+    },
+    "cascades": [
+      "protest",
+      "whistleblower"
+    ]
+  },
+  {
+    "id": 36,
+    "typeId": "constitutional_crisis",
+    "category": "political",
+    "name": "Constitutional Crisis",
+    "description": "A power struggle between city institutions has paralyzed governance.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.0005,
+    "durationDays": {
+      "min": 30,
+      "max": 120
+    },
+    "severity": {
+      "min": 0.5,
+      "max": 0.9
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": -0.2,
+      "approvalRatingPenalty": 0.3,
+      "policyUncertainty": 0.4,
+      "immigrationPenalty": 0.2,
+      "taxRevenueMultiplier": -0.2
+    },
+    "triggerConditions": {
+      "maxApproval": 0.25,
+      "minPopulation": 15000
+    },
+    "cascades": [
+      "protest",
+      "election"
+    ]
+  },
+  {
+    "id": 37,
+    "typeId": "military_parade",
+    "category": "political",
+    "name": "Military Parade",
+    "description": "A grand military parade draws crowds and stirs patriotic sentiment.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.003,
+    "durationDays": {
+      "min": 1,
+      "max": 3
+    },
+    "severity": {
+      "min": 0.2,
+      "max": 0.4
+    },
+    "localized": true,
+    "spreadRadius": 4,
+    "effects": {
+      "happiness": 0.1,
+      "approvalRatingBonus": 0.05,
+      "tourismIncome": 0.1,
+      "trafficDisruption": 0.3,
+      "commercialBoost": 0.05
+    },
+    "triggerConditions": {
+      "minPopulation": 8000
+    },
+    "cascades": []
+  },
+  {
+    "id": 38,
+    "typeId": "scandal",
+    "category": "political",
+    "name": "Bribery Scandal",
+    "description": "Senior officials caught accepting bribes from construction firms.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.001,
+    "durationDays": {
+      "min": 21,
+      "max": 60
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.7
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": -0.1,
+      "approvalRatingPenalty": 0.2,
+      "crimeIncrease": 0.05,
+      "propertyValueDecline": 0.05
+    },
+    "triggerConditions": {
+      "minCorruption": 0.3
+    },
+    "cascades": [
+      "protest",
+      "corruption_scandal"
+    ]
+  },
+  {
+    "id": 39,
+    "typeId": "water_main_break",
+    "category": "infrastructure",
+    "name": "Water Main Break",
+    "description": "A major water main has burst, flooding streets and cutting supply to thousands.",
+    "minEra": 2,
+    "maxEra": 5,
+    "baseProbability": 0.005,
+    "durationDays": {
+      "min": 2,
+      "max": 7
+    },
+    "severity": {
+      "min": 0.2,
+      "max": 0.6
+    },
+    "localized": true,
+    "spreadRadius": 4,
+    "effects": {
+      "happiness": -0.1,
+      "waterShortage": 0.3,
+      "trafficDisruption": 0.25,
+      "propertyDamage": 0.15,
+      "healthRisk": 0.05
+    },
+    "triggerConditions": {
+      "minInfrastructureAge": 20
+    },
+    "cascades": [
+      "disease_outbreak"
+    ]
+  },
+  {
+    "id": 40,
+    "typeId": "bridge_collapse",
+    "category": "infrastructure",
+    "name": "Bridge Collapse",
+    "description": "A critical bridge has collapsed, severing a major transportation link.",
+    "minEra": 2,
+    "maxEra": 5,
+    "baseProbability": 0.0005,
+    "durationDays": {
+      "min": 30,
+      "max": 180
+    },
+    "severity": {
+      "min": 0.6,
+      "max": 1.0
+    },
+    "localized": true,
+    "spreadRadius": 2,
+    "effects": {
+      "happiness": -0.2,
+      "trafficDisruption": 0.6,
+      "populationLoss": 0.01,
+      "commercialLoss": 0.2,
+      "propertyDamage": 0.3,
+      "approvalRatingPenalty": 0.15
+    },
+    "triggerConditions": {
+      "minInfrastructureAge": 30
+    },
+    "cascades": [
+      "protest",
+      "insurance_claim"
+    ]
+  },
+  {
+    "id": 41,
+    "typeId": "dam_failure",
+    "category": "infrastructure",
+    "name": "Dam Failure",
+    "description": "The city dam has breached, sending a wall of water downstream.",
+    "minEra": 2,
+    "maxEra": 5,
+    "baseProbability": 0.0003,
+    "durationDays": {
+      "min": 7,
+      "max": 30
+    },
+    "severity": {
+      "min": 0.7,
+      "max": 1.0
+    },
+    "localized": true,
+    "spreadRadius": 10,
+    "effects": {
+      "happiness": -0.3,
+      "propertyDamage": 0.7,
+      "populationLoss": 0.04,
+      "trafficDisruption": 0.5,
+      "waterShortage": 0.4,
+      "approvalRatingPenalty": 0.2
+    },
+    "triggerConditions": {
+      "hasDam": true,
+      "minInfrastructureAge": 25
+    },
+    "cascades": [
+      "flood",
+      "homelessness",
+      "disease_outbreak"
+    ]
+  },
+  {
+    "id": 42,
+    "typeId": "pipeline_leak",
+    "category": "infrastructure",
+    "name": "Pipeline Leak",
+    "description": "A gas pipeline rupture is contaminating soil and threatening nearby residents.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.002,
+    "durationDays": {
+      "min": 7,
+      "max": 30
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.7
+    },
+    "localized": true,
+    "spreadRadius": 5,
+    "effects": {
+      "happiness": -0.1,
+      "healthRisk": 0.2,
+      "pollutionIncrease": 0.3,
+      "propertyValueDecline": 0.1,
+      "fireRiskIncrease": 0.2
+    },
+    "triggerConditions": {
+      "minInfrastructureAge": 15
+    },
+    "cascades": [
+      "fire"
+    ]
+  },
+  {
+    "id": 43,
+    "typeId": "nuclear_incident",
+    "category": "infrastructure",
+    "name": "Nuclear Incident",
+    "description": "A radiation leak at the power plant has triggered an evacuation zone.",
+    "minEra": 4,
+    "maxEra": 5,
+    "baseProbability": 0.0001,
+    "durationDays": {
+      "min": 30,
+      "max": 360
+    },
+    "severity": {
+      "min": 0.8,
+      "max": 1.0
+    },
+    "localized": true,
+    "spreadRadius": 15,
+    "effects": {
+      "happiness": -0.4,
+      "populationLoss": 0.08,
+      "healthRisk": 0.5,
+      "propertyValueDecline": 0.5,
+      "immigrationPenalty": 0.5,
+      "approvalRatingPenalty": 0.3
+    },
+    "triggerConditions": {
+      "hasNuclearPlant": true
+    },
+    "cascades": [
+      "protest",
+      "homelessness",
+      "recession"
+    ]
+  },
+  {
+    "id": 44,
+    "typeId": "grid_overload",
+    "category": "infrastructure",
+    "name": "Grid Overload",
+    "description": "Surging electricity demand has overwhelmed the power grid, causing rolling blackouts.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.004,
+    "durationDays": {
+      "min": 3,
+      "max": 14
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.6
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": -0.1,
+      "productivityLoss": 0.15,
+      "commercialLoss": 0.1,
+      "crimeIncrease": 0.05
+    },
+    "triggerConditions": {
+      "minPowerDemand": 0.9,
+      "seasonBias": {
+        "summer": 1.8,
+        "winter": 1.5
+      }
+    },
+    "cascades": [
+      "power_outage"
+    ]
+  },
+  {
+    "id": 45,
+    "typeId": "tunnel_collapse",
+    "category": "infrastructure",
+    "name": "Tunnel Collapse",
+    "description": "A major tunnel has caved in, trapping vehicles and halting underground transit.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.0005,
+    "durationDays": {
+      "min": 14,
+      "max": 90
+    },
+    "severity": {
+      "min": 0.5,
+      "max": 0.9
+    },
+    "localized": true,
+    "spreadRadius": 2,
+    "effects": {
+      "happiness": -0.2,
+      "trafficDisruption": 0.5,
+      "populationLoss": 0.01,
+      "commercialLoss": 0.15,
+      "approvalRatingPenalty": 0.1
+    },
+    "triggerConditions": {
+      "hasTunnel": true,
+      "minInfrastructureAge": 20
+    },
+    "cascades": [
+      "insurance_claim",
+      "protest"
+    ]
+  },
+  {
+    "id": 46,
+    "typeId": "road_collapse",
+    "category": "infrastructure",
+    "name": "Road Collapse",
+    "description": "A sinkhole has swallowed a section of road, revealing crumbling infrastructure below.",
+    "minEra": 2,
+    "maxEra": 5,
+    "baseProbability": 0.002,
+    "durationDays": {
+      "min": 7,
+      "max": 30
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.7
+    },
+    "localized": true,
+    "spreadRadius": 2,
+    "effects": {
+      "happiness": -0.1,
+      "trafficDisruption": 0.35,
+      "propertyDamage": 0.15,
+      "commercialLoss": 0.1,
+      "approvalRatingPenalty": 0.05
+    },
+    "triggerConditions": {
+      "minInfrastructureAge": 15
+    },
+    "cascades": [
+      "water_main_break"
+    ]
+  },
+  {
+    "id": 47,
+    "typeId": "construction_accident",
+    "category": "infrastructure",
+    "name": "Construction Accident",
+    "description": "A crane collapse at a major construction site has killed workers and damaged nearby buildings.",
+    "minEra": 2,
+    "maxEra": 5,
+    "baseProbability": 0.003,
+    "durationDays": {
+      "min": 3,
+      "max": 14
+    },
+    "severity": {
+      "min": 0.2,
+      "max": 0.6
+    },
+    "localized": true,
+    "spreadRadius": 2,
+    "effects": {
+      "happiness": -0.1,
+      "populationLoss": 0.005,
+      "propertyDamage": 0.15,
+      "approvalRatingPenalty": 0.05,
+      "constructionDelay": 0.2
+    },
+    "triggerConditions": {
+      "hasActiveConstruction": true
+    },
+    "cascades": [
+      "insurance_claim",
+      "strike"
+    ]
+  },
+  {
+    "id": 48,
+    "typeId": "power_outage_major",
+    "category": "infrastructure",
+    "name": "Citywide Blackout",
+    "description": "The entire city has lost power after a catastrophic transformer failure.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.001,
+    "durationDays": {
+      "min": 2,
+      "max": 7
+    },
+    "severity": {
+      "min": 0.5,
+      "max": 0.9
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": -0.25,
+      "productivityLoss": 0.4,
+      "crimeIncrease": 0.15,
+      "commercialLoss": 0.25,
+      "healthRisk": 0.1,
+      "approvalRatingPenalty": 0.1
+    },
+    "triggerConditions": {
+      "minPopulation": 10000
+    },
+    "cascades": [
+      "protest",
+      "insurance_claim"
+    ]
+  },
+  {
+    "id": 49,
+    "typeId": "gold_rush",
+    "category": "era",
+    "name": "Gold Rush",
+    "description": "Prospectors flood in after gold is found in the surrounding hills.",
+    "minEra": 1,
+    "maxEra": 3,
+    "baseProbability": 0.002,
+    "durationDays": {
+      "min": 120,
+      "max": 360
+    },
+    "severity": {
+      "min": 0.5,
+      "max": 0.9
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": 0.1,
+      "immigrationBonus": 0.6,
+      "commercialBoost": 0.35,
+      "crimeIncrease": 0.2,
+      "pollutionIncrease": 0.15,
+      "propertyValueIncrease": 0.25
+    },
+    "triggerConditions": {
+      "hasOreDeposit": true
+    },
+    "cascades": [
+      "boom",
+      "housing_bubble"
+    ]
+  },
+  {
+    "id": 50,
+    "typeId": "railroad_arrives",
+    "category": "era",
+    "name": "Railroad Expansion",
+    "description": "A new rail line connects the city to the national network, transforming trade.",
+    "minEra": 2,
+    "maxEra": 3,
+    "baseProbability": 0.004,
+    "durationDays": {
+      "min": 30,
+      "max": 30
+    },
+    "severity": {
+      "min": 0.5,
+      "max": 0.8
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": 0.15,
+      "commercialBoost": 0.4,
+      "immigrationBonus": 0.35,
+      "industrialBoost": 0.3,
+      "propertyValueIncrease": 0.15
+    },
+    "triggerConditions": {
+      "minPopulation": 2000
+    },
+    "cascades": [
+      "boom"
+    ]
+  },
+  {
+    "id": 51,
+    "typeId": "car_boom",
+    "category": "era",
+    "name": "Automobile Boom",
+    "description": "Affordable automobiles are reshaping how citizens live and commute.",
+    "minEra": 3,
+    "maxEra": 4,
+    "baseProbability": 0.003,
+    "durationDays": {
+      "min": 180,
+      "max": 360
+    },
+    "severity": {
+      "min": 0.4,
+      "max": 0.7
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": 0.1,
+      "trafficIncrease": 0.35,
+      "pollutionIncrease": 0.25,
+      "suburbanGrowth": 0.3,
+      "commercialBoost": 0.15
+    },
+    "triggerConditions": {
+      "minPopulation": 8000
+    },
+    "cascades": []
+  },
+  {
+    "id": 52,
+    "typeId": "television_era",
+    "category": "era",
+    "name": "Television Era",
+    "description": "Television ownership explodes, reshaping culture and political campaigning.",
+    "minEra": 4,
+    "maxEra": 4,
+    "baseProbability": 0.003,
+    "durationDays": {
+      "min": 90,
+      "max": 180
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.5
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": 0.1,
+      "commercialBoost": 0.15,
+      "approvalRatingVolatility": 0.1,
+      "culturalBoost": 0.2
+    },
+    "triggerConditions": {
+      "minPopulation": 10000
+    },
+    "cascades": []
+  },
+  {
+    "id": 53,
+    "typeId": "internet_revolution",
+    "category": "era",
+    "name": "Internet Revolution",
+    "description": "High-speed internet transforms commerce, communication, and daily life.",
+    "minEra": 5,
+    "maxEra": 5,
+    "baseProbability": 0.004,
+    "durationDays": {
+      "min": 90,
+      "max": 180
+    },
+    "severity": {
+      "min": 0.4,
+      "max": 0.8
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": 0.1,
+      "productivityBoost": 0.2,
+      "commercialBoost": 0.25,
+      "immigrationBonus": 0.15,
+      "propertyValueIncrease": 0.1
+    },
+    "triggerConditions": {
+      "minPopulation": 15000
+    },
+    "cascades": [
+      "boom"
+    ]
+  },
+  {
+    "id": 54,
+    "typeId": "social_media_crisis",
+    "category": "era",
+    "name": "Social Media Crisis",
+    "description": "A viral social media scandal is damaging the city's reputation worldwide.",
+    "minEra": 5,
+    "maxEra": 5,
+    "baseProbability": 0.003,
+    "durationDays": {
+      "min": 7,
+      "max": 30
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.7
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": -0.1,
+      "approvalRatingPenalty": 0.15,
+      "tourismIncome": -0.2,
+      "immigrationPenalty": 0.1
+    },
+    "triggerConditions": {
+      "minPopulation": 20000
+    },
+    "cascades": [
+      "protest"
+    ]
+  },
+  {
+    "id": 55,
+    "typeId": "ai_automation_wave",
+    "category": "era",
+    "name": "AI Automation Wave",
+    "description": "Artificial intelligence is automating white-collar jobs at an unprecedented pace.",
+    "minEra": 5,
+    "maxEra": 5,
+    "baseProbability": 0.002,
+    "durationDays": {
+      "min": 180,
+      "max": 360
+    },
+    "severity": {
+      "min": 0.4,
+      "max": 0.8
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "productivityBoost": 0.4,
+      "unemploymentIncrease": 0.25,
+      "taxRevenueMultiplier": 0.15,
+      "happiness": -0.1,
+      "immigrationBonus": 0.1
+    },
+    "triggerConditions": {
+      "minPopulation": 25000,
+      "minResearchRate": 8.0
+    },
+    "cascades": [
+      "protest",
+      "strike",
+      "recession"
+    ]
+  },
+  {
+    "id": 56,
+    "typeId": "space_launch",
+    "category": "era",
+    "name": "Space Launch",
+    "description": "The city's aerospace facility successfully launches a rocket, capturing global attention.",
+    "minEra": 4,
+    "maxEra": 5,
+    "baseProbability": 0.001,
+    "durationDays": {
+      "min": 7,
+      "max": 14
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.6
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": 0.2,
+      "tourismIncome": 0.2,
+      "researchBoost": 0.2,
+      "immigrationBonus": 0.15,
+      "approvalRatingBonus": 0.1
+    },
+    "triggerConditions": {
+      "hasAerospaceCenter": true,
+      "minResearchRate": 7.0
+    },
+    "cascades": [
+      "boom"
+    ]
+  },
+  {
+    "id": 57,
+    "typeId": "climate_summit",
+    "category": "era",
+    "name": "Climate Summit",
+    "description": "The city hosts an international climate summit, drawing world leaders and activists.",
+    "minEra": 5,
+    "maxEra": 5,
+    "baseProbability": 0.002,
+    "durationDays": {
+      "min": 7,
+      "max": 14
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.5
+    },
+    "localized": true,
+    "spreadRadius": 5,
+    "effects": {
+      "happiness": 0.05,
+      "tourismIncome": 0.2,
+      "approvalRatingBonus": 0.1,
+      "trafficDisruption": 0.2,
+      "pollutionIncrease": -0.05
+    },
+    "triggerConditions": {
+      "minPopulation": 30000,
+      "maxPollution": 0.4
+    },
+    "cascades": [
+      "protest"
+    ]
+  },
+  {
+    "id": 58,
+    "typeId": "quantum_breakthrough",
+    "category": "era",
+    "name": "Quantum Breakthrough",
+    "description": "A local lab achieves quantum computing supremacy, attracting global investment.",
+    "minEra": 5,
+    "maxEra": 5,
+    "baseProbability": 0.001,
+    "durationDays": {
+      "min": 30,
+      "max": 90
+    },
+    "severity": {
+      "min": 0.4,
+      "max": 0.8
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": 0.15,
+      "researchBoost": 0.4,
+      "propertyValueIncrease": 0.2,
+      "immigrationBonus": 0.25,
+      "taxRevenueMultiplier": 0.1
+    },
+    "triggerConditions": {
+      "minResearchRate": 10.0,
+      "hasUniversity": true
+    },
+    "cascades": [
+      "boom"
+    ]
+  },
+  {
+    "id": 59,
+    "typeId": "film_premiere",
+    "category": "cultural",
+    "name": "Film Premiere",
+    "description": "A major film premiere draws celebrities and media attention to the city.",
+    "minEra": 4,
+    "maxEra": 5,
+    "baseProbability": 0.004,
+    "durationDays": {
+      "min": 3,
+      "max": 7
+    },
+    "severity": {
+      "min": 0.2,
+      "max": 0.4
+    },
+    "localized": true,
+    "spreadRadius": 3,
+    "effects": {
+      "happiness": 0.1,
+      "tourismIncome": 0.15,
+      "commercialBoost": 0.1,
+      "culturalBoost": 0.1,
+      "trafficDisruption": 0.1
+    },
+    "triggerConditions": {
+      "minPopulation": 15000,
+      "hasCinema": true
+    },
+    "cascades": []
+  },
+  {
+    "id": 60,
+    "typeId": "music_festival_large",
+    "category": "cultural",
+    "name": "Grand Music Festival",
+    "description": "A massive outdoor music festival attracts tens of thousands of visitors.",
+    "minEra": 4,
+    "maxEra": 5,
+    "baseProbability": 0.005,
+    "durationDays": {
+      "min": 3,
+      "max": 7
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.6
+    },
+    "localized": true,
+    "spreadRadius": 6,
+    "effects": {
+      "happiness": 0.2,
+      "tourismIncome": 0.3,
+      "commercialBoost": 0.2,
+      "trafficDisruption": 0.25,
+      "crimeIncrease": 0.05,
+      "pollutionIncrease": 0.05
+    },
+    "triggerConditions": {
+      "minPopulation": 10000,
+      "minHappiness": 0.4
+    },
+    "cascades": []
+  },
+  {
+    "id": 61,
+    "typeId": "food_festival",
+    "category": "cultural",
+    "name": "Food Festival",
+    "description": "A week-long food festival celebrates the city's culinary diversity.",
+    "minEra": 2,
+    "maxEra": 5,
+    "baseProbability": 0.006,
+    "durationDays": {
+      "min": 5,
+      "max": 10
+    },
+    "severity": {
+      "min": 0.2,
+      "max": 0.4
+    },
+    "localized": true,
+    "spreadRadius": 4,
+    "effects": {
+      "happiness": 0.15,
+      "tourismIncome": 0.15,
+      "commercialBoost": 0.15,
+      "healthRisk": 0.02,
+      "trafficDisruption": 0.1
+    },
+    "triggerConditions": {
+      "minPopulation": 3000,
+      "seasonBias": {
+        "summer": 1.5,
+        "autumn": 1.3
+      }
+    },
+    "cascades": []
+  },
+  {
+    "id": 62,
+    "typeId": "art_exhibition",
+    "category": "cultural",
+    "name": "Art Exhibition",
+    "description": "A renowned art exhibition opens, elevating the city's cultural standing.",
+    "minEra": 2,
+    "maxEra": 5,
+    "baseProbability": 0.005,
+    "durationDays": {
+      "min": 14,
+      "max": 60
+    },
+    "severity": {
+      "min": 0.2,
+      "max": 0.4
+    },
+    "localized": true,
+    "spreadRadius": 3,
+    "effects": {
+      "happiness": 0.1,
+      "tourismIncome": 0.1,
+      "culturalBoost": 0.2,
+      "propertyValueIncrease": 0.05,
+      "commercialBoost": 0.05
+    },
+    "triggerConditions": {
+      "minPopulation": 5000,
+      "hasMuseum": true
+    },
+    "cascades": []
+  },
+  {
+    "id": 63,
+    "typeId": "fashion_week",
+    "category": "cultural",
+    "name": "Fashion Week",
+    "description": "Designers and models descend on the city for a glamorous fashion week.",
+    "minEra": 4,
+    "maxEra": 5,
+    "baseProbability": 0.003,
+    "durationDays": {
+      "min": 7,
+      "max": 10
+    },
+    "severity": {
+      "min": 0.2,
+      "max": 0.5
+    },
+    "localized": true,
+    "spreadRadius": 4,
+    "effects": {
+      "happiness": 0.1,
+      "tourismIncome": 0.2,
+      "commercialBoost": 0.2,
+      "culturalBoost": 0.15,
+      "trafficDisruption": 0.15
+    },
+    "triggerConditions": {
+      "minPopulation": 20000
+    },
+    "cascades": []
+  },
+  {
+    "id": 64,
+    "typeId": "carnival",
+    "category": "cultural",
+    "name": "Carnival",
+    "description": "A riotous carnival fills the streets with music, costumes, and revelry.",
+    "minEra": 0,
+    "maxEra": 5,
+    "baseProbability": 0.006,
+    "durationDays": {
+      "min": 3,
+      "max": 7
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.6
+    },
+    "localized": true,
+    "spreadRadius": 5,
+    "effects": {
+      "happiness": 0.2,
+      "tourismIncome": 0.2,
+      "commercialBoost": 0.15,
+      "crimeIncrease": 0.05,
+      "trafficDisruption": 0.2
+    },
+    "triggerConditions": {
+      "minPopulation": 2000,
+      "seasonBias": {
+        "spring": 2.0
+      }
+    },
+    "cascades": []
+  },
+  {
+    "id": 65,
+    "typeId": "heritage_day",
+    "category": "cultural",
+    "name": "Heritage Day",
+    "description": "The city celebrates its founding with historical reenactments and ceremonies.",
+    "minEra": 1,
+    "maxEra": 5,
+    "baseProbability": 0.008,
+    "durationDays": {
+      "min": 1,
+      "max": 3
+    },
+    "severity": {
+      "min": 0.1,
+      "max": 0.3
+    },
+    "localized": true,
+    "spreadRadius": 4,
+    "effects": {
+      "happiness": 0.1,
+      "culturalBoost": 0.15,
+      "tourismIncome": 0.05,
+      "approvalRatingBonus": 0.03
+    },
+    "triggerConditions": {},
+    "cascades": []
+  },
+  {
+    "id": 66,
+    "typeId": "championship_win",
+    "category": "sports",
+    "name": "Championship Victory",
+    "description": "The city's team wins the national championship, sparking mass celebration.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.003,
+    "durationDays": {
+      "min": 3,
+      "max": 7
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.6
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": 0.25,
+      "commercialBoost": 0.2,
+      "tourismIncome": 0.15,
+      "approvalRatingBonus": 0.05,
+      "crimeIncrease": 0.03
+    },
+    "triggerConditions": {
+      "hasStadium": true,
+      "minPopulation": 10000
+    },
+    "cascades": []
+  },
+  {
+    "id": 67,
+    "typeId": "olympic_bid",
+    "category": "sports",
+    "name": "Olympic Bid",
+    "description": "The city launches an ambitious bid to host the Olympic Games.",
+    "minEra": 4,
+    "maxEra": 5,
+    "baseProbability": 0.001,
+    "durationDays": {
+      "min": 180,
+      "max": 360
+    },
+    "severity": {
+      "min": 0.5,
+      "max": 0.9
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": 0.1,
+      "cityBudgetDrain": 0.2,
+      "tourismIncome": 0.1,
+      "approvalRatingVolatility": 0.15,
+      "constructionBoost": 0.3,
+      "immigrationBonus": 0.1
+    },
+    "triggerConditions": {
+      "minPopulation": 50000,
+      "hasStadium": true,
+      "minApproval": 0.5
+    },
+    "cascades": [
+      "boom",
+      "housing_bubble"
+    ]
+  },
+  {
+    "id": 68,
+    "typeId": "stadium_disaster",
+    "category": "sports",
+    "name": "Stadium Disaster",
+    "description": "A structural failure during a packed match causes a deadly stampede.",
+    "minEra": 3,
+    "maxEra": 5,
+    "baseProbability": 0.0003,
+    "durationDays": {
+      "min": 7,
+      "max": 30
+    },
+    "severity": {
+      "min": 0.6,
+      "max": 1.0
+    },
+    "localized": true,
+    "spreadRadius": 3,
+    "effects": {
+      "happiness": -0.3,
+      "populationLoss": 0.02,
+      "approvalRatingPenalty": 0.2,
+      "tourismIncome": -0.15,
+      "propertyValueDecline": 0.1
+    },
+    "triggerConditions": {
+      "hasStadium": true,
+      "minInfrastructureAge": 20
+    },
+    "cascades": [
+      "protest",
+      "insurance_claim"
+    ]
+  },
+  {
+    "id": 69,
+    "typeId": "team_relocation",
+    "category": "sports",
+    "name": "Team Relocation",
+    "description": "The city's beloved sports team announces it is relocating to another city.",
+    "minEra": 4,
+    "maxEra": 5,
+    "baseProbability": 0.001,
+    "durationDays": {
+      "min": 30,
+      "max": 90
+    },
+    "severity": {
+      "min": 0.3,
+      "max": 0.6
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": -0.15,
+      "tourismIncome": -0.1,
+      "commercialLoss": 0.1,
+      "approvalRatingPenalty": 0.1,
+      "propertyValueDecline": 0.05
+    },
+    "triggerConditions": {
+      "hasStadium": true,
+      "maxHappiness": 0.4
+    },
+    "cascades": [
+      "protest"
+    ]
+  },
+  {
+    "id": 70,
+    "typeId": "world_cup_host",
+    "category": "sports",
+    "name": "World Cup Host City",
+    "description": "The city is selected to host matches for the World Cup, triggering a construction boom.",
+    "minEra": 4,
+    "maxEra": 5,
+    "baseProbability": 0.0005,
+    "durationDays": {
+      "min": 30,
+      "max": 45
+    },
+    "severity": {
+      "min": 0.5,
+      "max": 0.9
+    },
+    "localized": false,
+    "spreadRadius": 0,
+    "effects": {
+      "happiness": 0.2,
+      "tourismIncome": 0.4,
+      "commercialBoost": 0.3,
+      "trafficDisruption": 0.3,
+      "constructionBoost": 0.25,
+      "cityBudgetDrain": 0.15,
+      "crimeIncrease": 0.05
+    },
+    "triggerConditions": {
+      "minPopulation": 30000,
+      "hasStadium": true
+    },
+    "cascades": [
+      "boom"
+    ]
+  }
+]

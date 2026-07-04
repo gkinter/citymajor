@@ -1,0 +1,1 @@
+/Users/fredericbeeg/softbla/softbla-claude-kit/rules/shared/ui-ux-standards.md

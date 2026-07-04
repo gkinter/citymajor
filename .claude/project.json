@@ -1,0 +1,17 @@
+{
+  "id": "citymajor",
+  "shortId": 5,
+  "name": "CityMajor",
+  "description": "AI-generated city building game",
+  "profile": "_default",
+  "qdrant": {
+    "project": "citymajor",
+    "collections": [
+      "codebase_index",
+      "claude_knowledge",
+      "session_history"
+    ]
+  },
+  "contextMap": true,
+  "beast": false
+}

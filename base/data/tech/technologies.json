@@ -1,0 +1,3638 @@
+[
+  {
+    "id": "T001",
+    "name": "Cobblestone Paving",
+    "era": "frontier",
+    "category": "transport",
+    "cost_rp": 25,
+    "prerequisites": [],
+    "unlocks": [
+      "cobblestone_road"
+    ],
+    "effects": {
+      "road_capacity_multiplier": 3.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Paved roads increase capacity 3x over dirt paths",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T002",
+    "name": "Basic Rail Engineering",
+    "era": "frontier",
+    "category": "transport",
+    "cost_rp": 40,
+    "prerequisites": [
+      "T001"
+    ],
+    "unlocks": [
+      "rail_track",
+      "train_depot"
+    ],
+    "effects": {
+      "freight_throughput_multiplier": 5.0
+    },
+    "eureka_condition": "Connect two warehouses with a dirt road",
+    "eureka_bonus": 20,
+    "description": "Lay iron rails for steam-powered freight and passenger service",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T003",
+    "name": "Horse-Drawn Transit",
+    "era": "frontier",
+    "category": "transport",
+    "cost_rp": 20,
+    "prerequisites": [
+      "T001"
+    ],
+    "unlocks": [
+      "horse_bus_line",
+      "stable"
+    ],
+    "effects": {
+      "passenger_capacity_per_route": 30,
+      "commute_time_reduction": 0.15
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Scheduled horse-drawn omnibuses provide the city's first public transit",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T004",
+    "name": "Asphalt Roads",
+    "era": "industrial",
+    "category": "transport",
+    "cost_rp": 60,
+    "prerequisites": [
+      "T001",
+      "T018"
+    ],
+    "unlocks": [
+      "asphalt_road",
+      "road_maintenance_depot"
+    ],
+    "effects": {
+      "road_capacity_multiplier": 6.0,
+      "vehicle_speed_bonus": 0.25
+    },
+    "eureka_condition": "Reach 5000 population",
+    "eureka_bonus": 25,
+    "description": "Oil-derived asphalt creates smooth, durable road surfaces for motorized traffic",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T005",
+    "name": "Electric Tramway",
+    "era": "industrial",
+    "category": "transport",
+    "cost_rp": 75,
+    "prerequisites": [
+      "T003",
+      "T020"
+    ],
+    "unlocks": [
+      "tram_line",
+      "tram_depot"
+    ],
+    "effects": {
+      "passenger_capacity_per_route": 120,
+      "commute_time_reduction": 0.3
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Electrified streetcars move large numbers of commuters along fixed routes",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T006",
+    "name": "Advanced Rail Signaling",
+    "era": "industrial",
+    "category": "transport",
+    "cost_rp": 55,
+    "prerequisites": [
+      "T002"
+    ],
+    "unlocks": [
+      "signal_tower",
+      "double_track_rail"
+    ],
+    "effects": {
+      "rail_throughput_multiplier": 2.0,
+      "train_accident_rate": -0.9
+    },
+    "eureka_condition": "Operate 3 simultaneous train routes",
+    "eureka_bonus": 20,
+    "description": "Automated block signaling allows more trains on the same track safely",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T007",
+    "name": "Highway Engineering",
+    "era": "postwar",
+    "category": "transport",
+    "cost_rp": 120,
+    "prerequisites": [
+      "T004"
+    ],
+    "unlocks": [
+      "highway",
+      "highway_interchange",
+      "rest_stop"
+    ],
+    "effects": {
+      "road_capacity_multiplier": 12.0,
+      "intercity_trade_bonus": 0.4
+    },
+    "eureka_condition": "Connect 3 districts with asphalt roads",
+    "eureka_bonus": 30,
+    "description": "Multi-lane divided highways enable high-speed intercity road transport",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T008",
+    "name": "Motor Bus Network",
+    "era": "postwar",
+    "category": "transport",
+    "cost_rp": 80,
+    "prerequisites": [
+      "T004",
+      "T003"
+    ],
+    "unlocks": [
+      "bus_line",
+      "bus_depot",
+      "bus_stop"
+    ],
+    "effects": {
+      "passenger_capacity_per_route": 80,
+      "route_flexibility": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Diesel and electric buses provide flexible routing without fixed rail infrastructure",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T009",
+    "name": "Commercial Aviation",
+    "era": "postwar",
+    "category": "transport",
+    "cost_rp": 150,
+    "prerequisites": [
+      "T007"
+    ],
+    "unlocks": [
+      "airport",
+      "cargo_terminal_air"
+    ],
+    "effects": {
+      "tourism_attractiveness": 0.5,
+      "intercity_trade_bonus": 0.6
+    },
+    "eureka_condition": "Reach 25000 population",
+    "eureka_bonus": 40,
+    "description": "Airports connect the city to the wider world, boosting tourism and trade",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T010",
+    "name": "Commuter Rail",
+    "era": "postwar",
+    "category": "transport",
+    "cost_rp": 100,
+    "prerequisites": [
+      "T006",
+      "T020"
+    ],
+    "unlocks": [
+      "commuter_rail_line",
+      "commuter_station"
+    ],
+    "effects": {
+      "passenger_capacity_per_route": 500,
+      "suburban_growth_bonus": 0.35
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Electrified commuter rail links suburbs to the city center with high capacity",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T011",
+    "name": "Metro/Subway System",
+    "era": "modern",
+    "category": "transport",
+    "cost_rp": 200,
+    "prerequisites": [
+      "T010",
+      "T031"
+    ],
+    "unlocks": [
+      "metro_line",
+      "metro_station"
+    ],
+    "effects": {
+      "passenger_capacity_per_route": 2000,
+      "commute_time_reduction": 0.55,
+      "surface_traffic_reduction": 0.3
+    },
+    "eureka_condition": "Reach 75000 population",
+    "eureka_bonus": 50,
+    "description": "Underground rapid transit eliminates surface congestion in dense urban cores",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T012",
+    "name": "High-Speed Rail",
+    "era": "modern",
+    "category": "transport",
+    "cost_rp": 250,
+    "prerequisites": [
+      "T006",
+      "T031"
+    ],
+    "unlocks": [
+      "hsr_line",
+      "hsr_terminal"
+    ],
+    "effects": {
+      "intercity_trade_bonus": 0.8,
+      "tourism_attractiveness": 0.4
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Trains exceeding 300 km/h rival air travel for intercity connections",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T013",
+    "name": "Autonomous Vehicles",
+    "era": "future",
+    "category": "transport",
+    "cost_rp": 350,
+    "prerequisites": [
+      "T007",
+      "T044"
+    ],
+    "unlocks": [
+      "av_network",
+      "smart_intersection"
+    ],
+    "effects": {
+      "road_capacity_multiplier": 20.0,
+      "traffic_accident_rate": -0.95,
+      "parking_demand_reduction": 0.6
+    },
+    "eureka_condition": "Achieve 90% smart grid coverage",
+    "eureka_bonus": 60,
+    "description": "Self-driving vehicles optimize road usage and eliminate most traffic accidents",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T014",
+    "name": "Maglev Transit",
+    "era": "future",
+    "category": "transport",
+    "cost_rp": 400,
+    "prerequisites": [
+      "T012",
+      "T026"
+    ],
+    "unlocks": [
+      "maglev_line",
+      "maglev_station"
+    ],
+    "effects": {
+      "passenger_capacity_per_route": 3000,
+      "intercity_trade_bonus": 1.0,
+      "energy_per_passenger_km": -0.7
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Magnetic levitation trains achieve 600+ km/h with near-zero friction",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T015",
+    "name": "Hyperloop",
+    "era": "future",
+    "category": "transport",
+    "cost_rp": 500,
+    "prerequisites": [
+      "T014",
+      "T036"
+    ],
+    "unlocks": [
+      "hyperloop_tube",
+      "hyperloop_terminal"
+    ],
+    "effects": {
+      "intercity_travel_time_reduction": 0.9,
+      "intercity_trade_bonus": 1.5
+    },
+    "eureka_condition": "Build a maglev line spanning 3 districts",
+    "eureka_bonus": 80,
+    "description": "Vacuum tube transport propels pods at near-sonic speed between distant cities",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T016",
+    "name": "Steam Power",
+    "era": "frontier",
+    "category": "energy",
+    "cost_rp": 30,
+    "prerequisites": [],
+    "unlocks": [
+      "steam_engine",
+      "boiler_house"
+    ],
+    "effects": {
+      "industrial_output_multiplier": 2.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Harnessing steam pressure to drive machinery transforms manufacturing capacity",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T017",
+    "name": "Coal Power Plant",
+    "era": "industrial",
+    "category": "energy",
+    "cost_rp": 65,
+    "prerequisites": [
+      "T016"
+    ],
+    "unlocks": [
+      "coal_power_plant",
+      "coal_mine"
+    ],
+    "effects": {
+      "power_output_mw": 50,
+      "pollution_output": 40
+    },
+    "eureka_condition": "Operate 3 steam engines simultaneously",
+    "eureka_bonus": 25,
+    "description": "Centralized coal-fired generation provides reliable electricity at scale",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T018",
+    "name": "Oil Refining",
+    "era": "industrial",
+    "category": "energy",
+    "cost_rp": 70,
+    "prerequisites": [
+      "T016"
+    ],
+    "unlocks": [
+      "oil_refinery",
+      "oil_well",
+      "fuel_depot"
+    ],
+    "effects": {
+      "fuel_production": 1.0,
+      "industrial_output_multiplier": 1.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Crude oil processing yields fuel, lubricants, and petrochemicals for industry",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T019",
+    "name": "Natural Gas Distribution",
+    "era": "industrial",
+    "category": "energy",
+    "cost_rp": 60,
+    "prerequisites": [
+      "T018"
+    ],
+    "unlocks": [
+      "gas_pipeline",
+      "gas_power_plant"
+    ],
+    "effects": {
+      "power_output_mw": 40,
+      "pollution_output": 15,
+      "heating_coverage": 0.8
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Piped natural gas provides cleaner heating and efficient electricity generation",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T020",
+    "name": "Basic Electrical Grid",
+    "era": "industrial",
+    "category": "energy",
+    "cost_rp": 80,
+    "prerequisites": [
+      "T017"
+    ],
+    "unlocks": [
+      "power_line",
+      "transformer_station",
+      "street_light"
+    ],
+    "effects": {
+      "electrification_coverage": 1.0,
+      "citizen_happiness_bonus": 0.1
+    },
+    "eureka_condition": "Build a coal power plant",
+    "eureka_bonus": 30,
+    "description": "Transmission and distribution networks bring electricity to homes and businesses",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T021",
+    "name": "Nuclear Fission",
+    "era": "postwar",
+    "category": "energy",
+    "cost_rp": 180,
+    "prerequisites": [
+      "T020"
+    ],
+    "unlocks": [
+      "nuclear_power_plant",
+      "uranium_mine"
+    ],
+    "effects": {
+      "power_output_mw": 500,
+      "pollution_output": 2
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Splitting atoms produces enormous baseload power with minimal carbon emissions",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T022",
+    "name": "Hydroelectric Dam",
+    "era": "postwar",
+    "category": "energy",
+    "cost_rp": 130,
+    "prerequisites": [
+      "T020"
+    ],
+    "unlocks": [
+      "hydroelectric_dam",
+      "reservoir"
+    ],
+    "effects": {
+      "power_output_mw": 200,
+      "pollution_output": 0,
+      "water_supply_bonus": 0.4
+    },
+    "eureka_condition": "Place a city near a river tile",
+    "eureka_bonus": 35,
+    "description": "Dammed rivers generate clean renewable power and regulate water supply",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T023",
+    "name": "Solar Power",
+    "era": "modern",
+    "category": "energy",
+    "cost_rp": 160,
+    "prerequisites": [
+      "T020"
+    ],
+    "unlocks": [
+      "solar_farm",
+      "rooftop_solar"
+    ],
+    "effects": {
+      "power_output_mw": 80,
+      "pollution_output": 0,
+      "land_use_per_mw": 4.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Photovoltaic panels convert sunlight directly into emission-free electricity",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T024",
+    "name": "Wind Power",
+    "era": "modern",
+    "category": "energy",
+    "cost_rp": 150,
+    "prerequisites": [
+      "T020"
+    ],
+    "unlocks": [
+      "wind_farm",
+      "offshore_wind_turbine"
+    ],
+    "effects": {
+      "power_output_mw": 100,
+      "pollution_output": 0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Turbines harvest kinetic wind energy for large-scale clean power generation",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T025",
+    "name": "Smart Grid",
+    "era": "modern",
+    "category": "energy",
+    "cost_rp": 200,
+    "prerequisites": [
+      "T020",
+      "T044"
+    ],
+    "unlocks": [
+      "smart_meter",
+      "grid_battery_storage",
+      "demand_response_system"
+    ],
+    "effects": {
+      "grid_efficiency_bonus": 0.3,
+      "blackout_risk_reduction": 0.8
+    },
+    "eureka_condition": "Generate power from 3 different energy sources",
+    "eureka_bonus": 50,
+    "description": "Digital monitoring and automated load balancing maximize grid reliability and efficiency",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T026",
+    "name": "Fusion Power",
+    "era": "future",
+    "category": "energy",
+    "cost_rp": 450,
+    "prerequisites": [
+      "T021",
+      "T025"
+    ],
+    "unlocks": [
+      "fusion_reactor"
+    ],
+    "effects": {
+      "power_output_mw": 2000,
+      "pollution_output": 0,
+      "fuel_cost": 0.01
+    },
+    "eureka_condition": "Operate a nuclear plant for 20 years without incident",
+    "eureka_bonus": 80,
+    "description": "Controlled hydrogen fusion provides virtually limitless clean energy",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T027",
+    "name": "Orbital Solar Collection",
+    "era": "future",
+    "category": "energy",
+    "cost_rp": 550,
+    "prerequisites": [
+      "T023",
+      "T026",
+      "T042"
+    ],
+    "unlocks": [
+      "orbital_solar_array",
+      "microwave_receiver_station"
+    ],
+    "effects": {
+      "power_output_mw": 5000,
+      "pollution_output": 0,
+      "land_use_per_mw": 0.1
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Space-based solar arrays beam continuous energy to Earth via microwave transmission",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T028",
+    "name": "Timber Frame Construction",
+    "era": "frontier",
+    "category": "construction",
+    "cost_rp": 15,
+    "prerequisites": [],
+    "unlocks": [
+      "wooden_house",
+      "sawmill",
+      "lumber_yard"
+    ],
+    "effects": {
+      "max_building_height": 3,
+      "construction_speed_multiplier": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Post-and-beam timber framing enables rapid construction of basic structures",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T029",
+    "name": "Brick and Masonry",
+    "era": "frontier",
+    "category": "construction",
+    "cost_rp": 35,
+    "prerequisites": [
+      "T028"
+    ],
+    "unlocks": [
+      "brick_building",
+      "brickworks",
+      "stone_quarry"
+    ],
+    "effects": {
+      "max_building_height": 6,
+      "fire_resistance_bonus": 0.7,
+      "building_durability_multiplier": 2.0
+    },
+    "eureka_condition": "Lose a building to fire",
+    "eureka_bonus": 15,
+    "description": "Fired brick and cut stone create durable, fire-resistant urban structures",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T030",
+    "name": "Structural Steel",
+    "era": "industrial",
+    "category": "construction",
+    "cost_rp": 90,
+    "prerequisites": [
+      "T029",
+      "T016"
+    ],
+    "unlocks": [
+      "steel_frame_building",
+      "steel_mill",
+      "bridge_steel"
+    ],
+    "effects": {
+      "max_building_height": 15,
+      "construction_cost_reduction": 0.15
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Steel I-beams and riveted frames enable taller buildings and longer bridge spans",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T031",
+    "name": "Reinforced Concrete",
+    "era": "industrial",
+    "category": "construction",
+    "cost_rp": 95,
+    "prerequisites": [
+      "T030"
+    ],
+    "unlocks": [
+      "concrete_building",
+      "concrete_plant",
+      "parking_garage"
+    ],
+    "effects": {
+      "max_building_height": 30,
+      "construction_cost_reduction": 0.2,
+      "building_durability_multiplier": 3.0
+    },
+    "eureka_condition": "Build 10 steel-frame buildings",
+    "eureka_bonus": 30,
+    "description": "Steel-reinforced concrete combines tensile and compressive strength for massive structures",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T032",
+    "name": "Prefabricated Construction",
+    "era": "postwar",
+    "category": "construction",
+    "cost_rp": 110,
+    "prerequisites": [
+      "T031"
+    ],
+    "unlocks": [
+      "prefab_housing",
+      "prefab_factory"
+    ],
+    "effects": {
+      "construction_speed_multiplier": 3.0,
+      "construction_cost_reduction": 0.35,
+      "housing_density_bonus": 0.4
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Factory-produced building modules slash construction time and cost for mass housing",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T033",
+    "name": "Earthquake Resistance",
+    "era": "postwar",
+    "category": "construction",
+    "cost_rp": 100,
+    "prerequisites": [
+      "T031"
+    ],
+    "unlocks": [
+      "seismic_retrofit",
+      "base_isolator"
+    ],
+    "effects": {
+      "earthquake_damage_reduction": 0.85,
+      "building_durability_multiplier": 1.5
+    },
+    "eureka_condition": "Suffer earthquake damage",
+    "eureka_bonus": 35,
+    "description": "Base isolation and flexible framing protect structures from seismic forces",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T034",
+    "name": "Glass and Curtain Wall",
+    "era": "modern",
+    "category": "construction",
+    "cost_rp": 140,
+    "prerequisites": [
+      "T030"
+    ],
+    "unlocks": [
+      "glass_tower",
+      "curtain_wall_office"
+    ],
+    "effects": {
+      "max_building_height": 60,
+      "commercial_desirability_bonus": 0.3,
+      "citizen_happiness_bonus": 0.05
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Non-structural glass facades create iconic skylines and light-filled interiors",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T035",
+    "name": "Green Building Standards",
+    "era": "modern",
+    "category": "construction",
+    "cost_rp": 160,
+    "prerequisites": [
+      "T031",
+      "T023"
+    ],
+    "unlocks": [
+      "green_certified_building",
+      "living_wall",
+      "rainwater_system"
+    ],
+    "effects": {
+      "building_energy_consumption": -0.4,
+      "pollution_output": -0.2,
+      "citizen_health_bonus": 0.15
+    },
+    "eureka_condition": "Install rooftop solar on 5 buildings",
+    "eureka_bonus": 40,
+    "description": "LEED-style certification drives energy efficiency, water reuse, and healthy materials",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T036",
+    "name": "3D-Printed Construction",
+    "era": "future",
+    "category": "construction",
+    "cost_rp": 300,
+    "prerequisites": [
+      "T032",
+      "T044"
+    ],
+    "unlocks": [
+      "3d_print_facility",
+      "printed_housing"
+    ],
+    "effects": {
+      "construction_speed_multiplier": 6.0,
+      "construction_cost_reduction": 0.55,
+      "material_waste_reduction": 0.8
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Robotic additive manufacturing builds structures layer by layer from digital blueprints",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T037",
+    "name": "Arcology Design",
+    "era": "future",
+    "category": "construction",
+    "cost_rp": 600,
+    "prerequisites": [
+      "T036",
+      "T035",
+      "T026"
+    ],
+    "unlocks": [
+      "arcology"
+    ],
+    "effects": {
+      "max_building_height": 300,
+      "population_capacity_per_tile": 50000,
+      "self_sufficiency_rating": 0.9
+    },
+    "eureka_condition": "Reach 500000 population",
+    "eureka_bonus": 100,
+    "description": "Self-contained mega-structures house entire communities with integrated life support",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T038",
+    "name": "Telegraph Network",
+    "era": "frontier",
+    "category": "communication",
+    "cost_rp": 20,
+    "prerequisites": [],
+    "unlocks": [
+      "telegraph_office",
+      "telegraph_line"
+    ],
+    "effects": {
+      "admin_efficiency_bonus": 0.2,
+      "trade_info_speed": 2.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Electrical telegraph enables near-instant long-distance communication for the first time",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T039",
+    "name": "Telephone System",
+    "era": "industrial",
+    "category": "communication",
+    "cost_rp": 50,
+    "prerequisites": [
+      "T038",
+      "T020"
+    ],
+    "unlocks": [
+      "telephone_exchange",
+      "phone_line"
+    ],
+    "effects": {
+      "commercial_productivity_bonus": 0.2,
+      "emergency_response_speed": 0.3
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Voice telephony connects businesses and households, accelerating commerce",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T040",
+    "name": "Radio Broadcasting",
+    "era": "industrial",
+    "category": "communication",
+    "cost_rp": 55,
+    "prerequisites": [
+      "T038"
+    ],
+    "unlocks": [
+      "radio_tower",
+      "radio_station"
+    ],
+    "effects": {
+      "citizen_happiness_bonus": 0.1,
+      "education_reach_bonus": 0.25,
+      "emergency_warning_coverage": 0.6
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Wireless audio broadcasting delivers news, entertainment, and emergency alerts to all",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T041",
+    "name": "Television Broadcasting",
+    "era": "postwar",
+    "category": "communication",
+    "cost_rp": 90,
+    "prerequisites": [
+      "T040",
+      "T020"
+    ],
+    "unlocks": [
+      "tv_station",
+      "broadcast_tower"
+    ],
+    "effects": {
+      "citizen_happiness_bonus": 0.15,
+      "commercial_advertising_bonus": 0.3,
+      "education_reach_bonus": 0.35
+    },
+    "eureka_condition": "Reach 15000 population",
+    "eureka_bonus": 25,
+    "description": "Television brings visual mass media into homes, transforming culture and commerce",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T042",
+    "name": "Satellite Communications",
+    "era": "postwar",
+    "category": "communication",
+    "cost_rp": 140,
+    "prerequisites": [
+      "T041"
+    ],
+    "unlocks": [
+      "satellite_uplink",
+      "satellite_dish"
+    ],
+    "effects": {
+      "global_communication_coverage": 1.0,
+      "intercity_trade_bonus": 0.25,
+      "weather_forecast_accuracy": 0.7
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Orbital relay satellites enable global television, phone, and data links",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T043",
+    "name": "Mobile Telecommunications",
+    "era": "modern",
+    "category": "communication",
+    "cost_rp": 170,
+    "prerequisites": [
+      "T039",
+      "T042"
+    ],
+    "unlocks": [
+      "cell_tower",
+      "mobile_network"
+    ],
+    "effects": {
+      "commercial_productivity_bonus": 0.35,
+      "citizen_happiness_bonus": 0.1,
+      "emergency_response_speed": 0.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Cellular networks put wireless voice and data into every citizen's pocket",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T044",
+    "name": "Internet Infrastructure",
+    "era": "modern",
+    "category": "communication",
+    "cost_rp": 200,
+    "prerequisites": [
+      "T042",
+      "T043"
+    ],
+    "unlocks": [
+      "data_center",
+      "fiber_optic_network",
+      "isp"
+    ],
+    "effects": {
+      "commercial_productivity_bonus": 0.5,
+      "education_reach_bonus": 0.6,
+      "tech_industry_attractiveness": 1.0
+    },
+    "eureka_condition": "Build a data center",
+    "eureka_bonus": 50,
+    "description": "Fiber-optic backbone and packet switching create the global information network",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T045",
+    "name": "5G/6G Networks",
+    "era": "future",
+    "category": "communication",
+    "cost_rp": 280,
+    "prerequisites": [
+      "T044",
+      "T025"
+    ],
+    "unlocks": [
+      "5g_small_cell",
+      "iot_hub"
+    ],
+    "effects": {
+      "network_bandwidth_multiplier": 100.0,
+      "iot_device_support": 1.0,
+      "autonomous_vehicle_support": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Ultra-low-latency wireless enables IoT, autonomous vehicles, and real-time city management",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T046",
+    "name": "Quantum Communication",
+    "era": "future",
+    "category": "communication",
+    "cost_rp": 480,
+    "prerequisites": [
+      "T045"
+    ],
+    "unlocks": [
+      "quantum_network_node",
+      "quantum_encryption_hub"
+    ],
+    "effects": {
+      "cybersecurity_rating": 1.0,
+      "research_speed_bonus": 0.4,
+      "unhackable_comms": true
+    },
+    "eureka_condition": "Build 3 data centers",
+    "eureka_bonus": 70,
+    "description": "Quantum key distribution provides theoretically unbreakable encrypted communication",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T047",
+    "name": "Crop Rotation",
+    "era": "frontier",
+    "category": "agriculture",
+    "cost_rp": 15,
+    "prerequisites": [],
+    "unlocks": [
+      "improved_farmland"
+    ],
+    "effects": {
+      "farm_yield_multiplier": 1.5,
+      "soil_depletion_rate": -0.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Alternating crops by season preserves soil fertility and increases long-term yields",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T048",
+    "name": "Livestock Management",
+    "era": "frontier",
+    "category": "agriculture",
+    "cost_rp": 20,
+    "prerequisites": [
+      "T047"
+    ],
+    "unlocks": [
+      "cattle_ranch",
+      "dairy_farm",
+      "slaughterhouse"
+    ],
+    "effects": {
+      "food_variety_bonus": 0.3,
+      "leather_production": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Selective breeding and veterinary care improve meat, dairy, and draft animal quality",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T049",
+    "name": "Mechanical Agriculture",
+    "era": "industrial",
+    "category": "agriculture",
+    "cost_rp": 60,
+    "prerequisites": [
+      "T047",
+      "T016"
+    ],
+    "unlocks": [
+      "tractor_depot",
+      "grain_elevator",
+      "mechanized_farm"
+    ],
+    "effects": {
+      "farm_yield_multiplier": 3.0,
+      "farm_labor_requirement": -0.6
+    },
+    "eureka_condition": "Operate 5 farms",
+    "eureka_bonus": 20,
+    "description": "Steam and diesel-powered machinery replaces manual labor across vast farmlands",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T050",
+    "name": "Chemical Fertilizers",
+    "era": "industrial",
+    "category": "agriculture",
+    "cost_rp": 55,
+    "prerequisites": [
+      "T049"
+    ],
+    "unlocks": [
+      "fertilizer_plant"
+    ],
+    "effects": {
+      "farm_yield_multiplier": 2.0,
+      "water_pollution_output": 15
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Synthetic nitrogen and phosphorus compounds dramatically boost crop output",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T051",
+    "name": "Industrial Food Processing",
+    "era": "postwar",
+    "category": "agriculture",
+    "cost_rp": 85,
+    "prerequisites": [
+      "T050",
+      "T020"
+    ],
+    "unlocks": [
+      "food_processing_plant",
+      "cold_storage",
+      "supermarket"
+    ],
+    "effects": {
+      "food_spoilage_reduction": 0.7,
+      "food_variety_bonus": 0.5,
+      "food_distribution_range": 3.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Canning, freezing, and pasteurization extend shelf life and enable mass food distribution",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T052",
+    "name": "Genetically Modified Crops",
+    "era": "modern",
+    "category": "agriculture",
+    "cost_rp": 180,
+    "prerequisites": [
+      "T050"
+    ],
+    "unlocks": [
+      "gmo_research_lab",
+      "biotech_farm"
+    ],
+    "effects": {
+      "farm_yield_multiplier": 4.0,
+      "pest_resistance": 0.8,
+      "citizen_happiness_bonus": -0.05
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Genetic engineering creates pest-resistant, high-yield crop strains at the cost of public trust",
+    "branch_group": "agriculture_philosophy",
+    "branch_exclusive": true
+  },
+  {
+    "id": "T053",
+    "name": "Organic Farming Standards",
+    "era": "modern",
+    "category": "agriculture",
+    "cost_rp": 160,
+    "prerequisites": [
+      "T050"
+    ],
+    "unlocks": [
+      "organic_certification",
+      "farmers_market",
+      "composting_facility"
+    ],
+    "effects": {
+      "farm_yield_multiplier": 1.8,
+      "water_pollution_output": -0.8,
+      "citizen_health_bonus": 0.2,
+      "food_export_value_bonus": 0.4
+    },
+    "eureka_condition": "Reach 'Excellent' water quality rating",
+    "eureka_bonus": 40,
+    "description": "Eliminating synthetic inputs produces premium food and restores ecological balance",
+    "branch_group": "agriculture_philosophy",
+    "branch_exclusive": true
+  },
+  {
+    "id": "T054",
+    "name": "Vertical Farming",
+    "era": "future",
+    "category": "agriculture",
+    "cost_rp": 280,
+    "prerequisites": [
+      "T035",
+      "T025"
+    ],
+    "unlocks": [
+      "vertical_farm"
+    ],
+    "effects": {
+      "farm_yield_per_tile": 20.0,
+      "water_usage_reduction": 0.9,
+      "food_transport_cost": -0.7
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Multi-story indoor farms grow food year-round inside city limits using LED lighting",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T055",
+    "name": "Automated Hydroponics",
+    "era": "future",
+    "category": "agriculture",
+    "cost_rp": 350,
+    "prerequisites": [
+      "T054",
+      "T044"
+    ],
+    "unlocks": [
+      "hydroponic_complex",
+      "nutrient_recycling_system"
+    ],
+    "effects": {
+      "farm_yield_per_tile": 40.0,
+      "farm_labor_requirement": -0.95,
+      "water_usage_reduction": 0.95,
+      "food_quality_bonus": 0.3
+    },
+    "eureka_condition": "Operate 3 vertical farms",
+    "eureka_bonus": 60,
+    "description": "AI-managed soilless cultivation achieves maximum yield with minimal human intervention",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T056",
+    "name": "Watermill Industry",
+    "era": "frontier",
+    "category": "industrial",
+    "cost_rp": 25,
+    "prerequisites": [],
+    "unlocks": [
+      "watermill"
+    ],
+    "effects": {
+      "industrial_output": 1.0
+    },
+    "eureka_condition": "build_near_river",
+    "eureka_bonus": 0.3,
+    "description": "Water-powered mills harness river currents to drive saws, grinders, and bellows, forming the backbone of early frontier industry.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T057",
+    "name": "Assembly Line",
+    "era": "industrial",
+    "category": "industrial",
+    "cost_rp": 80,
+    "prerequisites": [
+      "T056"
+    ],
+    "unlocks": [
+      "factory"
+    ],
+    "effects": {
+      "industrial_output": 2.5,
+      "employment_capacity": 1.5
+    },
+    "eureka_condition": "produce_100_goods",
+    "eureka_bonus": 0.25,
+    "description": "Standardized sequential production multiplies factory output and creates a new class of industrial workers.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T058",
+    "name": "Chemical Industry",
+    "era": "industrial",
+    "category": "industrial",
+    "cost_rp": 100,
+    "prerequisites": [
+      "T057"
+    ],
+    "unlocks": [
+      "chemical_plant"
+    ],
+    "effects": {
+      "industrial_output": 1.5,
+      "pollution": 2.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Large-scale synthesis of dyes, fertilizers, and explosives drives economic growth but introduces toxic byproducts.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T059",
+    "name": "Automotive Manufacturing",
+    "era": "industrial",
+    "category": "industrial",
+    "cost_rp": 120,
+    "prerequisites": [
+      "T057"
+    ],
+    "unlocks": [
+      "auto_plant",
+      "highway"
+    ],
+    "effects": {
+      "industrial_output": 2.0,
+      "transport_capacity": 2.0
+    },
+    "eureka_condition": "build_5_factories",
+    "eureka_bonus": 0.2,
+    "description": "Mass production of automobiles reshapes cities around roads and fuels suburban expansion.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T060",
+    "name": "Electronics Manufacturing",
+    "era": "postwar",
+    "category": "industrial",
+    "cost_rp": 160,
+    "prerequisites": [
+      "T058",
+      "T059"
+    ],
+    "unlocks": [
+      "electronics_factory"
+    ],
+    "effects": {
+      "industrial_output": 2.0,
+      "tech_output": 1.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Transistors and printed circuits launch the consumer electronics revolution, creating high-value manufacturing jobs.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T061",
+    "name": "Industrial Robotics",
+    "era": "modern",
+    "category": "industrial",
+    "cost_rp": 200,
+    "prerequisites": [
+      "T060"
+    ],
+    "unlocks": [
+      "robotic_assembly_plant"
+    ],
+    "effects": {
+      "industrial_output": 3.0,
+      "employment_capacity": -1.0
+    },
+    "eureka_condition": "reach_industrial_output_50",
+    "eureka_bonus": 0.25,
+    "description": "Automated robotic arms replace repetitive labor, boosting throughput but displacing factory workers.",
+    "branch_group": "industrial_philosophy",
+    "branch_exclusive": true
+  },
+  {
+    "id": "T062",
+    "name": "Lean Manufacturing",
+    "era": "modern",
+    "category": "industrial",
+    "cost_rp": 200,
+    "prerequisites": [
+      "T060"
+    ],
+    "unlocks": [
+      "lean_factory"
+    ],
+    "effects": {
+      "industrial_output": 2.0,
+      "waste_reduction": 2.0,
+      "worker_satisfaction": 1.0
+    },
+    "eureka_condition": "zero_waste_event",
+    "eureka_bonus": 0.25,
+    "description": "Human-centered production eliminates waste through continuous improvement, empowering workers rather than replacing them.",
+    "branch_group": "industrial_philosophy",
+    "branch_exclusive": true
+  },
+  {
+    "id": "T063",
+    "name": "Clean Industry Standards",
+    "era": "modern",
+    "category": "industrial",
+    "cost_rp": 180,
+    "prerequisites": [
+      "T060",
+      "T078"
+    ],
+    "unlocks": [
+      "clean_factory"
+    ],
+    "effects": {
+      "pollution": -2.0,
+      "industrial_output": 0.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Mandatory emissions filters and process redesigns cut industrial pollution at the cost of slightly reduced output.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T064",
+    "name": "AI Manufacturing",
+    "era": "future",
+    "category": "industrial",
+    "cost_rp": 280,
+    "prerequisites": [
+      "T061",
+      "T095"
+    ],
+    "unlocks": [
+      "ai_factory"
+    ],
+    "effects": {
+      "industrial_output": 4.0,
+      "employment_capacity": -2.0,
+      "tech_output": 2.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Self-optimizing factories use machine learning to predict demand, eliminate defects, and run lights-out production.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T065",
+    "name": "Nanomanufacturing",
+    "era": "future",
+    "category": "industrial",
+    "cost_rp": 350,
+    "prerequisites": [
+      "T064",
+      "T096"
+    ],
+    "unlocks": [
+      "nanofab"
+    ],
+    "effects": {
+      "industrial_output": 5.0,
+      "pollution": -1.0,
+      "tech_output": 3.0
+    },
+    "eureka_condition": "complete_quantum_research",
+    "eureka_bonus": 0.3,
+    "description": "Molecular-scale fabrication assembles products atom by atom, producing perfect goods with near-zero material waste.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T066",
+    "name": "Basic Sanitation",
+    "era": "frontier",
+    "category": "medical",
+    "cost_rp": 30,
+    "prerequisites": [],
+    "unlocks": [
+      "outhouse",
+      "well"
+    ],
+    "effects": {
+      "health": 1.0,
+      "disease_rate": -1.0
+    },
+    "eureka_condition": "disease_outbreak",
+    "eureka_bonus": 0.4,
+    "description": "Separating drinking water from waste dramatically reduces waterborne illness in growing settlements.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T067",
+    "name": "General Hospital",
+    "era": "industrial",
+    "category": "medical",
+    "cost_rp": 70,
+    "prerequisites": [
+      "T066"
+    ],
+    "unlocks": [
+      "hospital"
+    ],
+    "effects": {
+      "health": 2.0,
+      "citizen_lifespan": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Centralized medical facilities with trained staff provide systematic care beyond folk remedies and barber-surgeons.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T068",
+    "name": "Vaccination Programs",
+    "era": "industrial",
+    "category": "medical",
+    "cost_rp": 90,
+    "prerequisites": [
+      "T067"
+    ],
+    "unlocks": [
+      "vaccination_clinic"
+    ],
+    "effects": {
+      "disease_rate": -2.0,
+      "population_growth": 0.5
+    },
+    "eureka_condition": "survive_epidemic",
+    "eureka_bonus": 0.3,
+    "description": "Mass immunization campaigns eradicate endemic diseases and allow population to grow without periodic plagues.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T069",
+    "name": "Modern Surgery",
+    "era": "industrial",
+    "category": "medical",
+    "cost_rp": 110,
+    "prerequisites": [
+      "T067"
+    ],
+    "unlocks": [
+      "surgical_wing"
+    ],
+    "effects": {
+      "health": 1.5,
+      "citizen_lifespan": 1.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Anesthesia and antiseptic techniques transform surgery from desperate last resort to routine lifesaving procedure.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T070",
+    "name": "Antibiotics and Pharmacology",
+    "era": "postwar",
+    "category": "medical",
+    "cost_rp": 140,
+    "prerequisites": [
+      "T068",
+      "T069"
+    ],
+    "unlocks": [
+      "pharmacy",
+      "pharmaceutical_lab"
+    ],
+    "effects": {
+      "disease_rate": -2.0,
+      "health": 2.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Synthetic drugs and antibiotics conquer bacterial infections, ushering in an era of pharmaceutical-driven healthcare.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T071",
+    "name": "Emergency Medical Services",
+    "era": "postwar",
+    "category": "medical",
+    "cost_rp": 130,
+    "prerequisites": [
+      "T069"
+    ],
+    "unlocks": [
+      "ambulance_station",
+      "trauma_center"
+    ],
+    "effects": {
+      "disaster_mortality": -2.0,
+      "health": 1.0
+    },
+    "eureka_condition": "disaster_event",
+    "eureka_bonus": 0.3,
+    "description": "Rapid-response paramedic teams and trauma centers save lives in the critical golden hour after accidents and disasters.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T072",
+    "name": "Advanced Diagnostics",
+    "era": "modern",
+    "category": "medical",
+    "cost_rp": 180,
+    "prerequisites": [
+      "T070",
+      "T060"
+    ],
+    "unlocks": [
+      "diagnostic_center"
+    ],
+    "effects": {
+      "health": 2.0,
+      "disease_rate": -1.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "MRI, CT, and automated blood analysis detect diseases years before symptoms appear, shifting medicine from reactive to preventive.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T073",
+    "name": "Specialized Medicine",
+    "era": "modern",
+    "category": "medical",
+    "cost_rp": 200,
+    "prerequisites": [
+      "T072"
+    ],
+    "unlocks": [
+      "research_hospital",
+      "specialist_clinic"
+    ],
+    "effects": {
+      "health": 2.5,
+      "citizen_lifespan": 2.0,
+      "education_demand": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Cardiology, oncology, neurology, and other specializations push life expectancy toward biological limits.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T074",
+    "name": "Genetic Medicine",
+    "era": "future",
+    "category": "medical",
+    "cost_rp": 300,
+    "prerequisites": [
+      "T073",
+      "T077"
+    ],
+    "unlocks": [
+      "gene_therapy_center"
+    ],
+    "effects": {
+      "health": 3.0,
+      "citizen_lifespan": 3.0,
+      "disease_rate": -3.0
+    },
+    "eureka_condition": "cure_genetic_disease",
+    "eureka_bonus": 0.25,
+    "description": "CRISPR therapies and personalized genomics eliminate hereditary diseases and extend healthy lifespans by decades.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T075",
+    "name": "Basic Sewage System",
+    "era": "frontier",
+    "category": "environmental",
+    "cost_rp": 30,
+    "prerequisites": [
+      "T066"
+    ],
+    "unlocks": [
+      "sewer_pipe"
+    ],
+    "effects": {
+      "sanitation": 1.5,
+      "disease_rate": -1.0
+    },
+    "eureka_condition": "reach_population_500",
+    "eureka_bonus": 0.3,
+    "description": "Underground drainage channels carry waste away from streets, ending the era of open gutters and cesspit emptiers.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T076",
+    "name": "Sewage Treatment",
+    "era": "industrial",
+    "category": "environmental",
+    "cost_rp": 90,
+    "prerequisites": [
+      "T075"
+    ],
+    "unlocks": [
+      "treatment_plant"
+    ],
+    "effects": {
+      "sanitation": 2.0,
+      "pollution": -1.0,
+      "river_health": 1.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Biological and chemical filtration processes clean wastewater before it returns to rivers, protecting downstream communities.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T077",
+    "name": "Biotechnology",
+    "era": "modern",
+    "category": "environmental",
+    "cost_rp": 180,
+    "prerequisites": [
+      "T070",
+      "T076"
+    ],
+    "unlocks": [
+      "biotech_lab"
+    ],
+    "effects": {
+      "tech_output": 2.0,
+      "pollution": -1.0,
+      "food_production": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Engineered microorganisms break down pollutants, boost crop yields, and produce novel materials from renewable feedstocks.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T078",
+    "name": "Pollution Control Regulations",
+    "era": "postwar",
+    "category": "environmental",
+    "cost_rp": 110,
+    "prerequisites": [
+      "T058"
+    ],
+    "unlocks": [
+      "environmental_agency"
+    ],
+    "effects": {
+      "pollution": -2.0,
+      "industrial_output": -0.5,
+      "citizen_health": 1.0
+    },
+    "eureka_condition": "pollution_crisis",
+    "eureka_bonus": 0.35,
+    "description": "Government mandates force factories to limit emissions, trading marginal output for breathable air and drinkable water.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T079",
+    "name": "Waste Management",
+    "era": "postwar",
+    "category": "environmental",
+    "cost_rp": 100,
+    "prerequisites": [
+      "T076"
+    ],
+    "unlocks": [
+      "landfill",
+      "waste_collection_depot"
+    ],
+    "effects": {
+      "sanitation": 1.5,
+      "pollution": -1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Organized collection routes and engineered landfills replace ad-hoc dumping, containing waste instead of spreading it.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T080",
+    "name": "Recycling Programs",
+    "era": "modern",
+    "category": "environmental",
+    "cost_rp": 140,
+    "prerequisites": [
+      "T079"
+    ],
+    "unlocks": [
+      "recycling_center"
+    ],
+    "effects": {
+      "waste_reduction": 2.0,
+      "resource_efficiency": 1.5,
+      "pollution": -1.0
+    },
+    "eureka_condition": "landfill_capacity_warning",
+    "eureka_bonus": 0.25,
+    "description": "Material recovery from waste streams reduces virgin resource extraction and extends the life of overflowing landfills.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T081",
+    "name": "Carbon Capture",
+    "era": "future",
+    "category": "environmental",
+    "cost_rp": 250,
+    "prerequisites": [
+      "T063",
+      "T077"
+    ],
+    "unlocks": [
+      "carbon_capture_facility"
+    ],
+    "effects": {
+      "pollution": -3.0,
+      "climate_stability": 2.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Industrial-scale atmospheric scrubbers and underground sequestration begin reversing a century of carbon accumulation.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T082",
+    "name": "Urban Green Space Planning",
+    "era": "modern",
+    "category": "environmental",
+    "cost_rp": 120,
+    "prerequisites": [
+      "T091"
+    ],
+    "unlocks": [
+      "city_park",
+      "greenway",
+      "botanical_garden"
+    ],
+    "effects": {
+      "happiness": 2.0,
+      "pollution": -1.0,
+      "property_value": 1.0
+    },
+    "eureka_condition": "happiness_below_threshold",
+    "eureka_bonus": 0.2,
+    "description": "Mandated parkland ratios and green corridors weave nature into the urban fabric, improving air quality and mental health.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T083",
+    "name": "Ecosystem Restoration",
+    "era": "future",
+    "category": "environmental",
+    "cost_rp": 260,
+    "prerequisites": [
+      "T082",
+      "T077"
+    ],
+    "unlocks": [
+      "restoration_reserve",
+      "wildlife_corridor"
+    ],
+    "effects": {
+      "biodiversity": 3.0,
+      "climate_stability": 1.5,
+      "happiness": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Rewilding degraded land and reconnecting fragmented habitats rebuilds ecological networks the city once destroyed.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T084",
+    "name": "Atmospheric Engineering",
+    "era": "future",
+    "category": "environmental",
+    "cost_rp": 400,
+    "prerequisites": [
+      "T081",
+      "T096"
+    ],
+    "unlocks": [
+      "weather_control_station"
+    ],
+    "effects": {
+      "climate_stability": 4.0,
+      "food_production": 2.0,
+      "disaster_risk": -2.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Quantum-modeled climate intervention enables targeted rainfall, storm suppression, and regional temperature stabilization.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T085",
+    "name": "Public Education Act",
+    "era": "industrial",
+    "category": "social",
+    "cost_rp": 60,
+    "prerequisites": [],
+    "unlocks": [
+      "elementary_school"
+    ],
+    "effects": {
+      "education": 1.5,
+      "literacy": 2.0,
+      "tech_output": 0.5
+    },
+    "eureka_condition": "reach_population_1000",
+    "eureka_bonus": 0.3,
+    "description": "Compulsory free schooling for all children creates a literate workforce and lays the foundation for civic participation.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T086",
+    "name": "Basic Zoning Laws",
+    "era": "industrial",
+    "category": "social",
+    "cost_rp": 50,
+    "prerequisites": [],
+    "unlocks": [
+      "zoning_office"
+    ],
+    "effects": {
+      "city_organization": 1.5,
+      "fire_risk": -1.0,
+      "property_value": 0.5
+    },
+    "eureka_condition": "building_fire_event",
+    "eureka_bonus": 0.3,
+    "description": "Separating residential, commercial, and industrial districts prevents the chaos of unplanned growth and reduces hazards.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T087",
+    "name": "Professional Fire Service",
+    "era": "industrial",
+    "category": "social",
+    "cost_rp": 55,
+    "prerequisites": [
+      "T086"
+    ],
+    "unlocks": [
+      "fire_station"
+    ],
+    "effects": {
+      "fire_risk": -2.5,
+      "disaster_mortality": -1.0
+    },
+    "eureka_condition": "major_fire_event",
+    "eureka_bonus": 0.4,
+    "description": "Full-time trained firefighters with steam-pumped engines replace volunteer bucket brigades, saving entire neighborhoods.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T088",
+    "name": "Professional Police Force",
+    "era": "industrial",
+    "category": "social",
+    "cost_rp": 55,
+    "prerequisites": [
+      "T086"
+    ],
+    "unlocks": [
+      "police_station"
+    ],
+    "effects": {
+      "crime_rate": -2.0,
+      "safety": 1.5
+    },
+    "eureka_condition": "crime_wave_event",
+    "eureka_bonus": 0.35,
+    "description": "Uniformed officers patrolling regular beats replace ad-hoc vigilance committees with accountable law enforcement.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T089",
+    "name": "Secondary Education",
+    "era": "postwar",
+    "category": "social",
+    "cost_rp": 100,
+    "prerequisites": [
+      "T085"
+    ],
+    "unlocks": [
+      "high_school"
+    ],
+    "effects": {
+      "education": 2.0,
+      "tech_output": 1.0,
+      "worker_skill": 1.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Extended schooling through age eighteen produces skilled workers capable of operating complex industrial and office systems.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T090",
+    "name": "Higher Education",
+    "era": "postwar",
+    "category": "social",
+    "cost_rp": 140,
+    "prerequisites": [
+      "T089"
+    ],
+    "unlocks": [
+      "university",
+      "research_institute"
+    ],
+    "effects": {
+      "education": 2.5,
+      "tech_output": 2.0,
+      "culture": 1.0
+    },
+    "eureka_condition": "tech_output_threshold",
+    "eureka_bonus": 0.2,
+    "description": "Universities generate breakthrough research, attract global talent, and anchor knowledge-economy districts.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T091",
+    "name": "Urban Planning Department",
+    "era": "postwar",
+    "category": "social",
+    "cost_rp": 110,
+    "prerequisites": [
+      "T086",
+      "T089"
+    ],
+    "unlocks": [
+      "planning_office",
+      "public_transit_authority"
+    ],
+    "effects": {
+      "city_organization": 2.5,
+      "transport_capacity": 1.0,
+      "property_value": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Professional planners coordinate land use, transit networks, and infrastructure investment across the entire metropolitan area.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T092",
+    "name": "Internet Infrastructure",
+    "era": "modern",
+    "category": "social",
+    "cost_rp": 160,
+    "prerequisites": [
+      "T060",
+      "T090"
+    ],
+    "unlocks": [
+      "data_center",
+      "fiber_network"
+    ],
+    "effects": {
+      "tech_output": 2.0,
+      "commerce": 2.0,
+      "education": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Fiber-optic backbone and wireless towers connect every citizen to the global information network, transforming commerce and culture.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T093",
+    "name": "Public Welfare System",
+    "era": "modern",
+    "category": "social",
+    "cost_rp": 150,
+    "prerequisites": [
+      "T090",
+      "T091"
+    ],
+    "unlocks": [
+      "welfare_office",
+      "public_housing"
+    ],
+    "effects": {
+      "happiness": 1.5,
+      "poverty_rate": -2.0,
+      "social_stability": 1.5
+    },
+    "eureka_condition": "inequality_crisis",
+    "eureka_bonus": 0.3,
+    "description": "Safety nets for unemployment, disability, and retirement prevent destitution and maintain social cohesion during economic shocks.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T094",
+    "name": "Smart City Platform",
+    "era": "future",
+    "category": "social",
+    "cost_rp": 280,
+    "prerequisites": [
+      "T092",
+      "T097"
+    ],
+    "unlocks": [
+      "smart_city_hub",
+      "sensor_network"
+    ],
+    "effects": {
+      "city_organization": 3.0,
+      "resource_efficiency": 2.5,
+      "transport_capacity": 2.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "City-wide IoT sensors and AI coordination optimize traffic, energy, water, and emergency response in real time.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T095a",
+    "name": "Mainframe Computing",
+    "era": "postwar",
+    "category": "computing",
+    "cost_rp": 130,
+    "prerequisites": [
+      "T060"
+    ],
+    "unlocks": [
+      "computer_center"
+    ],
+    "effects": {
+      "tech_output": 1.5,
+      "administration": 1.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Room-sized computers process census data, weather models, and financial records faster than armies of clerks.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T095b",
+    "name": "Personal Computing",
+    "era": "modern",
+    "category": "computing",
+    "cost_rp": 150,
+    "prerequisites": [
+      "T095a"
+    ],
+    "unlocks": [
+      "tech_office",
+      "internet_cafe"
+    ],
+    "effects": {
+      "tech_output": 2.0,
+      "commerce": 1.5,
+      "education": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Affordable desktop computers put processing power on every desk, spawning the software industry and digital culture.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T095",
+    "name": "Artificial Intelligence",
+    "era": "modern",
+    "category": "computing",
+    "cost_rp": 220,
+    "prerequisites": [
+      "T095b",
+      "T090"
+    ],
+    "unlocks": [
+      "ai_research_lab"
+    ],
+    "effects": {
+      "tech_output": 3.0,
+      "automation": 2.0,
+      "employment_capacity": -1.0
+    },
+    "eureka_condition": "build_3_tech_offices",
+    "eureka_bonus": 0.2,
+    "description": "Neural networks and machine learning automate pattern recognition, prediction, and decision-making across every industry.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T096",
+    "name": "Quantum Computing",
+    "era": "future",
+    "category": "computing",
+    "cost_rp": 300,
+    "prerequisites": [
+      "T095"
+    ],
+    "unlocks": [
+      "quantum_lab"
+    ],
+    "effects": {
+      "tech_output": 4.0,
+      "encryption_strength": 3.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Qubit processors solve previously intractable problems in materials science, cryptography, and drug design within hours.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T097",
+    "name": "Digital Governance",
+    "era": "modern",
+    "category": "computing",
+    "cost_rp": 170,
+    "prerequisites": [
+      "T095b",
+      "T092"
+    ],
+    "unlocks": [
+      "e_government_portal"
+    ],
+    "effects": {
+      "administration": 2.0,
+      "corruption": -1.5,
+      "citizen_satisfaction": 1.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Online permitting, transparent budgets, and digital voting reduce bureaucratic friction and increase civic trust.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T098",
+    "name": "Cybersecurity Infrastructure",
+    "era": "modern",
+    "category": "computing",
+    "cost_rp": 160,
+    "prerequisites": [
+      "T092",
+      "T095b"
+    ],
+    "unlocks": [
+      "security_operations_center"
+    ],
+    "effects": {
+      "cyber_defense": 2.5,
+      "crime_rate": -1.0,
+      "commerce": 0.5
+    },
+    "eureka_condition": "cyber_attack_event",
+    "eureka_bonus": 0.35,
+    "description": "Firewalls, encryption standards, and incident response teams protect critical infrastructure from digital threats.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T099",
+    "name": "Blockchain Governance",
+    "era": "future",
+    "category": "computing",
+    "cost_rp": 240,
+    "prerequisites": [
+      "T097",
+      "T098"
+    ],
+    "unlocks": [
+      "decentralized_registry"
+    ],
+    "effects": {
+      "corruption": -2.0,
+      "administration": 1.5,
+      "transparency": 2.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Immutable distributed ledgers for land titles, voting records, and public contracts make government fraud nearly impossible.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T100",
+    "name": "Autonomous Systems Integration",
+    "era": "future",
+    "category": "computing",
+    "cost_rp": 320,
+    "prerequisites": [
+      "T095",
+      "T059"
+    ],
+    "unlocks": [
+      "autonomous_hub",
+      "drone_logistics_center"
+    ],
+    "effects": {
+      "transport_capacity": 3.0,
+      "automation": 3.0,
+      "safety": 2.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Self-driving vehicles, delivery drones, and autonomous maintenance robots operate the city's physical infrastructure.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T101",
+    "name": "Space Industry",
+    "era": "future",
+    "category": "computing",
+    "cost_rp": 380,
+    "prerequisites": [
+      "T096",
+      "T065"
+    ],
+    "unlocks": [
+      "spaceport",
+      "orbital_platform"
+    ],
+    "effects": {
+      "tech_output": 5.0,
+      "prestige": 3.0,
+      "resource_access": 2.0
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Commercial launch facilities and orbital manufacturing open access to asteroid mining and zero-gravity fabrication.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T102",
+    "name": "Universal Basic Income",
+    "era": "future",
+    "category": "computing",
+    "cost_rp": 300,
+    "prerequisites": [
+      "T095",
+      "T093",
+      "T099"
+    ],
+    "unlocks": [
+      "ubi_distribution_center"
+    ],
+    "effects": {
+      "happiness": 3.0,
+      "poverty_rate": -3.0,
+      "social_stability": 2.5,
+      "employment_capacity": -1.0
+    },
+    "eureka_condition": "automation_unemployment_crisis",
+    "eureka_bonus": 0.3,
+    "description": "Guaranteed income funded by automation dividends ensures no citizen falls through the cracks of the post-labor economy.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T103",
+    "name": "Aqueduct Engineering",
+    "era": "frontier",
+    "category": "water_sanitation",
+    "cost_rp": 30,
+    "prerequisites": [],
+    "unlocks": [
+      "aqueduct"
+    ],
+    "effects": {
+      "water_range": 1.5
+    },
+    "eureka_condition": "build_3_wells",
+    "eureka_bonus": 0.25,
+    "description": "Gravity-fed stone channels carry fresh water from highland springs to city cisterns, eliminating bucket brigades.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T104",
+    "name": "Water Filtration",
+    "era": "industrial",
+    "category": "water_sanitation",
+    "cost_rp": 55,
+    "prerequisites": [
+      "T103"
+    ],
+    "unlocks": [
+      "filtration_plant"
+    ],
+    "effects": {
+      "disease_rate": -0.2,
+      "water_quality": 0.3
+    },
+    "eureka_condition": "suffer_cholera_outbreak",
+    "eureka_bonus": 0.3,
+    "description": "Sand and gravel filter beds remove sediment and pathogens, drastically cutting waterborne disease.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T105",
+    "name": "Chlorination",
+    "era": "industrial",
+    "category": "water_sanitation",
+    "cost_rp": 70,
+    "prerequisites": [
+      "T104"
+    ],
+    "unlocks": [
+      "chlorination_station"
+    ],
+    "effects": {
+      "disease_rate": -0.3,
+      "water_quality": 0.4
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Chemical disinfection of municipal water supplies eliminates typhoid, cholera, and dysentery at scale.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T106",
+    "name": "Reservoir Engineering",
+    "era": "industrial",
+    "category": "water_sanitation",
+    "cost_rp": 80,
+    "prerequisites": [
+      "T103"
+    ],
+    "unlocks": [
+      "reservoir",
+      "dam"
+    ],
+    "effects": {
+      "water_capacity": 2.0,
+      "flood_resistance": 0.3
+    },
+    "eureka_condition": "reach_population_5000",
+    "eureka_bonus": 0.2,
+    "description": "Massive earthworks and concrete dams store millions of gallons, buffering the city against drought and flood alike.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T107",
+    "name": "Desalination",
+    "era": "modern",
+    "category": "water_sanitation",
+    "cost_rp": 140,
+    "prerequisites": [
+      "T105",
+      "T106"
+    ],
+    "unlocks": [
+      "desalination_plant"
+    ],
+    "effects": {
+      "water_capacity": 3.0,
+      "energy_consumption": 0.15
+    },
+    "eureka_condition": "build_city_on_coast",
+    "eureka_bonus": 0.25,
+    "description": "Reverse-osmosis membranes extract fresh water from the sea, unlocking coastal arid regions for settlement.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T108",
+    "name": "Greywater Recycling",
+    "era": "modern",
+    "category": "water_sanitation",
+    "cost_rp": 120,
+    "prerequisites": [
+      "T105"
+    ],
+    "unlocks": [
+      "greywater_facility"
+    ],
+    "effects": {
+      "water_efficiency": 0.4,
+      "pollution": -0.15
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Household wastewater from sinks and showers is treated and reused for irrigation, cutting freshwater demand by a third.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T109",
+    "name": "Smart Water Meters",
+    "era": "modern",
+    "category": "water_sanitation",
+    "cost_rp": 100,
+    "prerequisites": [
+      "T108"
+    ],
+    "unlocks": [
+      "smart_water_grid"
+    ],
+    "effects": {
+      "water_efficiency": 0.25,
+      "maintenance_cost": -0.1
+    },
+    "eureka_condition": "research_smart_city_sensors",
+    "eureka_bonus": 0.2,
+    "description": "IoT sensors detect leaks and monitor consumption in real time, letting operators pinpoint waste before it compounds.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T110",
+    "name": "Atmospheric Water Generation",
+    "era": "future",
+    "category": "water_sanitation",
+    "cost_rp": 200,
+    "prerequisites": [
+      "T107",
+      "T109"
+    ],
+    "unlocks": [
+      "atmospheric_condenser"
+    ],
+    "effects": {
+      "water_capacity": 4.0,
+      "energy_consumption": 0.1
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Solar-powered condensers pull moisture from humid air, generating freshwater anywhere without aquifer or ocean access.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T111",
+    "name": "Gas Street Lighting",
+    "era": "frontier",
+    "category": "urban_design",
+    "cost_rp": 35,
+    "prerequisites": [],
+    "unlocks": [
+      "gas_lamp_post"
+    ],
+    "effects": {
+      "crime_rate": -0.1,
+      "nightlife_appeal": 0.15
+    },
+    "eureka_condition": "build_5_roads",
+    "eureka_bonus": 0.2,
+    "description": "Coal-gas lamps along main thoroughfares extend the useful day into evening, suppressing petty crime and enabling night commerce.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T112",
+    "name": "Public Parks Act",
+    "era": "frontier",
+    "category": "urban_design",
+    "cost_rp": 40,
+    "prerequisites": [],
+    "unlocks": [
+      "public_park",
+      "botanical_garden"
+    ],
+    "effects": {
+      "happiness": 0.15,
+      "land_value": 0.1
+    },
+    "eureka_condition": "reach_population_2000",
+    "eureka_bonus": 0.25,
+    "description": "Municipal legislation reserves green space for public recreation, providing lungs for the growing city.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T113",
+    "name": "Sewage Tunnels",
+    "era": "industrial",
+    "category": "urban_design",
+    "cost_rp": 65,
+    "prerequisites": [
+      "T103",
+      "T111"
+    ],
+    "unlocks": [
+      "sewer_network"
+    ],
+    "effects": {
+      "disease_rate": -0.25,
+      "pollution": -0.2
+    },
+    "eureka_condition": "suffer_cholera_outbreak",
+    "eureka_bonus": 0.3,
+    "description": "Brick-lined underground tunnels carry waste away from streets and homes, transforming urban sanitation overnight.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T114",
+    "name": "Electric Street Lighting",
+    "era": "industrial",
+    "category": "urban_design",
+    "cost_rp": 75,
+    "prerequisites": [
+      "T111"
+    ],
+    "unlocks": [
+      "electric_lamp_post"
+    ],
+    "effects": {
+      "crime_rate": -0.15,
+      "nightlife_appeal": 0.25,
+      "energy_consumption": 0.05
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Arc lamps and later incandescent bulbs bathe city streets in steady white light, making gas lamps obsolete.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T115",
+    "name": "Traffic Signals",
+    "era": "postwar",
+    "category": "urban_design",
+    "cost_rp": 60,
+    "prerequisites": [
+      "T114"
+    ],
+    "unlocks": [
+      "traffic_light_network"
+    ],
+    "effects": {
+      "traffic_flow": 0.3,
+      "accident_rate": -0.2
+    },
+    "eureka_condition": "build_10_roads",
+    "eureka_bonus": 0.2,
+    "description": "Synchronized electric signals tame the chaos of motorized intersections, keeping traffic moving and pedestrians alive.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T116",
+    "name": "Pedestrian Zones",
+    "era": "postwar",
+    "category": "urban_design",
+    "cost_rp": 70,
+    "prerequisites": [
+      "T112",
+      "T115"
+    ],
+    "unlocks": [
+      "pedestrian_plaza"
+    ],
+    "effects": {
+      "happiness": 0.1,
+      "commerce_income": 0.15,
+      "traffic_flow": -0.05
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Car-free shopping streets and plazas reclaim urban space for foot traffic, boosting retail and quality of life.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T117",
+    "name": "Urban Greenways",
+    "era": "modern",
+    "category": "urban_design",
+    "cost_rp": 110,
+    "prerequisites": [
+      "T112",
+      "T116"
+    ],
+    "unlocks": [
+      "greenway_corridor",
+      "bike_lane_network"
+    ],
+    "effects": {
+      "happiness": 0.15,
+      "pollution": -0.1,
+      "health": 0.1
+    },
+    "eureka_condition": "build_3_parks",
+    "eureka_bonus": 0.2,
+    "description": "Linear parks and protected bike corridors weave nature through the urban fabric, connecting neighborhoods without cars.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T118",
+    "name": "Smart City Sensors",
+    "era": "modern",
+    "category": "urban_design",
+    "cost_rp": 150,
+    "prerequisites": [
+      "T115",
+      "T117"
+    ],
+    "unlocks": [
+      "sensor_grid",
+      "city_dashboard"
+    ],
+    "effects": {
+      "traffic_flow": 0.2,
+      "energy_efficiency": 0.15,
+      "crime_rate": -0.1
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Thousands of networked sensors measure air quality, noise, foot traffic, and parking in real time, letting the city adapt dynamically.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T119",
+    "name": "Food Canning",
+    "era": "frontier",
+    "category": "food_cuisine",
+    "cost_rp": 30,
+    "prerequisites": [],
+    "unlocks": [
+      "cannery"
+    ],
+    "effects": {
+      "food_spoilage": -0.3,
+      "trade_range": 0.2
+    },
+    "eureka_condition": "build_3_farms",
+    "eureka_bonus": 0.25,
+    "description": "Sealed tin containers preserve food for months, enabling long-distance trade and winter survival without salting.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T120",
+    "name": "Refrigeration",
+    "era": "industrial",
+    "category": "food_cuisine",
+    "cost_rp": 65,
+    "prerequisites": [
+      "T119"
+    ],
+    "unlocks": [
+      "cold_storage",
+      "ice_factory"
+    ],
+    "effects": {
+      "food_spoilage": -0.4,
+      "food_variety": 0.2
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Mechanical ice-making and cold rooms keep meat, dairy, and produce fresh far from their point of origin.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T121",
+    "name": "Restaurant Licensing",
+    "era": "industrial",
+    "category": "food_cuisine",
+    "cost_rp": 50,
+    "prerequisites": [
+      "T119"
+    ],
+    "unlocks": [
+      "restaurant",
+      "food_market"
+    ],
+    "effects": {
+      "happiness": 0.1,
+      "commerce_income": 0.15
+    },
+    "eureka_condition": "reach_population_3000",
+    "eureka_bonus": 0.2,
+    "description": "Regulated dining establishments create a culinary scene, attracting visitors and giving citizens reasons to celebrate.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T122",
+    "name": "Food Safety Standards",
+    "era": "postwar",
+    "category": "food_cuisine",
+    "cost_rp": 80,
+    "prerequisites": [
+      "T120",
+      "T121"
+    ],
+    "unlocks": [
+      "food_inspection_office"
+    ],
+    "effects": {
+      "disease_rate": -0.15,
+      "food_quality": 0.3
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Government inspectors enforce hygiene codes from farm to fork, virtually eliminating mass food poisoning events.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T123",
+    "name": "Aquaculture",
+    "era": "modern",
+    "category": "food_cuisine",
+    "cost_rp": 110,
+    "prerequisites": [
+      "T122"
+    ],
+    "unlocks": [
+      "fish_farm",
+      "kelp_farm"
+    ],
+    "effects": {
+      "food_production": 0.25,
+      "pollution": 0.05
+    },
+    "eureka_condition": "build_city_on_coast",
+    "eureka_bonus": 0.2,
+    "description": "Controlled fish and shellfish farming in coastal pens supplements land agriculture with high-protein harvests.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T124",
+    "name": "Lab-Grown Meat",
+    "era": "future",
+    "category": "food_cuisine",
+    "cost_rp": 190,
+    "prerequisites": [
+      "T123"
+    ],
+    "unlocks": [
+      "cellular_agriculture_lab"
+    ],
+    "effects": {
+      "food_production": 0.4,
+      "pollution": -0.2,
+      "land_use": -0.3
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Cultured animal cells grow into steaks and poultry in bioreactors, feeding millions without pastureland or slaughterhouses.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T125",
+    "name": "Theater",
+    "era": "frontier",
+    "category": "entertainment",
+    "cost_rp": 25,
+    "prerequisites": [],
+    "unlocks": [
+      "theater"
+    ],
+    "effects": {
+      "happiness": 0.15,
+      "culture": 0.2
+    },
+    "eureka_condition": "reach_population_1000",
+    "eureka_bonus": 0.2,
+    "description": "Purpose-built playhouses stage drama, comedy, and opera, giving citizens a shared cultural life beyond the tavern.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T126",
+    "name": "Public Library",
+    "era": "frontier",
+    "category": "entertainment",
+    "cost_rp": 35,
+    "prerequisites": [],
+    "unlocks": [
+      "public_library"
+    ],
+    "effects": {
+      "education_rate": 0.15,
+      "culture": 0.1
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Free lending libraries put knowledge within reach of every citizen, seeding literacy and self-improvement across class lines.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T127",
+    "name": "Cinema",
+    "era": "industrial",
+    "category": "entertainment",
+    "cost_rp": 60,
+    "prerequisites": [
+      "T125"
+    ],
+    "unlocks": [
+      "cinema",
+      "film_studio"
+    ],
+    "effects": {
+      "happiness": 0.15,
+      "culture": 0.15,
+      "commerce_income": 0.1
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Moving pictures projected on silver screens captivate mass audiences, birthing a new art form and a booming industry.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T128",
+    "name": "Amusement Parks",
+    "era": "industrial",
+    "category": "entertainment",
+    "cost_rp": 70,
+    "prerequisites": [
+      "T125"
+    ],
+    "unlocks": [
+      "amusement_park"
+    ],
+    "effects": {
+      "happiness": 0.2,
+      "tourism_appeal": 0.25,
+      "land_use": 0.15
+    },
+    "eureka_condition": "reach_population_10000",
+    "eureka_bonus": 0.2,
+    "description": "Roller coasters, Ferris wheels, and midway games draw families from across the region for a day of manufactured wonder.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T129",
+    "name": "Professional Sports Leagues",
+    "era": "postwar",
+    "category": "entertainment",
+    "cost_rp": 85,
+    "prerequisites": [
+      "T127",
+      "T128"
+    ],
+    "unlocks": [
+      "stadium",
+      "sports_arena"
+    ],
+    "effects": {
+      "happiness": 0.15,
+      "tourism_appeal": 0.2,
+      "commerce_income": 0.15
+    },
+    "eureka_condition": "build_stadium",
+    "eureka_bonus": 0.25,
+    "description": "Organized leagues with salaried athletes fill stadiums every weekend, forging civic identity around home teams.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T130",
+    "name": "Television Networks",
+    "era": "postwar",
+    "category": "entertainment",
+    "cost_rp": 90,
+    "prerequisites": [
+      "T127"
+    ],
+    "unlocks": [
+      "tv_broadcast_tower",
+      "tv_station"
+    ],
+    "effects": {
+      "happiness": 0.1,
+      "culture": 0.15,
+      "information_spread": 0.3
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Broadcast towers beam news, sports, and sitcoms into every living room, unifying public discourse for better or worse.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T131",
+    "name": "Video Game Industry",
+    "era": "modern",
+    "category": "entertainment",
+    "cost_rp": 120,
+    "prerequisites": [
+      "T130"
+    ],
+    "unlocks": [
+      "game_studio",
+      "arcade"
+    ],
+    "effects": {
+      "happiness": 0.1,
+      "tech_output": 0.1,
+      "commerce_income": 0.15
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Interactive digital entertainment grows from arcade cabinets to a global creative industry rivaling Hollywood in revenue.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T132",
+    "name": "Esports Infrastructure",
+    "era": "modern",
+    "category": "entertainment",
+    "cost_rp": 140,
+    "prerequisites": [
+      "T129",
+      "T131"
+    ],
+    "unlocks": [
+      "esports_arena",
+      "streaming_hub"
+    ],
+    "effects": {
+      "happiness": 0.1,
+      "tourism_appeal": 0.15,
+      "tech_output": 0.05
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Purpose-built arenas host competitive gaming tournaments watched by millions online, merging sports culture with digital technology.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T133",
+    "name": "Central Banking",
+    "era": "frontier",
+    "category": "finance",
+    "cost_rp": 45,
+    "prerequisites": [],
+    "unlocks": [
+      "central_bank"
+    ],
+    "effects": {
+      "economic_stability": 0.3,
+      "tax_efficiency": 0.15
+    },
+    "eureka_condition": "collect_10000_gold",
+    "eureka_bonus": 0.2,
+    "description": "A national bank controls currency supply and interest rates, taming boom-bust cycles that cripple frontier economies.",
+    "branch_group": "financial_system",
+    "branch_exclusive": true
+  },
+  {
+    "id": "T134",
+    "name": "Stock Exchange",
+    "era": "industrial",
+    "category": "finance",
+    "cost_rp": 75,
+    "prerequisites": [
+      "T133"
+    ],
+    "unlocks": [
+      "stock_exchange"
+    ],
+    "effects": {
+      "investment_rate": 0.3,
+      "commerce_income": 0.2
+    },
+    "eureka_condition": "build_5_commercial_buildings",
+    "eureka_bonus": 0.2,
+    "description": "A regulated trading floor channels private capital into enterprise, accelerating industrial expansion through shared risk.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T135",
+    "name": "Insurance Industry",
+    "era": "industrial",
+    "category": "finance",
+    "cost_rp": 65,
+    "prerequisites": [
+      "T133"
+    ],
+    "unlocks": [
+      "insurance_office"
+    ],
+    "effects": {
+      "economic_stability": 0.2,
+      "disaster_recovery": 0.3
+    },
+    "eureka_condition": "suffer_fire_or_disaster",
+    "eureka_bonus": 0.25,
+    "description": "Actuarial science pools risk across thousands of policyholders, shielding businesses and families from catastrophic loss.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T136",
+    "name": "Credit Cards",
+    "era": "postwar",
+    "category": "finance",
+    "cost_rp": 90,
+    "prerequisites": [
+      "T134"
+    ],
+    "unlocks": [
+      "consumer_credit_bureau"
+    ],
+    "effects": {
+      "commerce_income": 0.2,
+      "consumer_spending": 0.25
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Plastic payment cards decouple spending from cash on hand, supercharging consumer commerce at the cost of household debt.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T137",
+    "name": "Microfinance",
+    "era": "modern",
+    "category": "finance",
+    "cost_rp": 100,
+    "prerequisites": [
+      "T135",
+      "T136"
+    ],
+    "unlocks": [
+      "microfinance_institution"
+    ],
+    "effects": {
+      "small_business_growth": 0.3,
+      "poverty_rate": -0.15
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Tiny loans to entrepreneurs without collateral ignite small business formation in underserved neighborhoods.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T138",
+    "name": "Cryptocurrency",
+    "era": "modern",
+    "category": "finance",
+    "cost_rp": 160,
+    "prerequisites": [
+      "T136"
+    ],
+    "unlocks": [
+      "crypto_exchange",
+      "blockchain_datacenter"
+    ],
+    "effects": {
+      "commerce_income": 0.15,
+      "energy_consumption": 0.2,
+      "economic_stability": -0.1
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Decentralized digital currencies bypass traditional banking, enabling borderless trade but introducing volatile speculation.",
+    "branch_group": "financial_system",
+    "branch_exclusive": true
+  },
+  {
+    "id": "T139",
+    "name": "Hotels and Inns",
+    "era": "frontier",
+    "category": "tourism",
+    "cost_rp": 25,
+    "prerequisites": [],
+    "unlocks": [
+      "inn",
+      "hotel"
+    ],
+    "effects": {
+      "tourism_appeal": 0.2,
+      "commerce_income": 0.1
+    },
+    "eureka_condition": "reach_population_1500",
+    "eureka_bonus": 0.2,
+    "description": "Clean beds and hot meals for travelers transform a waypoint into a destination, attracting merchants and migrants alike.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T140",
+    "name": "Heritage Tourism",
+    "era": "industrial",
+    "category": "tourism",
+    "cost_rp": 55,
+    "prerequisites": [
+      "T139"
+    ],
+    "unlocks": [
+      "museum",
+      "heritage_site"
+    ],
+    "effects": {
+      "tourism_appeal": 0.25,
+      "culture": 0.2
+    },
+    "eureka_condition": "build_landmark",
+    "eureka_bonus": 0.25,
+    "description": "Preservation of historic buildings and curation of local history attract visitors seeking authentic cultural experiences.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T141",
+    "name": "Eco-Tourism",
+    "era": "postwar",
+    "category": "tourism",
+    "cost_rp": 80,
+    "prerequisites": [
+      "T140"
+    ],
+    "unlocks": [
+      "nature_reserve",
+      "eco_lodge"
+    ],
+    "effects": {
+      "tourism_appeal": 0.2,
+      "pollution": -0.1,
+      "happiness": 0.1
+    },
+    "eureka_condition": "build_3_parks",
+    "eureka_bonus": 0.2,
+    "description": "Guided wilderness experiences and conservation lodges monetize natural beauty without destroying it.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T142",
+    "name": "Convention Centers",
+    "era": "postwar",
+    "category": "tourism",
+    "cost_rp": 95,
+    "prerequisites": [
+      "T139",
+      "T129"
+    ],
+    "unlocks": [
+      "convention_center"
+    ],
+    "effects": {
+      "tourism_appeal": 0.2,
+      "commerce_income": 0.2,
+      "tech_output": 0.05
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Massive exhibition halls host trade shows, conferences, and expos, filling hotel rooms and restaurants for weeks at a time.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T143",
+    "name": "Medical Tourism",
+    "era": "modern",
+    "category": "tourism",
+    "cost_rp": 130,
+    "prerequisites": [
+      "T141",
+      "T142"
+    ],
+    "unlocks": [
+      "medical_tourism_clinic"
+    ],
+    "effects": {
+      "tourism_appeal": 0.15,
+      "health": 0.1,
+      "commerce_income": 0.2
+    },
+    "eureka_condition": "build_hospital",
+    "eureka_bonus": 0.2,
+    "description": "World-class hospitals at competitive prices attract international patients, making healthcare itself an export industry.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T144",
+    "name": "Space Tourism",
+    "era": "future",
+    "category": "tourism",
+    "cost_rp": 220,
+    "prerequisites": [
+      "T143"
+    ],
+    "unlocks": [
+      "spaceport_terminal"
+    ],
+    "effects": {
+      "tourism_appeal": 0.4,
+      "prestige": 0.3,
+      "commerce_income": 0.25
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Suborbital flights and orbital hotel stays offer the ultimate luxury experience, putting your city on the interplanetary map.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T145",
+    "name": "Fortification",
+    "era": "frontier",
+    "category": "military",
+    "cost_rp": 35,
+    "prerequisites": [],
+    "unlocks": [
+      "city_wall",
+      "watchtower",
+      "fort"
+    ],
+    "effects": {
+      "defense_strength": 0.3,
+      "crime_rate": -0.1
+    },
+    "eureka_condition": "suffer_raid",
+    "eureka_bonus": 0.3,
+    "description": "Thick stone walls and corner bastions deter raiders and bandits, letting citizens sleep without one eye open.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T146",
+    "name": "Standing Army",
+    "era": "industrial",
+    "category": "military",
+    "cost_rp": 80,
+    "prerequisites": [
+      "T145"
+    ],
+    "unlocks": [
+      "barracks",
+      "military_academy"
+    ],
+    "effects": {
+      "defense_strength": 0.4,
+      "population_growth": -0.05
+    },
+    "eureka_condition": "reach_population_5000",
+    "eureka_bonus": 0.2,
+    "description": "A permanent professional military replaces militia levies, providing year-round security and projecting regional power.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T147",
+    "name": "Air Defense",
+    "era": "postwar",
+    "category": "military",
+    "cost_rp": 110,
+    "prerequisites": [
+      "T146"
+    ],
+    "unlocks": [
+      "radar_station",
+      "anti_air_battery"
+    ],
+    "effects": {
+      "defense_strength": 0.3,
+      "air_threat_resistance": 0.5
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Radar networks and anti-aircraft batteries create an invisible shield over the city, neutralizing aerial threats before they arrive.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T148",
+    "name": "Cybersecurity Defense",
+    "era": "modern",
+    "category": "military",
+    "cost_rp": 140,
+    "prerequisites": [
+      "T147",
+      "T118"
+    ],
+    "unlocks": [
+      "cyber_operations_center"
+    ],
+    "effects": {
+      "defense_strength": 0.2,
+      "cyber_threat_resistance": 0.5,
+      "tech_output": 0.1
+    },
+    "eureka_condition": "suffer_cyber_attack",
+    "eureka_bonus": 0.3,
+    "description": "Dedicated security teams monitor digital infrastructure around the clock, repelling intrusions that could cripple a smart city.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T149",
+    "name": "Space Defense",
+    "era": "future",
+    "category": "military",
+    "cost_rp": 230,
+    "prerequisites": [
+      "T148"
+    ],
+    "unlocks": [
+      "orbital_defense_platform"
+    ],
+    "effects": {
+      "defense_strength": 0.5,
+      "prestige": 0.2
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Orbital interceptors and ground-based directed energy weapons protect the city from threats that conventional defenses cannot reach.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T150",
+    "name": "Deep Mining",
+    "era": "frontier",
+    "category": "mining",
+    "cost_rp": 40,
+    "prerequisites": [],
+    "unlocks": [
+      "deep_mine",
+      "mine_shaft"
+    ],
+    "effects": {
+      "ore_production": 0.3,
+      "industrial_output": 0.15
+    },
+    "eureka_condition": "build_forge",
+    "eureka_bonus": 0.2,
+    "description": "Vertical shafts and timbered tunnels reach ore veins far below the surface, feeding the forges that build a city.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T151",
+    "name": "Open Pit Mining",
+    "era": "industrial",
+    "category": "mining",
+    "cost_rp": 70,
+    "prerequisites": [
+      "T150"
+    ],
+    "unlocks": [
+      "open_pit_mine",
+      "ore_processing_plant"
+    ],
+    "effects": {
+      "ore_production": 0.5,
+      "pollution": 0.2,
+      "land_use": 0.2
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Steam shovels strip away overburden to expose massive ore bodies, trading landscape for raw industrial tonnage.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T152",
+    "name": "Offshore Drilling",
+    "era": "postwar",
+    "category": "mining",
+    "cost_rp": 100,
+    "prerequisites": [
+      "T151"
+    ],
+    "unlocks": [
+      "offshore_platform",
+      "refinery"
+    ],
+    "effects": {
+      "fuel_production": 0.4,
+      "pollution": 0.15,
+      "commerce_income": 0.2
+    },
+    "eureka_condition": "build_city_on_coast",
+    "eureka_bonus": 0.25,
+    "description": "Steel platforms anchored to the seabed tap submarine petroleum deposits, fueling the postwar economic engine.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T153",
+    "name": "Rare Earth Processing",
+    "era": "modern",
+    "category": "mining",
+    "cost_rp": 150,
+    "prerequisites": [
+      "T151"
+    ],
+    "unlocks": [
+      "rare_earth_refinery"
+    ],
+    "effects": {
+      "tech_output": 0.25,
+      "pollution": 0.1,
+      "industrial_output": 0.2
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Specialized chemical extraction isolates neodymium, lithium, and cobalt \u2014 the invisible ingredients of every modern device.",
+    "branch_group": null,
+    "branch_exclusive": false
+  },
+  {
+    "id": "T154",
+    "name": "Asteroid Mining",
+    "era": "future",
+    "category": "mining",
+    "cost_rp": 250,
+    "prerequisites": [
+      "T152",
+      "T153"
+    ],
+    "unlocks": [
+      "asteroid_mining_station"
+    ],
+    "effects": {
+      "ore_production": 1.0,
+      "pollution": -0.3,
+      "prestige": 0.3
+    },
+    "eureka_condition": null,
+    "eureka_bonus": 0,
+    "description": "Autonomous spacecraft extract platinum-group metals from near-Earth asteroids, ending terrestrial resource scarcity for good.",
+    "branch_group": null,
+    "branch_exclusive": false
+  }
+]

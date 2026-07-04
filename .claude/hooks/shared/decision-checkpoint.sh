@@ -1,0 +1,1 @@
+/Users/fredericbeeg/softbla/softbla-claude-kit/hooks/shared/decision-checkpoint.sh

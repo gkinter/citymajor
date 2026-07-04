@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ppy.SDL2-CS" Version="*" />
+    <PackageReference Include="Silk.NET.OpenGL" Version="2.*" />
+    <PackageReference Include="ImGui.NET" Version="1.91.*" />
+    <PackageReference Include="K4os.Compression.LZ4" Version="1.*" />
+    <PackageReference Include="ENet-CSharp" Version="2.*" />
+  </ItemGroup>
+</Project>

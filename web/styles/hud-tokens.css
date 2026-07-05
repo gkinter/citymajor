@@ -838,13 +838,13 @@
 }
 
 .hud-law-toggle__input:checked + .hud-law-toggle__track {
-  background: rgba(201, 160, 255, 0.28);
-  border-color: rgba(201, 160, 255, 0.55);
+  background: var(--hud-accent-soft);
+  border-color: var(--hud-accent-border);
 }
 
 .hud-law-toggle__input:checked + .hud-law-toggle__track::after {
   transform: translateX(16px);
-  background: #e8d8ff;
+  background: var(--hud-accent-highlight);
 }
 
 .hud-law-toggle__input:disabled + .hud-law-toggle__track {
@@ -853,7 +853,7 @@
 }
 
 .hud-law-toggle__input:focus-visible + .hud-law-toggle__track {
-  outline: 2px solid #c9a0ff;
+  outline: 2px solid var(--hud-accent);
   outline-offset: 2px;
 }
 

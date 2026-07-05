@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { HUD_COLORS, hudSlidePanel } from "@/lib/hud-theme";
+import { HUD_COLORS, hudActionButton, hudSlidePanel } from "@/lib/hud-theme";
 import type { SimResources } from "@/lib/sim-bridge";
 
 const headerStyle: CSSProperties = {
@@ -25,6 +25,17 @@ const sectionTitle: CSSProperties = {
   letterSpacing: "0.06em",
   textTransform: "uppercase",
   color: HUD_COLORS.textMuted,
+};
+
+const fallbackNote: CSSProperties = {
+  marginBottom: 14,
+  padding: "8px 10px",
+  borderRadius: 6,
+  fontSize: 11,
+  lineHeight: 1.4,
+  color: HUD_COLORS.textMuted,
+  background: HUD_COLORS.rowBg,
+  border: `1px solid ${HUD_COLORS.borderSubtle}`,
 };
 
 type LawPanelProps = {
@@ -109,42 +120,43 @@ export function LawPanel({
     onSetLawActive !== undefined &&
     !sampleLaw.id.startsWith("placeholder");
 
+  const subtitle = hasWasmData
+    ? `${formatCount(definitionCount)} definitions · ${formatCount(activeCount)} active`
+    : "Awaiting simulation data";
+
   return (
     <aside
       className="hud-law-panel"
-      aria-label="City laws"
       style={hudSlidePanel()}
+      role="dialog"
+      aria-label="City laws"
+      aria-modal="true"
     >
       <header style={headerStyle}>
         <div>
-          <div style={{ fontWeight: 700, fontSize: 14 }}>Laws</div>
-          <div style={{ fontSize: 11, opacity: 0.65, marginTop: 2 }}>
-            Policy catalog and active ordinances
+          <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: "0.04em" }}>
+            Laws
+          </div>
+          <div style={{ opacity: 0.65, fontSize: 11, marginTop: 2 }}>
+            {subtitle}
           </div>
         </div>
         <button
           type="button"
-          className="hud-law-close"
-          style={{
-            padding: "4px 10px",
-            fontFamily: "inherit",
-            fontSize: 12,
-            color: HUD_COLORS.text,
-            background: "transparent",
-            border: `1px solid ${HUD_COLORS.borderSubtle}`,
-            borderRadius: 6,
-            cursor: "pointer",
-          }}
+          style={{ ...hudActionButton(), padding: "4px 10px", fontSize: 12 }}
           onClick={onClose}
+          aria-label="Close"
         >
-          Close
+          ✕
         </button>
       </header>
 
       <div style={bodyStyle}>
         {!hasWasmData ? (
-          <p className="hud-law-empty">
-            Law counts appear once the WASM sim exports LawSystem status.
+          <p style={fallbackNote}>
+            Ordinance counts and toggles will appear when the simulation exports{" "}
+            <code style={{ fontSize: 10 }}>lawSystem</code> status from WASM.
+            Preview rows below show the planned ordinance UI.
           </p>
         ) : null}
 

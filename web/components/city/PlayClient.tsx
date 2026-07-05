@@ -188,11 +188,8 @@ export function PlayClient() {
     DEFAULT_TRANSIT_MODE,
   );
   const [buildOpen, setBuildOpen] = useState(false);
-<<<<<<< HEAD
   const [helpOpen, setHelpOpen] = useState(false);
-=======
   const [showChunkDebug] = useState(() => isChunkDebugEnabled());
->>>>>>> 3df109a (feat(web): show loaded chunk count with ?debug=chunks)
 
   const statsRef = useRef(stats);
   statsRef.current = stats;

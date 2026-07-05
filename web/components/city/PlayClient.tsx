@@ -28,6 +28,7 @@ import type {
 import {
   EMPTY_CITY_STORAGE_KEY,
   GRAPHICS_QUALITY_STORAGE_KEY,
+  TRADE_OVERLAY_STORAGE_KEY,
   TRAFFIC_OVERLAY_STORAGE_KEY,
   type GraphicsQualityTier,
 } from "@/lib/constants";
@@ -57,6 +58,8 @@ import { HUD_ZONE, hudActionButton } from "@/lib/hud-theme";
 import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
+import { TradeOverlayToggle } from "@/components/city/TradeOverlayToggle";
+import { TradeOverlay } from "@/components/city/TradeOverlay";
 import { DemandOverlay } from "@/components/city/DemandOverlay";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
 import { EraProgressPanel } from "@/components/city/EraProgressPanel";
@@ -115,6 +118,12 @@ function readStoredTrafficOverlay(): boolean {
   return stored !== "off";
 }
 
+function readStoredTradeOverlay(): boolean {
+  if (typeof window === "undefined") return false;
+  const stored = window.localStorage.getItem(TRADE_OVERLAY_STORAGE_KEY);
+  return stored === "on";
+}
+
 function readEmptyCityPref(urlEmpty: boolean): boolean {
   if (typeof window === "undefined") return urlEmpty;
   if (urlEmpty) return true;
@@ -133,6 +142,9 @@ export function PlayClient() {
   );
   const [showTrafficOverlay, setShowTrafficOverlay] = useState(() =>
     readStoredTrafficOverlay(),
+  );
+  const [showTradeOverlay, setShowTradeOverlay] = useState(() =>
+    readStoredTradeOverlay(),
   );
   const [serviceViewMode, setServiceViewMode] = useState<ServiceViewMode>("off");
   const [stats, setStats] = useState<FpsStats>({
@@ -248,6 +260,14 @@ export function PlayClient() {
     setShowTrafficOverlay(enabled);
     window.localStorage.setItem(
       TRAFFIC_OVERLAY_STORAGE_KEY,
+      enabled ? "on" : "off",
+    );
+  }, []);
+
+  const handleTradeOverlayToggle = useCallback((enabled: boolean) => {
+    setShowTradeOverlay(enabled);
+    window.localStorage.setItem(
+      TRADE_OVERLAY_STORAGE_KEY,
       enabled ? "on" : "off",
     );
   }, []);
@@ -613,6 +633,11 @@ export function PlayClient() {
         enabled={showTrafficOverlay}
         onToggle={handleTrafficOverlayToggle}
       />
+      <TradeOverlayToggle
+        enabled={showTradeOverlay}
+        onToggle={handleTradeOverlayToggle}
+      />
+      <TradeOverlay visible={showTradeOverlay} resources={simResources} />
       <ServicesToolbar
         viewMode={serviceViewMode}
         onViewModeChange={handleServiceViewModeChange}

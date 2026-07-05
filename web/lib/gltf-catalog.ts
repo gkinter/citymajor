@@ -45,6 +45,22 @@ export const SHIPPED_GLTF_KEYS = [
 
 export type ShippedGltfKey = (typeof SHIPPED_GLTF_KEYS)[number];
 
+/**
+ * Hero landmark GLBs under `public/assets/gltf/heroes/` — not in `manifest.json`
+ * or `SHIPPED_GLTF_KEYS` (see `scripts/meshy/validate-manifest.mjs` heroes skip).
+ * Spec: docs/design/MESHY_HERO_LANDMARKS.md
+ */
+export const OPTIONAL_HERO_LANDMARKS = {
+  hero_frontier_city_hall: "/assets/gltf/heroes/hero_frontier_city_hall.glb",
+} as const;
+
+export type OptionalHeroLandmarkKey = keyof typeof OPTIONAL_HERO_LANDMARKS;
+
+export function heroGltfPublicPath(filename: string): string {
+  return `/assets/gltf/heroes/${filename}`;
+}
+
+
 /** @deprecated Use SHIPPED_GLTF_KEYS */
 export const PLACEHOLDER_ARCHETYPE_KEYS = SHIPPED_GLTF_KEYS;
 
@@ -165,4 +181,43 @@ export function hasGltfAsset(key: string): boolean {
 /** All catalog GLB URLs for play-page preload. */
 export function allGltfPaths(): string[] {
   return Object.values(GLTF_CATALOG);
+}
+
+/** Hero landmarks — `web/public/assets/gltf/heroes/` (MESHY_HERO_LANDMARKS.md). */
+export const HERO_GLTF_BASE = "/assets/gltf/heroes" as const;
+
+/**
+ * Hero GLB keys with documented paths. Assets load on demand (HEAD probe) — not
+ * preloaded via `allGltfPaths()` until the file ships.
+ */
+export const HERO_GLTF_KEYS = ["hero_frontier_city_hall"] as const;
+
+export type HeroGltfKey = (typeof HERO_GLTF_KEYS)[number];
+
+export const HERO_GLTF_CATALOG: Record<HeroGltfKey, string> = {
+  hero_frontier_city_hall: `${HERO_GLTF_BASE}/hero_frontier_city_hall.glb`,
+};
+
+/** Resolve a hero landmark key to its public GLB path, or null when unmapped. */
+export function resolveHeroGltfPath(key: string): string | null {
+  if (key in HERO_GLTF_CATALOG) {
+    return HERO_GLTF_CATALOG[key as HeroGltfKey];
+  }
+  return null;
+}
+
+/** HEAD probe — true when a GLB is present under `public/`. */
+export async function checkGltfAssetExists(path: string): Promise<boolean> {
+  try {
+    const res = await fetch(path, { method: "HEAD", cache: "no-store" });
+    const type = res.headers.get("content-type") ?? "";
+    return (
+      res.ok &&
+      (type.includes("model/gltf") ||
+        type.includes("octet-stream") ||
+        type.includes("application"))
+    );
+  } catch {
+    return false;
+  }
 }

@@ -76,6 +76,7 @@ export function validateManifest({ requireOnDisk = true } = {}) {
       for (const ent of readdirSync(dir, { withFileTypes: true })) {
         const childRel = rel ? `${rel}/${ent.name}` : ent.name;
         if (ent.isDirectory()) {
+          if (ent.name === "heroes") continue;
           walk(join(dir, ent.name), childRel);
         } else if (ent.name.endsWith(".glb") && !manifestRels.has(childRel)) {
           errors.push(`orphan GLB (not in manifest): web/public/assets/gltf/${childRel}`);

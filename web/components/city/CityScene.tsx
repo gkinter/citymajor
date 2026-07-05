@@ -23,6 +23,7 @@ import { TrafficOverlay } from "./TrafficOverlay";
 import { ServiceCoverageOverlay } from "./ServiceCoverageOverlay";
 import { EventMarkers } from "./EventMarkers";
 import { EraLandmarkPlaceholder } from "./EraLandmarkPlaceholder";
+import { FrontierCityHallLandmark } from "./FrontierCityHallLandmark";
 
 type CitySceneProps = {
   city: CityData;
@@ -146,6 +147,7 @@ export function CityScene({
         activeEvents={activeEvents}
         onEventClick={onEventMarkerClick}
       />
+      <FrontierCityHallLandmark era={era} />
       <EraLandmarkPlaceholder era={era} eraProgress={eraProgress} />
       <TilePicker onPick={onPick} />
     </>

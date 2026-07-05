@@ -1,5 +1,9 @@
 import { eraQuestTitle } from "@/lib/era-narrative";
 import { HUD_ERA_BADGE_COLORS } from "@/lib/era";
+import {
+  HERO_GLTF_BASE,
+  checkGltfAssetExists,
+} from "@/lib/gltf-catalog";
 import type { EraProgress } from "@/lib/sim-bridge";
 
 /** Monument names per next era — ERA_ARC_DESIGN_V2 §6.B + MESHY_HERO_LANDMARKS. */
@@ -17,8 +21,6 @@ const ERA_LANDMARK_HERO_FILES: Record<number, string> = {
   3: "hero_modern_glass_tower.glb",
   4: "inf_future_fusion_reactor.glb",
 };
-
-const HERO_GLTF_BASE = "/assets/gltf/heroes";
 
 export type EraLandmarkSpec = {
   landmarkName: string;
@@ -80,13 +82,5 @@ export function eraLandmarkGltfPath(nextEra: number): string | null {
   return `${HERO_GLTF_BASE}/${file}`;
 }
 
-/** HEAD probe — true when the hero GLB is present under `public/assets/gltf/heroes/`. */
-export async function checkEraLandmarkGltfExists(path: string): Promise<boolean> {
-  try {
-    const res = await fetch(path, { method: "HEAD", cache: "no-store" });
-    const type = res.headers.get("content-type") ?? "";
-    return res.ok && (type.includes("model/gltf") || type.includes("octet-stream") || type.includes("application"));
-  } catch {
-    return false;
-  }
-}
+/** @deprecated Use `checkGltfAssetExists` from `@/lib/gltf-catalog`. */
+export const checkEraLandmarkGltfExists = checkGltfAssetExists;

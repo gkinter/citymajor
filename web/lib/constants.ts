@@ -30,9 +30,53 @@ export const MIN_DPR = 0.5;
 export const MAX_DPR = 2;
 
 /** Graphics quality tier — controls post-processing and other GPU-heavy features. */
-export type GraphicsQualityTier = "low" | "high";
+export type GraphicsQualityTier = "low" | "med" | "high" | "ultra";
 
 export const GRAPHICS_QUALITY_STORAGE_KEY = "citymajor_graphics_quality";
+
+export const GRAPHICS_QUALITY_TIERS: readonly {
+  tier: GraphicsQualityTier;
+  label: string;
+  tooltip: string;
+}[] = [
+  {
+    tier: "low",
+    label: "Low",
+    tooltip: "Fastest — no bloom, lower pixel density on weak GPUs",
+  },
+  {
+    tier: "med",
+    label: "Med",
+    tooltip: "Balanced — no bloom, adaptive resolution for steady FPS",
+  },
+  {
+    tier: "high",
+    label: "High",
+    tooltip: "Bloom and full adaptive pixel density",
+  },
+  {
+    tier: "ultra",
+    label: "Ultra",
+    tooltip: "Maximum bloom and pixel density — best on discrete GPUs",
+  },
+] as const;
+
+const GRAPHICS_QUALITY_TIER_SET = new Set<GraphicsQualityTier>(
+  GRAPHICS_QUALITY_TIERS.map(({ tier }) => tier),
+);
+
+export function parseStoredQualityTier(
+  stored: string | null,
+): GraphicsQualityTier {
+  if (stored && GRAPHICS_QUALITY_TIER_SET.has(stored as GraphicsQualityTier)) {
+    return stored as GraphicsQualityTier;
+  }
+  return "med";
+}
+
+export function isPostProcessingEnabled(tier: GraphicsQualityTier): boolean {
+  return tier === "high" || tier === "ultra";
+}
 
 /** Persist traffic heatmap overlay visibility on /play. */
 export const TRAFFIC_OVERLAY_STORAGE_KEY = "citymajor_traffic_overlay";

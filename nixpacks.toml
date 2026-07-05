@@ -12,8 +12,9 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "pnpm build:wasm || echo 'WARN: WASM build failed — procedural fallback'",
-  "pnpm --filter @citymajor/web build",
+  "if [ \"${BUILD_WASM:-1}\" = \"1\" ]; then pnpm build:wasm && test -f web/public/dotnet/_framework/blazor.boot.json || { echo 'ERROR: BUILD_WASM=1 but WASM bundle missing' >&2; exit 1; }; else echo 'BUILD_WASM=0 — skip WASM publish'; fi",
+  "export SKIP_WASM_BUILD=1",
+  "pnpm --filter @citymajor/web exec next build",
 ]
 
 [start]

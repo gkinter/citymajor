@@ -80,9 +80,10 @@ function formatQuota(remaining: number | undefined): string {
 }
 
 function readStoredQualityTier(): GraphicsQualityTier {
-  if (typeof window === "undefined") return "high";
+  if (typeof window === "undefined") return "low";
   const stored = window.localStorage.getItem(GRAPHICS_QUALITY_STORAGE_KEY);
-  return stored === "low" ? "low" : "high";
+  if (stored === "high" || stored === "low") return stored;
+  return "low";
 }
 
 function readStoredTrafficOverlay(): boolean {
@@ -307,6 +308,9 @@ export function PlayClient() {
     setHeraldEvent(null);
     setHeraldSimEvent(null);
     setHeraldSpecialEdition(true);
+    setHeraldBucketReason(
+      "Population and technology gates cleared — era transition special edition",
+    );
     try {
       setHeraldEvent(narrativeFromEraTransition(era));
     } catch (err) {
@@ -584,6 +588,14 @@ export function PlayClient() {
         open={lawOpen}
         onClose={() => setLawOpen(false)}
         resources={simResources}
+      />
+
+      <CitizenPanel
+        open={citizenOpen}
+        onClose={() => setCitizenOpen(false)}
+        resources={simResources}
+        selection={citizenSelection}
+        onSelectHousehold={handleSelectHousehold}
       />
 
       <HudToast

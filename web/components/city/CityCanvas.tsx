@@ -34,6 +34,7 @@ import { playPaintFeedback } from "@/lib/paint-feedback";
 import { CityScene } from "./CityScene";
 import { AdaptiveDpr } from "./AdaptiveDpr";
 import { CityPostProcessing } from "./CityPostProcessing";
+import { CanvasRenderHealth } from "./CanvasRenderHealth";
 import { Minimap } from "./Minimap";
 
 function skyColorForApproval(approval: number | undefined): string {
@@ -91,6 +92,14 @@ export function CityCanvas({
   const [simResources, setSimResources] = useState<SimResources | null>(null);
   const [simSource, setSimSource] = useState<"wasm" | "procedural">("procedural");
   const [bridgeReady, setBridgeReady] = useState(false);
+  const [postProcessingDisabled, setPostProcessingDisabled] = useState(false);
+  const [renderHealthStats, setRenderHealthStats] = useState<
+    Pick<FpsStats, "visibleBuildings" | "visibleChunks" | "totalBuildings">
+  >({
+    visibleBuildings: 0,
+    visibleChunks: 0,
+    totalBuildings: city.buildings.length,
+  });
   const chunks = useMemo(() => createChunkStates(), []);
   const healthcareCoverage = useMemo(
     () => simResources?.healthcareCoverage ?? estimateHealthcareCoverage(city),
@@ -309,6 +318,22 @@ export function CityCanvas({
     onStats(latestStats.current);
   }, [pickedTile, dpr, simSource, healthcareCoverage, onStats]);
 
+  const handleRenderHealth = useCallback(
+    (partial: Pick<FpsStats, "visibleBuildings" | "visibleChunks" | "totalBuildings">) => {
+      setRenderHealthStats((prev) => {
+        if (
+          prev.visibleBuildings === partial.visibleBuildings &&
+          prev.visibleChunks === partial.visibleChunks &&
+          prev.totalBuildings === partial.totalBuildings
+        ) {
+          return prev;
+        }
+        return partial;
+      });
+    },
+    [],
+  );
+
   const handleStats = (partial: FpsStats) => {
     latestStats.current = {
       ...partial,
@@ -325,6 +350,18 @@ export function CityCanvas({
     () => skyColorForApproval(simResources?.approval),
     [simResources?.approval],
   );
+
+  const handleRenderFallback = useCallback((reason: string) => {
+    console.warn(`[CityMajor] Render fallback (${reason}) — procedural city + terrain`);
+    setPostProcessingDisabled(true);
+    setSimSource("procedural");
+    setCity(getCityData());
+    setZones([]);
+    setRoads([]);
+    setTraffic([]);
+    setServiceCoverage([]);
+    setSimResources(null);
+  }, []);
 
   const handleGlCreated = useCallback(
     ({ gl }: { gl: THREE.WebGLRenderer }) => {
@@ -373,6 +410,7 @@ export function CityCanvas({
               onCitizenDotClick={onCitizenDotClick}
               onPick={handlePick}
               onStats={handleStats}
+              onRenderHealth={handleRenderHealth}
               dpr={dpr}
               population={simResources?.population ?? 0}
               householdCount={simResources?.householdCount}
@@ -380,7 +418,22 @@ export function CityCanvas({
               eraProgress={simResources?.eraProgress}
             />
             <AdaptiveDpr dpr={dpr} onDprChange={setDpr} />
-            <CityPostProcessing qualityTier={qualityTier} />
+            <CityPostProcessing
+              qualityTier={qualityTier}
+              disabled={postProcessingDisabled}
+              sceneReady={
+                renderHealthStats.visibleBuildings > 0 &&
+                renderHealthStats.visibleChunks > 0
+              }
+            />
+            <CanvasRenderHealth
+              stats={renderHealthStats}
+              postProcessingActive={
+                qualityTier === "high" && !postProcessingDisabled
+              }
+              onDisablePostProcessing={() => setPostProcessingDisabled(true)}
+              onRenderFallback={handleRenderFallback}
+            />
           </Suspense>
         </Canvas>
       </div>

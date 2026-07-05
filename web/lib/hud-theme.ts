@@ -217,7 +217,7 @@ export function hudEraHeaderRow(extra?: CSSProperties): CSSProperties {
   };
 }
 
-/** Compact progress track for era / quest meters. */
+/** Compact progress track for research / era / quest meters. */
 export function hudProgressTrack(extra?: CSSProperties): CSSProperties {
   return {
     height: 5,

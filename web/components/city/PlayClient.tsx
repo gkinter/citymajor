@@ -79,6 +79,7 @@ import {
   isEducationBuildTypeId,
   type EducationBuildTypeId,
 } from "@/lib/education-buildings";
+import { handlePlayKeyboardShortcut } from "@/lib/play-keyboard";
 
 export type BuildMode = "zone" | "road" | "plop" | "education";
 
@@ -500,6 +501,59 @@ export function PlayClient() {
     setBuildOpen(false);
   }, []);
 
+  const handleEnterZoneMode = useCallback(() => {
+    setBuildOpen(false);
+    setBuildTypeId(null);
+    setBuildMode("zone");
+    setActiveTool((tool) =>
+      tool === "road" || tool === "bulldoze" ? "residential" : tool,
+    );
+  }, []);
+
+  const handleToggleBuildMenu = useCallback(() => {
+    setBuildOpen((open) => !open);
+  }, []);
+
+  const handleKeyboardSelectRoad = useCallback(() => {
+    handleToolChange("road");
+  }, [handleToolChange]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        heraldOpen ||
+        researchOpen ||
+        economyOpen ||
+        lawOpen ||
+        citizenOpen
+      ) {
+        return;
+      }
+
+      handlePlayKeyboardShortcut(event, {
+        onToggleBuildMenu: handleToggleBuildMenu,
+        onEnterZoneMode: handleEnterZoneMode,
+        onSelectRoad: handleKeyboardSelectRoad,
+        onSelectZoneTool: handleToolChange,
+        unlockedTechIds: simResources?.unlockedTechIds,
+      });
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [
+    citizenOpen,
+    economyOpen,
+    handleEnterZoneMode,
+    handleKeyboardSelectRoad,
+    handleToggleBuildMenu,
+    handleToolChange,
+    heraldOpen,
+    lawOpen,
+    researchOpen,
+    simResources?.unlockedTechIds,
+  ]);
+
   const canvasActiveTool: ZoningTool =
     buildMode === "road" ? "road" : activeTool;
 
@@ -587,7 +641,7 @@ export function PlayClient() {
               : {}),
           }}
           aria-pressed={buildOpen || buildMode === "plop" || buildMode === "education"}
-          title="Open build catalog — place civic and service buildings"
+          title="Open build catalog — place civic and service buildings (B)"
           onClick={() => setBuildOpen((open) => !open)}
         >
           Build

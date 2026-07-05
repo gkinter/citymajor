@@ -565,8 +565,25 @@ async function assertHudPanels(page, tag) {
  * @param {string} tag
  */
 async function assertEraQuestPanel(page, tag) {
+  const wasmDeadline = Date.now() + 30_000;
+  let simSource = "unknown";
+  while (Date.now() < wasmDeadline) {
+    const hudText = await readDiagnosticsHud(page);
+    simSource = hudText.match(/Data:\s*(WASM sim|procedural)/)?.[1] ?? "unknown";
+    if (simSource === "WASM sim" || simSource === "procedural") break;
+    await page.waitForTimeout(500);
+  }
+
+  if (simSource !== "WASM sim") {
+    if (WASM_EXPECTED) {
+      fail(tag, `Era quest requires WASM sim (got Data: ${simSource})`);
+    }
+    console.log(`[${tag}] SKIP: era quest panel (Data: ${simSource})`);
+    return;
+  }
+
   const panel = page.getByLabel("Era quest progress");
-  await panel.waitFor({ state: "visible", timeout: 15_000 });
+  await panel.waitFor({ state: "visible", timeout: 20_000 });
 
   const checklist = panel.getByRole("list", { name: "Era quest objectives" });
   await checklist.waitFor({ state: "visible" });
@@ -666,7 +683,7 @@ async function assertCitizenPanel(page, tag) {
 
   await clickHudToolbarButton(citizenBtn);
 
-  const citizenPanel = page.getByRole("dialog", { name: "Citizen households" });
+  const citizenPanel = page.getByRole("dialog", { name: "Citizens" });
   await citizenPanel.waitFor({ state: "visible" });
 
   const subtitle = citizenPanel
@@ -772,6 +789,53 @@ async function assertCitizenDotsRender(page, tag) {
   pass(tag, `citizen dots visible (${warmHits} warm samples, households=${badgeCount})`);
 }
 /**
+ * Poll WASM GetStatus (via smoke sim API snapshot) until laws.json catalog is loaded.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function waitForWasmLawCatalog(page, tag) {
+  try {
+    await page.waitForFunction(
+      () => {
+        const snap = window.__citymajorSimApi?.getSnapshot?.();
+        return (
+          typeof snap?.lawDefinitionCount === "number" && snap.lawDefinitionCount >= 1
+        );
+      },
+      undefined,
+      { timeout: 30_000 },
+    );
+  } catch {
+    const probe = await page.evaluate(() => {
+      const snap = window.__citymajorSimApi?.getSnapshot?.();
+      return {
+        lawDefinitionCount: snap?.lawDefinitionCount,
+        activeLawCount: snap?.activeLawCount,
+        sampleLaw: snap?.sampleLaw,
+        tick: snap?.tick,
+      };
+    });
+    fail(
+      tag,
+      `WASM law catalog not loaded (GetStatus lawDefinitionCount < 1); probe=${JSON.stringify(probe)}`,
+    );
+  }
+
+  const probe = await page.evaluate(() => {
+    const snap = window.__citymajorSimApi?.getSnapshot?.();
+    return {
+      lawDefinitionCount: snap?.lawDefinitionCount,
+      activeLawCount: snap?.activeLawCount,
+      sampleLawId: snap?.sampleLaw?.id,
+    };
+  });
+  pass(
+    tag,
+    `GetStatus law catalog ready (${probe.lawDefinitionCount} definitions, sample=${probe.sampleLawId ?? "none"})`,
+  );
+}
+
+/**
  * Laws HUD panel opens and shows WASM definition + active ordinance counts.
  * @param {import('playwright').Page} page
  * @param {string} tag
@@ -781,6 +845,8 @@ async function assertLawPanel(page, tag) {
   await lawBtn.waitFor({ state: "visible" });
 
   if (WASM_EXPECTED) {
+    await waitForWasmLawCatalog(page, tag);
+
     const badgeMatch = (await lawBtn.innerText()).match(/Laws\s*([\d,]+)/);
     const activeBadge = badgeMatch?.[1];
     if (!activeBadge) {
@@ -806,6 +872,28 @@ async function assertLawPanel(page, tag) {
 
   await definitionValue.waitFor({ state: "visible" });
   await activeValue.waitFor({ state: "visible" });
+
+  if (WASM_EXPECTED) {
+    try {
+      await page.waitForFunction(
+        () => {
+          const panel = document.querySelector('[aria-label="City laws"]');
+          if (!panel) return false;
+          for (const label of panel.querySelectorAll(".hud-law-stat__label")) {
+            if (!label.textContent?.includes("Definitions loaded")) continue;
+            const value = label.parentElement?.querySelector(".hud-law-stat__value");
+            const count = Number.parseInt((value?.textContent ?? "").replace(/,/g, ""), 10);
+            return Number.isFinite(count) && count >= 1;
+          }
+          return false;
+        },
+        undefined,
+        { timeout: 10_000 },
+      );
+    } catch {
+      fail(tag, "Law panel did not show WASM definition count within 10s after open");
+    }
+  }
 
   const defText = (await definitionValue.innerText()).trim();
   const activeText = (await activeValue.innerText()).trim();

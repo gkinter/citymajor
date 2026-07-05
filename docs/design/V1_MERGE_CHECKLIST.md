@@ -4,7 +4,7 @@
 **Branch:** `feat/wasm-r3f-integration-2026-07-04`  
 **PR:** [#1 — feat: CityMajor Web v1 — R3F + WASM integration spine](https://github.com/gkinter/citymajor/pull/1)  
 **Scope charter:** [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) · [SB-3704](https://linear.app/softblaze/issue/SB-3704)  
-**Last updated:** 2026-07-05 (`0d07bd9` · Docker LFS fix · worktree `citymajor-web-r3f-spike`)
+**Last updated:** 2026-07-05 (wave 15 build loop · worktree `citymajor-pr1-changelog` · see [PR1_BODY_DRAFT.md](./PR1_BODY_DRAFT.md))
 
 > PR #1 documents the v1 integration spine for review and preview deploys. **Do not merge to `main` until every **blocking** row below is checked.** Deferred items stay tracked in Linear under phase epics [SB-3726](https://linear.app/softblaze/issue/SB-3726)+.
 
@@ -17,7 +17,7 @@
 | [Cursor Bugbot](#1-cursor-bugbot) | Yes | **NEUTRAL** on `776d65d` — zero Critical/Major |
 | [Smoke suite](#2-smoke-suite) | Yes | **Green** — **46/46** deploy parity (local + FQDN + GHA); `WASM_EXPECTED=1` + LFS (`d5b8daa`) |
 | [Coolify preview URL](#3-coolify-preview-url) | Yes | **Current on `776d65d`** — FQDN 200; `CITYMAJOR_SESSION_SECRET` required (`5dd6f62`); **manual deploy** (webhook gap — [DEPLOY_WEB.md](../DEPLOY_WEB.md)) |
-| [Gameplay sprint](#8-gameplay-sprint) | Yes (player loop) | **Phase 3 wave 4** — road `place_road` smoke (`9d92661`), citizen/law smoke, CanvasRenderHealth, **7 hero GLBs**, service WASM |
+| [Gameplay sprint](#8-gameplay-sprint) | Yes (player loop) | **Phase 3 wave 15** — **7 zone tiers**, categorized **build menu**, WASM **`place_building`**, **education toolbar** (`5a0b08e`); wave-4 depth retained |
 | [Meshy assets](#4-meshy-assets) | Yes (v1 art minimum) | **Partial** — **41 manifest jobs**; **49 GLBs** on disk (7 heroes); P0 **25/108** shipped [SB-3730](https://linear.app/softblaze/issue/SB-3730) |
 | [Stripe stub vs live](#5-stripe-stub-vs-live) | Yes (monetization path) | **Mock on preview** — `stripeCheckoutEnabled: false`; live test-mode docs [SB-3714](https://linear.app/softblaze/issue/SB-3714) |
 | [Perf gate](#6-perf-gate) | Yes (launch only) | **Fails on software renderer** — headless GHA/Chromium `maxFps` &lt; 15 ⇒ exit 1 unless skipped; GPU sign-off open [SB-3703](https://linear.app/softblaze/issue/SB-3703) |
@@ -64,8 +64,8 @@ Depth + stability work after Phase 2 close. See [V1_GAMEPLAY_BUILD_PLAN.md](./V1
 | Hero GLTF landmark swap | [SB-3680](https://linear.app/softblaze/issue/SB-3680) | **Superseded** — see wave-2 (**Partial**) |
 | Cloud save binary | [SB-3686](https://linear.app/softblaze/issue/SB-3686) | **Superseded** — see wave-2 (**Partial**) |
 
-**HEAD (wave-4):** `776d65d` — `feat(heroes): add five Meshy pilot landmarks via MCP` (7 heroes; manifest **41 jobs**; session secret fix `5dd6f62`)  
-**Worktree:** `citymajor-web-r3f-spike` · branch `feat/wasm-r3f-integration-2026-07-04`
+**HEAD (wave-15):** `5a0b08e` — `fix(wave15): wire PlayClient deps from play-build integration` (7 zone tiers + build menu + WASM `place_building` + education)  
+**Worktree:** `citymajor-web-r3f-spike` · branch `feat/wasm-r3f-integration-2026-07-04` · merged from `feat/wave15-build-menu-merge-2026-07-05`
 
 ### Phase 3 wave 4 — continuation (`9b82eb1` → `776d65d`, 2026-07-05)
 
@@ -111,6 +111,25 @@ Depth systems after Phase 3 kickoff. See [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPL
 | **HUD theming** | `hud-tokens.css`, `hud-theme.ts` | **Shipped** — shared tokens for citizen/law/economy panels |
 
 **Post-`4b78131` commits (2026-07-05):** `bcabb2e`/`de480ec` LFS GLBs · `93f4341` Node 22 CI · `d5b8daa` LFS checkout · `73dcdba`/`ea216de` frontier `res_low` 06–10 · `600378f` diagnostics HUD · `e4d707c` perf-gate LFS · `9d92661` `place_road` smoke · `6e68ef6` `res_low` 11–12 · `9e52e5c` Meshy inventory · `0e555de` hero church LFS · `82d56ab`/`4219334` `res_low` 13–15 · `cd803b2`/`14a1881` `res_low` 16–17 · `10eb61e` `res_low` 18 + hero GLB smoke · `5dd6f62` session secret hardening · `15d6bbe` `res_low` 19–22 + manifest **41 jobs** · `776d65d` **7 hero** pilot GLBs.
+
+### Phase 3 wave 15 — build loop (`5a0b08e`, 2026-07-05)
+
+Player-facing **paint + plop** loop: tiered zoning, categorized civic build menu, road types, WASM manual building placement, and education overlay. Merged via `feat/wave15-build-menu-merge-2026-07-05` → integration branch. See [PR1_BODY_DRAFT.md](./PR1_BODY_DRAFT.md) for PR #1 copy.
+
+| Area | Key files / branch | Status |
+|------|-------------------|--------|
+| **7 zone tiers** — R-low, R-high, C, I, Office, Mixed, Ag | `zone-tiers.ts`, `ZoningToolbar.tsx`, `zone-content-keys.json` — `feat/zoning-toolbar-tiers-2026-07-05` | **Shipped** — tech-gated paint (`T029` R-high, `T086` mixed, `T134` office, `T047` ag); `unlockedTechIds` from WASM research snapshot |
+| **Tech unlock bridge** — zone content keys in CI | `v1-unlock-bridge.json`, `verify-tech-unlocks.mjs` — `feat/tech-zone-unlocks-2026-07-05` | **Shipped** — `pnpm verify:tech-unlocks` precheck in `smoke:all` |
+| **Build menu** — categorized civic ploppables | `build-catalog.ts`, `BuildToolbar.tsx` — `feat/build-catalog-2026-07-05`, `feat/build-toolbar-2026-07-05` | **Shipped** — tabs Civic / Education / Safety / Utilities / Parks; entries filtered by `isBuildUnlocked(unlockedTechIds)` |
+| **Road type toolbar** — dirt / paved / highway tiers | `road-types.ts`, `RoadTypeToolbar.tsx` — `feat/road-type-toolbar-2026-07-05` | **Shipped** — `buildMode: "road"` selects tier before `place_road` paint |
+| **WASM `place_building`** — manual civic placement | `WasmExports.PlaceBuilding`, `WasmSimHost.cs`, `sim-worker.ts`, `CityCanvas.tsx` — `feat/wasm-place-building-2026-07-05`, `feat/place-building-canvas-2026-07-05` | **Shipped** — tile click sends `{ type: "place_building", tileX, tileZ, typeId }`; smoke probe in `smoke-play-checks.mjs` (skips on procedural fallback) |
+| **Education toolbar** — schoolhouse + elementary | `education-buildings.ts`, `EducationToolbar.tsx` — `feat/education-build-ui-2026-07-05` | **Shipped** — `buildMode: "education"`; TypeIds 503 (frontier schoolhouse), 524 (industrial elementary) |
+| **PlayClient wiring** — zone / road / plop / education modes | `PlayClient.tsx` — `feat/play-build-integration-2026-07-05` | **Shipped** — mutual-exclusive toolbars; `activeBuildTypeId` → `CityCanvas` plop cursor |
+| **Build-menu smoke** — `place_building` + toolbar depth | `smoke-play-checks.mjs` — `feat/build-menu-smoke-2026-07-05` | **Shipped** — civic `place_building` assert when WASM active; build toolbar presence checks |
+
+**Wave-15 stack (merge order):** tech-zone-unlocks → zone-tiers → zoning-toolbar → road-type-toolbar → place-building-canvas → wasm-place-building → build-catalog → build-toolbar → education-build-ui → build-menu-smoke → play-build integration (`5a0b08e`).
+
+**Deferred (wave 16+):** transport toolbar (bus/rail stubs), full civic TypeId→tile persistence in snapshot smoke, office/mixed zone growth visuals at Industrial+ density.
 
 ---
 
@@ -492,8 +511,8 @@ Only these block merging PR #1 to `main`. Everything else is **post-merge** or *
 
 ## Merge decision
 
-> **DECISION (2026-07-05, `e96fe1c`): GO — merge PR #1 spine to `main`.**
-> All spine gates pass (Bugbot NEUTRAL, smoke 46/46 deploy parity, Coolify preview current, Phase 2 + Phase 3 wave-4 shipped). Remaining items below are **v1 LAUNCH NO-GO**, not spine blockers — they stay on post-merge parallel tracks under [SB-3726](https://linear.app/softblaze/issue/SB-3726)+.
+> **DECISION (2026-07-05, `5a0b08e`): GO — merge PR #1 spine to `main`.**
+> All spine gates pass (Bugbot NEUTRAL, smoke 46/46 deploy parity, Coolify preview current, Phase 2 + Phase 3 wave-4 + **wave-15 build loop** shipped). Remaining items below are **v1 LAUNCH NO-GO**, not spine blockers — they stay on post-merge parallel tracks under [SB-3726](https://linear.app/softblaze/issue/SB-3726)+.
 
 ### Safe to merge PR #1 spine when
 
@@ -504,6 +523,7 @@ Only these block merging PR #1 to `main`. Everything else is **post-merge** or *
 - [x] Phase 2 gameplay sprint shipped — roads, traffic, events, citizens, services, research UX, onboarding, landmarks
 - [x] Phase 3 kickoff stability — black canvas fix, economy panel, overlay a11y (`79ef561`)
 - [x] Phase 3 wave 4 — herald commands, era gates, tech bridge, CMJR/citizen/law/trade/LLM paths + `place_road` smoke + **7 hero GLBs** + `res_low_frontier_22` + session secret fix (`776d65d`, `5dd6f62`)
+- [x] Phase 3 wave 15 — **7 zone tiers**, categorized **build menu**, WASM **`place_building`**, **education toolbar**, road-type toolbar, PlayClient `zone|road|plop|education` modes (`5a0b08e`)
 - [x] Industrial Meshy GLBs — `com/ind_industrial_00` + `res_high_industrial_00`/`_01` + `res_low_industrial_00`/`_01` + `com_industrial_01` LFS (`464fa29`, `1d9a115`, `e96fe1c`)
 - [x] Team acknowledges Meshy partial batch / Stripe live / **GPU** perf sign-off / **webhook manual deploy** as **post-merge** parallel tracks ([SB-3726](https://linear.app/softblaze/issue/SB-3726))
 
@@ -525,7 +545,8 @@ Remaining **v1 LAUNCH NO-GO** at `e96fe1c`:
 |-----|---------|
 | [DEPLOY_WEB.md](../DEPLOY_WEB.md) | Coolify + Docker + env vars |
 | [MESHY_ASSET_CATALOG.md](./MESHY_ASSET_CATALOG.md) | 500-key taxonomy + batch manifests |
-| [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPLAY_BUILD_PLAN.md) | Phase 2 shipped · Phase 3 active · wave-4 `776d65d` |
+| [PR1_BODY_DRAFT.md](./PR1_BODY_DRAFT.md) | PR #1 body copy — wave-15 build loop deliverables |
+| [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPLAY_BUILD_PLAN.md) | Phase 2 shipped · Phase 3 active · wave-15 `5a0b08e` |
 | [WASM_SIM_BRIDGE.md](./WASM_SIM_BRIDGE.md) | Worker / snapshot contract |
 | [SAVE_FORMAT_WEB.md](./SAVE_FORMAT_WEB.md) | CMJR cloud save schema (§3 — wave-2 interim JSON chunk) |
 | [GAP_AUDIT_DESIGN_DOCS.md](./GAP_AUDIT_DESIGN_DOCS.md) | Doc contradictions resolved |

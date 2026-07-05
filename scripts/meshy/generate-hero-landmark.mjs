@@ -22,6 +22,12 @@ const HERO_BRIEFS = {
     target_polycount: 3500,
     ai_model: "meshy-6",
   },
+  hero_frontier_church: {
+    prompt:
+      "Mid-fidelity game asset, 1860s frontier wooden church, white painted clapboard walls, steep gabled roof, simple steeple with cross, arched double doors, tall narrow windows, small cemetery-free isolated building, warm timber and white palette, clean silhouette for city builder game, PBR game-ready, no landscape",
+    target_polycount: 3000,
+    ai_model: "meshy-6",
+  },
 };
 
 async function mcpToolCall(toolName, toolArgs, retries = 8) {

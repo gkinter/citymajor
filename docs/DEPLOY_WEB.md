@@ -266,6 +266,8 @@ The `wasm` stage runs `dotnet publish` for browser WASM — under-provisioned bu
 
 Coolify preview runs with `NODE_ENV=production` (set in the Dockerfile runner stage). **`CITYMAJOR_SESSION_SECRET` is required** — without it, `/api/saves`, entitlements, and checkout routes return 500 when minting or verifying the signed `citymajor_uid` cookie. Stripe vars remain optional unless testing live Founder Pass checkout.
 
+**Security:** Generate a unique random secret (≥32 chars); never copy the old dev placeholder from git history, and never set `NODE_ENV=development` on internet-facing deploys (that would mint cookies with a process-local ephemeral key instead of failing closed).
+
 | Variable | Required | Notes |
 |----------|----------|-------|
 | `CITYMAJOR_SESSION_SECRET` | **Yes** | ≥32 chars; signs `citymajor_uid` cookie — see [`STRIPE_COOLIFY_SETUP.md`](./STRIPE_COOLIFY_SETUP.md) |

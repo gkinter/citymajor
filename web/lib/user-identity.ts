@@ -1,4 +1,4 @@
-import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import type { NextResponse } from "next/server";
 
 /**
@@ -11,14 +11,31 @@ import type { NextResponse } from "next/server";
 const COOKIE_NAME = "citymajor_uid";
 const COOKIE_MAX_AGE_S = 60 * 60 * 24 * 365; // 1 year
 
-const DEV_SECRET =
-  "dev-only-secret-do-not-ship__please_set_CITYMAJOR_SESSION_SECRET";
+/** Former dev placeholder — reject if copied into runtime env (Bugbot: committed secret in prod). */
+const BLOCKED_SESSION_SECRETS = new Set([
+  "dev-only-secret-do-not-ship__please_set_CITYMAJOR_SESSION_SECRET",
+]);
 
+let devEphemeralSecret: string | null = null;
 let warnedAboutDevSecret = false;
+
+function getEphemeralDevSecret(): string {
+  if (!devEphemeralSecret) {
+    devEphemeralSecret = randomBytes(32).toString("base64url");
+  }
+  return devEphemeralSecret;
+}
 
 function getSecret(): string {
   const secret = process.env.CITYMAJOR_SESSION_SECRET;
-  if (secret && secret.length >= 32) return secret;
+  if (secret) {
+    if (BLOCKED_SESSION_SECRETS.has(secret)) {
+      throw new Error(
+        "CITYMAJOR_SESSION_SECRET must not be the committed dev placeholder — generate a unique secret of at least 32 chars",
+      );
+    }
+    if (secret.length >= 32) return secret;
+  }
   if (process.env.NODE_ENV === "production") {
     throw new Error(
       "CITYMAJOR_SESSION_SECRET must be set to a value of at least 32 chars in production",
@@ -27,10 +44,10 @@ function getSecret(): string {
   if (!warnedAboutDevSecret) {
     warnedAboutDevSecret = true;
     console.warn(
-      "[user-identity] CITYMAJOR_SESSION_SECRET not set — using dev fallback (non-production only)",
+      "[user-identity] CITYMAJOR_SESSION_SECRET not set — using ephemeral dev secret (non-production only; cookies reset on restart)",
     );
   }
-  return DEV_SECRET;
+  return getEphemeralDevSecret();
 }
 
 function sign(userId: string): string {

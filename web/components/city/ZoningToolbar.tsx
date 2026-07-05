@@ -177,6 +177,7 @@ export function ZoningToolbar({
         style={hudToolbar()}
         role="toolbar"
         aria-label="Zoning tools"
+        data-testid="zoning-toolbar"
         data-onboarding-target="zoning"
       >
         {ZONING_TOOLS.map(({ id, label, shortLabel, stub }) => {
@@ -189,7 +190,7 @@ export function ZoningToolbar({
             <button
               key={id}
               type="button"
-              data-testid={isZoneTierTool(id) ? `zoning-tool-${id}` : undefined}
+              data-testid={`zoning-tool-${id}`}
               className={highDemand ? "hud-zoning-btn--demand" : undefined}
               style={hudButton(activeTool === id && unlocked, stub || locked)}
               disabled={stub || locked}

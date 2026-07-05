@@ -888,29 +888,53 @@ async function assertZoningToolbar(page, tag) {
   pass(tag, `zoning toolbar has ${count} zone buttons`);
 }
 
+/** Baseline unlocked zone tier for build-menu e2e (Frontier starter). */
+const BUILD_MENU_ZONE_TIER = "commercial";
+
 /**
- * BuildToolbar or standalone Build control — skipped when build UI not merged.
+ * Open Build toolbar, select a zoning tier via data-testid, assert HUD stays visible.
+ * Skipped when build UI not merged.
  * @param {import('playwright').Page} page
  * @param {string} tag
- * @returns {Promise<boolean>} true when build UI is present
  */
-async function assertBuildToolbarOrSkip(page, tag) {
-  const buildToolbar = page.getByTestId("build-toolbar");
-  if ((await buildToolbar.count()) > 0) {
-    await buildToolbar.waitFor({ state: "visible" });
-    pass(tag, "build toolbar mounted");
-    return true;
-  }
-
+async function assertBuildMenuE2e(page, tag) {
   const buildBtn = page.getByRole("button", { name: /^Build\b/i });
-  if ((await buildBtn.count()) > 0) {
-    await buildBtn.first().waitFor({ state: "visible" });
-    pass(tag, "build button present");
-    return true;
+  if ((await buildBtn.count()) === 0) {
+    console.log(`[${tag}] SKIP: build button not on page`);
+    return;
   }
 
-  console.log(`[${tag}] SKIP: build toolbar not merged yet`);
-  return false;
+  await buildBtn.first().waitFor({ state: "visible" });
+  await clickHudToolbarButton(buildBtn.first());
+
+  const buildToolbar = page.getByTestId("build-toolbar");
+  if ((await buildToolbar.count()) === 0) {
+    console.log(`[${tag}] SKIP: build toolbar not merged yet`);
+    return;
+  }
+  await buildToolbar.waitFor({ state: "visible" });
+  pass(tag, "build toolbar opened");
+
+  const zoneBtn = page.getByTestId(`zoning-tool-${BUILD_MENU_ZONE_TIER}`);
+  if ((await zoneBtn.count()) === 0) {
+    fail(tag, `zoning tier button missing (data-testid=zoning-tool-${BUILD_MENU_ZONE_TIER})`);
+  }
+  if (await zoneBtn.isDisabled()) {
+    fail(tag, `zoning tier ${BUILD_MENU_ZONE_TIER} locked on starter city`);
+  }
+
+  await clickHudToolbarButton(zoneBtn);
+  await expectAriaPressed(
+    zoneBtn,
+    "true",
+    tag,
+    `zoning tier ${BUILD_MENU_ZONE_TIER} did not activate (aria-pressed)`,
+  );
+  pass(tag, `zoning tier ${BUILD_MENU_ZONE_TIER} selected`);
+
+  const hud = page.getByText("Diagnostics");
+  await hud.waitFor({ state: "visible" });
+  pass(tag, "diagnostics HUD visible after build menu interaction");
 }
 
 /**
@@ -1630,7 +1654,7 @@ export async function runPlayChecks(page, options = {}) {
   await assertOptionalOverlayToolbars(page, tag);
   await assertServiceCoverageDiagnostics(page, tag);
   await assertZoningToolbar(page, tag);
-  await assertBuildToolbarOrSkip(page, tag);
+  await assertBuildMenuE2e(page, tag);
 
   if (options.screenshotPath) {
     await page.screenshot({ path: options.screenshotPath, fullPage: false });

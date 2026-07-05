@@ -54,6 +54,10 @@ function skyColorForApproval(approval: number | undefined): string {
 type CityCanvasProps = {
   activeTool: ZoningTool;
   brushSize: PaintBrushSize;
+  /** When set, tile clicks place this building type via WASM `place_building`. */
+  buildTypeId?: number | null;
+  /** Road tier for the road tool (0=dirt, 1=paved, 2=highway); encoded in local roadFlags. */
+  roadTier?: number;
   gameSpeed: GameSpeedLevel;
   qualityTier: GraphicsQualityTier;
   activeEvents?: ActiveEventSnapshot[];
@@ -67,9 +71,17 @@ type CityCanvasProps = {
   onZonePainted?: (zoneType: number) => void;
 };
 
+/** Encode road tier into roadFlags bits 4–5 (ToolSystem.cs); WASM PlaceRoad ignores tier. */
+function roadFlagsForTier(roadTier: number | undefined): number {
+  const tier = roadTier ?? 0;
+  return ((tier & 0x03) << 4) | 0x01;
+}
+
 export function CityCanvas({
   activeTool,
   brushSize,
+  buildTypeId,
+  roadTier,
   gameSpeed,
   qualityTier,
   activeEvents,
@@ -261,9 +273,25 @@ export function CityCanvas({
       const bridge = bridgeRef.current;
       const wasmLive = bridgeReady && simSource === "wasm" && bridge;
 
+      if (buildTypeId != null) {
+        if (wasmLive) {
+          for (const [dx, dz] of brushTileOffsets(brushSize)) {
+            bridge.send({
+              type: "place_building",
+              tileX: pick.tileX + dx,
+              tileZ: pick.tileZ + dz,
+              typeId: buildTypeId,
+            });
+          }
+        }
+        playPaintFeedback("zone");
+        return;
+      }
+
       if (activeTool === "road") {
+        const roadFlags = roadFlagsForTier(roadTier);
         setRoads((prev) =>
-          paintRoadBrush(prev, pick.tileX, pick.tileZ, 1, brushSize),
+          paintRoadBrush(prev, pick.tileX, pick.tileZ, roadFlags, brushSize),
         );
         if (wasmLive) {
           for (const [dx, dz] of brushTileOffsets(brushSize)) {
@@ -312,7 +340,7 @@ export function CityCanvas({
       playPaintFeedback("zone");
       onZonePainted?.(zoneType);
     },
-    [activeTool, brushSize, bridgeReady, simSource, onZonePainted],
+    [activeTool, brushSize, buildTypeId, roadTier, bridgeReady, simSource, onZonePainted],
   );
 
   useEffect(() => {

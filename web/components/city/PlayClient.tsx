@@ -49,7 +49,8 @@ import { LawPanel } from "@/components/city/LawPanel";
 import { CitizenButton } from "@/components/city/CitizenButton";
 import { CitizenPanel } from "@/components/city/CitizenPanel";
 import { HudToast } from "@/components/city/HudToast";
-import { techNameFromIndex } from "@/lib/tech-catalog";
+import { ResearchUnlockToast } from "@/components/city/ResearchUnlockToast";
+import { detectNewlyUnlockedContent, type NewlyUnlockedResearch } from "@/lib/tech-unlocks";
 import { HUD_ZONE, hudActionButton } from "@/lib/hud-theme";
 import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
@@ -149,7 +150,9 @@ export function PlayClient() {
     tileX?: number;
     tileZ?: number;
   } | null>(null);
-  const [researchToast, setResearchToast] = useState<string | null>(null);
+  const [researchUnlock, setResearchUnlock] = useState<NewlyUnlockedResearch | null>(
+    null,
+  );
   const [cashCrisisToast, setCashCrisisToast] = useState<string | null>(null);
   const [residentialZonePainted, setResidentialZonePainted] = useState(false);
   const [buildMode, setBuildMode] = useState<BuildMode>("zone");
@@ -371,23 +374,11 @@ export function PlayClient() {
     if (!ids) return;
 
     const prev = prevUnlockedTechRef.current;
-    const newlyUnlocked = ids.filter((id) => !prev.has(id));
+    const unlock = detectNewlyUnlockedContent(prev, ids);
     prevUnlockedTechRef.current = new Set(ids);
 
-    if (newlyUnlocked.length === 0) return;
-
-    const names = newlyUnlocked
-      .map((id) => techNameFromIndex(id))
-      .filter((name): name is string => Boolean(name));
-
-    if (names.length === 0) return;
-
-    const label =
-      names.length === 1
-        ? names[0]
-        : `${names.slice(0, 2).join(", ")}${names.length > 2 ? ` +${names.length - 2}` : ""}`;
-
-    setResearchToast(`Research complete: ${label}`);
+    if (!unlock) return;
+    setResearchUnlock(unlock);
   }, [simResources?.unlockedTechIds]);
 
   useEffect(() => {
@@ -727,16 +718,16 @@ export function PlayClient() {
         onSelectHousehold={handleSelectHousehold}
       />
 
-      <HudToast
-        message={researchToast}
-        onDismiss={() => setResearchToast(null)}
+      <ResearchUnlockToast
+        unlock={researchUnlock}
+        onDismiss={() => setResearchUnlock(null)}
         style={{ top: 130 }}
       />
 
       <HudToast
         message={cashCrisisToast}
         onDismiss={() => setCashCrisisToast(null)}
-        style={{ top: researchToast ? 168 : 130 }}
+        style={{ top: researchUnlock ? 168 : 130 }}
       />
 
       <HeraldPanel

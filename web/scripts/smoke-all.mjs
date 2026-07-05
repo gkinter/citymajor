@@ -13,6 +13,7 @@
  *
  *   pnpm smoke:all
  *   SCREENSHOT=1 pnpm smoke:all   # saves test-results/smoke-play.png
+ *   SMOKE_NARRATIVE=1 pnpm smoke:all   # asserts POST /api/narrative/event source field
  *
  * First run: npx playwright install chromium
  */

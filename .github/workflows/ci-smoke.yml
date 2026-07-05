@@ -1,0 +1,65 @@
+# Headless smoke suite — routes /, /shop, /play (Playwright + WebGL readPixels).
+# CI has no CITYMAJOR_SESSION_SECRET → SMOKE_SKIP_SAVES=1 skips /api/saves checks.
+# PLAY_VIEWPORT=1280x720 matches CityCanvas backing store (default Playwright viewport breaks readPixels).
+
+name: CI smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: cd web && npx playwright install chromium --with-deps
+
+      - name: Start dev server
+        run: |
+          pnpm dev > /tmp/dev-server.log 2>&1 &
+          echo $! > /tmp/dev-server.pid
+        env:
+          NODE_OPTIONS: ""
+
+      - name: Wait for http://localhost:3000
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000/play > /dev/null; then
+              echo "Dev server ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Dev server did not become ready in time"
+          tail -50 /tmp/dev-server.log || true
+          exit 1
+
+      - name: Run smoke suite
+        run: pnpm smoke:all
+        env:
+          SMOKE_SKIP_SAVES: "1"
+          PLAY_VIEWPORT: "1280x720"
+          HEADLESS: "1"
+
+      - name: Stop dev server
+        if: always()
+        run: |
+          if [ -f /tmp/dev-server.pid ]; then
+            kill "$(cat /tmp/dev-server.pid)" 2>/dev/null || true
+          fi

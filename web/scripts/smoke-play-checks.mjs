@@ -151,10 +151,20 @@ function createSaveApiSessionFromPage(page) {
     /** @param {string} path @param {RequestInit} [init] */
     async fetch(path, init = {}) {
       const { body, ...rest } = init;
-      const res = await page.request.fetch(`${BASE_URL}${path}`, {
-        ...rest,
-        ...(body !== undefined ? { data: body } : {}),
-      });
+      /** @type {import('playwright').APIRequestContext['fetch'] extends (...args: infer A) => unknown ? A[1] : never} */
+      const requestOptions = { ...rest };
+      if (body !== undefined) {
+        if (typeof body === "string") {
+          try {
+            requestOptions.json = JSON.parse(body);
+          } catch {
+            requestOptions.data = body;
+          }
+        } else {
+          requestOptions.data = body;
+        }
+      }
+      const res = await page.request.fetch(`${BASE_URL}${path}`, requestOptions);
       const headerRecord = res.headers();
       return {
         ok: res.ok(),

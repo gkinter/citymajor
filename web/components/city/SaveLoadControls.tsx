@@ -90,6 +90,52 @@ function formatWhen(iso: string): string {
   }
 }
 
+function latestSaveTime(saves: SaveSlotListItem[]): Date | null {
+  if (saves.length === 0) return null;
+  let latest = saves[0]!;
+  for (const slot of saves) {
+    if (new Date(slot.updatedAt) > new Date(latest.updatedAt)) latest = slot;
+  }
+  return new Date(latest.updatedAt);
+}
+
+function SaveStatusDot({
+  saving,
+  lastSaveAt,
+}: {
+  saving: boolean;
+  lastSaveAt: Date | null;
+}) {
+  const dotColor = saving ? "#ffd166" : lastSaveAt ? "#4ade80" : HUD_COLORS.textDim;
+  const title = saving
+    ? "Saving…"
+    : lastSaveAt
+      ? `Last saved ${formatWhen(lastSaveAt.toISOString())}`
+      : "No saves yet";
+
+  return (
+    <span
+      title={title}
+      aria-label={title}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        pointerEvents: "none",
+      }}
+    >
+      <span
+        style={{
+          width: 8,
+          height: 8,
+          borderRadius: "50%",
+          background: dotColor,
+          boxShadow: saving ? `0 0 6px ${dotColor}` : undefined,
+        }}
+      />
+    </span>
+  );
+}
+
 function isZoneSnapshot(
   value: unknown,
 ): value is NonNullable<SimSnapshot["zones"]>[number] {
@@ -312,10 +358,12 @@ export function SaveLoadControls({
   );
 
   const slotsFull = slotCount >= maxSlots;
+  const lastSaveAt = latestSaveTime(saves);
 
   return (
     <>
       <div style={barStyle} role="group" aria-label="Save and load">
+        <SaveStatusDot saving={saving} lastSaveAt={lastSaveAt} />
         <button
           type="button"
           style={hudActionButton(saving || slotsFull)}

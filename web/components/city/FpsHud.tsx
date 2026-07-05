@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { FPS_DEGRADE_THRESHOLD } from "@/lib/constants";
 import {
   HUD_COLORS,
   HUD_ZONE,
@@ -10,6 +11,23 @@ import {
 import { CHUNK_COUNT } from "@/lib/constants";
 import type { FpsStats } from "@/lib/types";
 import type { ZoningTool } from "@/lib/zoning";
+
+type FpsTone = "good" | "warn" | "bad";
+
+const FPS_GOOD_THRESHOLD = 55;
+
+const FPS_TONE_COLOR: Record<FpsTone, string> = {
+  good: "#7dffb2",
+  warn: "#e8d44a",
+  bad: HUD_COLORS.error,
+};
+
+function fpsTone(fps: number): FpsTone | null {
+  if (fps <= 0) return null;
+  if (fps >= FPS_GOOD_THRESHOLD) return "good";
+  if (fps >= FPS_DEGRADE_THRESHOLD) return "warn";
+  return "bad";
+}
 
 type FpsHudProps = {
   stats: FpsStats;
@@ -40,6 +58,8 @@ export function FpsHud({
   showChunkDebug = false,
 }: FpsHudProps) {
   const simLabel = stats.simSource === "wasm" ? "WASM sim" : "procedural";
+  const fpsToneKey = fpsTone(stats.fps);
+  const fpsDisplay = stats.fps > 0 ? String(stats.fps) : "—";
   const showCoverage =
     stats.healthcareCoverage !== undefined ||
     stats.policeCoverage !== undefined ||
@@ -49,7 +69,27 @@ export function FpsHud({
     <div style={{ ...HUD_ZONE.bottomLeft, ...hudInfoPanel() }}>
       <div style={sectionTitle}>Diagnostics</div>
       <div>Data: {simLabel}</div>
-      <div>FPS: {stats.fps || "—"}</div>
+      <div>
+        FPS:{" "}
+        <span
+          style={{
+            fontWeight: 600,
+            fontVariantNumeric: "tabular-nums",
+            color: fpsToneKey ? FPS_TONE_COLOR[fpsToneKey] : undefined,
+          }}
+          title={
+            fpsToneKey === "good"
+              ? "≥55 FPS — smooth"
+              : fpsToneKey === "warn"
+                ? `30–54 FPS — integrated GPU range (degrades below ${FPS_DEGRADE_THRESHOLD})`
+                : fpsToneKey === "bad"
+                  ? `<${FPS_DEGRADE_THRESHOLD} FPS — AdaptiveDpr may reduce resolution`
+                  : "Frame rate unavailable"
+          }
+        >
+          {fpsDisplay}
+        </span>
+      </div>
       <div>DPR: {stats.dpr.toFixed(2)}</div>
       <div>
         Chunks: {stats.visibleChunks}/{CHUNK_COUNT} · Buildings:{" "}

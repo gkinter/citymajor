@@ -3,6 +3,14 @@ export const PAINT_FEEDBACK_DISABLED_KEY = "citymajor_paint_feedback_off";
 
 export type PaintFeedbackKind = "zone" | "bulldoze" | "road";
 
+/** Dispatched on each bulldoze paint — ZoningToolbar listens for confirm flash. */
+export const BULLDOZE_CONFIRM_EVENT = "citymajor:bulldoze-confirm";
+
+export function notifyBulldozeConfirm(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(BULLDOZE_CONFIRM_EVENT));
+}
+
 let audioCtx: AudioContext | null = null;
 
 function isFeedbackDisabled(): boolean {
@@ -35,6 +43,8 @@ const TONE_HZ: Record<PaintFeedbackKind, number> = {
  * unavailable, autoplay-blocked, or the user disabled feedback.
  */
 export function playPaintFeedback(kind: PaintFeedbackKind): void {
+  if (kind === "bulldoze") notifyBulldozeConfirm();
+
   if (isFeedbackDisabled()) return;
 
   const ctx = getAudioContext();

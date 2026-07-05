@@ -8,6 +8,7 @@ import {
   hudToolbar,
 } from "@/lib/hud-theme";
 import {
+  BULLDOZE_CONFIRM_EVENT,
   isPaintFeedbackEnabled,
   setPaintFeedbackEnabled,
 } from "@/lib/paint-feedback";
@@ -30,7 +31,9 @@ import {
   zoneTierByTool,
   type ZoneTierTool,
 } from "@/lib/zone-tiers";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+const BULLDOZE_FLASH_MS = 450;
 
 type ZoningToolbarProps = {
   activeTool: ZoningTool;
@@ -56,9 +59,27 @@ export function ZoningToolbar({
   unlockedTechIds,
 }: ZoningToolbarProps) {
   const [feedbackOn, setFeedbackOn] = useState(false);
+  const [bulldozeFlash, setBulldozeFlash] = useState(false);
+  const bulldozeFlashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setFeedbackOn(isPaintFeedbackEnabled());
+  }, []);
+
+  useEffect(() => {
+    const onBulldozeConfirm = () => {
+      setBulldozeFlash(true);
+      if (bulldozeFlashTimer.current) clearTimeout(bulldozeFlashTimer.current);
+      bulldozeFlashTimer.current = setTimeout(
+        () => setBulldozeFlash(false),
+        BULLDOZE_FLASH_MS,
+      );
+    };
+    window.addEventListener(BULLDOZE_CONFIRM_EVENT, onBulldozeConfirm);
+    return () => {
+      window.removeEventListener(BULLDOZE_CONFIRM_EVENT, onBulldozeConfirm);
+      if (bulldozeFlashTimer.current) clearTimeout(bulldozeFlashTimer.current);
+    };
   }, []);
 
   const unlockedTechSet = useMemo(
@@ -103,10 +124,18 @@ export function ZoningToolbar({
         }
       }
 
+      if (tool === "bulldoze") {
+        const hint = zoningDemandHint(tool, rci);
+        const brush = `${brushSize}×${brushSize} brush`;
+        return hint
+          ? `${label}: ${hint} · click map tiles (${brush})`
+          : `${label} · click map tiles (${brush})`;
+      }
+
       const demandHint = zoningDemandHint(tool, rci);
       return demandHint ? `${label}: ${demandHint}` : label;
     },
-    [rci, unlockedTechSet],
+    [brushSize, rci, unlockedTechSet],
   );
 
   return (
@@ -139,6 +168,15 @@ export function ZoningToolbar({
           <span style={hudLabel()}>Zone</span>
           <strong>{zoningToolShortLabel(activeTool)}</strong>
         </span>
+        {activeTool === "bulldoze" ? (
+          <span
+            data-testid="bulldoze-tooltip"
+            style={{ color: HUD_COLORS.textMuted, fontSize: 10, maxWidth: 220 }}
+            title={toolTitle("bulldoze", "Bulldoze")}
+          >
+            Click tiles to clear zones · brush {brushSize}×{brushSize}
+          </span>
+        ) : null}
         {showBrush ? (
           <button
             type="button"
@@ -185,13 +223,20 @@ export function ZoningToolbar({
           const locked = !unlocked;
           const title = toolTitle(id, label, stub);
           const highDemand = unlocked && !stub && isZoningDemandHigh(id, rci);
+          const confirmFlash = id === "bulldoze" && bulldozeFlash;
+          const btnClass = [
+            highDemand ? "hud-zoning-btn--demand" : null,
+            confirmFlash ? "hud-zoning-btn--confirm-flash" : null,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined;
 
           return (
             <button
               key={id}
               type="button"
               data-testid={`zoning-tool-${id}`}
-              className={highDemand ? "hud-zoning-btn--demand" : undefined}
+              className={btnClass}
               style={hudButton(activeTool === id && unlocked, stub || locked)}
               disabled={stub || locked}
               title={title}

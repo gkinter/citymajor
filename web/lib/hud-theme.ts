@@ -180,6 +180,82 @@ export function hudLabel(): CSSProperties {
   return { opacity: 0.65, marginRight: 6 };
 }
 
+/** Slide-out panel header row — title block + close affordance. */
+export function hudSlidePanelHeader(extra?: CSSProperties): CSSProperties {
+  return {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "14px 16px",
+    borderBottom: `1px solid ${HUD_COLORS.borderSubtle}`,
+    ...extra,
+  };
+}
+
+export function hudSlidePanelTitle(extra?: CSSProperties): CSSProperties {
+  return {
+    fontWeight: 700,
+    fontSize: 15,
+    letterSpacing: "0.04em",
+    ...extra,
+  };
+}
+
+export function hudSlidePanelSubtitle(extra?: CSSProperties): CSSProperties {
+  return {
+    opacity: 0.65,
+    fontSize: 11,
+    marginTop: 2,
+    ...extra,
+  };
+}
+
+export function hudSlidePanelBody(extra?: CSSProperties): CSSProperties {
+  return {
+    flex: 1,
+    overflowY: "auto",
+    padding: "16px 18px 24px",
+    ...extra,
+  };
+}
+
+export function hudSlidePanelCloseButton(extra?: CSSProperties): CSSProperties {
+  return {
+    ...hudActionButton(),
+    padding: "4px 10px",
+    fontSize: 12,
+    ...extra,
+  };
+}
+
+/** Uppercase section label inside slide panels. */
+export function hudSectionTitle(extra?: CSSProperties): CSSProperties {
+  return {
+    fontWeight: 700,
+    marginBottom: 8,
+    fontSize: 11,
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    color: HUD_COLORS.textMuted,
+    ...extra,
+  };
+}
+
+/** Empty / awaiting-data callout for slide panels. */
+export function hudEmptyState(extra?: CSSProperties): CSSProperties {
+  return {
+    marginBottom: 14,
+    padding: "12px 14px",
+    borderRadius: HUD_RADIUS.sm,
+    fontSize: 11,
+    lineHeight: 1.45,
+    color: HUD_COLORS.textMuted,
+    background: HUD_COLORS.rowBg,
+    border: `1px solid ${HUD_COLORS.borderSubtle}`,
+    ...extra,
+  };
+}
+
 export function hudInfoPanel(extra?: CSSProperties): CSSProperties {
   return hudPanel({
     padding: "10px 14px",

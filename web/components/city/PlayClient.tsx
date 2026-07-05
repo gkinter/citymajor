@@ -55,6 +55,7 @@ import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
+import { HappinessMeter } from "@/components/city/HappinessMeter";
 import { EraProgressPanel } from "@/components/city/EraProgressPanel";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
 import { SpeedToolbar } from "@/components/city/SpeedToolbar";
@@ -567,6 +568,7 @@ export function PlayClient() {
         entitlements={entitlements}
         onSlotsChanged={refreshEntitlements}
       />
+      <HappinessMeter resources={simResources} />
       <ResourcesHud
         resources={simResources}
         populationGrowthPerMonth={populationGrowthPerMonth}

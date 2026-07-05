@@ -1451,6 +1451,57 @@ async function readDiagnosticsHud(page) {
   return page.locator("div").filter({ hasText: "Diagnostics" }).first().innerText();
 }
 
+/**
+ * `/play?debug=chunks` — Diagnostics HUD "Loaded chunks" streaming overlay.
+ * Non-blocking: logs NOTE when the line is absent or count is still zero.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function assertChunkDebugLoadedLine(page, tag) {
+  await page.goto(`${BASE_URL}/play?debug=chunks`, { waitUntil: "domcontentloaded" });
+
+  try {
+    await page.getByText("Diagnostics").waitFor({ state: "visible", timeout: 30_000 });
+  } catch {
+    console.log(
+      `[${tag}] NOTE: diagnostics HUD not visible on /play?debug=chunks`,
+    );
+    return;
+  }
+
+  await skipOnboardingScrim(page, tag);
+
+  const deadline = Date.now() + 45_000;
+  let loadedMatch = null;
+  while (Date.now() < deadline) {
+    const hudText = await readDiagnosticsHud(page);
+    loadedMatch = hudText.match(/Loaded chunks:\s*(\d+)\/(\d+)/);
+    if (loadedMatch && Number(loadedMatch[1]) > 0) break;
+    await page.waitForTimeout(500);
+  }
+
+  if (!loadedMatch) {
+    console.log(
+      `[${tag}] NOTE: Loaded chunks line not shown on /play?debug=chunks (chunk-debug overlay may lag deploy)`,
+    );
+    return;
+  }
+
+  const loaded = Number(loadedMatch[1]);
+  const total = Number(loadedMatch[2]);
+  if (loaded < 1) {
+    console.log(
+      `[${tag}] NOTE: Loaded chunks still 0/${total} on /play?debug=chunks after wait (streaming lag)`,
+    );
+    return;
+  }
+
+  pass(
+    tag,
+    `chunk debug overlay Loaded chunks ${loaded}/${total} on /play?debug=chunks`,
+  );
+}
+
 /** @param {string} hudText */
 function parseHudRenderStats(hudText) {
   const buildingsMatch = hudText.match(/Buildings:\s*(\d+)\/(\d+)/);
@@ -1681,6 +1732,8 @@ export async function runPlayChecks(page, options = {}) {
   if (PERF_GATE) {
     await runPerfGate(page, { tag: `${tag}-perf`, skipNavigate: true });
   }
+
+  await assertChunkDebugLoadedLine(page, tag);
 
   // Anything not on the WASM-fallback allowlist should FAIL the smoke run —
   // silently downgrading to `console.warn` masked several real regressions on

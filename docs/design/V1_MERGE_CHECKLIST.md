@@ -4,7 +4,7 @@
 **Branch:** `feat/wasm-r3f-integration-2026-07-04`  
 **PR:** [#1 — feat: CityMajor Web v1 — R3F + WASM integration spine](https://github.com/gkinter/citymajor/pull/1)  
 **Scope charter:** [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) · [SB-3704](https://linear.app/softblaze/issue/SB-3704)  
-**Last updated:** 2026-07-05 (`4b78131` wave-4 fixes · uncommitted WT doc OK)
+**Last updated:** 2026-07-05 (`e4d707c` · worktree `citymajor-web-r3f-spike`)
 
 > PR #1 documents the v1 integration spine for review and preview deploys. **Do not merge to `main` until every **blocking** row below is checked.** Deferred items stay tracked in Linear under phase epics [SB-3726](https://linear.app/softblaze/issue/SB-3726)+.
 
@@ -12,15 +12,15 @@
 
 ## Gate summary
 
-| Gate | Blocking? | Status (2026-07-05, `4b78131`) |
+| Gate | Blocking? | Status (2026-07-05, `e4d707c`) |
 |------|-----------|--------------------------------|
-| [Cursor Bugbot](#1-cursor-bugbot) | Yes | **NEUTRAL** on `4b78131` — zero Critical/Major |
-| [Smoke suite](#2-smoke-suite) | Yes | **Green local** — ~35+/play + `verify:tech-unlocks`; **GHA CI red** (`--experimental-strip-types` on Node 20) |
-| [Coolify preview URL](#3-coolify-preview-url) | Yes | **Healthy but stale** — FQDN 200; auto-deploy gap ([DEPLOY_WEB.md](../DEPLOY_WEB.md)); manual redeploy for `4b78131`+ |
-| [Gameplay sprint](#8-gameplay-sprint) | Yes (player loop) | **Phase 3 wave 4** — law toggles, citizen/law smoke, CanvasRenderHealth, hero probe, road/service WASM |
-| [Meshy assets](#4-meshy-assets) | Yes (v1 art minimum) | **Partial** — 10 Meshy GLBs committed; **3 LFS pending push** (04/05/hero); P0 batch [SB-3730](https://linear.app/softblaze/issue/SB-3730) |
-| [Stripe stub vs live](#5-stripe-stub-vs-live) | Yes (monetization path) | **Stub + docs** — test-mode wiring in [DEPLOY_WEB.md](../DEPLOY_WEB.md) ([SB-3714](https://linear.app/softblaze/issue/SB-3714)) |
-| [Perf gate](#6-perf-gate) | Yes | **CI stub only** — `perf-gate.yml` workflow_dispatch (`817b1a1`); sign-off still open [SB-3703](https://linear.app/softblaze/issue/SB-3703) |
+| [Cursor Bugbot](#1-cursor-bugbot) | Yes | **NEUTRAL** on `e4d707c` — zero Critical/Major |
+| [Smoke suite](#2-smoke-suite) | Yes | **Green** — local ~37/37 + GHA `smoke` pass (`93f4341` Node 22; LFS checkout `d5b8daa`) |
+| [Coolify preview URL](#3-coolify-preview-url) | Yes | **Current on `e4d707c`** — FQDN 200; **manual deploy** required (webhook gap — [DEPLOY_WEB.md](../DEPLOY_WEB.md)) |
+| [Gameplay sprint](#8-gameplay-sprint) | Yes (player loop) | **Phase 3 wave 4** — law toggles, citizen/law smoke, CanvasRenderHealth, hero GLB, road/service WASM |
+| [Meshy assets](#4-meshy-assets) | Yes (v1 art minimum) | **Partial** — 11 LFS GLBs + 7 raw Meshy zone blobs; `res_low_frontier_02`–`10` + hero shipped; P0 batch [SB-3730](https://linear.app/softblaze/issue/SB-3730) |
+| [Stripe stub vs live](#5-stripe-stub-vs-live) | Yes (monetization path) | **Mock on preview** — `stripeCheckoutEnabled: false`; live test-mode docs [SB-3714](https://linear.app/softblaze/issue/SB-3714) |
+| [Perf gate](#6-perf-gate) | Yes | **Sign-off open** [SB-3703](https://linear.app/softblaze/issue/SB-3703) — `perf-gate.yml` LFS checkout (`e4d707c`); GPU benchmark TBD |
 | [Open Linear issues](#7-open-linear-issues) | Track | Phase epics [SB-3726](https://linear.app/softblaze/issue/SB-3726)–[SB-3730](https://linear.app/softblaze/issue/SB-3730) · master [SB-3708](https://linear.app/softblaze/issue/SB-3708) |
 
 ---
@@ -64,24 +64,26 @@ Depth + stability work after Phase 2 close. See [V1_GAMEPLAY_BUILD_PLAN.md](./V1
 | Hero GLTF landmark swap | [SB-3680](https://linear.app/softblaze/issue/SB-3680) | **Superseded** — see wave-2 (**Partial**) |
 | Cloud save binary | [SB-3686](https://linear.app/softblaze/issue/SB-3686) | **Superseded** — see wave-2 (**Partial**) |
 
-**HEAD (wave-4):** `4b78131` — `fix(sim): LawSystem LoadFromJson via JsonDocument for WASM`  
-**Branch tip:** same + uncommitted WT (`smoke-play-checks.mjs` citizen-dot assert; LFS GLBs) — **doc-only drift OK**
+**HEAD (wave-4):** `e4d707c` — `fix(ci): enable Git LFS checkout in perf-gate workflow`  
+**Worktree:** `citymajor-web-r3f-spike` · branch `feat/wasm-r3f-integration-2026-07-04` · **clean** at `e4d707c`
 
-### Phase 3 wave 4 — continuation (`9b82eb1` → `4b78131`, 2026-07-05)
+### Phase 3 wave 4 — continuation (`9b82eb1` → `e4d707c`, 2026-07-05)
 
 Stability + depth after wave-2 HUD paths. Key commits on integration branch:
 
 | Area | Commit / issue | Status |
 |------|----------------|--------|
-| **CitizenPanel smoke** — open/close + dot drill-down | `b46446b`, `21f49b2` — [SB-3689](https://linear.app/softblaze/issue/SB-3689) | **Shipped** — panel assertions in `smoke-play-checks.mjs`; citizen-dot render assert in uncommitted WT |
+| **CitizenPanel smoke** — open/close + dot drill-down | `b46446b`, `21f49b2`, `8fb7d1c` — [SB-3689](https://linear.app/softblaze/issue/SB-3689) | **Shipped** — panel + citizen-dot render assert in `smoke-play-checks.mjs` |
 | **LawPanel toggles** — `SetLawActive` WASM export | `dcb4c4f`, `c976290`, `4b78131` | **Partial** — toggle + smoke sim API export; effect application deferred |
 | **CanvasRenderHealth** — black-frame watchdog | `21f49b2`, `c39b6cb` | **Shipped** — `readPixels` inline in smoke + HUD watchdog |
 | **CMJR save smoke** — Playwright cookies + JSON body | `61c5600`, `d8c57c6` | **Shipped** — save API session path; WASM round-trip skips when export unavailable |
 | **Road graph + service coverage** | `6261885` | **Shipped** — WASM host connectivity + coverage exports |
-| **Hero landmark probe** — FrontierCityHall GLB path | `72eda21` — [SB-3680](https://linear.app/softblaze/issue/SB-3680) | **Partial** — catalog + scene probe; `hero_frontier_city_hall.glb` on disk (LFS, uncommitted) |
-| **Meshy GLBs** — `res_low_frontier_02/03` | `737425d` | **Shipped** (committed); 04/05 + hero pending LFS push |
-| **CI smoke workflow** | `34d85a2` | **Red** — GHA Node 20 lacks `--experimental-strip-types` for `verify:tech-unlocks` |
-| **Coolify webhook incident** | `605149b` | **Documented** — Public GitHub source blocks auto-deploy; manual `coolify deploy` required |
+| **Hero landmark** — FrontierCityHall GLB | `de480ec`, `72eda21` — [SB-3680](https://linear.app/softblaze/issue/SB-3680) | **Partial** — LFS GLB on disk + catalog; era-gate spawn probe |
+| **Meshy GLBs** — `res_low_frontier_02`–`10` | `737425d`, `bcabb2e`, `73dcdba`, `ea216de` | **Shipped** (LFS); 7 v1-core zone blobs still raw git |
+| **CI smoke workflow** | `93f4341`, `32d9874`, `d5b8daa`, `9374829` | **Green** — Node 22 + LFS checkout + procedural CI skips |
+| **Diagnostics HUD** — service coverage line + smoke | `600378f` | **Shipped** — FpsHud H/P/F means + `smoke-play-checks` assert |
+| **Perf-gate LFS** — GLB checkout on manual dispatch | `e4d707c` | **Shipped** — matches `ci-smoke` (`d5b8daa`) |
+| **Coolify webhook incident** | `605149b` | **Open** — Public GitHub source blocks auto-deploy; **manual `coolify deploy`** after each push |
 
 ### Phase 3 wave 4 — shipped (`9b82eb1`, 2026-07-05)
 
@@ -93,17 +95,17 @@ Depth systems after Phase 3 kickoff. See [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPL
 | **CMJR save** — Layer B blob round-trip | `CmjrSave.cs`, `save-format.ts`, `save-store.ts`, `SaveLoadControls.tsx` — [SB-3686](https://linear.app/softblaze/issue/SB-3686) | **Partial** | **62%** — `export_cmjr` / load + POST/GET blob wired; save API smoke green (`61c5600`+); full SoA chunks + deterministic WASM round-trip TBD |
 | **Laws** — ordinance catalog in WASM | `LawSystem.cs`, `LawSystemTests.cs`, `LawPanel.tsx`, `LawButton.tsx` — [SB-3689](https://linear.app/softblaze/issue/SB-3689) adj. | **Partial** | **55%** — catalog load + `SetLawActive` toggle (`dcb4c4f`); smoke panel open/close; effect application deferred |
 | **Trade** — global market monthlies | `TradeSystem.cs`, `WasmSimHost.ProcessGlobalMarketTrade`, `ResourcesHud.tsx`, `EconomyPanel.tsx` | **Partial** | **52%** — auto import/export (`PartnerCityId=-1`); HUD trade strip + economy panel; inter-city routes deferred [SB-3728](https://linear.app/softblaze/issue/SB-3728) — **v2 architecture:** [`WEB_V1_SCOPE.md`](./WEB_V1_SCOPE.md) §12 |
-| **LLM Herald** — Founder narrative path | `narrative-prompt.ts`, `/api/narrative/event`, `NewsTicker.tsx` — [SB-3695](https://linear.app/softblaze/issue/SB-3695) | **Partial** | **68%** — OpenAI/Anthropic path + quota + template fallback; requires `NARRATIVE_LLM_*` env + Founder tier; smoke in uncommitted WT |
+| **LLM Herald** — Founder narrative path | `narrative-prompt.ts`, `/api/narrative/event`, `NewsTicker.tsx` — [SB-3695](https://linear.app/softblaze/issue/SB-3695) | **Partial** | **68%** — OpenAI/Anthropic path + quota + template fallback; requires `NARRATIVE_LLM_*` env + Founder tier on preview |
 | **Herald commands** — council option → sim | `herald-option-commands.ts`, `PlayClient.tsx`, `WasmExports.AdjustBudget` / `ApplyApprovalDelta` / `BoostResearch` | **Shipped** — budget, approval, research-boost commands reach WASM; resolves linked `approval_event` |
 | **Era gates** — pop + tech checklist | `WasmEraDeriver.cs`, `EraProgressPanel.tsx`, `era-landmarks.ts` | **Shipped** — gates mirror `ResearchSystem.EraRequirements`; landmark spawns when all gates met |
-| **Hero GLTF landmark** — Meshy swap path | `EraLandmarkPlaceholder.tsx` — [SB-3680](https://linear.app/softblaze/issue/SB-3680) | **Partial** — `hero_frontier_city_hall.glb` on disk (LFS, uncommitted WT); procedural box fallback when absent |
+| **Hero GLTF landmark** — Meshy swap path | `EraLandmarkPlaceholder.tsx` — [SB-3680](https://linear.app/softblaze/issue/SB-3680) | **Partial** — `hero_frontier_city_hall.glb` LFS (`de480ec`); procedural box fallback when absent |
 | **Tech unlock bridge** — v1 building/capability map | `base/data/tech/v1-unlock-bridge.json`, `verify-tech-unlocks.mjs`, `tech-catalog.ts` | **Shipped** — CI guard + `smoke:all` precheck; all Frontier/Industrial unlocks resolve |
-| **Smoke expansions** — era quest + toolbar depth | `smoke-play-checks.mjs`, `smoke-all.mjs` | **Shipped** — citizen/law panel, canvas health, era quest, economy, services/traffic, tech precheck, CMJR API; citizen-dot render in uncommitted WT |
-| **Stripe / shop probes** | `stripe.ts`, `/api/shop`, checkout + webhook routes | **Partial** — stub + test-mode wiring; shop route smoke; live webhook on preview TBD |
+| **Smoke expansions** — era quest + toolbar depth | `smoke-play-checks.mjs`, `smoke-all.mjs` | **Shipped** — citizen/law panel, canvas health, era quest (skipped on procedural CI), economy, services/traffic, tech precheck, CMJR API, citizen-dot render |
+| **Stripe / shop probes** | `stripe.ts`, `/api/shop`, checkout + webhook routes | **Mock on preview** — `stripeCheckoutEnabled: false`; stub cookie checkout; live webhook TBD [SB-3714](https://linear.app/softblaze/issue/SB-3714) |
 | **Meshy batch `--manifest`** | `batch-generate.mjs`, `.gitattributes` LFS policy | **Shipped** — manifest flag + Git LFS for GLB batches |
 | **HUD theming** | `hud-tokens.css`, `hud-theme.ts` | **Shipped** — shared tokens for citizen/law/economy panels |
 
-**Uncommitted WT** (`citymajor-web-r3f-spike`, post-`4b78131`): `smoke-play-checks.mjs` citizen-dot render assert; `res_low_frontier_04/05.glb` + `hero_frontier_city_hall.glb` (Git LFS, not pushed). **Doc-only drift in WT is OK** — commit LFS assets + smoke before next preview redeploy.
+**Post-`4b78131` commits (2026-07-05):** `bcabb2e`/`de480ec` LFS GLBs · `93f4341` Node 22 CI · `d5b8daa` LFS checkout · `73dcdba`/`ea216de` frontier `res_low` 06–10 · `600378f` diagnostics HUD · `e4d707c` perf-gate LFS.
 
 ---
 
@@ -115,9 +117,9 @@ Automated code review on PR #1.
 |-------|----------------|---------------|
 | Bugbot run completed | [PR #1 checks](https://github.com/gkinter/citymajor/pull/1) | Status `COMPLETED` |
 | No Critical / Major findings | Re-run after new commits | Zero blocking severity |
-| Latest reviewed SHA | `4b78131` | NEUTRAL — re-run after new commits |
+| Latest reviewed SHA | `e4d707c` | NEUTRAL — zero Critical/Major |
 
-**Current:** Bugbot **NEUTRAL** on `4b78131` (2026-07-05) — zero Critical/Major findings. Prior clean run was **NEUTRAL** on `82d8df4`. Gate **passes** for merge review.
+**Current:** Bugbot **NEUTRAL** on `e4d707c` (2026-07-05) — zero Critical/Major findings. Prior clean runs: **NEUTRAL** on `4b78131`, `82d8df4`. Gate **passes** for merge review.
 
 ```bash
 # After push — watch PR checks or use review-bugbot skill locally
@@ -181,15 +183,15 @@ BASE_URL=https://citymajor.apps.softblaze.net \
   WASM_EXPECTED=1 pnpm smoke:all
 ```
 
-> **Update (`4b78131`):** Citizen + law panel smoke #22–25; canvas health #26. **Update (`2909622`):** Black WebGL canvas regression guarded by assertion #12 / #26. **Update (`79ef561`):** Economy panel assertions #20–21. **Update (wave-2):** Era Quest gate assertion #19; `verify:tech-unlocks` precheck #0.
+> **Update (`e4d707c`):** diagnostics HUD (`600378f`) + perf-gate LFS (`e4d707c`). **Update (`ea216de`):** GHA `smoke` green on Node 22 (`93f4341`); LFS GLB checkout in CI (`d5b8daa`); era quest skipped on procedural runner (`9374829`). **Update (`4b78131`):** Citizen + law panel smoke #22–25; canvas health #26. **Update (`2909622`):** Black WebGL canvas regression guarded by assertion #12 / #26. **Update (`79ef561`):** Economy panel assertions #20–21. **Update (wave-2):** Era Quest gate assertion #19; `verify:tech-unlocks` precheck #0.
 
 **Pass:** Console ends with `[smoke-all] All checks passed.` — **~38/38** with `SCREENSHOT=1`, **~37/37** without (overlay toolbar checks skip when UI absent).
 
-**Local (2026-07-05):** **Green** on `4b78131` with `pnpm build:wasm && pnpm dev` + `WASM_EXPECTED=1 pnpm smoke:all`.
+**Local (2026-07-05):** **Green** on `e4d707c` with `pnpm build:wasm && pnpm dev` + `WASM_EXPECTED=1 pnpm smoke:all`.
 
-**GHA CI (`34d85a2`):** **Red** — `verify:tech-unlocks` precheck fails: Node 20 runner rejects `--experimental-strip-types`. Fix: compile `verify-tech-unlocks.mts` to `.mjs` or bump workflow Node ≥ 22. Not a local regression.
+**GHA CI (`93f4341`+):** **Green** — `smoke` workflow pass on `e4d707c` (Node 22; LFS assets; procedural CI panel skips).
 
-**Deferred smoke (backlog):** Citizen-dot render assert (uncommitted WT); deterministic CMJR WASM round-trip; LLM Herald headline when keys set.
+**Deferred smoke (backlog):** Deterministic CMJR WASM round-trip; LLM Herald headline when keys set.
 
 **Scripts:** `web/scripts/smoke-all.mjs`, `smoke-play-checks.mjs` · Docs: `web/PERF.md` § Automated headless smoke test.
 
@@ -226,16 +228,15 @@ curl -sI "$FQDN/play" | grep -i cross-origin
 
 **Linear:** [SB-3715 — M2: Coolify deploy](https://linear.app/softblaze/issue/SB-3715/m2-coolify-deploy-preview-app-for-citymajor-web) — **Done**
 
-**Status:** Preview **healthy** at canonical FQDN (HTTP 200, WASM assets present) but **stale vs `4b78131`**.
+**Status:** Preview **current on `e4d707c`** at canonical FQDN (HTTP 200, WASM assets present). Deployed via **manual** `coolify deploy citymajor-web --force` — push webhooks still broken ([DEPLOY_WEB.md § Auto-deploy incident](../DEPLOY_WEB.md#auto-deploy-incident--commit-79ef561-2026-07-04)).
 
 ### Preview deploy gaps
 
 | Gap | Detail | Action |
 |-----|--------|--------|
 | **Auto-deploy broken** | App bound to Public GitHub (`source_id = 0`); pushes do not enqueue builds (`is_webhook = false`) | Follow [DEPLOY_WEB.md § Fix](../DEPLOY_WEB.md#fix-required-for-push--deploy) — wire GitHub App source |
-| **SHA lag** | Wave-4 commits (`9b82eb1`→`4b78131`) not on preview until manual deploy | `coolify deploy citymajor-web --force` after LFS push |
-| **LFS on preview** | `res_low_frontier_04/05` + `hero_frontier_city_hall` uncommitted / not pushed | `git lfs push origin feat/wasm-r3f-integration-2026-07-04` then redeploy |
-| **Preview smoke** | `BASE_URL` smoke not re-run post-`4b78131` | Run §2 against FQDN after redeploy |
+| **Manual deploy required** | Every push after `e4d707c` needs explicit redeploy until webhook fix | `coolify deploy citymajor-web --force` |
+| **Preview smoke** | Re-run `BASE_URL` smoke after each manual redeploy | Run §2 against FQDN |
 
 ---
 
@@ -243,15 +244,15 @@ curl -sI "$FQDN/play" | grep -i cross-origin
 
 Art pipeline: [MESHY_ASSET_PIPELINE.md](./MESHY_ASSET_PIPELINE.md) · [MESHY_ASSET_CATALOG.md](./MESHY_ASSET_CATALOG.md) · [BUILDING_ARCHETYPE_3D.md](./BUILDING_ARCHETYPE_3D.md) · [SB-3678](https://linear.app/softblaze/issue/SB-3678) · epic [SB-3730](https://linear.app/softblaze/issue/SB-3730)
 
-| Milestone | Target | Current (`4b78131`) |
+| Milestone | Target | Current (`e4d707c`) |
 |-----------|--------|---------------------|
 | Batch script + seed manifest | `scripts/meshy/batch-generate.mjs` | **Done** |
 | **Asset catalog + batch manifests** | `MESHY_ASSET_CATALOG.md`, `generate-manifest-batches.mjs` | **Done** (`79ef561`) — 500-key taxonomy, P0–P3 batches [SB-3739](https://linear.app/softblaze/issue/SB-3739)–[SB-3747](https://linear.app/softblaze/issue/SB-3747) |
 | MCP gateway path | `6095f2f` — `MESHY_USE_MCP=1` | **Done** — Softblaze Meshy MCP when API key unset |
-| `SHIPPED_GLTF_KEYS` registry | `web/lib/gltf-catalog.ts` | **Done** — 20 keys (one per category × era sample) |
-| v1 minimum GLBs | ~80–120 core archetypes (Frontier + Industrial) | **Partial** — **10 Meshy GLBs** committed at `4b78131` (+ 3 LFS pending push); 12 procedural placeholders |
-| Hero landmarks | 8 pilot heroes | **Partial** — `hero_frontier_city_hall.glb` on disk (LFS, uncommitted); era-gate spawn + GLB probe ([SB-3719](https://linear.app/softblaze/issue/SB-3719)) |
-| On-disk assets | `web/public/assets/gltf/{era}/*.glb` | **Partial** — 25 GLBs total (13 Meshy-quality ≥8 MB + 12 procedural); P0 batch [SB-3740](https://linear.app/softblaze/issue/SB-3740) |
+| `SHIPPED_GLTF_KEYS` registry | `web/lib/gltf-catalog.ts` | **Done** — 28 keys (`res_low_frontier_00`–`10` + industrial samples + hero) |
+| v1 minimum GLBs | ~80–120 core archetypes (Frontier + Industrial) | **Partial** — **18 Meshy GLBs** on disk (7 raw + 11 LFS); 12 procedural placeholders |
+| Hero landmarks | 8 pilot heroes | **Partial** — `hero_frontier_city_hall.glb` LFS (`de480ec`); era-gate spawn + GLB probe ([SB-3719](https://linear.app/softblaze/issue/SB-3719)) |
+| On-disk assets | `web/public/assets/gltf/{era}/*.glb` | **Partial** — frontier `res_low` 00–10 + industrial samples; P0 batch [SB-3740](https://linear.app/softblaze/issue/SB-3740) |
 | Runtime fallback | InstancedMesh + procedural modules | **Works** — merge OK for spine, not for art-complete v1 |
 
 ### Meshy GLBs on disk (production-quality)
@@ -264,19 +265,31 @@ Art pipeline: [MESHY_ASSET_PIPELINE.md](./MESHY_ASSET_PIPELINE.md) · [MESHY_ASS
 | `res_low_frontier_01` | frontier | Meshy MCP (`3c5a851`) |
 | `res_low_frontier_02` | frontier | Meshy MCP (`737425d`) |
 | `res_low_frontier_03` | frontier | Meshy MCP (`737425d`) |
+| `res_low_frontier_04` | frontier | Meshy LFS (`bcabb2e`) |
+| `res_low_frontier_05` | frontier | Meshy LFS (`bcabb2e`) |
+| `res_low_frontier_06` | frontier | Meshy LFS (`73dcdba`) |
+| `res_low_frontier_07` | frontier | Meshy LFS (`73dcdba`) |
+| `res_low_frontier_08` | frontier | Meshy LFS (`73dcdba`) |
+| `res_low_frontier_09` | frontier | Meshy LFS (`ea216de`) |
+| `res_low_frontier_10` | frontier | Meshy LFS (`ea216de`) |
 | `ind_industrial_00` | industrial | Meshy MCP (`79ef561`) |
 | `res_high_industrial_00` | industrial | Meshy MCP (`86dd2ff`) |
 | `res_low_industrial_00` | industrial | Meshy MCP (`3076c29`) |
+| `hero_frontier_city_hall` | heroes | Meshy LFS (`de480ec`) |
 
-### LFS pending push (not on remote / preview)
+### LFS-shipped (on remote + preview at `e4d707c`)
 
 | Key | Era | Status |
 |-----|-----|--------|
-| `res_low_frontier_04` | frontier | On disk; Git LFS tracked; **not pushed** |
-| `res_low_frontier_05` | frontier | On disk; Git LFS tracked; **not pushed** |
-| `hero_frontier_city_hall` | heroes | On disk; **untracked**; commit + LFS push before preview |
+| `res_low_frontier_02`–`10` | frontier | **Pushed** — 9 LFS zone GLBs |
+| `hero_frontier_city_hall` | heroes | **Pushed** (`de480ec`) |
+| `com_industrial_00` | industrial | LFS pointer; procedural on disk until Meshy re-export |
 
-> `com_industrial_00` remains procedural placeholder (`075941a`). Production Meshy GLB deferred to [SB-3740](https://linear.app/softblaze/issue/SB-3740).
+### Raw-blob zone GLBs (migrate TBD)
+
+| Key | Era | Status |
+|-----|-----|--------|
+| v1-core `*_00` samples (7 files) | frontier + industrial | Plain git blobs — `git lfs migrate` pending approval ([MESHY_ASSET_CATALOG.md](./MESHY_ASSET_CATALOG.md)) |
 
 Remaining `SHIPPED_GLTF_KEYS` resolve to small procedural placeholders until batch run completes.
 
@@ -286,7 +299,8 @@ Remaining `SHIPPED_GLTF_KEYS` resolve to small procedural placeholders until bat
 - [x] Canonical catalog + manifest batch JSONs (`79ef561`, [SB-3730](https://linear.app/softblaze/issue/SB-3730))
 - [x] `SHIPPED_GLTF_KEYS` aligned to catalog samples (`79ef561`)
 - [x] Git LFS policy for GLB batches (`.gitattributes`)
-- [ ] Push pending LFS objects (`git lfs push`) — 04/05 committed, hero uncommitted
+- [x] Push LFS objects for frontier `02`–`10` + hero (`bcabb2e`, `de480ec`, `73dcdba`, `ea216de`)
+- [ ] `git lfs migrate` for 7 raw v1-core zone blobs — approval required
 - [ ] Run Meshy batch for Frontier + Industrial core set (~80 GLBs) — [SB-3740](https://linear.app/softblaze/issue/SB-3740)
 - [ ] Post-process: bottom-center pivot, 1-story unit scale
 - [ ] 3+ hero landmarks placed in scene at era gates — **partial** (wave-2): GLB probe + procedural fallback; Meshy heroes pending [SB-3741](https://linear.app/softblaze/issue/SB-3741)
@@ -323,17 +337,17 @@ Founder Pass ($24.99) per [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) §5.
 
 | Check | Stub | Live (test mode) |
 |-------|------|------------------|
-| `/shop` loads Founder Pass | [ ] | [ ] |
-| Checkout initiates without 500 | [ ] | [ ] |
+| `/shop` loads Founder Pass | [x] | [ ] |
+| Checkout initiates without 500 | [x] mock cookie | [ ] |
 | Webhook registered to preview FQDN | N/A | [ ] |
-| Entitlements reflect purchase | Cookie path | [ ] |
-| No pay-to-win gates on sim | [ ] | [ ] |
+| Entitlements reflect purchase | [x] cookie path | [ ] |
+| No pay-to-win gates on sim | [x] | [ ] |
 
 **Linear:** [SB-3698](https://linear.app/softblaze/issue/SB-3698) (checkout) · [SB-3693](https://linear.app/softblaze/issue/SB-3693) (auth + entitlements) · [SB-3714](https://linear.app/softblaze/issue/SB-3714) (test-mode docs)
 
 **Docs:** Stripe env vars + webhook FQDN — quick ops [`STRIPE_COOLIFY_SETUP.md`](../STRIPE_COOLIFY_SETUP.md); full walkthrough [`DEPLOY_WEB.md`](../DEPLOY_WEB.md) (`2ce1bb1`).
 
-**Status:** Code stub ships in PR #1; Coolify test-mode wiring documented. **Live Stripe optional for integration merge**, **required for launch**.
+**Status (preview `e4d707c`):** **Mock checkout active** — `GET /api/shop` → `stripeCheckoutEnabled: false`, `missing: ["STRIPE_SECRET_KEY","STRIPE_FOUNDER_PASS_PRICE_ID"]`. Live Stripe optional for integration merge, **required for launch**.
 
 ---
 
@@ -359,9 +373,9 @@ Targets from [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) §4 and `web/PERF.md`.
 
 ### CI automation (`817b1a1`)
 
-Manual-dispatch workflow `.github/workflows/perf-gate.yml` runs `PERF_GATE=1 pnpm smoke:all` on `workflow_dispatch`. `.github/workflows/smoke.yml` runs on push (`34d85a2`) — **currently red** on Node 20 (`--experimental-strip-types`). Software-renderer GHA runners auto-skip when max FPS < 15 unless `PERF_GATE_STRICT=1`. **Meaningful ≥30 FPS sign-off requires GPU host** — not blocking PR until self-hosted runner exists.
+Manual-dispatch workflow `.github/workflows/perf-gate.yml` runs `PERF_GATE=1 pnpm smoke:all` on `workflow_dispatch` with **LFS checkout** (`e4d707c`, matches `d5b8daa` on `ci-smoke`). `.github/workflows/smoke.yml` runs on push — **green** on `e4d707c` (`93f4341`). Software-renderer GHA runners auto-skip when max FPS < 15 unless `PERF_GATE_STRICT=1`. **Meaningful ≥30 FPS sign-off requires GPU host** — [SB-3703](https://linear.app/softblaze/issue/SB-3703) still open.
 
-**Status:** Spike expectations documented; **formal gate not signed**; CI stub landed for future GPU runner.
+**Status:** Spike expectations documented in `web/PERF.md`; **formal GPU sign-off not complete**; CI smoke green; perf-gate workflow LFS-ready for future self-hosted runner.
 
 ---
 
@@ -417,23 +431,22 @@ Master tracker: [SB-3708](https://linear.app/softblaze/issue/SB-3708) — links 
 
 ### Safe to merge PR #1 spine when
 
-- [x] Bugbot NEUTRAL or clean on HEAD (`4b78131`) — **NEUTRAL**, zero Critical/Major
+- [x] Bugbot NEUTRAL or clean on HEAD (`e4d707c`) — **NEUTRAL**, zero Critical/Major
 - [x] Smoke **~37/37** local (~38/38 with screenshot) on WASM build + `verify:tech-unlocks` pass
-- [x] Coolify preview **healthy** — `https://citymajor.apps.softblaze.net` ([SB-3715](https://linear.app/softblaze/issue/SB-3715) Done)
-- [ ] Preview redeployed to `4b78131`+ and `BASE_URL` smoke green (blocked by auto-deploy gap + LFS push)
+- [x] GHA `smoke` workflow **green** on `e4d707c` (Node 22, `93f4341`)
+- [x] Coolify preview **current** — `https://citymajor.apps.softblaze.net` on `e4d707c` ([SB-3715](https://linear.app/softblaze/issue/SB-3715) Done; **manual deploy** until webhook fix)
 - [x] Phase 2 gameplay sprint shipped — roads, traffic, events, citizens, services, research UX, onboarding, landmarks
 - [x] Phase 3 kickoff stability — black canvas fix, economy panel, overlay a11y (`79ef561`)
-- [x] Phase 3 wave 4 — herald commands, era gates, tech bridge, CMJR/citizen/law/trade/LLM paths + smoke (`4b78131`)
-- [ ] GHA smoke workflow green (Node 20 `--experimental-strip-types` fix)
-- [ ] Team acknowledges Meshy partial batch / Stripe / perf / preview deploy gap as **post-merge** or parallel tracks ([SB-3726](https://linear.app/softblaze/issue/SB-3726))
+- [x] Phase 3 wave 4 — herald commands, era gates, tech bridge, CMJR/citizen/law/trade/LLM paths + smoke (`e4d707c`)
+- [ ] Team acknowledges Meshy partial batch / Stripe live / perf sign-off / **webhook manual deploy** as **post-merge** or parallel tracks ([SB-3726](https://linear.app/softblaze/issue/SB-3726))
 
 ### Do **not** call v1 launched until
 
 - [ ] Meshy batch 1 + 3 heroes in scene (not placeholders) — [SB-3730](https://linear.app/softblaze/issue/SB-3730)
 - [ ] Perf gate signed ([SB-3703](https://linear.app/softblaze/issue/SB-3703))
 - [ ] Cloud saves + auth ([SB-3686](https://linear.app/softblaze/issue/SB-3686) full CMJR SoA + multi-device, [SB-3693](https://linear.app/softblaze/issue/SB-3693))
-- [ ] Stripe live test path verified on preview
-- [ ] Phase 3 depth complete — `populationL2` WASM export, LLM Herald on preview, hero GLTF on disk ([SB-3727](https://linear.app/softblaze/issue/SB-3727))
+- [ ] Stripe live test path verified on preview (mock checkout OK for spine merge)
+- [ ] Phase 3 depth complete — `populationL2` WASM export, LLM Herald on preview ([SB-3727](https://linear.app/softblaze/issue/SB-3727))
 - [ ] Laws toggle effect application in sim (toggle + panel smoke shipped `dcb4c4f` / `4b78131`)
 - [ ] CTO P0 player-loop items in [CTO_IMPROVEMENT_ROADMAP_2026-07.md](./CTO_IMPROVEMENT_ROADMAP_2026-07.md) § v1 Launch Blockers
 
@@ -445,7 +458,7 @@ Master tracker: [SB-3708](https://linear.app/softblaze/issue/SB-3708) — links 
 |-----|---------|
 | [DEPLOY_WEB.md](../DEPLOY_WEB.md) | Coolify + Docker + env vars |
 | [MESHY_ASSET_CATALOG.md](./MESHY_ASSET_CATALOG.md) | 500-key taxonomy + batch manifests |
-| [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPLAY_BUILD_PLAN.md) | Phase 2 shipped · Phase 3 active · wave-4 `4b78131` |
+| [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPLAY_BUILD_PLAN.md) | Phase 2 shipped · Phase 3 active · wave-4 `e4d707c` |
 | [WASM_SIM_BRIDGE.md](./WASM_SIM_BRIDGE.md) | Worker / snapshot contract |
 | [SAVE_FORMAT_WEB.md](./SAVE_FORMAT_WEB.md) | CMJR cloud save schema (§3 — wave-2 interim JSON chunk) |
 | [GAP_AUDIT_DESIGN_DOCS.md](./GAP_AUDIT_DESIGN_DOCS.md) | Doc contradictions resolved |

@@ -176,7 +176,7 @@ export function CitizenPanel({
       className="hud-citizen-panel"
       style={hudSlidePanel()}
       role="dialog"
-      aria-label="Citizen households"
+      aria-label="Citizens"
       aria-modal="true"
     >
       <header style={headerStyle}>

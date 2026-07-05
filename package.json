@@ -7,7 +7,7 @@
     "start": "pnpm --filter @citymajor/web start",
     "build:wasm": "bash web/wasm/build-wasm.sh",
     "dev:wasm": "pnpm build:wasm && pnpm dev",
-    "smoke:precheck": "pnpm meshy:validate",
+    "smoke:precheck": "node scripts/smoke-precheck.mjs",
     "smoke:all": "pnpm smoke:precheck && pnpm --filter @citymajor/web smoke:all",
     "smoke:ci": "SMOKE_SKIP_SAVES=1 PLAY_VIEWPORT=1280x720 HEADLESS=1 pnpm smoke:all",
     "smoke:play": "pnpm --filter @citymajor/web smoke:play",

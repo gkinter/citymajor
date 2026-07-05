@@ -560,19 +560,34 @@ async function assertHudPanels(page, tag) {
 }
 
 /**
+ * Preview/CI WASM sim boots async (~20–30s cold). Era quest and law panels need
+ * WASM-derived HUD state — wait for Diagnostics "Data: WASM sim" before those checks.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function waitForWasmSim(page, tag) {
+  if (!WASM_EXPECTED) return;
+
+  try {
+    await page.waitForFunction(
+      () => document.body.innerText.includes("Data: WASM sim"),
+      undefined,
+      { timeout: 90_000 },
+    );
+  } catch {
+    fail(tag, "WASM sim did not become ready within 90s (HUD still procedural?)");
+  }
+  pass(tag, "WASM sim live");
+}
+
+/**
  * Era Quest panel shows population + tech-count gates from WasmEraDeriver.
  * @param {import('playwright').Page} page
  * @param {string} tag
  */
 async function assertEraQuestPanel(page, tag) {
-  const wasmDeadline = Date.now() + 30_000;
-  let simSource = "unknown";
-  while (Date.now() < wasmDeadline) {
-    const hudText = await readDiagnosticsHud(page);
-    simSource = hudText.match(/Data:\s*(WASM sim|procedural)/)?.[1] ?? "unknown";
-    if (simSource === "WASM sim" || simSource === "procedural") break;
-    await page.waitForTimeout(500);
-  }
+  const hudText = await readDiagnosticsHud(page);
+  const simSource = hudText.match(/Data:\s*(WASM sim|procedural)/)?.[1] ?? "unknown";
 
   if (simSource !== "WASM sim") {
     if (WASM_EXPECTED) {
@@ -677,7 +692,11 @@ async function assertCitizenPanel(page, tag) {
   );
   const badgeCount = badgeMatch?.[1];
   if (!badgeCount || badgeCount === "—") {
-    fail(tag, "Citizens button badge missing household count");
+    if (WASM_EXPECTED) {
+      fail(tag, "Citizens button badge missing household count");
+    }
+    console.log(`[${tag}] SKIP: citizen panel (no household badge — procedural)`);
+    return;
   }
   pass(tag, `citizens button shows household badge (${badgeCount})`);
 
@@ -706,6 +725,31 @@ async function assertCitizenPanel(page, tag) {
   await citizenPanel.getByRole("button", { name: "Close" }).click();
   await citizenPanel.waitFor({ state: "hidden" });
   pass(tag, "citizen panel closes");
+}
+
+/** laws.json ships 70 definitions — WASM loads them async after sim init. */
+const WASM_LAW_DEFINITION_COUNT = 70;
+
+/**
+ * Dismiss onboarding scrim if init-script localStorage was too late.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function skipOnboardingScrim(page, tag) {
+  const scrim = page.locator(".hud-onboarding__scrim");
+  const overlay = page.locator(".hud-onboarding");
+  if (!(await overlay.isVisible().catch(() => false))) return;
+
+  const dismiss = page.locator(".hud-onboarding__dismiss");
+  if (await dismiss.count()) {
+    await dismiss.click();
+  } else {
+    await page.evaluate(() => {
+      window.localStorage.setItem("citymajor_onboarding_done", "1");
+    });
+  }
+  await scrim.waitFor({ state: "hidden", timeout: 10_000 });
+  pass(tag, "onboarding scrim skipped");
 }
 
 /**
@@ -796,13 +840,13 @@ async function assertCitizenDotsRender(page, tag) {
 async function waitForWasmLawCatalog(page, tag) {
   try {
     await page.waitForFunction(
-      () => {
+      (expected) => {
         const snap = window.__citymajorSimApi?.getSnapshot?.();
         return (
-          typeof snap?.lawDefinitionCount === "number" && snap.lawDefinitionCount >= 1
+          typeof snap?.lawDefinitionCount === "number" && snap.lawDefinitionCount >= expected
         );
       },
-      undefined,
+      WASM_LAW_DEFINITION_COUNT,
       { timeout: 30_000 },
     );
   } catch {
@@ -817,7 +861,7 @@ async function waitForWasmLawCatalog(page, tag) {
     });
     fail(
       tag,
-      `WASM law catalog not loaded (GetStatus lawDefinitionCount < 1); probe=${JSON.stringify(probe)}`,
+      `WASM law catalog not loaded (GetStatus lawDefinitionCount < 70); probe=${JSON.stringify(probe)}`,
     );
   }
 
@@ -876,22 +920,25 @@ async function assertLawPanel(page, tag) {
   if (WASM_EXPECTED) {
     try {
       await page.waitForFunction(
-        () => {
+        (expected) => {
           const panel = document.querySelector('[aria-label="City laws"]');
           if (!panel) return false;
           for (const label of panel.querySelectorAll(".hud-law-stat__label")) {
             if (!label.textContent?.includes("Definitions loaded")) continue;
             const value = label.parentElement?.querySelector(".hud-law-stat__value");
             const count = Number.parseInt((value?.textContent ?? "").replace(/,/g, ""), 10);
-            return Number.isFinite(count) && count >= 1;
+            return Number.isFinite(count) && count >= expected;
           }
           return false;
         },
-        undefined,
-        { timeout: 10_000 },
+        WASM_LAW_DEFINITION_COUNT,
+        { timeout: 30_000 },
       );
     } catch {
-      fail(tag, "Law panel did not show WASM definition count within 10s after open");
+      fail(
+        tag,
+        `Law panel WASM definitions did not reach ${WASM_LAW_DEFINITION_COUNT} within 30s`,
+      );
     }
   }
 
@@ -900,8 +947,11 @@ async function assertLawPanel(page, tag) {
 
   if (WASM_EXPECTED) {
     const defCount = Number.parseInt(defText.replace(/,/g, ""), 10);
-    if (!Number.isFinite(defCount) || defCount < 1) {
-      fail(tag, `Law panel definition count invalid: ${defText}`);
+    if (!Number.isFinite(defCount) || defCount < WASM_LAW_DEFINITION_COUNT) {
+      fail(
+        tag,
+        `Law panel definition count below WASM catalog (${defCount}/${WASM_LAW_DEFINITION_COUNT})`,
+      );
     }
     const activeCount = Number.parseInt(activeText.replace(/,/g, ""), 10);
     if (!Number.isFinite(activeCount) || activeCount < 0) {
@@ -1199,6 +1249,7 @@ export async function runPlayChecks(page, options = {}) {
 
   const hud = page.getByText("Diagnostics");
   await hud.waitFor({ state: "visible" });
+  await skipOnboardingScrim(page, tag);
   pass(tag, "diagnostics HUD visible");
 
   const wordmark = page.locator(".hud-wordmark__title");
@@ -1228,6 +1279,7 @@ export async function runPlayChecks(page, options = {}) {
 
   const savesAvailable = await assertSaveApiHealth(tag);
   await assertHudPanels(page, tag);
+  await waitForWasmSim(page, tag);
   await assertEraQuestPanel(page, tag);
   await assertEconomyPanel(page, tag);
   await assertCitizenPanel(page, tag);

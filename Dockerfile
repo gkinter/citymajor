@@ -16,15 +16,22 @@ RUN apt-get update \
  && ln -sf /usr/bin/python3 /usr/bin/python \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
+# pnpm build:wasm parity: monorepo root + wasm script (same entry as beast/pnpm build:wasm)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY web/package.json ./web/
 COPY src/ ./src/
 COPY base/ ./base/
-COPY web/wasm/build-wasm.sh ./web/wasm/build-wasm.sh
+COPY web/wasm/ ./web/wasm/
+COPY --from=base /usr/local/bin/node /usr/local/bin/node
+COPY --from=base /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=base /usr/local/bin/corepack /usr/local/bin/corepack
+RUN corepack enable && corepack prepare pnpm@10.12.1 --activate
 RUN mkdir -p web/public/dotnet
 ENV NODE_OPTIONS=
 RUN if [ "$BUILD_WASM" = "1" ]; then \
-      bash web/wasm/build-wasm.sh; \
-      test -f web/public/dotnet/_framework/blazor.boot.json \
-        || { echo "ERROR: WASM publish succeeded but blazor.boot.json missing under web/public/dotnet/_framework/" >&2; exit 1; }; \
+      pnpm build:wasm \
+        && test -f web/public/dotnet/_framework/blazor.boot.json \
+        || { echo "ERROR: BUILD_WASM=1 but web/public/dotnet/_framework/blazor.boot.json missing" >&2; exit 1; }; \
     else \
       echo "BUILD_WASM=0 — skipping WASM; procedural fallback at runtime"; \
     fi
@@ -72,7 +79,12 @@ RUN stub="$(find web/public/assets/gltf -name '*.glb' -print0 \
     fi
 COPY --from=wasm /src/web/public/dotnet ./web/public/dotnet
 # wasm stage already published; builder image has no .NET SDK
+ARG BUILD_WASM=1
 ENV SKIP_WASM_BUILD=1
+RUN if [ "$BUILD_WASM" = "1" ]; then \
+      test -f web/public/dotnet/_framework/blazor.boot.json \
+        || { echo "ERROR: WASM bundle not copied into builder stage" >&2; exit 1; }; \
+    fi
 RUN --mount=type=cache,target=/app/web/.next/cache,sharing=locked \
     pnpm --filter @citymajor/web... build
 

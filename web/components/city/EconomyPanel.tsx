@@ -45,6 +45,10 @@ const fallbackNote: CSSProperties = {
   border: `1px solid ${HUD_COLORS.borderSubtle}`,
 };
 
+/** v2 inter-city trade epic — co-op regional play, headless sim server. */
+const SB3728_TRADE_EPIC_URL =
+  "https://linear.app/softblaze/issue/SB-3728";
+
 type EconomyPanelProps = {
   open: boolean;
   onClose: () => void;
@@ -184,6 +188,29 @@ function ImbalanceList({
   );
 }
 
+function TradeRoutesStub() {
+  return (
+    <section className="hud-economy-section" aria-label="Trade routes">
+      <div style={{ ...sectionTitle, color: "#c9a0ff" }}>Trade routes</div>
+      <div className="hud-economy-routes-stub">
+        <p className="hud-economy-routes-stub__text">
+          Inter-city trade — partner routes, recurring contracts, and stable
+          pricing between cities on a shared region — ships in v2.
+        </p>
+        <p className="hud-economy-routes-stub__status">No routes · read-only preview</p>
+        <a
+          className="hud-economy-routes-stub__link"
+          href={SB3728_TRADE_EPIC_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          SB-3728 — v2 Trade & MP epic
+        </a>
+      </div>
+    </section>
+  );
+}
+
 export function EconomyPanel({ open, onClose, resources }: EconomyPanelProps) {
   if (!open) return null;
 
@@ -257,6 +284,8 @@ export function EconomyPanel({ open, onClose, resources }: EconomyPanelProps) {
             </p>
           </section>
         ) : null}
+
+        <TradeRoutesStub />
 
         {view.fallbackLabel ? (
           <p style={fallbackNote}>{view.fallbackLabel}</p>

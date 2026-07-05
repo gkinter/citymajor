@@ -866,7 +866,15 @@ ctx.onmessage = async (event: MessageEvent<WorkerInbound>) => {
 
   if (msg.type === "export_cmjr") {
     try {
-      const base64 = sim?.ExportCmjr?.() ?? "";
+      if (!sim?.ExportCmjr) {
+        post({ type: "error", message: "ExportCmjr not available" });
+        return;
+      }
+      const base64 = sim.ExportCmjr();
+      if (!base64) {
+        post({ type: "error", message: "ExportCmjr returned empty blob" });
+        return;
+      }
       post({ type: "cmjr_blob", base64 });
     } catch (err) {
       post({ type: "error", message: String(err) });

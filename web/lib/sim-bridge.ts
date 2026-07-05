@@ -124,7 +124,7 @@ export type SimResources = {
   populationGrowthRate?: number;
   cityFunds: number;
   era: number;
-  /** WASM GetStatus — progress toward next era (WasmConfig thresholds). */
+  /** WASM GetStatus — progress toward next era (population + tech-count gates). */
   eraProgress?: EraProgress;
   /** WASM GetStatus — EconomySystem demand signals (-1..+1). */
   residentialDemand?: number;

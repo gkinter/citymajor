@@ -151,7 +151,7 @@ export function HeraldPanel({
             style={{ opacity: 0.65, fontSize: 11, marginTop: 2 }}
           >
             {specialEdition
-              ? "commemorative era milestone"
+              ? "population and tech gates cleared — commemorative issue"
               : `narrative remaining today: ${formatQuota(quotaRemaining)}`}
           </div>
         </div>

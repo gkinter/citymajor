@@ -216,7 +216,12 @@ export function SaveLoadControls({
     setSaving(true);
     setActionMessage(null);
     try {
-      const wasmBlobBase64 = await simApi.exportWasmSave();
+      let wasmBlobBase64: string | null = null;
+      try {
+        wasmBlobBase64 = await simApi.exportWasmSave();
+      } catch (err) {
+        console.warn("[SaveLoadControls] WASM export failed, saving JSON snapshot only:", err);
+      }
       const res = await fetch("/api/saves", {
         method: "POST",
         credentials: "include",

@@ -28,7 +28,7 @@ const STEPS: OnboardingStep[] = [
   {
     id: "welcome",
     title: "Welcome, Mayor",
-    body: "Your city runs on a tight loop: paint residential zones, read R/C/I demand, open the Daily Herald for story events, queue research, and clear Era Quest checklist gates to advance civilization.",
+    body: "Your city runs on a tight loop: paint residential zones, read R/C/I demand, open the Daily Herald for story events, queue research, and meet Era Quest gates — population and technologies researched — to advance civilization.",
     spotlight: null,
     cardPlacement: "center",
     hint: "Takes about two minutes.",

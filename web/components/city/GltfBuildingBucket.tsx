@@ -2,7 +2,7 @@
 
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { resolveCatalogKey, resolveGltfPath } from "@/lib/gltf-catalog";
 import { markGltfCatalogLoaded } from "@/lib/gltf-load-state";
@@ -69,18 +69,17 @@ export function GltfBuildingBucket({
   const { scene } = useGLTF(path);
   const meshRef = useRef<THREE.InstancedMesh | null>(null);
   const colorsRef = useRef<THREE.Color[]>([]);
+  const paintedVisible = useRef(false);
   const getSpawnScale = useBuildingSpawnScales(buildings);
 
   const { geometry, footprint } = useMemo(() => meshFootprint(scene), [scene]);
   const category = buildings[0]?.category;
 
-  useEffect(() => {
-    markGltfCatalogLoaded(catalogKey);
-  }, [catalogKey, scene]);
-
   useFrame(() => {
     const mesh = meshRef.current;
     if (!mesh || !buildings.length) return;
+
+    let drewVisible = false;
 
     for (let i = 0; i < buildings.length; i++) {
       const building = buildings[i];
@@ -100,6 +99,7 @@ export function GltfBuildingBucket({
       );
 
       const showGltf = !hidden && lod === 0 && !visual.wireframe;
+      if (showGltf) drewVisible = true;
 
       mesh.setMatrixAt(
         i,
@@ -120,6 +120,11 @@ export function GltfBuildingBucket({
 
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+    if (drewVisible && !paintedVisible.current) {
+      paintedVisible.current = true;
+      markGltfCatalogLoaded(catalogKey);
+    }
   });
 
   if (!buildings.length) return null;

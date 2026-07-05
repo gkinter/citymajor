@@ -8,7 +8,7 @@ import {
   hasGltfAsset,
   resolveCatalogKey,
 } from "@/lib/gltf-catalog";
-import { isGltfCatalogLoaded } from "@/lib/gltf-load-state";
+import { isGltfCatalogLoaded, isGltfCatalogFailed } from "@/lib/gltf-load-state";
 import type { ChunkState, CityData } from "@/lib/types";
 import {
   composeInstanceMatrix,
@@ -91,6 +91,7 @@ export function BuildingInstances({
           useGltf &&
           catalogKey !== null &&
           isGltfCatalogLoaded(catalogKey) &&
+          !isGltfCatalogFailed(catalogKey) &&
           !hidden &&
           lod === 0 &&
           !visual.wireframe;

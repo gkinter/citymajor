@@ -25,11 +25,10 @@ export class GltfBucketBoundary extends Component<
     return { failed: true };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.warn(
+  componentDidCatch(error: Error, _info: ErrorInfo): void {
+    console.error(
       `[CityMajor] GLTF bucket failed (${this.props.catalogKey}) — using box fallback`,
-      error,
-      info.componentStack,
+      error.message,
     );
     markGltfCatalogFailed(this.props.catalogKey);
   }

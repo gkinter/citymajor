@@ -8,7 +8,11 @@ import { allGltfPaths } from "@/lib/gltf-catalog";
 export function GltfPreloader() {
   useEffect(() => {
     for (const path of allGltfPaths()) {
-      useGLTF.preload(path);
+      try {
+        useGLTF.preload(path);
+      } catch (err) {
+        console.warn(`[CityMajor] GLTF preload skipped (${path})`, err);
+      }
     }
   }, []);
 

@@ -11,6 +11,7 @@ import {
   TECH_CATALOG_TOTAL,
   TECH_V1_CATALOG,
   classifyTechAvailability,
+  formatUnlockLabel,
   techIdFromCatalogId,
   techNameFromIndex,
   type TechAvailability,
@@ -265,7 +266,7 @@ export function ResearchPanel({
                       ? ` · req ${tech.prerequisites.join(", ")}`
                       : ""}
                     {tech.unlocks && tech.unlocks.length > 0
-                      ? ` · unlocks ${tech.unlocks.join(", ")}`
+                      ? ` · unlocks ${tech.unlocks.map(formatUnlockLabel).join(", ")}`
                       : ""}
                   </div>
                   <p className="hud-research-list__desc">{tech.description}</p>

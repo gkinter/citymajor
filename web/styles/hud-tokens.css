@@ -659,6 +659,45 @@
   color: var(--hud-text-dim);
 }
 
+.hud-economy-routes-stub {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--hud-row-bg);
+  border: 1px dashed rgba(201, 160, 255, 0.45);
+}
+
+.hud-economy-routes-stub__text {
+  margin: 0 0 8px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--hud-text-muted);
+}
+
+.hud-economy-routes-stub__status {
+  margin: 0 0 10px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hud-text-dim);
+}
+
+.hud-economy-routes-stub__link {
+  font-size: 11px;
+  font-weight: 600;
+  color: #c9a0ff;
+  text-decoration: none;
+}
+
+.hud-economy-routes-stub__link:hover {
+  text-decoration: underline;
+}
+
+.hud-economy-routes-stub__link:focus-visible {
+  outline: 2px solid #c9a0ff;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* Law panel — WASM LawSystem counts */
 .hud-law-button {
   font-family: var(--hud-font-mono);

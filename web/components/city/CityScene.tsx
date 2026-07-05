@@ -40,6 +40,9 @@ type CitySceneProps = {
   onEventMarkerClick?: (event: ActiveEventSnapshot) => void;
   onPick: (pick: PickResult) => void;
   onStats: (stats: FpsStats) => void;
+  onRenderHealth?: (
+    stats: Pick<FpsStats, "visibleBuildings" | "visibleChunks" | "totalBuildings">,
+  ) => void;
   dpr: number;
   population?: number;
   householdCount?: number;
@@ -62,6 +65,7 @@ export function CityScene({
   onEventMarkerClick,
   onPick,
   onStats,
+  onRenderHealth,
   dpr,
   population = 0,
   householdCount,
@@ -75,31 +79,37 @@ export function CityScene({
   dirLight.position.set(80, 120, 40);
 
   useFrame(() => {
+    const visibleChunks = updateChunkVisibility(chunks, camera);
+    const lodCounts = updateChunkLod(chunks, camera.position);
+    const visibleBuildings = visibleBuildingCount(
+      chunks,
+      city.chunkBuildingIndices,
+    );
+
+    onRenderHealth?.({
+      visibleChunks,
+      visibleBuildings,
+      totalBuildings: city.buildings.length,
+    });
+
     const now = performance.now();
     fpsAccum.current.frames += 1;
     const elapsed = now - fpsAccum.current.last;
-    if (elapsed >= 500) {
-      fpsAccum.current.fps = (fpsAccum.current.frames * 1000) / elapsed;
-      fpsAccum.current.frames = 0;
-      fpsAccum.current.last = now;
+    if (elapsed < 500) return;
 
-      const visibleChunks = updateChunkVisibility(chunks, camera);
-      const lodCounts = updateChunkLod(chunks, camera.position);
-      const visibleBuildings = visibleBuildingCount(
-        chunks,
-        city.chunkBuildingIndices,
-      );
+    fpsAccum.current.fps = (fpsAccum.current.frames * 1000) / elapsed;
+    fpsAccum.current.frames = 0;
+    fpsAccum.current.last = now;
 
-      statsSnapshot.current = {
-        fps: Math.round(fpsAccum.current.fps),
-        dpr,
-        visibleChunks,
-        visibleBuildings,
-        lodCounts,
-        pickedTile,
-      };
-      onStats(statsSnapshot.current as FpsStats);
-    }
+    statsSnapshot.current = {
+      fps: Math.round(fpsAccum.current.fps),
+      dpr,
+      visibleChunks,
+      visibleBuildings,
+      lodCounts,
+      pickedTile,
+    };
+    onStats(statsSnapshot.current as FpsStats);
   });
 
   return (

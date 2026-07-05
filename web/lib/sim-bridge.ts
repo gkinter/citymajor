@@ -3,8 +3,8 @@
  * Falls back to procedural city-data when WASM is unavailable (see city-data.ts).
  */
 
-/** 0 = paused, 1 = 1x, 2 = 2x, 3 = 3x */
-export type GameSpeedLevel = 0 | 1 | 2 | 3;
+/** 0 = paused, 1 = 1x, 2 = 2x, 4 = 4x */
+export type GameSpeedLevel = 0 | 1 | 2 | 4;
 
 export type SimCommand =
   | { type: "tick"; deltaMs: number }

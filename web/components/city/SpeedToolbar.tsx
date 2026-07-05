@@ -16,7 +16,7 @@ const SPEEDS: { level: GameSpeedLevel; label: string }[] = [
   { level: 0, label: "Pause" },
   { level: 1, label: "1x" },
   { level: 2, label: "2x" },
-  { level: 3, label: "3x" },
+  { level: 4, label: "4x" },
 ];
 
 export function SpeedToolbar({ speedLevel, onSpeedChange }: SpeedToolbarProps) {

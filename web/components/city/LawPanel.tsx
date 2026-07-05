@@ -31,6 +31,7 @@ type LawPanelProps = {
   open: boolean;
   onClose: () => void;
   resources: SimResources | null;
+  onSetLawActive?: (lawId: string, active: boolean) => void;
 };
 
 function formatCount(value: number | undefined): string {
@@ -47,13 +48,66 @@ function StatRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function LawPanel({ open, onClose, resources }: LawPanelProps) {
+function LawToggleRow({
+  law,
+  disabled = false,
+  comingSoon = false,
+  onToggle,
+}: {
+  law: { id: string; name: string; active: boolean };
+  disabled?: boolean;
+  comingSoon?: boolean;
+  onToggle?: (active: boolean) => void;
+}) {
+  const toggleId = `law-toggle-${law.id}`;
+
+  return (
+    <div
+      className={`hud-law-row${comingSoon ? " hud-law-row--soon" : ""}`}
+      aria-label={law.name}
+    >
+      <div className="hud-law-row__copy">
+        <span className="hud-law-row__name">{law.name}</span>
+        {comingSoon ? (
+          <span className="hud-law-row__badge">Coming soon</span>
+        ) : (
+          <span className="hud-law-row__hint">
+            {law.active ? "In effect" : "Not active"}
+          </span>
+        )}
+      </div>
+      <label className="hud-law-toggle" htmlFor={toggleId}>
+        <input
+          id={toggleId}
+          type="checkbox"
+          className="hud-law-toggle__input"
+          checked={law.active}
+          disabled={disabled || comingSoon}
+          onChange={(event) => onToggle?.(event.target.checked)}
+        />
+        <span className="hud-law-toggle__track" aria-hidden />
+      </label>
+    </div>
+  );
+}
+
+export function LawPanel({
+  open,
+  onClose,
+  resources,
+  onSetLawActive,
+}: LawPanelProps) {
   if (!open) return null;
 
   const definitionCount = resources?.lawDefinitionCount;
   const activeCount = resources?.activeLawCount;
+  const sampleLaw = resources?.sampleLaw;
   const hasWasmData =
     definitionCount !== undefined || activeCount !== undefined;
+  const canToggleSample =
+    sampleLaw !== undefined &&
+    onSetLawActive !== undefined &&
+    !sampleLaw.id.startsWith("placeholder");
 
   return (
     <aside
@@ -107,6 +161,40 @@ export function LawPanel({ open, onClose, resources }: LawPanelProps) {
           <StatRow
             label="Ordinances in effect"
             value={formatCount(activeCount)}
+          />
+        </section>
+
+        <section aria-label="Ordinance toggles" style={{ marginTop: 18 }}>
+          <div style={sectionTitle}>Ordinances</div>
+          {sampleLaw ? (
+            <LawToggleRow
+              law={sampleLaw}
+              disabled={!canToggleSample}
+              onToggle={
+                canToggleSample
+                  ? (active) => onSetLawActive?.(sampleLaw.id, active)
+                  : undefined
+              }
+            />
+          ) : (
+            <LawToggleRow
+              law={{
+                id: "placeholder",
+                name: "Speed Limits",
+                active: false,
+              }}
+              comingSoon
+              disabled
+            />
+          )}
+          <LawToggleRow
+            law={{
+              id: "placeholder-catalog",
+              name: "Full ordinance catalog",
+              active: false,
+            }}
+            comingSoon
+            disabled
           />
         </section>
       </div>

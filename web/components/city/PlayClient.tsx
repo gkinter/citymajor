@@ -170,6 +170,16 @@ export function PlayClient() {
     void refreshEntitlements();
   }, [refreshEntitlements]);
 
+  // Playwright smoke: exportWasmSave() without clicking Save UI (localStorage gate).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.localStorage.getItem("citymajor_smoke") !== "1") return;
+    window.__citymajorSimApi = simApi;
+    return () => {
+      window.__citymajorSimApi = null;
+    };
+  }, [simApi]);
+
   const handleSimResources = useCallback((resources: SimResources) => {
     populationGrowthRef.current.push(resources.tick, resources.population);
     setPopulationGrowthPerMonth(populationGrowthRef.current.estimatePerMonth());
@@ -416,6 +426,10 @@ export function PlayClient() {
     simApiRef.current?.sendCommand({ type: "enqueue_research", techId });
   }, []);
 
+  const handleSetLawActive = useCallback((lawId: string, active: boolean) => {
+    simApiRef.current?.sendCommand({ type: "set_law_active", lawId, active });
+  }, []);
+
   const handleZonePainted = useCallback((zoneType: number) => {
     if (isResidentialZonePaint(zoneType)) {
       setResidentialZonePainted(true);
@@ -588,6 +602,7 @@ export function PlayClient() {
         open={lawOpen}
         onClose={() => setLawOpen(false)}
         resources={simResources}
+        onSetLawActive={handleSetLawActive}
       />
 
       <CitizenPanel

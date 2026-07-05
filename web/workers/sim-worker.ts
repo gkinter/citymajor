@@ -512,6 +512,7 @@ function readStatus(): Pick<
       populationL2: parsePopulationL2(parsed.populationL2),
       lawDefinitionCount: parsed.lawDefinitionCount,
       activeLawCount: parsed.activeLawCount,
+      sampleLaw: parseSampleLaw(parsed.sampleLaw),
     };
   } catch {
     return null;
@@ -577,6 +578,7 @@ function readSnapshot(): SimSnapshot {
     lawDefinitionCount:
       parsed.lawDefinitionCount ?? status?.lawDefinitionCount,
     activeLawCount: parsed.activeLawCount ?? status?.activeLawCount,
+    sampleLaw: parseSampleLaw(parsed.sampleLaw) ?? status?.sampleLaw,
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),
@@ -630,6 +632,12 @@ function placeRoadTile(tileX: number, tileZ: number) {
 function enqueueResearchTech(techId: number) {
   if (techId < 0) return;
   const ok = sim?.EnqueueResearch?.(techId) ?? false;
+  if (ok) publishResourceUpdate();
+}
+
+function setLawActiveState(lawId: string, active: boolean) {
+  if (!lawId) return;
+  const ok = sim?.SetLawActive?.(lawId, active) ?? false;
   if (ok) publishResourceUpdate();
 }
 
@@ -741,9 +749,12 @@ function loadSnapshot(snapshot: SimSnapshot) {
       return;
     }
   } else {
-    console.warn(
-      "[sim-worker] LoadSnapshot export missing — syncing grids only",
-    );
+    post({ type: "load_complete", ok: false });
+    post({
+      type: "error",
+      message: "LoadSnapshot export missing from WASM — cannot restore sim state",
+    });
+    return;
   }
 
   syncGridsFromSnapshot(snapshot);
@@ -826,6 +837,9 @@ function handleCommand(command: SimCommand) {
       break;
     case "enqueue_research":
       enqueueResearchTech(command.techId);
+      break;
+    case "set_law_active":
+      setLawActiveState(command.lawId, command.active);
       break;
     case "load_snapshot":
       loadSnapshot(command.snapshot);

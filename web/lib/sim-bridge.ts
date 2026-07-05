@@ -246,6 +246,13 @@ export type SimClientApi = {
   sendCommand: (command: SimCommand) => void;
 };
 
+declare global {
+  interface Window {
+    /** Set by PlayClient when localStorage citymajor_smoke=1 (Playwright only). */
+    __citymajorSimApi?: SimClientApi | null;
+  }
+}
+
 const DEFAULT_WASM_URL = "/dotnet";
 const DEFAULT_WORLD_SIZE = 256;
 /**

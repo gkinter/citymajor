@@ -43,6 +43,18 @@ export type PickResult = {
   chunkIndex: number;
 } | null;
 
+/** AdaptiveDpr controller state — surfaced in Diagnostics HUD when ?debug=perf. */
+export type AdaptiveDprStatus = "stable" | "low-fps" | "degraded" | "recovering";
+
+export type AdaptiveDprDebugInfo = {
+  status: AdaptiveDprStatus;
+  sampledFps: number;
+  baseDpr: number;
+  /** Milliseconds below FPS_DEGRADE_THRESHOLD; 0 when FPS is healthy. */
+  lowFpsElapsedMs: number;
+  lastEvent?: "degrade" | "recover";
+};
+
 export type FpsStats = {
   fps: number;
   dpr: number;
@@ -58,4 +70,6 @@ export type FpsStats = {
   policeCoverage?: number;
   /** 0–1 mean fire coverage over zoned tiles (WASM). */
   fireCoverage?: number;
+  /** AdaptiveDpr telemetry — populated when /play?debug=perf. */
+  adaptiveDpr?: AdaptiveDprDebugInfo;
 };

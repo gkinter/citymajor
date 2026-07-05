@@ -128,6 +128,7 @@ function readEmptyCityPref(urlEmpty: boolean): boolean {
 export function PlayClient() {
   const searchParams = useSearchParams();
   const urlEmpty = searchParams.get("empty") === "1";
+  const perfDebug = searchParams.get("debug") === "perf";
   const [emptyCity, setEmptyCity] = useState(() => readEmptyCityPref(urlEmpty));
   const [activeTool, setActiveTool] = useState<ZoningTool>("residential");
   const [brushSize, setBrushSize] = useState<PaintBrushSize>(1);
@@ -654,6 +655,7 @@ export function PlayClient() {
         onSimResources={handleSimResources}
         onSimApi={setSimApi}
         onZonePainted={handleZonePainted}
+        perfDebug={perfDebug}
       />
       <ApprovalMoodOverlay approval={simResources?.approval} />
       <HudWordmark />
@@ -711,6 +713,7 @@ export function PlayClient() {
         stats={stats}
         totalBuildings={stats.totalBuildings}
         activeTool={canvasActiveTool}
+        perfDebug={perfDebug}
       />
       <MinimapPanel />
       <div style={{ ...HUD_ZONE.bottomLeft, pointerEvents: "auto" }}>

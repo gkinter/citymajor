@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type * as THREE from "three";
-import type { FpsStats, PickResult, CityData } from "@/lib/types";
+import type { FpsStats, PickResult, CityData, AdaptiveDprDebugInfo } from "@/lib/types";
 import { cityDataFromSnapshot, getCityData } from "@/lib/city-data";
 import { createChunkStates } from "@/lib/chunks";
 import { LOW_APPROVAL_WARNING_THRESHOLD, MAX_DPR } from "@/lib/constants";
@@ -72,6 +72,8 @@ type CityCanvasProps = {
   onZonePainted?: (zoneType: number) => void;
   /** Skip WASM SeedStarterCity — terrain-only start (see /play?empty=1). */
   skipStarterCity?: boolean;
+  /** Show AdaptiveDpr telemetry in Diagnostics HUD (/play?debug=perf). */
+  perfDebug?: boolean;
 };
 
 /** Encode road tier into roadFlags bits 4–5 (ToolSystem.cs); WASM PlaceRoad ignores tier. */
@@ -97,6 +99,7 @@ export function CityCanvas({
   onSimApi,
   onZonePainted,
   skipStarterCity = false,
+  perfDebug = false,
 }: CityCanvasProps) {
   const [city, setCity] = useState<CityData>(() => getCityData());
   const [zones, setZones] = useState<ZoneTile[]>([]);
@@ -124,6 +127,9 @@ export function CityCanvas({
   const policeCoverage = simResources?.policeCoverage;
   const fireCoverage = simResources?.fireCoverage;
   const [dpr, setDpr] = useState(1);
+  const [adaptiveDprDebug, setAdaptiveDprDebug] = useState<
+    AdaptiveDprDebugInfo | undefined
+  >(undefined);
   useEffect(() => {
     setDpr(Math.min(MAX_DPR, window.devicePixelRatio));
   }, []);
@@ -386,6 +392,21 @@ export function CityCanvas({
   }, [hoveredTile, zones, roads, city.buildings]);
 
   useEffect(() => {
+    if (!perfDebug) {
+      setAdaptiveDprDebug(undefined);
+    }
+  }, [perfDebug]);
+
+  const handleAdaptiveDprDebug = useCallback(
+    (info: AdaptiveDprDebugInfo) => {
+      setAdaptiveDprDebug(info);
+      latestStats.current = { ...latestStats.current, adaptiveDpr: info };
+      onStats(latestStats.current);
+    },
+    [onStats],
+  );
+
+  useEffect(() => {
     latestStats.current = {
       ...latestStats.current,
       pickedTile,
@@ -394,9 +415,20 @@ export function CityCanvas({
       healthcareCoverage,
       policeCoverage,
       fireCoverage,
+      adaptiveDpr: perfDebug ? adaptiveDprDebug : undefined,
     };
     onStats(latestStats.current);
-  }, [pickedTile, dpr, simSource, healthcareCoverage, policeCoverage, fireCoverage, onStats]);
+  }, [
+    pickedTile,
+    dpr,
+    simSource,
+    healthcareCoverage,
+    policeCoverage,
+    fireCoverage,
+    adaptiveDprDebug,
+    perfDebug,
+    onStats,
+  ]);
 
   const handleRenderHealth = useCallback(
     (partial: Pick<FpsStats, "visibleBuildings" | "visibleChunks" | "totalBuildings">) => {
@@ -423,6 +455,7 @@ export function CityCanvas({
       healthcareCoverage,
       policeCoverage,
       fireCoverage,
+      adaptiveDpr: perfDebug ? adaptiveDprDebug : undefined,
       totalBuildings: city.buildings.length,
     };
     onStats(latestStats.current);
@@ -501,7 +534,12 @@ export function CityCanvas({
               era={simResources?.era ?? 0}
               eraProgress={simResources?.eraProgress}
             />
-          <AdaptiveDpr dpr={dpr} onDprChange={setDpr} />
+          <AdaptiveDpr
+            dpr={dpr}
+            onDprChange={setDpr}
+            perfDebug={perfDebug}
+            onDebugUpdate={perfDebug ? handleAdaptiveDprDebug : undefined}
+          />
           <CityPostProcessing
             qualityTier={qualityTier}
             disabled={postProcessingDisabled}

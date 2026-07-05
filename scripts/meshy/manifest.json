@@ -70,6 +70,12 @@
       "era": "industrial"
     },
     {
+      "key": "res_high_industrial_01",
+      "prompt": "A dense 19th-century tenement building block, brick texture, flat roof with lip, low poly, stylized game asset, silhouette variant 01",
+      "category": "res_high",
+      "era": "industrial"
+    },
+    {
       "key": "res_high_modern_00",
       "prompt": "A modern mid-rise apartment block, balconies, flat roof with lip, concrete and glass, low poly, stylized game asset",
       "category": "res_high",

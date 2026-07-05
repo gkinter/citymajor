@@ -35,7 +35,6 @@ import { CityScene } from "./CityScene";
 import { AdaptiveDpr } from "./AdaptiveDpr";
 import { CityPostProcessing } from "./CityPostProcessing";
 import { CanvasRenderHealth } from "./CanvasRenderHealth";
-import { Minimap } from "./Minimap";
 
 function skyColorForApproval(approval: number | undefined): string {
   const base = { r: 0x0b, g: 0x10, b: 0x20 };
@@ -476,7 +475,6 @@ export function CityCanvas({
           />
         </Canvas>
       </div>
-      <Minimap zones={zones} city={city} />
     </div>
   );
 }

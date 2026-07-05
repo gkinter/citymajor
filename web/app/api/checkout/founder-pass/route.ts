@@ -2,27 +2,29 @@ import { NextResponse } from "next/server";
 import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
 import {
   getFounderPassPriceId,
+  getMissingStripeCheckoutEnv,
   getStripeClient,
   getStripePublishableKey,
   isStripeCheckoutEnabled,
+  stripeCheckoutUnavailableBody,
 } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const missing = getMissingStripeCheckoutEnv();
   return NextResponse.json({
     configured: isStripeCheckoutEnabled(),
     publishableKey: getStripePublishableKey(),
+    ...(missing.length > 0 ? { missing } : {}),
   });
 }
 
 export async function POST(req: Request) {
-  if (!isStripeCheckoutEnabled()) {
-    return NextResponse.json(
-      { error: "Stripe checkout is not configured" },
-      { status: 503 },
-    );
+  const missing = getMissingStripeCheckoutEnv();
+  if (missing.length > 0) {
+    return NextResponse.json(stripeCheckoutUnavailableBody(), { status: 503 });
   }
 
   const { userId, newCookie } = ensureUserId(req);

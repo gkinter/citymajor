@@ -49,6 +49,7 @@ public sealed class IronAndOakGame
     private Simulation.PoliticsSystem? _politicsSystem;
     private Simulation.ResearchSystem? _researchSystem;
     private Simulation.EventSystem? _eventSystem;
+    private Simulation.LawSystem? _lawSystem;
     private Simulation.CulturalDNASystem? _culturalDna;
 
     // Yearly tick tracking (CulturalDNA ticks once per game year)
@@ -107,6 +108,7 @@ public sealed class IronAndOakGame
         _politicsSystem = new Simulation.PoliticsSystem();
         _researchSystem = new Simulation.ResearchSystem();
         _eventSystem = new Simulation.EventSystem(seed: 12345);
+        _lawSystem = new Simulation.LawSystem();
         _culturalDna = new Simulation.CulturalDNASystem();
 
         // Wire budget system event bus
@@ -488,6 +490,20 @@ public sealed class IronAndOakGame
             catch (Exception ex)
             {
                 Console.WriteLine($"[IronAndOak] WARNING: Failed to load tech tree: {ex.Message}");
+            }
+        }
+
+        string lawsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "base", "data", "laws", "laws.json");
+        if (File.Exists(lawsPath))
+        {
+            try
+            {
+                _lawSystem!.LoadFromFile(lawsPath);
+                Console.WriteLine($"[IronAndOak] Loaded {_lawSystem.DefinitionCount} laws from {lawsPath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[IronAndOak] WARNING: Failed to load laws: {ex.Message}");
             }
         }
     }

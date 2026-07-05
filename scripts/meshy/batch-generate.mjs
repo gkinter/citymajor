@@ -6,11 +6,12 @@
  * Usage:
  *   MESHY_API_KEY=msk_… node scripts/meshy/batch-generate.mjs
  *   node scripts/meshy/batch-generate.mjs --dry-run
+ *   node scripts/meshy/batch-generate.mjs --manifest scripts/meshy/manifest-batch-v1-core.json
  *
  * See docs/MESHY_ASSET_PIPELINE.md
  */
 import { mkdirSync, readFileSync, existsSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Document, NodeIO, getBounds } from "@gltf-transform/core";
 import { validateManifest } from "./validate-manifest.mjs";
@@ -41,12 +42,14 @@ function parseArgs(argv) {
     limit: Infinity,
     pollMs: DEFAULT_POLL_MS,
     previewOnly: false,
+    manifest: null,
   };
 
   for (const arg of argv) {
     if (arg === "--dry-run" || arg === "-n") opts.dryRun = true;
     else if (arg === "--skip-existing") opts.skipExisting = true;
     else if (arg === "--preview-only") opts.previewOnly = true;
+    else if (arg.startsWith("--manifest=")) opts.manifest = arg.slice("--manifest=".length);
     else if (arg.startsWith("--only=")) opts.only = arg.slice("--only=".length);
     else if (arg.startsWith("--limit=")) opts.limit = Number(arg.slice("--limit=".length));
     else if (arg.startsWith("--poll-ms=")) opts.pollMs = Number(arg.slice("--poll-ms=".length));
@@ -71,6 +74,7 @@ Usage:
 
 Options:
   --dry-run, -n       Plan jobs without calling Meshy (default when MESHY_API_KEY unset)
+  --manifest=<path>   Manifest JSON (default scripts/meshy/manifest.json; use manifest-batch-*.json for batches)
   --only=<key>        Process a single manifest job by archetype key
   --skip-existing     Skip jobs whose output GLB already exists
   --limit=<n>         Process at most N jobs
@@ -86,10 +90,24 @@ Environment:
 }
 
 /**
+ * @param {string} pathArg
+ * @returns {string}
+ */
+function resolveManifestPath(pathArg) {
+  const manifestPath = isAbsolute(pathArg) ? pathArg : resolve(process.cwd(), pathArg);
+  if (!existsSync(manifestPath)) {
+    console.error(`Manifest not found: ${manifestPath}`);
+    process.exit(1);
+  }
+  return manifestPath;
+}
+
+/**
+ * @param {string} manifestPath
  * @returns {MeshyManifest}
  */
-function loadManifest() {
-  const raw = readFileSync(MANIFEST_PATH, "utf8");
+function loadManifest(manifestPath) {
+  const raw = readFileSync(manifestPath, "utf8");
   return JSON.parse(raw);
 }
 
@@ -456,7 +474,8 @@ function sleep(ms) {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
-  const manifest = loadManifest();
+  const manifestPath = resolveManifestPath(opts.manifest ?? MANIFEST_PATH);
+  const manifest = loadManifest(manifestPath);
   const apiKey = process.env.MESHY_API_KEY?.trim() ?? "";
   const useMcp = !opts.dryRun && !apiKey && process.env.MESHY_USE_MCP === "1";
   const dryRun = opts.dryRun || (!apiKey && !useMcp);
@@ -480,7 +499,7 @@ async function main() {
 
   console.log(
     dryRun
-      ? `Dry-run: ${jobs.length} job(s) from ${MANIFEST_PATH}`
+      ? `Dry-run: ${jobs.length} job(s) from ${manifestPath}`
       : useMcp
         ? `Generating ${jobs.length} asset(s) via Meshy MCP (${manifest.meshy_model})`
         : `Generating ${jobs.length} asset(s) via Meshy (${manifest.meshy_model})`,
@@ -509,17 +528,23 @@ async function main() {
   }
 
   if (dryRun) {
-    const validation = validateManifest({ requireOnDisk: true });
-    if (!validation.ok) {
-      console.error(`\nManifest / GLB validation failed:`);
-      for (const err of validation.errors) {
-        console.error(`  - ${err}`);
+    if (resolve(manifestPath) === resolve(MANIFEST_PATH)) {
+      const validation = validateManifest({ requireOnDisk: true });
+      if (!validation.ok) {
+        console.error(`\nManifest / GLB validation failed:`);
+        for (const err of validation.errors) {
+          console.error(`  - ${err}`);
+        }
+        process.exit(1);
       }
-      process.exit(1);
+      console.log(
+        `\nDry-run complete (${validation.jobCount} job(s) match web/public/assets/gltf). Set MESHY_API_KEY to generate for real.`,
+      );
+    } else {
+      console.log(
+        `\nDry-run complete (${jobs.length} job(s) from batch manifest). Set MESHY_API_KEY or MESHY_USE_MCP=1 to generate.`,
+      );
     }
-    console.log(
-      `\nDry-run complete (${validation.jobCount} job(s) match web/public/assets/gltf). Set MESHY_API_KEY to generate for real.`,
-    );
   } else {
     console.log(`\nBatch complete.`);
   }

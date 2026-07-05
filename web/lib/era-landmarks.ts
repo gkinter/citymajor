@@ -10,6 +10,16 @@ const ERA_LANDMARK_NAMES: Record<number, string> = {
   4: "Fusion Reactor",
 };
 
+/** Hero GLB filenames for era-gate monuments (`nextEra` → target era). */
+const ERA_LANDMARK_HERO_FILES: Record<number, string> = {
+  1: "hero_industrial_train_station.glb",
+  2: "hero_postwar_civic_hall.glb",
+  3: "hero_modern_glass_tower.glb",
+  4: "inf_future_fusion_reactor.glb",
+};
+
+const HERO_GLTF_BASE = "/assets/gltf/heroes";
+
 export type EraLandmarkSpec = {
   landmarkName: string;
   questTitle: string | null;
@@ -21,12 +31,12 @@ export type EraLandmarkSpec = {
 };
 
 /**
- * True when WASM era-progress gates are satisfied for the next era.
- * Uses `percent >= 100` so Frontier→Industrial OR-path logic matches WasmEraDeriver.
+ * True when all era-progress gates are satisfied (population AND tech count).
+ * Matches ResearchSystem.CheckEraTransition / WasmEraDeriver.GetEraProgress.
  */
 export function isEraGateReady(progress: EraProgress | undefined): boolean {
   if (!progress || progress.gates.length === 0) return false;
-  return progress.percent >= 100;
+  return progress.gates.every((gate) => gate.met);
 }
 
 export function eraLandmarkSpec(nextEra: number): EraLandmarkSpec | null {
@@ -62,3 +72,21 @@ export const ERA_LANDMARK_TILE = {
   tileX: 128,
   tileZ: 128,
 } as const;
+
+/** Public URL for the hero GLB tied to an era gate, or null when unmapped. */
+export function eraLandmarkGltfPath(nextEra: number): string | null {
+  const file = ERA_LANDMARK_HERO_FILES[nextEra];
+  if (!file) return null;
+  return `${HERO_GLTF_BASE}/${file}`;
+}
+
+/** HEAD probe — true when the hero GLB is present under `public/assets/gltf/heroes/`. */
+export async function checkEraLandmarkGltfExists(path: string): Promise<boolean> {
+  try {
+    const res = await fetch(path, { method: "HEAD", cache: "no-store" });
+    const type = res.headers.get("content-type") ?? "";
+    return res.ok && (type.includes("model/gltf") || type.includes("octet-stream") || type.includes("application"));
+  } catch {
+    return false;
+  }
+}

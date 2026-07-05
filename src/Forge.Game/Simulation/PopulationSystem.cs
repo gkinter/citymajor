@@ -1112,4 +1112,78 @@ public sealed class PopulationSystem
         EnsureCapacity(householdIndex + 1);
         _headAge[householdIndex] = age;
     }
+
+    // =========================================================================
+    // L2 export — top households for web CitizenPanel drill-down
+    // =========================================================================
+
+    /// <summary>Named household row for WASM populationL2 export.</summary>
+    public readonly struct HouseholdSampleRow
+    {
+        public string Id { get; init; }
+        public int TileX { get; init; }
+        public int TileZ { get; init; }
+        /// <summary>0–1 satisfaction.</summary>
+        public float Happiness { get; init; }
+        /// <summary>Commute time in game minutes.</summary>
+        public float CommuteMin { get; init; }
+    }
+
+    private const float TilesToCommuteMinutes = 3f;
+
+    /// <summary>
+    /// Collect up to <paramref name="limit"/> active households sorted by happiness (desc)
+    /// for the web CitizenPanel L2 list.
+    /// </summary>
+    public HouseholdSampleRow[] CollectHouseholdSample(WorldState state, int limit = 50)
+    {
+        if (limit <= 0 || state.Households.Count == 0)
+            return [];
+
+        var candidates = new List<(int idx, byte happiness)>(state.Households.Count);
+        for (int i = 0; i < state.Households.Capacity; i++)
+        {
+            if (!state.Households.IsActive(i)) continue;
+            candidates.Add((i, state.Households.Happiness[i]));
+        }
+
+        if (candidates.Count == 0)
+            return [];
+
+        candidates.Sort((a, b) => b.happiness.CompareTo(a.happiness));
+
+        int count = Math.Min(limit, candidates.Count);
+        var result = new HouseholdSampleRow[count];
+        for (int j = 0; j < count; j++)
+        {
+            int idx = candidates[j].idx;
+            var hh = state.Households;
+            int tileX = 0;
+            int tileZ = 0;
+            ushort homeId = hh.HomeBuildingId[idx];
+            if (homeId != 0 && homeId < state.Buildings.Capacity && state.Buildings.IsActive(homeId))
+            {
+                tileX = state.Buildings.GridX[homeId];
+                tileZ = state.Buildings.GridY[homeId];
+            }
+
+            float commuteMin = 0f;
+            if (hh.AgeGroup[idx] != 2 && hh.WorkBuildingId[idx] != 0)
+            {
+                float distance = CalculateBuildingDistance(state, homeId, hh.WorkBuildingId[idx]);
+                commuteMin = distance * TilesToCommuteMinutes;
+            }
+
+            result[j] = new HouseholdSampleRow
+            {
+                Id = $"HH-{idx:D5}",
+                TileX = tileX,
+                TileZ = tileZ,
+                Happiness = hh.Happiness[idx] / 255f,
+                CommuteMin = commuteMin,
+            };
+        }
+
+        return result;
+    }
 }

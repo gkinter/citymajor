@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { entitlementsForTier } from "@/lib/entitlements";
+import { generateNarrativeWithLlm, isNarrativeLlmConfigured } from "@/lib/narrative-prompt";
 import { resolveTierFromRequest } from "@/lib/resolve-tier";
 import {
   consumeNarrativeEvent,
@@ -75,6 +77,22 @@ export async function POST(req: Request) {
   const cityName = parsed.data.context?.cityName;
   if (cityName) {
     event = personalizeNarrativeEvent(event, cityName);
+  }
+
+  const { llmEnabled } = entitlementsForTier(tier);
+  if (llmEnabled && isNarrativeLlmConfigured()) {
+    try {
+      const llmEvent = await generateNarrativeWithLlm({
+        bucket,
+        context: parsed.data.context,
+        template: event,
+      });
+      if (llmEvent) {
+        event = cityName ? personalizeNarrativeEvent(llmEvent, cityName) : llmEvent;
+      }
+    } catch (err) {
+      console.error("[narrative/event] LLM failed, using template fallback:", err);
+    }
   }
 
   const payload = NarrativeEventResponseSchema.parse(event);

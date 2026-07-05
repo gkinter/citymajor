@@ -9,6 +9,7 @@ import { createChunkStates } from "@/lib/chunks";
 import { LOW_APPROVAL_WARNING_THRESHOLD, MAX_DPR } from "@/lib/constants";
 import { LOW_HAPPINESS_APPROVAL } from "@/lib/sim-metrics";
 import type { GraphicsQualityTier } from "@/lib/constants";
+import type { CitizenDotPick } from "@/lib/population-l2";
 import {
   createSimBridge,
   type ActiveEventSnapshot,
@@ -56,6 +57,7 @@ type CityCanvasProps = {
   qualityTier: GraphicsQualityTier;
   activeEvents?: ActiveEventSnapshot[];
   onEventMarkerClick?: (event: ActiveEventSnapshot) => void;
+  onCitizenDotClick?: (pick: CitizenDotPick) => void;
   showTrafficOverlay?: boolean;
   serviceViewMode: ServiceViewMode;
   onStats: (stats: FpsStats) => void;
@@ -71,6 +73,7 @@ export function CityCanvas({
   qualityTier,
   activeEvents,
   onEventMarkerClick,
+  onCitizenDotClick,
   showTrafficOverlay = true,
   serviceViewMode,
   onStats,
@@ -224,6 +227,12 @@ export function CityCanvas({
         const authoritative = bridge.getSnapshot();
         if (authoritative) applySnapshot(authoritative);
       },
+      applyWasmSave: async (base64Cmjr) => {
+        await bridge.loadCmjr(base64Cmjr);
+        const authoritative = bridge.getSnapshot();
+        if (authoritative) applySnapshot(authoritative);
+      },
+      exportWasmSave: () => bridge.exportCmjr(),
       sendCommand: (command) => bridge.send(command),
     });
     return () => onSimApi?.(null);
@@ -361,6 +370,7 @@ export function CityCanvas({
               pickedTile={pickedTile}
               activeEvents={activeEvents}
               onEventMarkerClick={onEventMarkerClick}
+              onCitizenDotClick={onCitizenDotClick}
               onPick={handlePick}
               onStats={handleStats}
               dpr={dpr}

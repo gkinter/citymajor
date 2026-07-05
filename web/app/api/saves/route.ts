@@ -69,7 +69,7 @@ export async function POST(req: Request) {
   if (!result.ok) {
     return applyUserIdCookie(
       NextResponse.json(
-        result.status === 500
+        result.status === 500 || result.status === 400
           ? { error: result.error }
           : {
               error: result.error,

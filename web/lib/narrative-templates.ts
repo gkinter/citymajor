@@ -33,12 +33,14 @@ export const NarrativeOptionSchema = z.object({
   tradeoff: z.string(),
 });
 
+export const NarrativeSourceSchema = z.enum(["template", "llm"]);
+
 export const NarrativeEventResponseSchema = z.object({
   bucket: SimStateBucketSchema,
   headline: z.string(),
   body: z.string(),
   options: z.array(NarrativeOptionSchema),
-  source: z.literal("template"),
+  source: NarrativeSourceSchema,
 });
 
 export type NarrativeEventResponse = z.infer<typeof NarrativeEventResponseSchema>;

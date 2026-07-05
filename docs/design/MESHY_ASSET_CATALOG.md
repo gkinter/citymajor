@@ -34,6 +34,26 @@ Per `BUILDING_ARCHETYPE_3D.md`, zone building archetype keys follow:
 
 ---
 
+## Version control & storage
+
+Meshy refine GLBs are **~8–12 MB each** ([`MESHY_ASSET_PIPELINE.md`](MESHY_ASSET_PIPELINE.md) § Git LFS). Do **not** commit production Meshy outputs as plain git blobs.
+
+| Asset class | Typical size | In git? | Mechanism |
+|-------------|--------------|---------|-----------|
+| **Procedural placeholders** | &lt; 50 KB | Yes | Plain git (`pnpm generate:gltf-placeholders`) |
+| **Meshy zone / hero GLBs** | 8–12 MB | **Git LFS only** or CDN ([SB-3682](https://linear.app/softblaze/issue/SB-3682)) | LFS pointer, or regenerate on preview |
+| **Manifests, scripts, catalog** | KB | Yes | Always commit |
+
+```bash
+git lfs install
+git lfs track "web/public/assets/gltf/**/*.glb"
+git add .gitattributes
+```
+
+**Spike inventory (v1-core, 20 keys):** 7 Meshy GLBs in history as raw blobs (needs `git lfs migrate` before scaling); 13 procedural placeholders. Do not add another Meshy batch to plain git — P0 (108 assets) would exceed **1 GB**.
+
+---
+
 ## LOD strategy
 
 | Band | Treatment | Status |

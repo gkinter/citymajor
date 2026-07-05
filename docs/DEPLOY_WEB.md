@@ -132,13 +132,48 @@ M0 preview needs **no secrets**. Omit Stripe vars unless testing live Founder Pa
 
 Live Founder Pass checkout needs **runtime** secrets plus a **build-time** publishable key. Omit all Stripe vars to keep the mock cookie checkout on `/shop`.
 
+**Quick reference — `coolify env-set` on `citymajor-web`** (`w134tsftvj327kp96j45kcsb`):
+
+```bash
+APP=citymajor-web
+export STRIPE_SECRET_KEY='sk_test_…'              # Dashboard → Developers → API keys
+export STRIPE_FOUNDER_PASS_PRICE_ID='price_…'     # Dashboard → Product catalog → price ID
+export STRIPE_WEBHOOK_SECRET='whsec_…'            # Dashboard → Webhooks → signing secret (after §3)
+
+coolify env-set "$APP" STRIPE_SECRET_KEY "$STRIPE_SECRET_KEY"
+coolify env-set "$APP" STRIPE_FOUNDER_PASS_PRICE_ID "$STRIPE_FOUNDER_PASS_PRICE_ID"
+coolify env-set "$APP" STRIPE_WEBHOOK_SECRET "$STRIPE_WEBHOOK_SECRET"
+coolify deploy "$APP" --force
+```
+
+Use quoted `"$VAR"` so `whsec_…` values with special characters are passed literally. Full phased setup (publishable key, build-time flag, verification curls) is in [§2](#2-coolify-env-vars-on-citymajor-web) and [§3](#3-stripe-dashboard--webhook-endpoint-preview).
+
 **Canonical preview webhook URL:**
 
 ```
 https://citymajor.apps.softblaze.net/api/webhooks/stripe
 ```
 
-Use this exact path when registering webhooks in the Stripe Dashboard or when verifying the Coolify deploy. A `GET` on that URL returns JSON with `checkoutConfigured` / `webhookConfigured` flags.
+Use this exact path when registering webhooks in the Stripe Dashboard or when verifying the Coolify deploy. A `GET` on that URL returns JSON with `checkoutConfigured` / `webhookConfigured` flags and, when misconfigured, `missingCheckout` / `missingWebhook` arrays listing unset env keys.
+
+**Env validation smoke tests** (run after deploy; no secrets required):
+
+```bash
+FQDN="https://citymajor.apps.softblaze.net"
+
+# Shop + checkout readiness (lists missing STRIPE_* keys when unset)
+curl -s "$FQDN/api/shop" | jq .
+curl -s "$FQDN/api/checkout/founder-pass" | jq .
+
+# Webhook readiness
+curl -s "$FQDN/api/webhooks/stripe" | jq .
+
+# POST without Stripe keys → 503 with explicit missing[] (not 500)
+curl -s -o /dev/null -w "%{http_code}\n" -X POST "$FQDN/api/checkout/founder-pass"
+# Expect 503 when checkout env incomplete; body includes missing: ["STRIPE_SECRET_KEY", ...]
+```
+
+When Stripe runtime keys are absent, `POST /api/checkout/founder-pass` and `POST /api/webhooks/stripe` return **503** with `{ "error": "…", "missing": ["STRIPE_…"], "configured": false }`. `/shop` falls back to mock cookie checkout when `stripeCheckoutEnabled` is false (see `GET /api/shop`).
 
 ##### 1. Stripe Dashboard — test mode product
 
@@ -153,13 +188,20 @@ Never commit real keys; use `web/.env.example` placeholders locally.
 
 ##### 2. Coolify env vars on `citymajor-web`
 
+**Target app** (either identifier works with `coolify env-set`):
+
+| Identifier | Value |
+|------------|-------|
+| App name | `citymajor-web` |
+| App UUID | `w134tsftvj327kp96j45kcsb` |
+
 **UI path:** Application **`citymajor-web`** → **Environment Variables** → **Add**
 
 | Key | Example (test mode) | Build time | Runtime | Purpose |
 |-----|---------------------|------------|---------|---------|
 | `STRIPE_SECRET_KEY` | `sk_test_…` | **No** | **Yes** | Server-side Checkout Session creation (`POST /api/checkout/founder-pass`) |
 | `STRIPE_FOUNDER_PASS_PRICE_ID` | `price_…` | **No** | **Yes** | Founder Pass Stripe Price ID |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_…` | **No** | **Yes** | Verifies `POST /api/webhooks/stripe` |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_…` | **No** | **Yes** | Verifies `POST /api/webhooks/stripe` (set in [§3](#3-stripe-dashboard--webhook-endpoint-preview) after Dashboard endpoint exists) |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_test_…` | **Yes** | **No** | Inlined at Next.js build; safe to expose in browser |
 
 Also ensure production identity signing is set (required for checkout user binding):
@@ -168,29 +210,54 @@ Also ensure production identity signing is set (required for checkout user bindi
 |-----|------------|---------|-------|
 | `CITYMAJOR_SESSION_SECRET` | **No** | **Yes** | ≥32 chars; signs `citymajor_uid` cookie used as webhook `userKey` |
 
-**CLI** (replace `…` with real test-mode values — never commit them):
+**CLI — phase A: checkout keys** (from Stripe Dashboard §1; never commit or paste into docs):
 
 ```bash
-coolify env-set citymajor-web STRIPE_SECRET_KEY sk_test_...
-coolify env-set citymajor-web STRIPE_FOUNDER_PASS_PRICE_ID price_...
-coolify env-set citymajor-web STRIPE_WEBHOOK_SECRET whsec_...
-coolify env-set citymajor-web NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY pk_test_...
-# Mark NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as build-time in Coolify UI if CLI omits the flag
-coolify deploy citymajor-web --force
+APP=citymajor-web   # or: APP=w134tsftvj327kp96j45kcsb
+
+# Paste test-mode values from Dashboard → Developers → API keys / Product catalog
+export STRIPE_SECRET_KEY='sk_test_REPLACE_ME'
+export STRIPE_FOUNDER_PASS_PRICE_ID='price_REPLACE_ME'
+export NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY='pk_test_REPLACE_ME'
+
+coolify env-set "$APP" STRIPE_SECRET_KEY "$STRIPE_SECRET_KEY"
+coolify env-set "$APP" STRIPE_FOUNDER_PASS_PRICE_ID "$STRIPE_FOUNDER_PASS_PRICE_ID"
+coolify env-set "$APP" NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY "$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"
 ```
 
-Changing `NEXT_PUBLIC_*` or `BUILD_WASM` requires a **rebuild** (not just restart). Runtime-only secrets (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_FOUNDER_PASS_PRICE_ID`) take effect after redeploy without a full rebuild if only those keys changed.
+`coolify env-set` writes **runtime** vars by default. For `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, open Coolify → **Environment Variables** → edit that key → enable **Available at Buildtime** (or set via MCP `coolify-env-vars` `create` with `is_buildtime: true`). Then redeploy:
+
+```bash
+coolify deploy "$APP" --force
+```
+
+**Verify checkout keys** (no secrets in output):
+
+```bash
+FQDN="https://citymajor.apps.softblaze.net"
+curl -s "$FQDN/api/shop" | jq '{stripeCheckoutEnabled, missing}'
+curl -s "$FQDN/api/checkout/founder-pass" | jq '{configured, missing}'
+# Expect stripeCheckoutEnabled: true and missing: [] when STRIPE_SECRET_KEY + STRIPE_FOUNDER_PASS_PRICE_ID are live
+```
+
+Changing `NEXT_PUBLIC_*` or `BUILD_WASM` requires a **rebuild** (not just restart). Runtime-only secrets (`STRIPE_SECRET_KEY`, `STRIPE_FOUNDER_PASS_PRICE_ID`, later `STRIPE_WEBHOOK_SECRET`) take effect after redeploy without a full rebuild when only those keys change.
 
 ##### 3. Stripe Dashboard — webhook endpoint (preview)
 
 1. **Developers** → **Webhooks** → **+ Add endpoint**.
 2. **Endpoint URL:** `https://citymajor.apps.softblaze.net/api/webhooks/stripe`
 3. **Events to send:** select **`checkout.session.completed`** (only event handled in v1).
-4. After creation, open the endpoint → **Signing secret** → copy `whsec_…` into Coolify as `STRIPE_WEBHOOK_SECRET`.
-5. Redeploy if the webhook secret was added after the first deploy:
+4. After creation, open the endpoint → **Signing secret** → copy `whsec_…`.
+
+**CLI — phase B: webhook signing secret** (Dashboard endpoint secret — **not** the `stripe listen` secret from local dev):
 
 ```bash
-coolify deploy citymajor-web --force
+APP=citymajor-web   # or: APP=w134tsftvj327kp96j45kcsb
+
+export STRIPE_WEBHOOK_SECRET='whsec_REPLACE_ME'   # Dashboard → Webhooks → endpoint → Signing secret
+
+coolify env-set "$APP" STRIPE_WEBHOOK_SECRET "$STRIPE_WEBHOOK_SECRET"
+coolify deploy "$APP" --force
 ```
 
 **Verify endpoint is reachable:**
@@ -198,6 +265,7 @@ coolify deploy citymajor-web --force
 ```bash
 curl -s "https://citymajor.apps.softblaze.net/api/webhooks/stripe" | jq .
 # Expect: { "status": "ok", "checkoutConfigured": true, "webhookConfigured": true, ... }
+# When misconfigured: "missingCheckout" / "missingWebhook" arrays name unset env keys
 ```
 
 Send a test event from the Dashboard (**Send test webhook** → `checkout.session.completed`) only after env vars are live; unsigned test payloads from the Dashboard still require the signing secret to match.
@@ -265,8 +333,9 @@ curl -s -b "citymajor_uid=$(node -e "
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| `/shop` still uses mock checkout | Missing `STRIPE_SECRET_KEY` or `STRIPE_FOUNDER_PASS_PRICE_ID` | Set vars on `citymajor-web`, redeploy |
-| Webhook returns **503** | `STRIPE_WEBHOOK_SECRET` unset | Add secret from Dashboard endpoint, redeploy |
+| `/shop` still uses mock checkout | Missing `STRIPE_SECRET_KEY` or `STRIPE_FOUNDER_PASS_PRICE_ID` | `curl …/api/shop \| jq .missing`; set vars on `citymajor-web`, redeploy |
+| `POST /api/checkout/founder-pass` returns **503** | Checkout env incomplete | Response body lists `missing` keys; set on Coolify, redeploy |
+| Webhook returns **503** | `STRIPE_WEBHOOK_SECRET` and/or `STRIPE_SECRET_KEY` unset | `GET /api/webhooks/stripe` → check `missingWebhook`; add secrets, redeploy |
 | Webhook returns **400** signature error | Wrong `whsec_` for that URL (CLI secret on preview, or vice versa) | Use Dashboard secret on Coolify; CLI secret only for `stripe listen` |
 | Checkout succeeds but tier stays `free` | Webhook ignored — invalid `userKey` in session metadata | Ensure `CITYMAJOR_SESSION_SECRET` is set; user must have `citymajor_uid` cookie before checkout |
 | Tier lost after redeploy | v1 tier-store is file/in-memory stub | Expected for spike; durable store is v1.5 ([SB-3693](./design/SB-3693_AUTH_ENTITLEMENTS_GAP.md)) |
@@ -355,7 +424,7 @@ The M0 spike runs with in-memory stubs — no secrets required for preview.
 | `STRIPE_WEBHOOK_SECRET` | No | — | Verifies `POST /api/webhooks/stripe` (register Coolify FQDN + `/api/webhooks/stripe`) |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | No | — | Stripe publishable key (`pk_test_…` / `pk_live_…`); **build-time** Docker arg / Coolify env |
 
-Without Stripe vars, `/shop` uses the mock entitlements cookie path. Checkout reads `STRIPE_SECRET_KEY` + `STRIPE_FOUNDER_PASS_PRICE_ID` server-side; webhooks require `STRIPE_WEBHOOK_SECRET`. See `web/.env.example` and [Stripe test-mode setup (SB-3714)](#stripe-test-mode-setup-sb-3714).
+Without Stripe vars, `/shop` uses the mock entitlements cookie path. Checkout reads `STRIPE_SECRET_KEY` + `STRIPE_FOUNDER_PASS_PRICE_ID` server-side; webhooks require `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET`. Diagnostic routes: `GET /api/shop`, `GET /api/checkout/founder-pass`, `GET /api/webhooks/stripe` (each returns `missing` / `missingCheckout` / `missingWebhook` when keys are absent). See `web/.env.example` and [Stripe test-mode setup (SB-3714)](#stripe-test-mode-setup-sb-3714).
 
 ## COOP / COEP headers (SharedArrayBuffer)
 

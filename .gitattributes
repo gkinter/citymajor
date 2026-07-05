@@ -1,0 +1,2 @@
+# Meshy refine GLBs (~8–12 MB each). See docs/design/MESHY_ASSET_CATALOG.md § Version control.
+web/public/assets/gltf/**/*.glb filter=lfs diff=lfs merge=lfs -text

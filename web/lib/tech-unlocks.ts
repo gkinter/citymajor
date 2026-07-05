@@ -1,5 +1,10 @@
 import allTechnologies from "../../base/data/tech/technologies.json";
-import { techIdFromCatalogId, type TechPreview } from "@/lib/tech-catalog";
+import {
+  BUILDING_SLUG_TO_TYPE_ID,
+  V1_UNLOCK_TO_BUILDING_SLUG,
+  techIdFromCatalogId,
+  type TechPreview,
+} from "@/lib/tech-catalog";
 
 const fullCatalog = allTechnologies as TechPreview[];
 
@@ -42,7 +47,8 @@ export function isBaselineContent(contentKey: string): boolean {
 
 /** Map WASM building typeId ranges to content keys when a catalog entry exists. */
 export function buildingTypeRequiresTech(typeId: number): string | null {
-  // v1: zone-grown buildings need no explicit tech; special placements use content keys.
-  void typeId;
+  for (const [contentKey, slug] of Object.entries(V1_UNLOCK_TO_BUILDING_SLUG)) {
+    if (BUILDING_SLUG_TO_TYPE_ID[slug] === typeId) return contentKey;
+  }
   return null;
 }

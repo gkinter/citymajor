@@ -4,6 +4,14 @@ import { z } from "zod";
 import type { Tier } from "@/lib/entitlements";
 import { entitlementsForTier } from "@/lib/entitlements";
 import {
+  FORMAT_VERSION_CMJR_V1,
+  FORMAT_VERSION_JSON_STUB,
+  SNAPSHOT_SCHEMA_VERSION,
+  encodeWasmBlobBase64,
+  summaryFromCmjrHeader,
+  validateWasmBlobBase64,
+} from "@/lib/save-format";
+import {
   blobKeyForSave,
   deleteBlob,
   getBlob,
@@ -15,8 +23,8 @@ import { getUserIdFromRequest } from "@/lib/user-identity";
 import { ensureDataDir, resolveDataDir } from "@/lib/data-dir";
 
 /** JSON-only stub — no CMJR blob yet (SAVE_FORMAT_WEB §6.1). */
-export const FORMAT_VERSION_JSON_STUB = 0;
-export const SNAPSHOT_SCHEMA_VERSION = 1;
+export { FORMAT_VERSION_JSON_STUB, SNAPSHOT_SCHEMA_VERSION } from "@/lib/save-format";
+export const FORMAT_VERSION_CMJR = FORMAT_VERSION_CMJR_V1;
 
 export const SaveSummarySchema = z.object({
   tick: z.number().int().nonnegative(),
@@ -40,6 +48,8 @@ export const SaveSlotSchema = z.object({
   blobKey: z.string().optional(),
   blobBytes: z.number().int().nonnegative().optional(),
   thumbnailKey: z.string().optional(),
+  /** Base64 CMJR blob for client load when formatVersion >= 1 (GET :id only). */
+  wasmBlobBase64: z.string().optional(),
 });
 export type SaveSlot = z.infer<typeof SaveSlotSchema>;
 
@@ -50,6 +60,8 @@ export type SaveSlotListItem = z.infer<typeof SaveSlotListItemSchema>;
 export const CreateSaveBodySchema = z.object({
   name: z.string().min(1).max(64),
   payload: z.record(z.string(), z.unknown()).optional(),
+  /** Layer B CMJR bytes from WASM ExportCmjr (base64). */
+  wasmBlobBase64: z.string().min(1).optional(),
 });
 
 export const SaveListResponseSchema = z.object({
@@ -200,6 +212,14 @@ function toListItem(slot: SaveSlot): SaveSlotListItem {
   return SaveSlotListItemSchema.parse(rest);
 }
 
+function resolveWasmBlobBase64(slot: SaveSlot, userId: string): string | undefined {
+  const key = slot.blobKey ?? blobKeyForSave(userId, slot.id, "cmjr");
+  if (slot.formatVersion < FORMAT_VERSION_CMJR_V1) return undefined;
+  const blob = getBlob(key);
+  if (!blob || blob.length === 0) return undefined;
+  return encodeWasmBlobBase64(blob);
+}
+
 function resolvePayload(slot: SaveSlot, userId: string): Record<string, unknown> {
   if (slot.formatVersion === FORMAT_VERSION_JSON_STUB && slot.payload) {
     return slot.payload;
@@ -268,7 +288,11 @@ export function getSave(
 
   return {
     ok: true,
-    save: SaveSlotSchema.parse({ ...slot, payload }),
+    save: SaveSlotSchema.parse({
+      ...slot,
+      payload,
+      wasmBlobBase64: resolveWasmBlobBase64(slot, key),
+    }),
     downloadUrl,
   };
 }
@@ -291,6 +315,11 @@ export function createSave(
       error: string;
       maxSlots: number;
       count: number;
+    }
+  | {
+      ok: false;
+      status: 400;
+      error: string;
     }
   | {
       ok: false;
@@ -321,13 +350,51 @@ export function createSave(
       const now = new Date().toISOString();
       const payload = body.payload ?? {};
       const id = crypto.randomUUID();
-      const blobKey = blobKeyForSave(key, id);
 
-      // Sidecar blob — cloud-ready separation; inline payload kept for v1 stub.
-      try {
-        putBlob(blobKey, JSON.stringify(payload));
-      } catch {
-        // Non-fatal: inline payload still works for v1.
+      let formatVersion = FORMAT_VERSION_JSON_STUB;
+      let snapshotSchemaVersion = SNAPSHOT_SCHEMA_VERSION;
+      let summary = extractSummaryFromPayload(payload);
+      let blobKey = blobKeyForSave(key, id, "json");
+      let blobBytes = Buffer.byteLength(JSON.stringify(payload), "utf8");
+      let inlinePayload: Record<string, unknown> | undefined = payload;
+
+      if (body.wasmBlobBase64) {
+        const validated = validateWasmBlobBase64(body.wasmBlobBase64);
+        if (!validated.ok) {
+          return {
+            ok: false as const,
+            status: 400 as const,
+            error: validated.error,
+          };
+        }
+
+        formatVersion = FORMAT_VERSION_CMJR_V1;
+        snapshotSchemaVersion = validated.header.snapshotSchemaVersion;
+        summary = summaryFromCmjrHeader(validated.header);
+        blobKey = blobKeyForSave(key, id, "cmjr");
+        blobBytes = validated.bytes.length;
+
+        try {
+          putBlob(blobKey, validated.bytes);
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Failed to persist save blob";
+          return {
+            ok: false as const,
+            status: 500 as const,
+            error: message,
+          };
+        }
+
+        // Layer C JSON kept as optional cache for list/detail UI.
+        inlinePayload = Object.keys(payload).length > 0 ? payload : undefined;
+      } else {
+        // Sidecar JSON blob — cloud-ready separation; inline payload kept for v1 stub.
+        try {
+          putBlob(blobKey, JSON.stringify(payload));
+        } catch {
+          // Non-fatal: inline payload still works for v1.
+        }
       }
 
       const slot: SaveSlot = SaveSlotSchema.parse({
@@ -336,12 +403,12 @@ export function createSave(
         createdAt: now,
         updatedAt: now,
         revision: 1,
-        formatVersion: FORMAT_VERSION_JSON_STUB,
-        snapshotSchemaVersion: SNAPSHOT_SCHEMA_VERSION,
-        summary: extractSummaryFromPayload(payload),
-        payload,
+        formatVersion,
+        snapshotSchemaVersion,
+        summary,
+        payload: inlinePayload,
         blobKey,
-        blobBytes: Buffer.byteLength(JSON.stringify(payload), "utf8"),
+        blobBytes,
       });
 
       saves.push(slot);

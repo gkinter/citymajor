@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { handleStripeWebhookEvent } from "@/lib/stripe-webhook";
-import { getStripeClient, getStripeWebhookSecret, isStripeCheckoutEnabled, isStripeWebhookEnabled } from "@/lib/stripe";
+import {
+  getMissingStripeCheckoutEnv,
+  getMissingStripeWebhookEnv,
+  getStripeClient,
+  getStripeWebhookSecret,
+  isStripeCheckoutEnabled,
+  isStripeWebhookEnabled,
+  stripeWebhookUnavailableBody,
+} from "@/lib/stripe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,22 +22,25 @@ export const dynamic = "force-dynamic";
  * Stripe env vars (see `web/.env.example`).
  */
 export async function GET() {
+  const missingCheckout = getMissingStripeCheckoutEnv();
+  const missingWebhook = getMissingStripeWebhookEnv();
   return NextResponse.json({
     status: "ok",
     endpoint: "/api/webhooks/stripe",
     checkoutConfigured: isStripeCheckoutEnabled(),
     webhookConfigured: isStripeWebhookEnabled(),
+    ...(missingCheckout.length > 0 ? { missingCheckout } : {}),
+    ...(missingWebhook.length > 0 ? { missingWebhook } : {}),
   });
 }
 
 export async function POST(req: Request) {
-  const webhookSecret = getStripeWebhookSecret();
-  if (!webhookSecret) {
-    return NextResponse.json(
-      { error: "STRIPE_WEBHOOK_SECRET is not configured" },
-      { status: 503 },
-    );
+  const missing = getMissingStripeWebhookEnv();
+  if (missing.length > 0) {
+    return NextResponse.json(stripeWebhookUnavailableBody(), { status: 503 });
   }
+
+  const webhookSecret = getStripeWebhookSecret()!;
 
   const signature = req.headers.get("stripe-signature");
   if (!signature) {

@@ -18,6 +18,7 @@ import {
   SaveListResponseSchema,
   type SaveSlotListItem,
 } from "@/lib/saves-client";
+import { FORMAT_VERSION_CMJR_V1 } from "@/lib/save-format";
 
 type SaveLoadControlsProps = {
   simApi: SimClientApi | null;
@@ -215,11 +216,16 @@ export function SaveLoadControls({
     setSaving(true);
     setActionMessage(null);
     try {
+      const wasmBlobBase64 = await simApi.exportWasmSave();
       const res = await fetch("/api/saves", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), payload: snapshot }),
+        body: JSON.stringify({
+          name: name.trim(),
+          payload: snapshot,
+          ...(wasmBlobBase64 ? { wasmBlobBase64 } : {}),
+        }),
       });
       const json: unknown = await res.json();
       if (!res.ok) {
@@ -273,12 +279,21 @@ export function SaveLoadControls({
         }
         const parsed = GetSaveResponseSchema.safeParse(json);
         if (!parsed.success) throw new Error("Invalid save response");
-        const snapshot = parseSimSnapshot(parsed.data.save.payload ?? {});
-        if (!snapshot) {
-          setActionMessage(`Save "${slot.name}" has no restorable snapshot`);
-          return;
+
+        if (
+          parsed.data.save.formatVersion >= FORMAT_VERSION_CMJR_V1 &&
+          parsed.data.save.wasmBlobBase64
+        ) {
+          await simApi.applyWasmSave(parsed.data.save.wasmBlobBase64);
+        } else {
+          const snapshot = parseSimSnapshot(parsed.data.save.payload ?? {});
+          if (!snapshot) {
+            setActionMessage(`Save "${slot.name}" has no restorable snapshot`);
+            return;
+          }
+          await simApi.applySnapshot(snapshot);
         }
-        await simApi.applySnapshot(snapshot);
+
         setLoadOpen(false);
         setActionMessage(`Loaded "${slot.name}"`);
         onLoadSuccess?.();

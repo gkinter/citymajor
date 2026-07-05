@@ -102,7 +102,7 @@ export async function runPerfGate(page, options = {}) {
     await page.addInitScript(() => {
       window.localStorage.setItem("citymajor_onboarding_done", "1");
     });
-    await page.goto(`${BASE_URL}/play`, { waitUntil: "networkidle" });
+    await page.goto(`${BASE_URL}/play`, { waitUntil: "domcontentloaded" });
   }
 
   const canvas = page.locator('[data-testid="city-canvas"] canvas');

@@ -17,12 +17,18 @@ export type SimCommand =
   | { type: "pause" }
   | { type: "resume" }
   | { type: "load_snapshot"; snapshot: SimSnapshot }
+  | { type: "load_cmjr"; base64Cmjr: string }
+  /** Herald council — one-time treasury change from a council option. */
+  | { type: "budget_adjust"; deltaFunds: number }
+  /** Herald council — approval swing + optional active-event resolution. */
   | {
-      type: "herald_choice";
+      type: "approval_event";
+      approvalDelta: number;
       optionId: string;
-      eventTypeId?: string;
       eventId?: number;
-    };
+    }
+  /** Herald council — instant RP grant (stub until full policy research hooks). */
+  | { type: "research_boost"; points: number };
 
 export type ZoneSnapshot = {
   tileX: number;
@@ -107,6 +113,8 @@ export type EraProgress = {
   gates: EraProgressGate[];
 };
 
+import type { PopulationL2Snapshot } from "@/lib/population-l2";
+
 export type SimResources = {
   tick: number;
   population: number;
@@ -155,6 +163,18 @@ export type SimResources = {
   fireCoverage?: number;
   /** WASM — top Leontief goods shortages and surpluses. */
   economy?: EconomySnapshot;
+  /** WASM GetStatus — global-market export revenue from last trade month. */
+  monthlyExportValue?: number;
+  /** WASM GetStatus — global-market import cost from last trade month. */
+  monthlyImportCost?: number;
+  /** WASM GetStatus — net trade balance (exports − imports). */
+  tradeBalance?: number;
+  /** WASM — named household sample for citizen drill-down (SB-3689). */
+  populationL2?: PopulationL2Snapshot;
+  /** WASM GetStatus — law definitions loaded from laws.json. */
+  lawDefinitionCount?: number;
+  /** WASM GetStatus — ordinances currently in effect. */
+  activeLawCount?: number;
 };
 
 /** Strip render payload from a full sim snapshot for HUD consumers. */
@@ -187,6 +207,10 @@ export interface SimBridge {
   send(command: SimCommand): void;
   /** Restore WASM state from a save payload; resolves when the worker acks. */
   loadSnapshot(snapshot: SimSnapshot): Promise<void>;
+  /** Restore WASM from CMJR base64 blob (Layer B). */
+  loadCmjr(base64Cmjr: string): Promise<void>;
+  /** Export CMJR base64 from WASM for cloud save. */
+  exportCmjr(): Promise<string | null>;
   getSnapshot(): SimSnapshot | null;
   onSnapshot(callback: (snapshot: SimSnapshot) => void): () => void;
   /**
@@ -206,6 +230,10 @@ export type SimClientApi = {
   getSnapshot: () => SimSnapshot | null;
   /** Optimistic UI apply + WASM restore; rejects on worker load failure. */
   applySnapshot: (snapshot: SimSnapshot) => Promise<void>;
+  /** Restore from CMJR blob when formatVersion >= 1. */
+  applyWasmSave: (base64Cmjr: string) => Promise<void>;
+  /** Export CMJR blob for POST /api/saves. */
+  exportWasmSave: () => Promise<string | null>;
   sendCommand: (command: SimCommand) => void;
 };
 
@@ -222,12 +250,14 @@ const INIT_TIMEOUT_MS = 45_000;
 type WorkerInbound =
   | { type: "init"; wasmBaseUrl: string; worldSize: number }
   | { type: "command"; command: SimCommand }
+  | { type: "export_cmjr" }
   | { type: "dispose" };
 
 type WorkerOutbound =
   | { type: "ready" }
   | { type: "snapshot"; snapshot: SimSnapshot }
   | { type: "load_complete"; ok: boolean }
+  | { type: "cmjr_blob"; base64: string }
   | { type: "error"; message: string };
 
 const LOAD_SNAPSHOT_TIMEOUT_MS = 15_000;
@@ -240,6 +270,9 @@ export function createSimBridge(): SimBridge {
   const errorListeners = new Set<(error: Error) => void>();
   let pendingLoad:
     | { resolve: () => void; reject: (error: Error) => void }
+    | null = null;
+  let pendingExport:
+    | { resolve: (base64: string | null) => void; reject: (error: Error) => void }
     | null = null;
 
   const notifyError = (error: Error) => {
@@ -263,10 +296,23 @@ export function createSimBridge(): SimBridge {
       settlePendingLoad(msg.ok);
       return;
     }
+    if (msg.type === "cmjr_blob") {
+      const pending = pendingExport;
+      if (pending) {
+        pendingExport = null;
+        pending.resolve(msg.base64 || null);
+      }
+      return;
+    }
     if (msg.type === "error") {
       const err = new Error(msg.message);
       notifyError(err);
       settlePendingLoad(false, err);
+      if (pendingExport) {
+        const pending = pendingExport;
+        pendingExport = null;
+        pending.reject(err);
+      }
     }
   };
 
@@ -403,6 +449,73 @@ export function createSimBridge(): SimBridge {
       });
     },
 
+    loadCmjr(base64Cmjr) {
+      const localWorker = worker;
+      if (!localWorker) {
+        return Promise.reject(new Error("Sim worker not initialized"));
+      }
+      if (pendingLoad) {
+        return Promise.reject(new Error("Another load is already in progress"));
+      }
+      return new Promise<void>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          if (!pendingLoad) return;
+          pendingLoad = null;
+          reject(
+            new Error(
+              `Load CMJR timed out after ${LOAD_SNAPSHOT_TIMEOUT_MS}ms`,
+            ),
+          );
+        }, LOAD_SNAPSHOT_TIMEOUT_MS);
+
+        pendingLoad = {
+          resolve: () => {
+            clearTimeout(timeoutId);
+            resolve();
+          },
+          reject: (error) => {
+            clearTimeout(timeoutId);
+            reject(error);
+          },
+        };
+
+        localWorker.postMessage({
+          type: "command",
+          command: { type: "load_cmjr", base64Cmjr } satisfies SimCommand,
+        } satisfies WorkerInbound);
+      });
+    },
+
+    exportCmjr() {
+      const localWorker = worker;
+      if (!localWorker) {
+        return Promise.reject(new Error("Sim worker not initialized"));
+      }
+      if (pendingExport) {
+        return Promise.reject(new Error("Export already in progress"));
+      }
+      return new Promise<string | null>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          if (!pendingExport) return;
+          pendingExport = null;
+          reject(new Error("Export CMJR timed out"));
+        }, LOAD_SNAPSHOT_TIMEOUT_MS);
+
+        pendingExport = {
+          resolve: (base64) => {
+            clearTimeout(timeoutId);
+            resolve(base64);
+          },
+          reject: (error) => {
+            clearTimeout(timeoutId);
+            reject(error);
+          },
+        };
+
+        localWorker.postMessage({ type: "export_cmjr" } satisfies WorkerInbound);
+      });
+    },
+
     getSnapshot() {
       return latestSnapshot;
     },
@@ -421,6 +534,8 @@ export function createSimBridge(): SimBridge {
     dispose() {
       pendingLoad?.reject(new Error("Sim bridge disposed"));
       pendingLoad = null;
+      pendingExport?.reject(new Error("Sim bridge disposed"));
+      pendingExport = null;
       worker?.postMessage({ type: "dispose" } satisfies WorkerInbound);
       worker?.terminate();
       worker = null;
@@ -441,6 +556,12 @@ export function createSimBridgeStub(): SimBridge {
     send() {},
     async loadSnapshot() {
       throw new Error("Sim bridge stub cannot load snapshots");
+    },
+    async loadCmjr() {
+      throw new Error("Sim bridge stub cannot load CMJR saves");
+    },
+    async exportCmjr() {
+      return null;
     },
     getSnapshot() {
       return null;

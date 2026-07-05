@@ -33,10 +33,7 @@ const questSubtitle: CSSProperties = {
   opacity: 0.9,
 };
 
-function formatGateValue(id: string, value: number): string {
-  if (id === "researchPoints") {
-    return value >= 10 ? value.toFixed(0) : value.toFixed(1);
-  }
+function formatGateValue(_id: string, value: number): string {
   return Math.floor(value).toLocaleString();
 }
 

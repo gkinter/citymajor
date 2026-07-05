@@ -2,11 +2,35 @@ import Stripe from "stripe";
 
 let stripeClient: Stripe | null = null;
 
+/** Runtime env vars required for `POST /api/checkout/founder-pass`. */
+export const STRIPE_CHECKOUT_ENV_KEYS = [
+  "STRIPE_SECRET_KEY",
+  "STRIPE_FOUNDER_PASS_PRICE_ID",
+] as const;
+
+/** Runtime env vars required for `POST /api/webhooks/stripe`. */
+export const STRIPE_WEBHOOK_ENV_KEYS = [
+  "STRIPE_SECRET_KEY",
+  "STRIPE_WEBHOOK_SECRET",
+] as const;
+
+export type StripeCheckoutEnvKey = (typeof STRIPE_CHECKOUT_ENV_KEYS)[number];
+export type StripeWebhookEnvKey = (typeof STRIPE_WEBHOOK_ENV_KEYS)[number];
+
+function isEnvSet(name: string): boolean {
+  return Boolean(process.env[name]?.trim());
+}
+
+export function getMissingStripeCheckoutEnv(): StripeCheckoutEnvKey[] {
+  return STRIPE_CHECKOUT_ENV_KEYS.filter((key) => !isEnvSet(key));
+}
+
+export function getMissingStripeWebhookEnv(): StripeWebhookEnvKey[] {
+  return STRIPE_WEBHOOK_ENV_KEYS.filter((key) => !isEnvSet(key));
+}
+
 export function isStripeCheckoutEnabled(): boolean {
-  return Boolean(
-    process.env.STRIPE_SECRET_KEY?.trim() &&
-      process.env.STRIPE_FOUNDER_PASS_PRICE_ID?.trim(),
-  );
+  return getMissingStripeCheckoutEnv().length === 0;
 }
 
 export function getStripeClient(): Stripe {
@@ -37,8 +61,29 @@ export function getStripePublishableKey(): string | null {
 }
 
 export function isStripeWebhookEnabled(): boolean {
-  return Boolean(
-    process.env.STRIPE_SECRET_KEY?.trim() &&
-      process.env.STRIPE_WEBHOOK_SECRET?.trim(),
-  );
+  return getMissingStripeWebhookEnv().length === 0;
+}
+
+export type StripeServiceUnavailableBody = {
+  error: string;
+  missing: readonly string[];
+  configured: false;
+};
+
+export function stripeCheckoutUnavailableBody(): StripeServiceUnavailableBody {
+  const missing = getMissingStripeCheckoutEnv();
+  return {
+    error: `Stripe checkout is not configured (missing: ${missing.join(", ")})`,
+    missing,
+    configured: false,
+  };
+}
+
+export function stripeWebhookUnavailableBody(): StripeServiceUnavailableBody {
+  const missing = getMissingStripeWebhookEnv();
+  return {
+    error: `Stripe webhook is not configured (missing: ${missing.join(", ")})`,
+    missing,
+    configured: false,
+  };
 }

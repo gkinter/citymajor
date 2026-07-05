@@ -1,4 +1,8 @@
 import { BuildingCategory } from "@citymajor/sim-types";
+import {
+  LOW_TREASURY_MIN_FUNDS,
+  LOW_TREASURY_RUNWAY_MONTHS,
+} from "@/lib/constants";
 import type { SimStateBucket } from "@/lib/narrative-templates";
 import type { SimResources } from "@/lib/sim-bridge";
 import type { CityData } from "./types";
@@ -111,6 +115,95 @@ function formatFundsShort(cityFunds: number): string {
   if (abs >= 1_000_000) return `$${(cityFunds / 1_000_000).toFixed(1)}M`;
   if (abs >= 1_000) return `$${(cityFunds / 1_000).toFixed(1)}K`;
   return `$${cityFunds.toLocaleString()}`;
+}
+
+function formatCompactMoney(amount: number): string {
+  const abs = Math.abs(amount);
+  const sign = amount >= 0 ? "+" : "−";
+  if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `${sign}$${(abs / 1_000).toFixed(1)}K`;
+  return `${sign}$${abs.toLocaleString()}`;
+}
+
+function hasMonthlyBudget(resources: SimResources): boolean {
+  return (
+    resources.monthlyIncome !== undefined &&
+    resources.monthlyExpenses !== undefined
+  );
+}
+
+export type CashCrisisKind = "bankrupt" | "low-treasury" | "negative-cashflow";
+
+export type CashCrisisSeverity = "critical" | "warn";
+
+export type CashCrisisWarning = {
+  kind: CashCrisisKind;
+  severity: CashCrisisSeverity;
+  message: string;
+};
+
+const CASH_CRISIS_RANK: Record<CashCrisisKind, number> = {
+  "negative-cashflow": 1,
+  "low-treasury": 2,
+  bankrupt: 3,
+};
+
+/** Treasury balance that triggers a low-funds warning strip in ResourcesHud. */
+export function resolveLowTreasuryThreshold(resources: SimResources): number {
+  const expenses = resources.monthlyExpenses;
+  if (expenses !== undefined && expenses > 0) {
+    return Math.max(
+      LOW_TREASURY_MIN_FUNDS,
+      expenses * LOW_TREASURY_RUNWAY_MONTHS,
+    );
+  }
+  return LOW_TREASURY_MIN_FUNDS;
+}
+
+/**
+ * Detect bankruptcy / cash-crisis signals for HUD warning strip (GAMEPLAY_LOOP #9).
+ * Treasury deficit takes priority over low runway, which takes priority over negative cashflow.
+ */
+export function detectCashCrisis(
+  resources: SimResources | null,
+): CashCrisisWarning | null {
+  if (!resources) return null;
+
+  const monthlyNet = hasMonthlyBudget(resources)
+    ? resources.monthlyIncome! - resources.monthlyExpenses!
+    : null;
+
+  if (resources.cityFunds < 0) {
+    return {
+      kind: "bankrupt",
+      severity: "critical",
+      message: `Treasury ${formatFundsShort(resources.cityFunds)} — cut spending or raise revenue before services stall`,
+    };
+  }
+
+  const threshold = resolveLowTreasuryThreshold(resources);
+  if (resources.cityFunds < threshold) {
+    return {
+      kind: "low-treasury",
+      severity: "warn",
+      message: `Treasury ${formatFundsShort(resources.cityFunds)} below ${formatFundsShort(threshold)} runway — Herald may run deficit coverage`,
+    };
+  }
+
+  if (monthlyNet !== null && monthlyNet < 0) {
+    return {
+      kind: "negative-cashflow",
+      severity: "warn",
+      message: `Negative cashflow ${formatCompactMoney(monthlyNet)}/mo — expenses exceed income`,
+    };
+  }
+
+  return null;
+}
+
+/** Compare crisis severity for toast re-arming when conditions escalate. */
+export function cashCrisisRank(kind: CashCrisisKind): number {
+  return CASH_CRISIS_RANK[kind];
 }
 
 /**

@@ -49,3 +49,51 @@ export function formatGrowthPerMonth(rate: number): string {
   const sign = rate > 0 ? "+" : "";
   return `${sign}${rate.toLocaleString()}/mo`;
 }
+
+/** Effective household budget for citizen-dot rendering. */
+export function resolveHouseholdBudget(
+  householdCount: number,
+  population: number,
+): number {
+  if (householdCount > 0) return householdCount;
+  if (population > 0) return Math.ceil(population / 2.4);
+  return 0;
+}
+
+/**
+ * Distribute exactly `budget` dots across residential buildings (capped at maxDots),
+ * weighted by building level. Sum of returned counts always equals min(budget, maxDots).
+ */
+export function allocateDotsPerBuilding(
+  residentialIndices: readonly number[],
+  levelForIndex: (buildingIndex: number) => number,
+  budget: number,
+  maxDots = 12_000,
+): number[] {
+  const buildingCount = residentialIndices.length;
+  if (buildingCount === 0 || budget <= 0) {
+    return new Array(buildingCount).fill(0);
+  }
+
+  const target = Math.min(budget, maxDots);
+  const weights = residentialIndices.map((idx) =>
+    Math.max(1, levelForIndex(idx)),
+  );
+  const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+
+  const quotas = weights.map((w) => (w / totalWeight) * target);
+  const counts = quotas.map((q) => Math.floor(q));
+  let assigned = counts.reduce((sum, c) => sum + c, 0);
+
+  const remainders = quotas
+    .map((q, i) => ({ i, remainder: q - counts[i]! }))
+    .sort((a, b) => b.remainder - a.remainder);
+
+  for (const { i } of remainders) {
+    if (assigned >= target) break;
+    counts[i]!++;
+    assigned++;
+  }
+
+  return counts;
+}

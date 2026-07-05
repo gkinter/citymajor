@@ -51,6 +51,23 @@ type EconomyPanelProps = {
   resources: SimResources | null;
 };
 
+function formatTradeMoney(amount: number): string {
+  const abs = Math.abs(amount);
+  const sign = amount >= 0 ? "+" : "−";
+  if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(2)}M`;
+  if (abs >= 1_000) return `${sign}$${(abs / 1_000).toFixed(1)}K`;
+  return `${sign}$${abs.toLocaleString()}`;
+}
+
+function hasTradeData(resources: SimResources | null): resources is SimResources {
+  if (!resources) return false;
+  return (
+    resources.monthlyExportValue !== undefined ||
+    resources.monthlyImportCost !== undefined ||
+    resources.tradeBalance !== undefined
+  );
+}
+
 type DisplayRow = {
   name: string;
   magnitude: number;
@@ -206,6 +223,41 @@ export function EconomyPanel({ open, onClose, resources }: EconomyPanelProps) {
       </header>
 
       <div style={bodyStyle}>
+        {hasTradeData(resources) ? (
+          <section className="hud-economy-section" aria-label="Global trade">
+            <div style={{ ...sectionTitle, color: "#9ecbff" }}>Global trade</div>
+            <ul className="hud-economy-trade">
+              <li className="hud-economy-trade__row">
+                <span className="hud-economy-trade__label">Exports</span>
+                <span className="hud-economy-trade__value hud-economy-trade__value--in">
+                  {formatTradeMoney(resources.monthlyExportValue ?? 0)}
+                </span>
+              </li>
+              <li className="hud-economy-trade__row">
+                <span className="hud-economy-trade__label">Imports</span>
+                <span className="hud-economy-trade__value hud-economy-trade__value--out">
+                  {formatTradeMoney(-(resources.monthlyImportCost ?? 0))}
+                </span>
+              </li>
+              <li className="hud-economy-trade__row hud-economy-trade__row--balance">
+                <span className="hud-economy-trade__label">Balance</span>
+                <span
+                  className={`hud-economy-trade__value ${
+                    (resources.tradeBalance ?? 0) >= 0
+                      ? "hud-economy-trade__value--in"
+                      : "hud-economy-trade__value--out"
+                  }`}
+                >
+                  {formatTradeMoney(resources.tradeBalance ?? 0)}
+                </span>
+              </li>
+            </ul>
+            <p className="hud-economy-trade__note">
+              Last month on the anonymous global market (PartnerCityId −1).
+            </p>
+          </section>
+        ) : null}
+
         {view.fallbackLabel ? (
           <p style={fallbackNote}>{view.fallbackLabel}</p>
         ) : null}

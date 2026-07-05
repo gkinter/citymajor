@@ -9,7 +9,10 @@
  *
  * First run: npx playwright install chromium
  */
+import { spawnSync } from "node:child_process";
 import { mkdir } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import {
   BASE_URL,
@@ -23,6 +26,19 @@ import {
 import { runPlayChecks } from "./smoke-play-checks.mjs";
 
 const TAG = "smoke-all";
+const WEB_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+
+function runTechUnlocksPrecheck() {
+  const result = spawnSync(
+    process.execPath,
+    ["./scripts/verify-tech-unlocks.mjs"],
+    { cwd: WEB_ROOT, stdio: "inherit" },
+  );
+  if (result.status !== 0) {
+    fail(TAG, "verify:tech-unlocks pre-check failed");
+  }
+  pass(TAG, "verify:tech-unlocks pre-check passed");
+}
 
 /** @type {{ path: string; text: string; label: string }[]} */
 const ROUTE_COPY = [
@@ -41,6 +57,8 @@ async function assertRouteCopy(page, path, text, label) {
 async function main() {
   let browser;
   try {
+    runTechUnlocksPrecheck();
+
     for (const route of ["/", "/shop", "/play"]) {
       await assertHttpOk(TAG, route);
     }

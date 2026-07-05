@@ -307,7 +307,7 @@ public class ResearchSystemTests
         var rs = CreateTestSystem();
         var state = CreateTestState();
         state.Era = 0;
-        state.Population = 100; // Medieval needs 500
+        state.Population = 100; // Industrial needs 400
         // Unlock enough techs
         for (int i = 0; i < 10; i++) state.UnlockTech(i);
         Assert.Equal(-1, rs.CheckEraTransition(state));
@@ -319,7 +319,7 @@ public class ResearchSystemTests
         var rs = CreateTestSystem();
         var state = CreateTestState();
         state.Era = 0;
-        state.Population = 1000; // Enough for Medieval
+        state.Population = 1000; // Enough for Industrial
         // Only 2 techs unlocked, need 5
         state.UnlockTech(0);
         state.UnlockTech(1);
@@ -333,7 +333,7 @@ public class ResearchSystemTests
         var state = CreateTestState();
         state.Era = 0;
         state.Population = 600;
-        // Unlock 5 techs (Medieval requirement)
+        // Unlock 5 techs (Industrial requirement)
         for (int i = 0; i < 5; i++) state.UnlockTech(i);
         Assert.Equal(1, rs.CheckEraTransition(state));
     }
@@ -343,7 +343,7 @@ public class ResearchSystemTests
     {
         var rs = CreateTestSystem();
         var state = CreateTestState();
-        state.Era = 5; // Future (max)
+        state.Era = 4; // Future (max WASM era index)
         state.Population = 1_000_000;
         for (int i = 0; i < 200; i++) state.UnlockTech(i);
         Assert.Equal(-1, rs.CheckEraTransition(state));

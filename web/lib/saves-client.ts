@@ -21,6 +21,7 @@ export const SaveSlotSchema = z.object({
   blobKey: z.string().optional(),
   blobBytes: z.number().int().nonnegative().optional(),
   thumbnailKey: z.string().optional(),
+  wasmBlobBase64: z.string().optional(),
 });
 export type SaveSlot = z.infer<typeof SaveSlotSchema>;
 

@@ -11,6 +11,7 @@ import {
   visibleBuildingCount,
 } from "@/lib/chunks";
 import type { RoadTile, TrafficTile, ZoneTile } from "@/lib/zoning";
+import type { CitizenDotPick } from "@/lib/population-l2";
 import type { ActiveEventSnapshot, EraProgress, ServiceCoverageSnapshot, ServiceViewMode } from "@/lib/sim-bridge";
 import { BuildingInstances } from "./BuildingInstances";
 import { CitizenDots } from "./CitizenDots";
@@ -42,6 +43,7 @@ type CitySceneProps = {
   dpr: number;
   population?: number;
   householdCount?: number;
+  onCitizenDotClick?: (pick: CitizenDotPick) => void;
 };
 
 export function CityScene({
@@ -63,6 +65,7 @@ export function CityScene({
   dpr,
   population = 0,
   householdCount,
+  onCitizenDotClick,
 }: CitySceneProps) {
   const { camera } = useThree();
   const fpsAccum = useRef({ frames: 0, last: performance.now(), fps: 0 });
@@ -127,6 +130,7 @@ export function CityScene({
         chunks={chunks}
         population={population}
         householdCount={householdCount}
+        onDotClick={onCitizenDotClick}
       />
       <EventMarkers
         activeEvents={activeEvents}

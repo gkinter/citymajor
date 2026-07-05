@@ -26,7 +26,9 @@ public sealed class WasmSimHost
     private PoliticsSystem _politics = null!;
     private ResearchSystem _research = null!;
     private EventSystem _events = null!;
+    private LawSystem _laws = null!;
     private CulturalDNASystem _culturalDna = null!;
+    private TradeSystem _trade = null!;
 
     private double _trafficLiteAccumulator;
     private double _trafficEdgeBatchAccumulator;
@@ -46,6 +48,8 @@ public sealed class WasmSimHost
     public float ResearchPoints => _state?.ResearchPoints ?? 0f;
     public float ResearchRate => _state?.ResearchRate ?? 0f;
     public int EventDefinitionCount => _events?.Definitions.Count ?? 0;
+    public int LawDefinitionCount => _laws?.DefinitionCount ?? 0;
+    public int ActiveLawCount => _laws?.ActiveLawCount ?? 0;
     /// <summary>Count of unlocked technologies (not catalog size).</summary>
     public int UnlockedTechCount =>
         _state is null ? 0 : ResearchSystem.CountUnlockedTechs(_state);
@@ -76,6 +80,7 @@ public sealed class WasmSimHost
     public long MonthlyIncome => _state?.Income.Total ?? 0;
     public long MonthlyExpenses => _state?.Expenses.Total ?? 0;
     public int BuildingCount => _state?.Buildings.Count ?? 0;
+    public int WorldSize => _config?.WorldSize ?? WasmConfig.DefaultWorldSize;
     public EraProgressSnapshot EraProgress =>
         _state is null || _research is null
             ? new EraProgressSnapshot()
@@ -84,6 +89,15 @@ public sealed class WasmSimHost
     /// <summary>Top goods shortages/surpluses from Leontief market zones.</summary>
     public EconomySnapshotDto EconomySnapshot =>
         EconomySnapshotDto.From(_economy);
+
+    /// <summary>Global-market export revenue from the last trade month.</summary>
+    public float MonthlyExportValue => _trade?.MonthlyExportValue ?? 0f;
+
+    /// <summary>Global-market import cost from the last trade month.</summary>
+    public float MonthlyImportCost => _trade?.MonthlyImportCost ?? 0f;
+
+    /// <summary>Net trade balance (exports − imports) from the last trade month.</summary>
+    public float TradeBalance => _trade?.TradeBalance ?? 0f;
 
     /// <summary>City-wide average health coverage over zoned tiles (0–1).</summary>
     public float HealthcareCoverage =>
@@ -126,7 +140,9 @@ public sealed class WasmSimHost
         _politics = new PoliticsSystem();
         _research = new ResearchSystem();
         _events = new EventSystem(seed: 12345);
+        _laws = new LawSystem();
         _culturalDna = new CulturalDNASystem();
+        _trade = new TradeSystem();
 
         _budget.SetEventBus(_eventBus);
         _economy.SetEventBus(_eventBus);
@@ -135,7 +151,7 @@ public sealed class WasmSimHost
 
         CulturalDNASystem.ApplyPreset(_state, "western_european");
         _lastCulturalDnaYear = _state.Year;
-        _state.Era = 0; // Frontier — derived each month via WasmEraDeriver (SB-3692)
+        _state.Era = 0; // Frontier — advanced by ResearchSystem.CheckEraTransition on monthly tick
 
         GenerateMap();
         SeedStarterCity();
@@ -189,7 +205,7 @@ public sealed class WasmSimHost
         if (!IsInitialized) return "{}";
 
         var snap = SimSnapshot.CaptureFrom(_state);
-        var dto = SimSnapshotDto.From(snap, _state, _events, _economy, _services);
+        var dto = SimSnapshotDto.From(snap, _state, _events, _economy, _services, _population);
         return JsonSerializer.Serialize(dto, JsonContext.Default.SimSnapshotDto);
     }
 
@@ -199,6 +215,14 @@ public sealed class WasmSimHost
             return JsonSerializer.Serialize(new WasmStatusDto(), JsonContext.Default.WasmStatusDto);
 
         return JsonSerializer.Serialize(WasmStatusDto.From(this), JsonContext.Default.WasmStatusDto);
+    }
+
+    /// <summary>Top households sample for CitizenPanel L2 drill-down.</summary>
+    public PopulationL2Dto GetPopulationL2Export()
+    {
+        if (!IsInitialized || _population is null || _state is null)
+            return new PopulationL2Dto();
+        return PopulationL2Dto.From(_state, _population);
     }
 
     public void PaintZone(int x, int y, byte zoneType)
@@ -248,6 +272,37 @@ public sealed class WasmSimHost
         return _research.EnqueueResearch(techId, _state);
     }
 
+    /// <summary>Apply a one-time treasury change from a Herald council budget option.</summary>
+    public void AdjustBudget(long deltaFunds)
+    {
+        if (!IsInitialized || _state is null || deltaFunds == 0) return;
+        _state.CityFunds += deltaFunds;
+    }
+
+    /// <summary>Apply a mayor approval swing from a Herald council option (percentage points).</summary>
+    public void ApplyApprovalDelta(float deltaPercent)
+    {
+        if (!IsInitialized || _state is null || deltaPercent == 0f) return;
+        _state.ApprovalRating = Math.Clamp(
+            _state.ApprovalRating + deltaPercent / 100f,
+            0f,
+            1f);
+    }
+
+    /// <summary>Stub RP grant from Herald council options until policy research hooks land.</summary>
+    public void BoostResearch(float points)
+    {
+        if (!IsInitialized || _state is null || points <= 0f) return;
+        _state.ResearchPoints += points;
+    }
+
+    /// <summary>Resolve an active sim event after the player picks a Herald council option.</summary>
+    public bool ResolveHeraldEvent(int eventId)
+    {
+        if (!IsInitialized || _events is null || _state is null) return false;
+        return _events.ResolvePlayerResponse(eventId, _state);
+    }
+
     /// <summary>
     /// Restore simulation state from a Layer-C JSON snapshot (save/load v1).
     /// Re-inits the world shell, clears starter content, then applies saved tiles/buildings/scalars.
@@ -272,6 +327,27 @@ public sealed class WasmSimHost
         Init(size);
         ApplySnapshotDto(dto);
         return true;
+    }
+
+    /// <summary>Export canonical CMJR bytes (Layer B) for cloud persistence.</summary>
+    public byte[] ExportCmjrBytes(string cityName = "City") =>
+        CmjrSave.Export(this, cityName);
+
+    /// <summary>Restore simulation from CMJR bytes; accepts base64 from API transport.</summary>
+    public bool LoadFromCmjrBytes(ReadOnlySpan<byte> data) => CmjrSave.Load(this, data);
+
+    public bool LoadFromCmjrBase64(string base64)
+    {
+        if (string.IsNullOrWhiteSpace(base64)) return false;
+        try
+        {
+            var bytes = Convert.FromBase64String(base64);
+            return LoadFromCmjrBytes(bytes);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private void ApplySnapshotDto(SimSnapshotDto dto)
@@ -445,12 +521,13 @@ public sealed class WasmSimHost
         FeedCrossSystemData();
         _population.MonthlyTick(_state);
         _economy.MonthlyTick(_state, WasmConfig.GameDayInterval);
+        ProcessGlobalMarketTrade();
         _zoneGrowth.RecalculateLandValue(_state);
         _zoneGrowth.CheckUpgrades(_state);
         _budget.CalculateMonthlyBudget(_state, _economy);
         _politics.MonthlyTick(_state, WasmConfig.GameDayInterval);
         _research.MonthlyTick(_state, WasmConfig.GameDayInterval);
-        WasmEraDeriver.UpdateEra(_state, _research);
+        // Era set by ResearchSystem.MonthlyTick via CheckEraTransition (pop + tech count).
 
         if (_state.Year > _lastCulturalDnaYear)
         {
@@ -644,6 +721,32 @@ public sealed class WasmSimHost
         {
             // Same degrade path as desktop when data pack is missing.
         }
+
+        try
+        {
+            _laws.LoadFromJson(WasmEmbeddedData.Read("laws.json"));
+        }
+        catch
+        {
+            // Same degrade path as desktop when data pack is missing.
+        }
+    }
+
+    /// <summary>
+    /// Auto import/export against the anonymous global market only (<c>PartnerCityId = -1</c>).
+    /// Inter-city trade routes are deferred until regional map (v1.5).
+    /// </summary>
+    private void ProcessGlobalMarketTrade()
+    {
+        // WASM spike does not simulate partner cities — strip non-global routes before execution.
+        var routes = _trade.Routes;
+        for (int i = routes.Count - 1; i >= 0; i--)
+        {
+            if (routes[i].PartnerCityId != -1)
+                _trade.CancelTradeRoute(i);
+        }
+
+        _trade.ProcessTrade(_state, _economy);
     }
 
     private void FeedCrossSystemData()
@@ -757,6 +860,50 @@ public sealed class TrafficLiteInfoDto
     public int EdgeBatchCount { get; init; }
 }
 
+/// <summary>Named household row for web CitizenPanel L2 list.</summary>
+public sealed class HouseholdPreviewDto
+{
+    public string Id { get; init; } = "";
+    public int TileX { get; init; }
+    public int TileZ { get; init; }
+    /// <summary>0–1 satisfaction.</summary>
+    public float Happiness { get; init; }
+    /// <summary>Commute time in game minutes.</summary>
+    public float CommuteMin { get; init; }
+}
+
+/// <summary>Population L2 snapshot — top households sample for drill-down.</summary>
+public sealed class PopulationL2Dto
+{
+    public HouseholdPreviewDto[] Households { get; init; } = [];
+
+    public static PopulationL2Dto From(WorldState state, PopulationSystem? population)
+    {
+        if (population is null || state.Households.Count == 0)
+            return new PopulationL2Dto();
+
+        var rows = population.CollectHouseholdSample(state, limit: 50);
+        if (rows.Length == 0)
+            return new PopulationL2Dto();
+
+        var households = new HouseholdPreviewDto[rows.Length];
+        for (int i = 0; i < rows.Length; i++)
+        {
+            var row = rows[i];
+            households[i] = new HouseholdPreviewDto
+            {
+                Id = row.Id,
+                TileX = row.TileX,
+                TileZ = row.TileZ,
+                Happiness = row.Happiness,
+                CommuteMin = row.CommuteMin,
+            };
+        }
+
+        return new PopulationL2Dto { Households = households };
+    }
+}
+
 public sealed class WasmStatusDto
 {
     public bool Initialized { get; init; }
@@ -781,6 +928,8 @@ public sealed class WasmStatusDto
     public float ResearchPoints { get; init; }
     public float ResearchRate { get; init; }
     public int EventDefinitionCount { get; init; }
+    public int LawDefinitionCount { get; init; }
+    public int ActiveLawCount { get; init; }
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
     public int TechCount { get; init; }
     public int CurrentResearchId { get; init; } = -1;
@@ -800,6 +949,14 @@ public sealed class WasmStatusDto
     public float FireCoverage { get; init; }
     /// <summary>Leontief goods shortages/surpluses for economy HUD.</summary>
     public EconomySnapshotDto Economy { get; init; } = new();
+    /// <summary>Global-market export revenue from the last trade month.</summary>
+    public float MonthlyExportValue { get; init; }
+    /// <summary>Global-market import cost from the last trade month.</summary>
+    public float MonthlyImportCost { get; init; }
+    /// <summary>Net trade balance (exports − imports) from the last trade month.</summary>
+    public float TradeBalance { get; init; }
+    /// <summary>Top households sample for CitizenPanel L2 drill-down.</summary>
+    public PopulationL2Dto PopulationL2 { get; init; } = new();
 
     public static WasmStatusDto From(WasmSimHost host) => new()
     {
@@ -824,6 +981,8 @@ public sealed class WasmStatusDto
         ResearchPoints = host.ResearchPoints,
         ResearchRate = host.ResearchRate,
         EventDefinitionCount = host.EventDefinitionCount,
+        LawDefinitionCount = host.LawDefinitionCount,
+        ActiveLawCount = host.ActiveLawCount,
         ActiveEvents = host.ActiveEvents,
         TechCount = host.UnlockedTechCount,
         CurrentResearchId = host.CurrentResearchId,
@@ -855,18 +1014,23 @@ public sealed class WasmStatusDto
             "BudgetSystem",
             "PoliticsSystem",
             "EventSystem",
+            "LawSystem",
             "ResearchSystem",
             "CulturalDNASystem",
+            "TradeSystem (global market, PartnerCityId=-1)",
         ],
         Stubbed =
         [
             "TrafficSystem full (500 zones — desktop only; WASM uses lite mode)",
-            "TradeSystem (not wired in spike)",
         ],
         HealthcareCoverage = host.HealthcareCoverage,
         PoliceCoverage = host.PoliceCoverage,
         FireCoverage = host.FireCoverage,
         Economy = host.EconomySnapshot,
+        MonthlyExportValue = host.MonthlyExportValue,
+        MonthlyImportCost = host.MonthlyImportCost,
+        TradeBalance = host.TradeBalance,
+        PopulationL2 = host.GetPopulationL2Export(),
     };
 }
 
@@ -898,13 +1062,16 @@ public sealed class SimSnapshotDto
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
     /// <summary>Leontief goods shortages/surpluses for economy HUD.</summary>
     public EconomySnapshotDto Economy { get; init; } = new();
+    /// <summary>Top households sample for CitizenPanel L2 drill-down.</summary>
+    public PopulationL2Dto PopulationL2 { get; init; } = new();
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
         WorldState state,
         EventSystem? events = null,
         EconomySystem? economy = null,
-        ServiceSystem? services = null)
+        ServiceSystem? services = null,
+        PopulationSystem? population = null)
     {
         var buildings = CollectBuildings(state);
         var zones = CollectZones(state);
@@ -933,6 +1100,7 @@ public sealed class SimSnapshotDto
             ServiceCoverage = serviceCoverage,
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
             Economy = EconomySnapshotDto.From(economy),
+            PopulationL2 = PopulationL2Dto.From(state, population),
         };
     }
 
@@ -1168,6 +1336,9 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(GoodImbalanceDto[]))]
 [JsonSerializable(typeof(EconomySnapshotDto))]
 [JsonSerializable(typeof(WasmStatusDto))]
+[JsonSerializable(typeof(HouseholdPreviewDto))]
+[JsonSerializable(typeof(HouseholdPreviewDto[]))]
+[JsonSerializable(typeof(PopulationL2Dto))]
 [JsonSerializable(typeof(TickIntervalsDto))]
 [JsonSerializable(typeof(TrafficLiteInfoDto))]
 [JsonSerializable(typeof(EraProgressSnapshot))]

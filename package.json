@@ -9,11 +9,12 @@
     "dev:wasm": "pnpm build:wasm && pnpm dev",
     "smoke:all": "pnpm --filter @citymajor/web smoke:all",
     "smoke:play": "pnpm --filter @citymajor/web smoke:play",
+    "verify:tech-unlocks": "pnpm --filter @citymajor/web verify:tech-unlocks",
     "perf:gate": "pnpm --filter @citymajor/web perf:gate",
     "meshy:batch": "node scripts/meshy/batch-generate.mjs",
     "meshy:batch:dry": "node scripts/meshy/batch-generate.mjs --dry-run",
     "meshy:validate": "node scripts/meshy/validate-manifest.mjs",
-    "meshy:batch:mcp": "MESHY_USE_MCP=1 node scripts/meshy/batch-generate.mjs"
+    "meshy:batch:mcp": "MESHY_USE_MCP=1 node scripts/meshy/batch-generate.mjs --skip-existing"
   },
   "devDependencies": {
     "@gltf-transform/core": "^4.2.1",

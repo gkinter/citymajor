@@ -61,7 +61,7 @@ const STEPS: OnboardingStep[] = [
   {
     id: "research-era",
     title: "Research & Era Quest",
-    body: "Queue technologies from the Research button beside the Herald. The Era Quest panel tracks checklist objectives — population, treasury, research points — you must meet to unlock the next era. Work the checklist; era transitions celebrate your progress.",
+    body: "Queue technologies from the Research button beside the Herald. The Era Quest panel tracks checklist objectives — population and technologies researched — you must meet to unlock the next era. Work the checklist; era transitions celebrate your progress.",
     spotlight: "era",
     cardPlacement: "left",
     hint: "Open Research or finish the tour.",

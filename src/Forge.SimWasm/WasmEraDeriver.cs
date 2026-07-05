@@ -4,9 +4,9 @@ using Forge.Game.Simulation;
 namespace Forge.SimWasm;
 
 /// <summary>
-/// Derives HUD/visual era from research proxies (RP, population, industry) when
-/// tech_tree.json is not fully bundled in the WASM spike (SB-3692 partial).
-/// Tick count must not advance era — gates mirror ERA_ARC_DESIGN_V2 §6.C (SB-3718).
+/// HUD/visual era helpers for the WASM spike. Era transitions follow
+/// <see cref="ResearchSystem.CheckEraTransition"/> — population + unlocked tech
+/// count gates from <see cref="ResearchSystem.EraRequirements"/> (SB-3718).
 /// </summary>
 public static class WasmEraDeriver
 {
@@ -20,12 +20,14 @@ public static class WasmEraDeriver
     ];
 
     /// <summary>
-    /// Recompute <see cref="WorldState.Era"/> from research gates (RP, population, industry).
-    /// Tick count must not advance era — aligns with ERA_ARC_DESIGN_V2 §6.C (SB-3718).
+    /// Apply <see cref="ResearchSystem.CheckEraTransition"/> — no building-count proxies.
+    /// Prefer letting <see cref="ResearchSystem.MonthlyTick"/> set era; this is a sync helper.
     /// </summary>
     public static void UpdateEra(WorldState state, ResearchSystem research)
     {
-        state.Era = EraFromResearch(state, research);
+        int newEra = research.CheckEraTransition(state);
+        if (newEra >= 0)
+            state.Era = newEra;
     }
 
     public static string EraName(int era)
@@ -35,37 +37,9 @@ public static class WasmEraDeriver
         return EraNames[era];
     }
 
-    private static int EraFromResearch(WorldState state, ResearchSystem research)
-    {
-        float rp = state.ResearchPoints;
-        int pop = state.Population;
-        int heavyIndustry = research.HeavyIndustryCount;
-        int educated = research.EducatedPopulation;
-
-        if (rp >= WasmConfig.EraFutureResearchPoints
-            && pop >= WasmConfig.EraFutureMinPopulation)
-            return 4;
-
-        if (rp >= WasmConfig.EraModernResearchPoints
-            && pop >= WasmConfig.EraModernMinPopulation)
-            return 3;
-
-        if (rp >= WasmConfig.EraPostwarResearchPoints
-            && pop >= WasmConfig.EraPostwarMinPopulation)
-            return 2;
-
-        // Frontier → Industrial: primary threshold for WASM partial
-        if (rp >= WasmConfig.EraIndustrialResearchPoints
-            || heavyIndustry >= WasmConfig.EraIndustrialHeavyIndustry
-            || (pop >= WasmConfig.EraIndustrialMinPopulation
-                && educated >= WasmConfig.EraIndustrialEducatedPop))
-            return 1;
-
-        return 0;
-    }
-
     /// <summary>
-    /// Player-facing progress toward the next era — gates mirror <see cref="WasmConfig"/> thresholds.
+    /// Player-facing progress toward the next era — gates mirror
+    /// <see cref="ResearchSystem.EraRequirements"/> (population AND tech count).
     /// </summary>
     public static EraProgressSnapshot GetEraProgress(WorldState state, ResearchSystem research)
     {
@@ -83,7 +57,7 @@ public static class WasmEraDeriver
 
         int nextEra = currentEra + 1;
         var gates = BuildGatesForNextEra(currentEra, state, research);
-        float percent = ComputePercent(currentEra, state, research, gates);
+        float percent = ComputePercent(gates);
 
         return new EraProgressSnapshot
         {
@@ -99,92 +73,36 @@ public static class WasmEraDeriver
         WorldState state,
         ResearchSystem research)
     {
-        float rp = state.ResearchPoints;
-        int pop = state.Population;
-        int heavyIndustry = research.HeavyIndustryCount;
-        int educated = research.EducatedPopulation;
+        int nextEra = currentEra + 1;
+        if (nextEra >= ResearchSystem.EraRequirements.Length)
+            return [];
 
-        return currentEra switch
-        {
-            0 =>
-            [
-                Gate("researchPoints", "Research points", rp, WasmConfig.EraIndustrialResearchPoints,
-                    rp >= WasmConfig.EraIndustrialResearchPoints),
-                Gate("population", "Population", pop, WasmConfig.EraIndustrialMinPopulation,
-                    pop >= WasmConfig.EraIndustrialMinPopulation),
-                Gate("educatedPopulation", "Educated citizens", educated,
-                    WasmConfig.EraIndustrialEducatedPop,
-                    educated >= WasmConfig.EraIndustrialEducatedPop),
-                Gate("heavyIndustry", "Heavy industry", heavyIndustry,
-                    WasmConfig.EraIndustrialHeavyIndustry,
-                    heavyIndustry >= WasmConfig.EraIndustrialHeavyIndustry),
-            ],
-            1 =>
-            [
-                Gate("researchPoints", "Research", rp, WasmConfig.EraPostwarResearchPoints,
-                    rp >= WasmConfig.EraPostwarResearchPoints),
-                Gate("population", "Population", pop, WasmConfig.EraPostwarMinPopulation,
-                    pop >= WasmConfig.EraPostwarMinPopulation),
-            ],
-            2 =>
-            [
-                Gate("researchPoints", "Research", rp, WasmConfig.EraModernResearchPoints,
-                    rp >= WasmConfig.EraModernResearchPoints),
-                Gate("population", "Population", pop, WasmConfig.EraModernMinPopulation,
-                    pop >= WasmConfig.EraModernMinPopulation),
-            ],
-            3 =>
-            [
-                Gate("researchPoints", "Research", rp, WasmConfig.EraFutureResearchPoints,
-                    rp >= WasmConfig.EraFutureResearchPoints),
-                Gate("population", "Population", pop, WasmConfig.EraFutureMinPopulation,
-                    pop >= WasmConfig.EraFutureMinPopulation),
-            ],
-            _ => [],
-        };
+        var req = ResearchSystem.EraRequirements[nextEra];
+        int pop = state.Population;
+        int techCount = ResearchSystem.CountUnlockedTechs(state);
+
+        return
+        [
+            Gate("population", "Population", pop, req.MinPopulation,
+                pop >= req.MinPopulation),
+            Gate("techCount", "Technologies researched", techCount, req.RequiredTechCount,
+                techCount >= req.RequiredTechCount),
+        ];
     }
 
-    private static float ComputePercent(
-        int currentEra,
-        WorldState state,
-        ResearchSystem research,
-        EraProgressGate[] gates)
+    private static float ComputePercent(EraProgressGate[] gates)
     {
         if (gates.Length == 0) return 100f;
 
-        float rp = state.ResearchPoints;
-        int pop = state.Population;
-        int heavyIndustry = research.HeavyIndustryCount;
-        int educated = research.EducatedPopulation;
-
-        float pathProgress = currentEra switch
+        float minRatio = 1f;
+        foreach (var gate in gates)
         {
-            // Frontier → Industrial: OR across three paths (matches EraFromResearch).
-            0 => Math.Max(
-                Ratio(rp, WasmConfig.EraIndustrialResearchPoints),
-                Math.Max(
-                    Ratio(heavyIndustry, WasmConfig.EraIndustrialHeavyIndustry),
-                    Math.Min(
-                        Ratio(pop, WasmConfig.EraIndustrialMinPopulation),
-                        Ratio(educated, WasmConfig.EraIndustrialEducatedPop)))),
-            // Later eras: AND across RP + population.
-            1 => Math.Min(
-                Ratio(rp, WasmConfig.EraPostwarResearchPoints),
-                Ratio(pop, WasmConfig.EraPostwarMinPopulation)),
-            2 => Math.Min(
-                Ratio(rp, WasmConfig.EraModernResearchPoints),
-                Ratio(pop, WasmConfig.EraModernMinPopulation)),
-            3 => Math.Min(
-                Ratio(rp, WasmConfig.EraFutureResearchPoints),
-                Ratio(pop, WasmConfig.EraFutureMinPopulation)),
-            _ => 1f,
-        };
+            float ratio = gate.Required <= 0 ? 1f : Math.Clamp(gate.Current / gate.Required, 0f, 1f);
+            minRatio = Math.Min(minRatio, ratio);
+        }
 
-        return Math.Clamp(pathProgress * 100f, 0f, 100f);
+        return Math.Clamp(minRatio * 100f, 0f, 100f);
     }
-
-    private static float Ratio(float current, float required) =>
-        required <= 0 ? 1f : Math.Clamp(current / required, 0f, 1f);
 
     private static EraProgressGate Gate(
         string id,

@@ -10,16 +10,19 @@ import type {
   SimSnapshot,
   ZoneSnapshot,
 } from "../lib/sim-bridge";
+import { parsePopulationL2 } from "../lib/population-l2";
 
 type WorkerInbound =
   | { type: "init"; wasmBaseUrl: string; worldSize: number }
   | { type: "command"; command: SimCommand }
+  | { type: "export_cmjr" }
   | { type: "dispose" };
 
 type WorkerOutbound =
   | { type: "ready" }
   | { type: "snapshot"; snapshot: SimSnapshot }
   | { type: "load_complete"; ok: boolean }
+  | { type: "cmjr_blob"; base64: string }
   | { type: "error"; message: string };
 
 const ctx: DedicatedWorkerGlobalScope =
@@ -76,6 +79,12 @@ type WasmStatus = {
     shortages?: Array<{ name?: string; magnitude?: number }>;
     surpluses?: Array<{ name?: string; magnitude?: number }>;
   };
+  monthlyExportValue?: number;
+  monthlyImportCost?: number;
+  tradeBalance?: number;
+  populationL2?: unknown;
+  lawDefinitionCount?: number;
+  activeLawCount?: number;
 };
 
 type SimExports = {
@@ -88,6 +97,12 @@ type SimExports = {
   PlaceRoad?: (x: number, y: number) => void;
   EnqueueResearch?: (techId: number) => boolean;
   LoadSnapshot?: (snapshotJson: string) => boolean;
+  ExportCmjr?: () => string;
+  LoadFromCmjr?: (base64Cmjr: string) => boolean;
+  AdjustBudget?: (deltaFunds: number) => void;
+  ApplyApprovalDelta?: (deltaPercent: number) => void;
+  BoostResearch?: (points: number) => void;
+  ResolveHeraldEvent?: (eventId: number) => boolean;
 };
 
 let sim: SimExports | null = null;
@@ -242,6 +257,14 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
   const placeRoad = source.PlaceRoad ?? source.placeRoad;
   const enqueueResearch = source.EnqueueResearch ?? source.enqueueResearch;
   const loadSnapshot = source.LoadSnapshot ?? source.loadSnapshot;
+  const exportCmjr = source.ExportCmjr ?? source.exportCmjr;
+  const loadFromCmjr = source.LoadFromCmjr ?? source.loadFromCmjr;
+  const adjustBudget = source.AdjustBudget ?? source.adjustBudget;
+  const applyApprovalDelta =
+    source.ApplyApprovalDelta ?? source.applyApprovalDelta;
+  const boostResearch = source.BoostResearch ?? source.boostResearch;
+  const resolveHeraldEvent =
+    source.ResolveHeraldEvent ?? source.resolveHeraldEvent;
   if (
     typeof init !== "function" ||
     typeof tick !== "function" ||
@@ -278,6 +301,30 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
     LoadSnapshot:
       typeof loadSnapshot === "function"
         ? (loadSnapshot as (snapshotJson: string) => boolean)
+        : undefined,
+    ExportCmjr:
+      typeof exportCmjr === "function"
+        ? (exportCmjr as () => string)
+        : undefined,
+    LoadFromCmjr:
+      typeof loadFromCmjr === "function"
+        ? (loadFromCmjr as (base64Cmjr: string) => boolean)
+        : undefined,
+    AdjustBudget:
+      typeof adjustBudget === "function"
+        ? (adjustBudget as (deltaFunds: number) => void)
+        : undefined,
+    ApplyApprovalDelta:
+      typeof applyApprovalDelta === "function"
+        ? (applyApprovalDelta as (deltaPercent: number) => void)
+        : undefined,
+    BoostResearch:
+      typeof boostResearch === "function"
+        ? (boostResearch as (points: number) => void)
+        : undefined,
+    ResolveHeraldEvent:
+      typeof resolveHeraldEvent === "function"
+        ? (resolveHeraldEvent as (eventId: number) => boolean)
         : undefined,
   };
 }
@@ -377,6 +424,12 @@ function readStatus(): Pick<
   | "policeCoverage"
   | "fireCoverage"
   | "economy"
+  | "monthlyExportValue"
+  | "monthlyImportCost"
+  | "tradeBalance"
+  | "populationL2"
+  | "lawDefinitionCount"
+  | "activeLawCount"
 > | null {
   if (!sim?.GetStatus) return null;
   try {
@@ -428,6 +481,12 @@ function readStatus(): Pick<
       policeCoverage: parsed.policeCoverage,
       fireCoverage: parsed.fireCoverage,
       economy: parseEconomy(parsed.economy),
+      monthlyExportValue: parsed.monthlyExportValue,
+      monthlyImportCost: parsed.monthlyImportCost,
+      tradeBalance: parsed.tradeBalance,
+      populationL2: parsePopulationL2(parsed.populationL2),
+      lawDefinitionCount: parsed.lawDefinitionCount,
+      activeLawCount: parsed.activeLawCount,
     };
   } catch {
     return null;
@@ -485,6 +544,14 @@ function readSnapshot(): SimSnapshot {
     policeCoverage: parsed.policeCoverage ?? status?.policeCoverage,
     fireCoverage: parsed.fireCoverage ?? status?.fireCoverage,
     economy: parseEconomy(parsed.economy) ?? status?.economy,
+    monthlyExportValue:
+      parsed.monthlyExportValue ?? status?.monthlyExportValue,
+    monthlyImportCost: parsed.monthlyImportCost ?? status?.monthlyImportCost,
+    tradeBalance: parsed.tradeBalance ?? status?.tradeBalance,
+    populationL2: parsePopulationL2(parsed.populationL2) ?? status?.populationL2,
+    lawDefinitionCount:
+      parsed.lawDefinitionCount ?? status?.lawDefinitionCount,
+    activeLawCount: parsed.activeLawCount ?? status?.activeLawCount,
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),
@@ -541,6 +608,38 @@ function enqueueResearchTech(techId: number) {
   if (ok) publishResourceUpdate();
 }
 
+function adjustBudgetFunds(deltaFunds: number) {
+  if (!deltaFunds) return;
+  sim?.AdjustBudget?.(deltaFunds);
+  publishResourceUpdate();
+}
+
+function applyApprovalEvent(
+  approvalDelta: number,
+  optionId: string,
+  eventId?: number,
+) {
+  if (approvalDelta !== 0) {
+    sim?.ApplyApprovalDelta?.(approvalDelta);
+  }
+  if (eventId !== undefined && eventId >= 0) {
+    const resolved = sim?.ResolveHeraldEvent?.(eventId) ?? false;
+    if (!resolved) {
+      console.info(
+        "[CityMajor] Herald event resolve missed",
+        { eventId, optionId },
+      );
+    }
+  }
+  publishResourceUpdate();
+}
+
+function boostResearchPoints(points: number) {
+  if (points <= 0) return;
+  sim?.BoostResearch?.(points);
+  publishResourceUpdate();
+}
+
 function syncGridsFromSnapshot(snapshot: SimSnapshot) {
   const zg = ensureZoneGrid(worldSize);
   zg.fill(0);
@@ -569,6 +668,36 @@ function syncGridsFromSnapshot(snapshot: SimSnapshot) {
     }
     rg[zoneIndex(road.tileX, road.tileZ)] = road.roadFlags || 1;
   }
+}
+
+function loadCmjrBlob(base64Cmjr: string) {
+  if (!sim) {
+    post({ type: "load_complete", ok: false });
+    post({ type: "error", message: "Sim worker not initialized" });
+    return;
+  }
+
+  if (!sim.LoadFromCmjr) {
+    post({ type: "load_complete", ok: false });
+    post({ type: "error", message: "LoadFromCmjr export missing from WASM" });
+    return;
+  }
+
+  const restored = sim.LoadFromCmjr(base64Cmjr);
+  if (!restored) {
+    post({ type: "load_complete", ok: false });
+    post({ type: "error", message: "Failed to restore WASM CMJR save" });
+    return;
+  }
+
+  const snapshot = readSnapshot();
+  syncGridsFromSnapshot(snapshot);
+  simAccumMs = 0;
+  lastSnapshotMs = 0;
+  lastResourceMs = 0;
+  lastPublishedBuildingCount = null;
+  publishSnapshot();
+  post({ type: "load_complete", ok: true });
 }
 
 function loadSnapshot(snapshot: SimSnapshot) {
@@ -676,8 +805,21 @@ function handleCommand(command: SimCommand) {
     case "load_snapshot":
       loadSnapshot(command.snapshot);
       break;
-    case "herald_choice":
-      console.info("[CityMajor] Herald council choice (stub)", command);
+    case "load_cmjr":
+      loadCmjrBlob(command.base64Cmjr);
+      break;
+    case "budget_adjust":
+      adjustBudgetFunds(command.deltaFunds);
+      break;
+    case "approval_event":
+      applyApprovalEvent(
+        command.approvalDelta,
+        command.optionId,
+        command.eventId,
+      );
+      break;
+    case "research_boost":
+      boostResearchPoints(command.points);
       break;
   }
 }
@@ -716,6 +858,16 @@ ctx.onmessage = async (event: MessageEvent<WorkerInbound>) => {
   if (msg.type === "command") {
     try {
       handleCommand(msg.command);
+    } catch (err) {
+      post({ type: "error", message: String(err) });
+    }
+    return;
+  }
+
+  if (msg.type === "export_cmjr") {
+    try {
+      const base64 = sim?.ExportCmjr?.() ?? "";
+      post({ type: "cmjr_blob", base64 });
     } catch (err) {
       post({ type: "error", message: String(err) });
     }

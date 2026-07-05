@@ -35,6 +35,8 @@ export const HUD_Z = {
   base: 10,
   controls: 15,
   panel: 20,
+  /** Slide-out panels (Research, Economy, Herald) — above topRightActions (panel+1). */
+  slidePanel: 25,
   modal: 40,
 } as const;
 
@@ -210,7 +212,7 @@ export function hudSlidePanel(): CSSProperties {
     right: 0,
     width: "min(420px, 92vw)",
     height: "100%",
-    zIndex: HUD_Z.panel,
+    zIndex: HUD_Z.slidePanel,
     display: "flex",
     flexDirection: "column",
     fontFamily: HUD_FONT.mono,

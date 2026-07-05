@@ -55,6 +55,7 @@
   --hud-z-base: 10;
   --hud-z-controls: 15;
   --hud-z-panel: 20;
+  --hud-z-slide-panel: 25;
   --hud-z-modal: 40;
   --hud-z-onboarding: 50;
 }
@@ -301,6 +302,8 @@
 
 .hud-research-panel {
   font-family: var(--hud-font-mono);
+  z-index: var(--hud-z-slide-panel);
+  pointer-events: auto;
 }
 
 .hud-research-stat__label {
@@ -603,6 +606,188 @@
   color: var(--hud-text-dim);
 }
 
+.hud-economy-trade {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hud-economy-trade__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--hud-row-bg);
+  border: 1px solid var(--hud-border-subtle);
+}
+
+.hud-economy-trade__row--balance {
+  border-left: 3px solid #9ecbff;
+}
+
+.hud-economy-trade__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hud-text-muted);
+}
+
+.hud-economy-trade__value {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.hud-economy-trade__value--in {
+  color: #7dffb2;
+}
+
+.hud-economy-trade__value--out {
+  color: var(--hud-error);
+}
+
+.hud-economy-trade__note {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--hud-text-dim);
+}
+
+/* Law panel — WASM LawSystem counts */
+.hud-law-button {
+  font-family: var(--hud-font-mono);
+}
+
+.hud-law-panel {
+  font-family: var(--hud-font-mono);
+}
+
+.hud-law-empty {
+  margin: 0 0 14px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--hud-text-dim);
+  background: var(--hud-row-bg);
+  border: 1px solid var(--hud-border-subtle);
+}
+
+.hud-law-stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--hud-row-bg);
+  border: 1px solid var(--hud-border-subtle);
+}
+
+.hud-law-stat__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hud-text);
+}
+
+.hud-law-stat__value {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--hud-text-muted);
+}
+
+/* Citizen panel — household stats + L2 drill-down */
+.hud-citizen-button {
+  font-family: var(--hud-font-mono);
+}
+
+.hud-citizen-panel {
+  font-family: var(--hud-font-mono);
+}
+
+.hud-citizen-stat__label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--hud-text-dim);
+  margin-bottom: 2px;
+}
+
+.hud-citizen-stat__value {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--hud-text);
+}
+
+.hud-citizen-list__heading {
+  margin: 4px 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--hud-text-muted);
+}
+
+.hud-citizen-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hud-citizen-list__item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--hud-row-bg);
+  border: 1px solid var(--hud-border-subtle);
+  border-left: 3px solid rgba(255, 184, 77, 0.55);
+}
+
+.hud-citizen-list__item--selected {
+  border-left-color: #ffd080;
+  background: rgba(255, 184, 77, 0.08);
+}
+
+.hud-citizen-list__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hud-citizen-list__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hud-text);
+}
+
+.hud-citizen-list__happiness {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #ffd080;
+}
+
+.hud-citizen-list__meta {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--hud-text-dim);
+}
+
+.hud-citizen-list__item--available:hover {
+  border-color: rgba(255, 184, 77, 0.45);
+}
+
 /* Zoning toolbar — highlight tools matching high RCI demand */
 .hud-zoning-btn--demand {
   box-shadow:
@@ -691,6 +876,83 @@
 .hud-resources__budget-out {
   color: var(--hud-error);
   font-weight: 600;
+}
+
+.hud-resources__trade {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+}
+
+.hud-resources__trade-export {
+  color: #7dffb2;
+  font-weight: 600;
+}
+
+.hud-resources__trade-import {
+  color: var(--hud-error);
+  font-weight: 600;
+}
+
+.hud-resources__trade-balance {
+  font-weight: 600;
+}
+
+.hud-resources__trade-balance--good {
+  color: #7dffb2;
+}
+
+.hud-resources__trade-balance--bad {
+  color: var(--hud-error);
+}
+
+.hud-resources__crisis {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--hud-border-subtle);
+  font-family: var(--hud-font-mono);
+  font-size: 10px;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.hud-resources__crisis--warn {
+  color: #e8d44a;
+}
+
+.hud-resources__crisis--critical {
+  color: var(--hud-error);
+}
+
+.hud-resources__crisis-label {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hud-resources__crisis--warn .hud-resources__crisis-label {
+  background: rgba(232, 212, 74, 0.15);
+  border: 1px solid rgba(232, 212, 74, 0.45);
+}
+
+.hud-resources__crisis--critical .hud-resources__crisis-label {
+  background: rgba(255, 154, 168, 0.15);
+  border: 1px solid rgba(255, 154, 168, 0.5);
+}
+
+.hud-resources__crisis-message {
+  opacity: 0.95;
+  white-space: normal;
 }
 
 /* ── Crisis warning modal (GAMEPLAY_LOOP #9) ── */

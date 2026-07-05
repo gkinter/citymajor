@@ -8,8 +8,15 @@ import {
   type NarrativeEventResponse,
   type SimStateBucket,
 } from "@/lib/narrative-templates";
-import { deriveNarrativeBucket, explainNarrativeBucket } from "@/lib/sim-metrics";
+import {
+  cashCrisisRank,
+  detectCashCrisis,
+  deriveNarrativeBucket,
+  explainNarrativeBucket,
+  type CashCrisisKind,
+} from "@/lib/sim-metrics";
 import { narrativeFromSimEvent } from "@/lib/event-catalog";
+import { heraldOptionToSimCommands } from "@/lib/herald-option-commands";
 import { narrativeFromEraTransition } from "@/lib/era-narrative";
 import type {
   ActiveEventSnapshot,
@@ -37,6 +44,10 @@ import { ResearchButton } from "@/components/city/ResearchButton";
 import { ResearchPanel } from "@/components/city/ResearchPanel";
 import { EconomyButton } from "@/components/city/EconomyButton";
 import { EconomyPanel } from "@/components/city/EconomyPanel";
+import { LawButton } from "@/components/city/LawButton";
+import { LawPanel } from "@/components/city/LawPanel";
+import { CitizenButton } from "@/components/city/CitizenButton";
+import { CitizenPanel } from "@/components/city/CitizenPanel";
 import { HudToast } from "@/components/city/HudToast";
 import { techNameFromIndex } from "@/lib/tech-catalog";
 import { HUD_ZONE } from "@/lib/hud-theme";
@@ -56,6 +67,7 @@ import {
 } from "@/components/city/OnboardingOverlay";
 import { resolveRci } from "@/lib/zoning-economy";
 import { GltfPreloader } from "@/components/city/GltfPreloader";
+import type { HouseholdPreview } from "@/lib/population-l2";
 
 const NarrativeApiResponseSchema = NarrativeEventResponseSchema.extend({
   narrativeEventsRemaining: z.number().int().nonnegative().optional(),
@@ -116,7 +128,15 @@ export function PlayClient() {
   const [eraTransitionEra, setEraTransitionEra] = useState<number | null>(null);
   const [researchOpen, setResearchOpen] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
+  const [lawOpen, setLawOpen] = useState(false);
+  const [citizenOpen, setCitizenOpen] = useState(false);
+  const [citizenSelection, setCitizenSelection] = useState<{
+    householdId?: string;
+    tileX?: number;
+    tileZ?: number;
+  } | null>(null);
   const [researchToast, setResearchToast] = useState<string | null>(null);
+  const [cashCrisisToast, setCashCrisisToast] = useState<string | null>(null);
   const [residentialZonePainted, setResidentialZonePainted] = useState(false);
 
   const statsRef = useRef(stats);
@@ -126,6 +146,7 @@ export function PlayClient() {
   const heraldedEventIdsRef = useRef<Set<number>>(new Set());
   const prevEraRef = useRef<number | null>(null);
   const prevUnlockedTechRef = useRef<Set<number>>(new Set());
+  const prevCashCrisisKindRef = useRef<CashCrisisKind | null>(null);
   const simApiRef = useRef(simApi);
   simApiRef.current = simApi;
   const populationGrowthRef = useRef(new PopulationGrowthTracker());
@@ -339,6 +360,20 @@ export function PlayClient() {
   }, [simResources?.unlockedTechIds]);
 
   useEffect(() => {
+    const crisis = detectCashCrisis(simResources);
+    const kind = crisis?.kind ?? null;
+    const prev = prevCashCrisisKindRef.current;
+    prevCashCrisisKindRef.current = kind;
+
+    if (!crisis) return;
+    if (prev !== null && kind !== null && cashCrisisRank(kind) <= cashCrisisRank(prev)) {
+      return;
+    }
+
+    setCashCrisisToast(crisis.message);
+  }, [simResources]);
+
+  useEffect(() => {
     const events = simResources?.activeEvents;
     if (!events?.length) return;
 
@@ -355,17 +390,20 @@ export function PlayClient() {
   const handleHeraldOptionSelect = useCallback(
     (optionId: string) => {
       const simEvent = heraldSimEvent;
+      const commands = heraldOptionToSimCommands(optionId, {
+        eventId: simEvent?.eventId,
+      });
       console.info("[CityMajor] Herald council choice", {
         optionId,
         eventTypeId: simEvent?.typeId,
         eventId: simEvent?.eventId,
+        commands,
       });
-      simApiRef.current?.sendCommand({
-        type: "herald_choice",
-        optionId,
-        eventTypeId: simEvent?.typeId,
-        eventId: simEvent?.eventId,
-      });
+      const api = simApiRef.current;
+      if (!api) return;
+      for (const command of commands) {
+        api.sendCommand(command);
+      }
     },
     [heraldSimEvent],
   );
@@ -378,6 +416,22 @@ export function PlayClient() {
     if (isResidentialZonePaint(zoneType)) {
       setResidentialZonePainted(true);
     }
+  }, []);
+
+  const handleCitizenDotClick = useCallback(
+    (pick: { tileX: number; tileZ: number; buildingIndex: number }) => {
+      setCitizenSelection({ tileX: pick.tileX, tileZ: pick.tileZ });
+      setCitizenOpen(true);
+    },
+    [],
+  );
+
+  const handleSelectHousehold = useCallback((household: HouseholdPreview) => {
+    setCitizenSelection({
+      householdId: household.id,
+      tileX: household.tileX,
+      tileZ: household.tileZ,
+    });
   }, []);
 
   const quotaRemaining = entitlements?.narrativeEventsRemaining;
@@ -398,6 +452,7 @@ export function PlayClient() {
         serviceViewMode={serviceViewMode}
         activeEvents={simResources?.activeEvents}
         onEventMarkerClick={openHerald}
+        onCitizenDotClick={handleCitizenDotClick}
         onStats={setStats}
         onSimResources={handleSimResources}
         onSimApi={setSimApi}
@@ -447,6 +502,10 @@ export function PlayClient() {
           display: "flex",
           alignItems: "center",
           gap: 8,
+          pointerEvents:
+            researchOpen || economyOpen || lawOpen || heraldOpen
+              ? "none"
+              : "auto",
         }}
       >
         <ResearchButton
@@ -462,6 +521,28 @@ export function PlayClient() {
           title="Goods shortages and surpluses"
           active={economyOpen}
           onClick={() => setEconomyOpen((open) => !open)}
+        />
+        <LawButton
+          title="Law catalog and active ordinances"
+          active={lawOpen}
+          badgeLabel={
+            simResources?.activeLawCount !== undefined
+              ? String(simResources.activeLawCount)
+              : undefined
+          }
+          onClick={() => setLawOpen((open) => !open)}
+        />
+        <CitizenButton
+          badgeLabel={
+            simResources?.householdCount !== undefined
+              ? String(simResources.householdCount)
+              : simResources?.population !== undefined
+                ? String(simResources.population)
+                : "—"
+          }
+          title="Household stats and citizen drill-down"
+          active={citizenOpen}
+          onClick={() => setCitizenOpen((open) => !open)}
         />
         <HeraldButton
           embedded
@@ -499,10 +580,22 @@ export function PlayClient() {
         resources={simResources}
       />
 
+      <LawPanel
+        open={lawOpen}
+        onClose={() => setLawOpen(false)}
+        resources={simResources}
+      />
+
       <HudToast
         message={researchToast}
         onDismiss={() => setResearchToast(null)}
         style={{ top: 130 }}
+      />
+
+      <HudToast
+        message={cashCrisisToast}
+        onDismiss={() => setCashCrisisToast(null)}
+        style={{ top: researchToast ? 168 : 130 }}
       />
 
       <HeraldPanel
@@ -531,7 +624,10 @@ export function PlayClient() {
 
       <EraTransitionModal era={eraTransitionEra} onDismiss={dismissEraTransition} />
 
-      <NewsTicker activeEvents={simResources?.activeEvents} />
+      <NewsTicker
+        activeEvents={simResources?.activeEvents}
+        simResources={simResources}
+      />
     </div>
   );
 }

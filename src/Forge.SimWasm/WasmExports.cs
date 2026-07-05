@@ -64,6 +64,30 @@ public static partial class Program
     }
 
     [JSExport]
+    public static void AdjustBudget(double deltaFunds)
+    {
+        _host?.AdjustBudget((long)deltaFunds);
+    }
+
+    [JSExport]
+    public static void ApplyApprovalDelta(float deltaPercent)
+    {
+        _host?.ApplyApprovalDelta(deltaPercent);
+    }
+
+    [JSExport]
+    public static void BoostResearch(float points)
+    {
+        _host?.BoostResearch(points);
+    }
+
+    [JSExport]
+    public static bool ResolveHeraldEvent(int eventId)
+    {
+        return _host?.ResolveHeraldEvent(eventId) ?? false;
+    }
+
+    [JSExport]
     public static string GetStatus()
     {
         return _host?.GetStatusJson()
@@ -74,5 +98,18 @@ public static partial class Program
     public static bool LoadSnapshot(string snapshotJson)
     {
         return _host?.LoadSnapshotFromJson(snapshotJson) ?? false;
+    }
+
+    [JSExport]
+    public static string ExportCmjr()
+    {
+        if (_host is null) return "";
+        return Convert.ToBase64String(_host.ExportCmjrBytes());
+    }
+
+    [JSExport]
+    public static bool LoadFromCmjr(string base64Cmjr)
+    {
+        return _host?.LoadFromCmjrBase64(base64Cmjr) ?? false;
     }
 }

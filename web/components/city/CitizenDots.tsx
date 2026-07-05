@@ -2,8 +2,14 @@
 
 import { BuildingCategory, BuildingState } from "@citymajor/sim-types";
 import { useFrame } from "@react-three/fiber";
+import type { ThreeEvent } from "@react-three/fiber";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import {
+  allocateDotsPerBuilding,
+  resolveHouseholdBudget,
+} from "@/lib/population-growth";
+import type { CitizenDotPick } from "@/lib/population-l2";
 import type { ChunkState, CityData } from "@/lib/types";
 
 type CitizenDotsProps = {
@@ -12,6 +18,7 @@ type CitizenDotsProps = {
   /** City-wide household count from WASM snapshot. */
   householdCount?: number;
   population: number;
+  onDotClick?: (pick: CitizenDotPick) => void;
 };
 
 type DotSlot = {
@@ -37,16 +44,6 @@ function isResidential(category: BuildingCategory): boolean {
   );
 }
 
-function dotsForBuilding(
-  level: number,
-  occupancy: number,
-  householdCount: number,
-): number {
-  if (householdCount <= 0 && occupancy <= 0) return 0;
-  const base = householdCount > 0 ? Math.max(1, Math.round(level * occupancy)) : 0;
-  return Math.min(3, base);
-}
-
 /**
  * Warm citizen markers above residential buildings at LOD L2 — reads alive from
  * the render snapshot without per-building household IDs (SB-3689 / SB-3712).
@@ -56,6 +53,7 @@ export function CitizenDots({
   chunks,
   householdCount = 0,
   population,
+  onDotClick,
 }: CitizenDotsProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const slotsRef = useRef<DotSlot[]>([]);
@@ -72,25 +70,29 @@ export function CitizenDots({
     return indices;
   }, [city.buildings]);
 
-  const occupancy = useMemo(() => {
-    const count = residentialIndices.length;
-    if (count === 0) return 0;
-    const households =
-      householdCount > 0
-        ? householdCount
-        : population > 0
-          ? Math.ceil(population / 2.4)
-          : 0;
-    return Math.min(1.5, households / count);
-  }, [householdCount, population, residentialIndices.length]);
+  const dotBudget = useMemo(
+    () => resolveHouseholdBudget(householdCount, population),
+    [householdCount, population],
+  );
+
+  const dotsPerBuilding = useMemo(
+    () =>
+      allocateDotsPerBuilding(
+        residentialIndices,
+        (buildingIndex) => city.buildings[buildingIndex]?.level ?? 1,
+        dotBudget,
+        MAX_DOTS,
+      ),
+    [city.buildings, dotBudget, residentialIndices],
+  );
 
   useLayoutEffect(() => {
     const slots: DotSlot[] = [];
-    for (const buildingIndex of residentialIndices) {
+    for (let ri = 0; ri < residentialIndices.length; ri++) {
+      const buildingIndex = residentialIndices[ri]!;
       const building = city.buildings[buildingIndex]!;
-      const dotCount = dotsForBuilding(building.level, occupancy, householdCount);
+      const dotCount = dotsPerBuilding[ri] ?? 0;
       for (let j = 0; j < dotCount; j++) {
-        if (slots.length >= MAX_DOTS) break;
         const angle = (j / Math.max(1, dotCount)) * Math.PI * 2 + building.id * 0.17;
         const radius = 0.12 + (j % 2) * 0.06;
         slots.push({
@@ -107,7 +109,7 @@ export function CitizenDots({
     mesh.count = slots.length;
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, [city.buildings, householdCount, occupancy, residentialIndices]);
+  }, [city.buildings, dotsPerBuilding, residentialIndices]);
 
   useFrame((_, delta) => {
     const mesh = meshRef.current;
@@ -150,7 +152,24 @@ export function CitizenDots({
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   });
 
-  if (residentialIndices.length === 0) {
+  const handleClick = (event: ThreeEvent<MouseEvent>) => {
+    if (!onDotClick) return;
+    const instanceId = event.instanceId;
+    if (instanceId === undefined || instanceId < 0) return;
+    event.stopPropagation();
+    const slot = slotsRef.current[instanceId];
+    if (!slot) return;
+    const building = city.buildings[slot.buildingIndex];
+    if (!building) return;
+    onDotClick({
+      instanceId,
+      buildingIndex: slot.buildingIndex,
+      tileX: building.tileX,
+      tileZ: building.tileZ,
+    });
+  };
+
+  if (residentialIndices.length === 0 || dotBudget <= 0) {
     return null;
   }
 
@@ -159,6 +178,7 @@ export function CitizenDots({
       ref={meshRef}
       args={[undefined, undefined, MAX_DOTS]}
       frustumCulled={false}
+      onClick={onDotClick ? handleClick : undefined}
     >
       <sphereGeometry args={[1, 6, 6]} />
       <meshBasicMaterial vertexColors transparent opacity={0.92} depthWrite={false} />

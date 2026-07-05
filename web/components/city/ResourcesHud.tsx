@@ -7,7 +7,7 @@ import {
   HUD_ZONE,
   hudPanel,
 } from "@/lib/hud-theme";
-import { LOW_HAPPINESS_APPROVAL } from "@/lib/sim-metrics";
+import { detectCashCrisis, LOW_HAPPINESS_APPROVAL } from "@/lib/sim-metrics";
 import type { RciDemand, SimResources } from "@/lib/sim-bridge";
 import { formatGrowthPerMonth } from "@/lib/population-growth";
 import { resolveRci } from "@/lib/zoning-economy";
@@ -70,6 +70,28 @@ function hasMonthlyBudget(resources: SimResources): boolean {
   );
 }
 
+function hasTradeData(resources: SimResources): boolean {
+  return (
+    resources.monthlyExportValue !== undefined ||
+    resources.monthlyImportCost !== undefined ||
+    resources.tradeBalance !== undefined
+  );
+}
+
+function formatTradeInflow(amount: number): string {
+  const abs = Math.abs(amount);
+  if (abs >= 1_000_000) return `+$${(abs / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `+$${(abs / 1_000).toFixed(1)}K`;
+  return `+$${abs.toLocaleString()}`;
+}
+
+function formatTradeOutflow(amount: number): string {
+  const abs = Math.abs(amount);
+  if (abs >= 1_000_000) return `−$${(abs / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `−$${(abs / 1_000).toFixed(1)}K`;
+  return `−$${abs.toLocaleString()}`;
+}
+
 type RciMeterProps = {
   label: "R" | "C" | "I";
   demand: number;
@@ -115,8 +137,9 @@ export function ResourcesHud({
   const panelStyle = hudPanel({
     ...HUD_ZONE.resources,
     display: "flex",
-    alignItems: "center",
-    gap: 12,
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 0,
     padding: "6px 16px",
     pointerEvents: "none",
     whiteSpace: "nowrap",
@@ -141,9 +164,17 @@ export function ResourcesHud({
       : null;
   const growthRate =
     resources?.populationGrowthRate ?? populationGrowthPerMonth ?? null;
+  const cashCrisis = detectCashCrisis(resources);
 
   return (
     <div style={panelStyle}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
       <div className="hud-resources">
         <div className="hud-resources__stat">
           <span className="hud-resources__label">Pop</span>
@@ -218,6 +249,45 @@ export function ResourcesHud({
           </div>
         ) : null}
 
+        {resources && hasTradeData(resources) ? (
+          <div
+            className="hud-resources__stat"
+            title={`Global market trade last month: ${formatTradeInflow(resources.monthlyExportValue ?? 0)} exports, ${formatTradeOutflow(resources.monthlyImportCost ?? 0)} imports`}
+          >
+            <span className="hud-resources__label">Trade</span>
+            <span className="hud-resources__trade">
+              <span
+                className="hud-resources__trade-export"
+                title="Export revenue"
+              >
+                {formatTradeInflow(resources.monthlyExportValue ?? 0)}
+              </span>
+              <span className="hud-resources__budget-sep">/</span>
+              <span
+                className="hud-resources__trade-import"
+                title="Import cost"
+              >
+                {formatTradeOutflow(resources.monthlyImportCost ?? 0)}
+              </span>
+              {resources.tradeBalance !== undefined ? (
+                <>
+                  <span className="hud-resources__budget-sep">·</span>
+                  <span
+                    className={`hud-resources__trade-balance ${
+                      resources.tradeBalance >= 0
+                        ? "hud-resources__trade-balance--good"
+                        : "hud-resources__trade-balance--bad"
+                    }`}
+                    title="Net trade balance (exports − imports)"
+                  >
+                    ({formatCompactMoney(resources.tradeBalance)})
+                  </span>
+                </>
+              ) : null}
+            </span>
+          </div>
+        ) : null}
+
         {resources?.approval !== undefined ? (
           <div
             className="hud-resources__stat"
@@ -279,6 +349,21 @@ export function ResourcesHud({
           <RciMeter label="R" demand={rci.residential} />
           <RciMeter label="C" demand={rci.commercial} />
           <RciMeter label="I" demand={rci.industrial} />
+        </div>
+      ) : null}
+      </div>
+
+      {cashCrisis ? (
+        <div
+          className={`hud-resources__crisis hud-resources__crisis--${cashCrisis.severity}`}
+          role="alert"
+          aria-live="polite"
+          title="Cash crisis — check budget, taxes, and Herald deficit coverage"
+        >
+          <span className="hud-resources__crisis-label" aria-hidden>
+            {cashCrisis.severity === "critical" ? "Bankruptcy" : "Cash crisis"}
+          </span>
+          <span className="hud-resources__crisis-message">{cashCrisis.message}</span>
         </div>
       ) : null}
     </div>

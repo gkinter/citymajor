@@ -42,6 +42,8 @@ type CitySceneProps = {
   eraProgress?: EraProgress;
   onEventMarkerClick?: (event: ActiveEventSnapshot) => void;
   onPick: (pick: PickResult) => void;
+  onHover?: (pick: PickResult, pointer: { clientX: number; clientY: number }) => void;
+  onHoverEnd?: () => void;
   onStats: (stats: FpsStats) => void;
   onRenderHealth?: (
     stats: Pick<FpsStats, "visibleBuildings" | "visibleChunks" | "totalBuildings">,
@@ -67,6 +69,8 @@ export function CityScene({
   eraProgress,
   onEventMarkerClick,
   onPick,
+  onHover,
+  onHoverEnd,
   onStats,
   onRenderHealth,
   dpr,
@@ -154,7 +158,7 @@ export function CityScene({
         <FrontierChurchLandmark era={era} />
       ) : null}
       <EraLandmarkPlaceholder era={era} eraProgress={eraProgress} />
-      <TilePicker onPick={onPick} />
+      <TilePicker onPick={onPick} onHover={onHover} onHoverEnd={onHoverEnd} />
     </>
   );
 }

@@ -79,6 +79,8 @@ import {
   isEducationBuildTypeId,
   type EducationBuildTypeId,
 } from "@/lib/education-buildings";
+import { handlePlayKeyboardShortcut } from "@/lib/play-keyboard";
+import { HelpPanel } from "@/components/city/HelpPanel";
 
 export type BuildMode = "zone" | "road" | "plop" | "education";
 
@@ -156,6 +158,7 @@ export function PlayClient() {
   const [buildTypeId, setBuildTypeId] = useState<number | null>(null);
   const [roadTier, setRoadTier] = useState<RoadTier>(DEFAULT_ROAD_TIER);
   const [buildOpen, setBuildOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -500,6 +503,75 @@ export function PlayClient() {
     setBuildOpen(false);
   }, []);
 
+  const handleEnterZoneMode = useCallback(() => {
+    setBuildOpen(false);
+    setBuildTypeId(null);
+    setBuildMode("zone");
+    setActiveTool((tool) =>
+      tool === "road" || tool === "bulldoze" ? "residential" : tool,
+    );
+  }, []);
+
+  const handleToggleBuildMenu = useCallback(() => {
+    setBuildOpen((open) => !open);
+  }, []);
+
+  const handleKeyboardSelectRoad = useCallback(() => {
+    handleToolChange("road");
+  }, [handleToolChange]);
+
+  const handleToggleHelp = useCallback(() => {
+    setHelpOpen((open) => !open);
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const handlers = {
+        onToggleHelp: handleToggleHelp,
+        onToggleBuildMenu: handleToggleBuildMenu,
+        onEnterZoneMode: handleEnterZoneMode,
+        onSelectRoad: handleKeyboardSelectRoad,
+        onSelectZoneTool: handleToolChange,
+        unlockedTechIds: simResources?.unlockedTechIds,
+      };
+
+      if (event.key === "?") {
+        handlePlayKeyboardShortcut(event, handlers);
+        return;
+      }
+
+      if (helpOpen) return;
+
+      if (
+        heraldOpen ||
+        researchOpen ||
+        economyOpen ||
+        lawOpen ||
+        citizenOpen
+      ) {
+        return;
+      }
+
+      handlePlayKeyboardShortcut(event, handlers);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [
+    citizenOpen,
+    economyOpen,
+    handleEnterZoneMode,
+    handleKeyboardSelectRoad,
+    handleToggleBuildMenu,
+    handleToggleHelp,
+    handleToolChange,
+    helpOpen,
+    heraldOpen,
+    lawOpen,
+    researchOpen,
+    simResources?.unlockedTechIds,
+  ]);
+
   const canvasActiveTool: ZoningTool =
     buildMode === "road" ? "road" : activeTool;
 
@@ -635,7 +707,7 @@ export function PlayClient() {
           alignItems: "center",
           gap: 8,
           pointerEvents:
-            researchOpen || economyOpen || lawOpen || heraldOpen
+            researchOpen || economyOpen || lawOpen || heraldOpen || helpOpen
               ? "none"
               : "auto",
         }}
@@ -762,6 +834,8 @@ export function PlayClient() {
       />
 
       <CrisisWarningModal resources={simResources} />
+
+      <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
 
       <EraTransitionModal era={eraTransitionEra} onDismiss={dismissEraTransition} />
 

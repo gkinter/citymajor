@@ -7,10 +7,12 @@ public static partial class Program
     private static WasmSimHost? _host;
 
     [JSExport]
-    public static void Init(int worldSize)
+    public static void Init(int worldSize, int skipStarterCity = 0)
     {
         _host = new WasmSimHost();
-        _host.Init(worldSize > 0 ? worldSize : WasmConfig.DefaultWorldSize);
+        _host.Init(
+            worldSize > 0 ? worldSize : WasmConfig.DefaultWorldSize,
+            skipStarterCity != 0);
     }
 
     /// <summary>

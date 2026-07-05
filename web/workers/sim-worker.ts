@@ -13,7 +13,12 @@ import type {
 import { parsePopulationL2 } from "../lib/population-l2";
 
 type WorkerInbound =
-  | { type: "init"; wasmBaseUrl: string; worldSize: number }
+  | {
+      type: "init";
+      wasmBaseUrl: string;
+      worldSize: number;
+      skipStarterCity?: boolean;
+    }
   | { type: "command"; command: SimCommand }
   | { type: "export_cmjr" }
   | { type: "dispose" };
@@ -94,7 +99,7 @@ type WasmStatus = {
 };
 
 type SimExports = {
-  Init: (worldSize: number) => void;
+  Init: (worldSize: number, skipStarterCity?: number) => void;
   Tick: (dt: number) => number;
   GetRenderSnapshot: () => string;
   GetStatus?: () => string;
@@ -898,7 +903,7 @@ ctx.onmessage = async (event: MessageEvent<WorkerInbound>) => {
       ensureZoneGrid(worldSize);
       ensureRoadGrid(worldSize);
       sim = await loadWasm(msg.wasmBaseUrl);
-      sim.Init(worldSize);
+      sim.Init(worldSize, msg.skipStarterCity ? 1 : 0);
       simAccumMs = 0;
       lastSnapshotMs = 0;
       lastResourceMs = 0;

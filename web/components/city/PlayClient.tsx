@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { EntitlementsSchema, type Entitlements } from "@/lib/entitlements";
 import {
@@ -25,6 +26,7 @@ import type {
   SimResources,
 } from "@/lib/sim-bridge";
 import {
+  EMPTY_CITY_STORAGE_KEY,
   GRAPHICS_QUALITY_STORAGE_KEY,
   TRAFFIC_OVERLAY_STORAGE_KEY,
   type GraphicsQualityTier,
@@ -105,7 +107,16 @@ function readStoredTrafficOverlay(): boolean {
   return stored !== "off";
 }
 
+function readEmptyCityPref(urlEmpty: boolean): boolean {
+  if (typeof window === "undefined") return urlEmpty;
+  if (urlEmpty) return true;
+  return window.localStorage.getItem(EMPTY_CITY_STORAGE_KEY) === "1";
+}
+
 export function PlayClient() {
+  const searchParams = useSearchParams();
+  const urlEmpty = searchParams.get("empty") === "1";
+  const [emptyCity, setEmptyCity] = useState(() => readEmptyCityPref(urlEmpty));
   const [activeTool, setActiveTool] = useState<ZoningTool>("residential");
   const [brushSize, setBrushSize] = useState<PaintBrushSize>(1);
   const [gameSpeed, setGameSpeed] = useState<GameSpeedLevel>(1);
@@ -186,6 +197,18 @@ export function PlayClient() {
   useEffect(() => {
     void refreshEntitlements();
   }, [refreshEntitlements]);
+
+  useEffect(() => {
+    if (urlEmpty) {
+      window.localStorage.setItem(EMPTY_CITY_STORAGE_KEY, "1");
+      setEmptyCity(true);
+    }
+  }, [urlEmpty]);
+
+  const handleEmptyCityToggle = useCallback((enabled: boolean) => {
+    setEmptyCity(enabled);
+    window.localStorage.setItem(EMPTY_CITY_STORAGE_KEY, enabled ? "1" : "0");
+  }, []);
 
   // Playwright smoke: exportWasmSave() without clicking Save UI (localStorage gate).
   useEffect(() => {
@@ -529,6 +552,7 @@ export function PlayClient() {
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <GltfPreloader />
       <CityCanvas
+        key={emptyCity ? "empty" : "starter"}
         activeTool={canvasActiveTool}
         brushSize={brushSize}
         buildTypeId={
@@ -539,6 +563,7 @@ export function PlayClient() {
         qualityTier={qualityTier}
         showTrafficOverlay={showTrafficOverlay}
         serviceViewMode={serviceViewMode}
+        skipStarterCity={emptyCity}
         activeEvents={simResources?.activeEvents}
         onEventMarkerClick={openHerald}
         onCitizenDotClick={handleCitizenDotClick}
@@ -551,6 +576,30 @@ export function PlayClient() {
       <HudWordmark />
       <SpeedToolbar speedLevel={gameSpeed} onSpeedChange={setGameSpeed} />
       <QualityToolbar qualityTier={qualityTier} onQualityChange={handleQualityChange} />
+      <label
+        style={{
+          position: "fixed",
+          top: 12,
+          left: 200,
+          zIndex: 20,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          fontSize: 12,
+          color: "rgba(255,255,255,0.75)",
+          pointerEvents: "auto",
+          cursor: "pointer",
+          userSelect: "none",
+        }}
+        title="Start with terrain only — no seeded roads, zones, or buildings (reloads sim)"
+      >
+        <input
+          type="checkbox"
+          checked={emptyCity}
+          onChange={(e) => handleEmptyCityToggle(e.target.checked)}
+        />
+        Empty start
+      </label>
       <TrafficOverlayToggle
         enabled={showTrafficOverlay}
         onToggle={handleTrafficOverlayToggle}

@@ -40,6 +40,9 @@ export const TRAFFIC_OVERLAY_STORAGE_KEY = "citymajor_traffic_overlay";
 /** Set when the /play guided onboarding tour is completed or dismissed. */
 export const ONBOARDING_STORAGE_KEY = "citymajor_onboarding_done";
 
+/** PlayClient "Empty start" toggle — skips WASM SeedStarterCity on init. */
+export const EMPTY_CITY_STORAGE_KEY = "citymajor_empty";
+
 /** Session-scoped dismiss flags for GAMEPLAY_LOOP #9 crisis warnings. */
 export const CRISIS_BANKRUPTCY_SESSION_KEY = "citymajor_crisis_bankruptcy_dismissed";
 export const CRISIS_LOW_APPROVAL_SESSION_KEY = "citymajor_crisis_low_approval_dismissed";

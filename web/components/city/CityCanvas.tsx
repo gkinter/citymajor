@@ -6,7 +6,11 @@ import type * as THREE from "three";
 import type { FpsStats, PickResult, CityData } from "@/lib/types";
 import { cityDataFromSnapshot, getCityData } from "@/lib/city-data";
 import { createChunkStates } from "@/lib/chunks";
-import { LOW_APPROVAL_WARNING_THRESHOLD, MAX_DPR } from "@/lib/constants";
+import {
+  isPostProcessingEnabled,
+  LOW_APPROVAL_WARNING_THRESHOLD,
+  MAX_DPR,
+} from "@/lib/constants";
 import { LOW_HAPPINESS_APPROVAL } from "@/lib/sim-metrics";
 import type { GraphicsQualityTier } from "@/lib/constants";
 import type { CitizenDotPick } from "@/lib/population-l2";
@@ -513,7 +517,7 @@ export function CityCanvas({
           <CanvasRenderHealth
             stats={renderHealthStats}
             postProcessingActive={
-              qualityTier === "high" && !postProcessingDisabled
+              isPostProcessingEnabled(qualityTier) && !postProcessingDisabled
             }
             onDisablePostProcessing={() => setPostProcessingDisabled(true)}
             onRenderFallback={handleRenderFallback}

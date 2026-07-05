@@ -4,7 +4,10 @@ import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import { UnsignedByteType } from "three";
-import type { GraphicsQualityTier } from "@/lib/constants";
+import {
+  isPostProcessingEnabled,
+  type GraphicsQualityTier,
+} from "@/lib/constants";
 
 type CityPostProcessingProps = {
   qualityTier: GraphicsQualityTier;
@@ -43,13 +46,15 @@ export function CityPostProcessing({
 
   if (
     disabled ||
-    qualityTier !== "high" ||
+    !isPostProcessingEnabled(qualityTier) ||
     !ready ||
     !sceneReady ||
     stableFrames < 3
   ) {
     return null;
   }
+
+  const bloomIntensity = qualityTier === "ultra" ? 0.5 : 0.35;
 
   return (
     <EffectComposer
@@ -61,7 +66,7 @@ export function CityPostProcessing({
       <Bloom
         luminanceThreshold={0.65}
         luminanceSmoothing={0.4}
-        intensity={0.35}
+        intensity={bloomIntensity}
         mipmapBlur
       />
     </EffectComposer>

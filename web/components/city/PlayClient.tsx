@@ -29,6 +29,7 @@ import {
   EMPTY_CITY_STORAGE_KEY,
   GRAPHICS_QUALITY_STORAGE_KEY,
   TRAFFIC_OVERLAY_STORAGE_KEY,
+  parseStoredQualityTier,
   type GraphicsQualityTier,
 } from "@/lib/constants";
 import type { FpsStats } from "@/lib/types";
@@ -109,10 +110,10 @@ function formatQuota(remaining: number | undefined): string {
 }
 
 function readStoredQualityTier(): GraphicsQualityTier {
-  if (typeof window === "undefined") return "low";
-  const stored = window.localStorage.getItem(GRAPHICS_QUALITY_STORAGE_KEY);
-  if (stored === "high" || stored === "low") return stored;
-  return "low";
+  if (typeof window === "undefined") return "med";
+  return parseStoredQualityTier(
+    window.localStorage.getItem(GRAPHICS_QUALITY_STORAGE_KEY),
+  );
 }
 
 function readStoredTrafficOverlay(): boolean {

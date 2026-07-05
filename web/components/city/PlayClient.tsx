@@ -33,7 +33,7 @@ import type { FpsStats } from "@/lib/types";
 import { PopulationGrowthTracker } from "@/lib/population-growth";
 import type { ZoningTool, PaintBrushSize } from "@/lib/zoning";
 import { ApprovalMoodOverlay } from "@/components/city/ApprovalMoodOverlay";
-import { CityCanvas } from "@/components/city/CityCanvas";
+import { CityCanvas, type CityCanvasHandle } from "@/components/city/CityCanvas";
 import { CrisisWarningModal } from "@/components/city/CrisisWarningModal";
 import { EraTransitionModal } from "@/components/city/EraTransitionModal";
 import { NewsTicker } from "@/components/city/NewsTicker";
@@ -50,7 +50,7 @@ import { CitizenButton } from "@/components/city/CitizenButton";
 import { CitizenPanel } from "@/components/city/CitizenPanel";
 import { HudToast } from "@/components/city/HudToast";
 import { techNameFromIndex } from "@/lib/tech-catalog";
-import { HUD_ZONE, hudActionButton } from "@/lib/hud-theme";
+import { HUD_ZONE, HUD_Z, hudActionButton } from "@/lib/hud-theme";
 import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
@@ -167,6 +167,7 @@ export function PlayClient() {
   const prevCashCrisisKindRef = useRef<CashCrisisKind | null>(null);
   const simApiRef = useRef(simApi);
   simApiRef.current = simApi;
+  const cityCanvasRef = useRef<CityCanvasHandle>(null);
   const populationGrowthRef = useRef(new PopulationGrowthTracker());
 
   const refreshEntitlements = useCallback(async () => {
@@ -529,6 +530,7 @@ export function PlayClient() {
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <GltfPreloader />
       <CityCanvas
+        ref={cityCanvasRef}
         activeTool={canvasActiveTool}
         brushSize={brushSize}
         buildTypeId={
@@ -549,6 +551,26 @@ export function PlayClient() {
       />
       <ApprovalMoodOverlay approval={simResources?.approval} />
       <HudWordmark />
+      <div
+        style={{
+          position: "absolute",
+          top: 52,
+          left: 12,
+          zIndex: HUD_Z.controls,
+          pointerEvents: "auto",
+        }}
+      >
+        <button
+          type="button"
+          data-testid="camera-home-button"
+          style={hudActionButton()}
+          title="Reset camera to default view"
+          aria-label="Reset camera to home view"
+          onClick={() => cityCanvasRef.current?.resetCamera()}
+        >
+          Home
+        </button>
+      </div>
       <SpeedToolbar speedLevel={gameSpeed} onSpeedChange={setGameSpeed} />
       <QualityToolbar qualityTier={qualityTier} onQualityChange={handleQualityChange} />
       <TrafficOverlayToggle

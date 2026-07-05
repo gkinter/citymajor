@@ -42,10 +42,33 @@ ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+# Git LFS: GLBs under web/public/assets/gltf/ are LFS-tracked (.gitattributes).
+# Build contexts checked out without LFS (e.g. Coolify clones) hold ~130-byte
+# pointer stubs instead of real meshes. Install git-lfs so the builder can
+# fetch+smudge the real binaries; repo is public → no auth needed.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git-lfs \
+ && git lfs install --skip-smudge \
+ && rm -rf /var/lib/apt/lists/*
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/web/node_modules ./web/node_modules
 COPY --from=deps /app/web/packages/sim-types/node_modules ./web/packages/sim-types/node_modules
 COPY . .
+# Fetch LFS objects and smudge GLBs in place. No-op when the context already
+# has real binaries (CI checks out with lfs:true). Skipped when .git is absent
+# or a worktree file — the stub check below is the real gate. Requires .git
+# in context (see .dockerignore) for Coolify clones that don't fetch LFS.
+RUN if [ -d .git ]; then git lfs pull; \
+    else echo "No .git directory in context — skipping lfs pull, relying on stub check"; fi
+# Fail fast if any GLB is still an LFS pointer stub — prevents shipping an
+# image that passes file-exists checks but fails at R3F load time.
+RUN stub="$(find web/public/assets/gltf -name '*.glb' -print0 \
+           | xargs -0 grep -Il 'git-lfs' 2>/dev/null || true)"; \
+    if [ -n "$stub" ]; then \
+      echo "ERROR: LFS pointer stubs detected — git lfs pull did not smudge:" >&2; \
+      printf '%s\n' "$stub" >&2; \
+      exit 1; \
+    fi
 COPY --from=wasm /src/web/public/dotnet ./web/public/dotnet
 # wasm stage already published; builder image has no .NET SDK
 ENV SKIP_WASM_BUILD=1

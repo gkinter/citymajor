@@ -38,6 +38,19 @@ const TONE_HZ: Record<PaintFeedbackKind, number> = {
   road: 340,
 };
 
+/** Peak gain — bulldoze is quieter; low Hz reads louder at equal gain. */
+const TONE_GAIN: Record<PaintFeedbackKind, number> = {
+  zone: 0.07,
+  bulldoze: 0.048,
+  road: 0.07,
+};
+
+const TONE_DECAY_S: Record<PaintFeedbackKind, number> = {
+  zone: 0.09,
+  bulldoze: 0.11,
+  road: 0.09,
+};
+
 /**
  * Short paint blip + light haptic. Silently no-ops when audio/haptics are
  * unavailable, autoplay-blocked, or the user disabled feedback.
@@ -53,14 +66,15 @@ export function playPaintFeedback(kind: PaintFeedbackKind): void {
       if (ctx.state === "suspended") void ctx.resume();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = "sine";
+      const decayS = TONE_DECAY_S[kind];
+      osc.type = kind === "bulldoze" ? "triangle" : "sine";
       osc.frequency.value = TONE_HZ[kind];
-      gain.gain.setValueAtTime(0.07, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.09);
+      gain.gain.setValueAtTime(TONE_GAIN[kind], ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + decayS);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.1);
+      osc.stop(ctx.currentTime + decayS + 0.01);
     } catch {
       // Autoplay policy or missing Web Audio — skip sound.
     }

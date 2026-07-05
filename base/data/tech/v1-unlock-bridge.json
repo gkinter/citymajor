@@ -1,5 +1,6 @@
 {
   "capabilities": [
+    "agricultural_zone",
     "asphalt_road",
     "cobblestone_road",
     "double_track_rail",
@@ -8,8 +9,11 @@
     "gas_pipeline",
     "highway",
     "horse_bus_line",
+    "mixed_use_zone",
+    "office_zone",
     "phone_line",
     "power_line",
+    "residential_high_zone",
     "rail_track",
     "sewer_network",
     "sewer_pipe",
@@ -30,6 +34,7 @@
     "cannery": "ind_industrial_brewery",
     "cattle_ranch": "res_frontier_ranch_house",
     "central_bank": "com_frontier_bank",
+    "city_hall": "svc_industrial_city_hall",
     "chemical_plant": "ind_industrial_gasworks",
     "chlorination_station": "inf_industrial_sewer_pump",
     "cinema": "com_industrial_theater",

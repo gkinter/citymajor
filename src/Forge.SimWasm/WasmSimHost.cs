@@ -126,7 +126,7 @@ public sealed class WasmSimHost
         return ids.ToArray();
     }
 
-    public void Init(int worldSize = WasmConfig.DefaultWorldSize)
+    public void Init(int worldSize = WasmConfig.DefaultWorldSize, bool skipStarterCity = false)
     {
         worldSize = NextPowerOfTwo(Math.Clamp(worldSize, WasmConfig.MinWorldSize, WasmConfig.MaxWorldSize));
 
@@ -158,9 +158,12 @@ public sealed class WasmSimHost
         _state.Era = 0; // Frontier — advanced by ResearchSystem.CheckEraTransition on monthly tick
 
         GenerateMap();
-        SeedStarterCity();
-        SeedStartingPopulation();
-        BootstrapServiceCoverage();
+        if (!skipStarterCity)
+        {
+            SeedStarterCity();
+            SeedStartingPopulation();
+            BootstrapServiceCoverage();
+        }
 
         IsInitialized = true;
     }

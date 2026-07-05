@@ -69,6 +69,8 @@ type CityCanvasProps = {
   onSimResources?: (resources: SimResources) => void;
   onSimApi?: (api: SimClientApi | null) => void;
   onZonePainted?: (zoneType: number) => void;
+  /** Skip WASM SeedStarterCity — terrain-only start (see /play?empty=1). */
+  skipStarterCity?: boolean;
 };
 
 /** Encode road tier into roadFlags bits 4–5 (ToolSystem.cs); WASM PlaceRoad ignores tier. */
@@ -93,6 +95,7 @@ export function CityCanvas({
   onSimResources,
   onSimApi,
   onZonePainted,
+  skipStarterCity = false,
 }: CityCanvasProps) {
   const [city, setCity] = useState<CityData>(() => getCityData());
   const [zones, setZones] = useState<ZoneTile[]>([]);
@@ -213,7 +216,7 @@ export function CityCanvas({
 
     (async () => {
       try {
-        await bridge.init("/dotnet", 256);
+        await bridge.init("/dotnet", 256, skipStarterCity);
         if (cancelled || fellBack) return;
 
         setSimSource("wasm");
@@ -234,7 +237,7 @@ export function CityCanvas({
       bridge.dispose();
       bridgeRef.current = null;
     };
-  }, [applySnapshot]);
+  }, [applySnapshot, skipStarterCity]);
 
   useEffect(() => {
     const bridge = bridgeRef.current;

@@ -215,7 +215,11 @@ export type SimSnapshot = SimResources & {
 };
 
 export interface SimBridge {
-  init(wasmUrl?: string, worldSize?: number): Promise<void>;
+  init(
+    wasmUrl?: string,
+    worldSize?: number,
+    skipStarterCity?: boolean,
+  ): Promise<void>;
   send(command: SimCommand): void;
   /** Restore WASM state from a save payload; resolves when the worker acks. */
   loadSnapshot(snapshot: SimSnapshot): Promise<void>;
@@ -267,7 +271,12 @@ const DEFAULT_WORLD_SIZE = 256;
 const INIT_TIMEOUT_MS = 45_000;
 
 type WorkerInbound =
-  | { type: "init"; wasmBaseUrl: string; worldSize: number }
+  | {
+      type: "init";
+      wasmBaseUrl: string;
+      worldSize: number;
+      skipStarterCity?: boolean;
+    }
   | { type: "command"; command: SimCommand }
   | { type: "export_cmjr" }
   | { type: "dispose" };
@@ -341,7 +350,11 @@ export function createSimBridge(): SimBridge {
   };
 
   return {
-    async init(wasmUrl = DEFAULT_WASM_URL, worldSize = DEFAULT_WORLD_SIZE) {
+    async init(
+      wasmUrl = DEFAULT_WASM_URL,
+      worldSize = DEFAULT_WORLD_SIZE,
+      skipStarterCity = false,
+    ) {
       worker = new Worker(
         new URL("../workers/sim-worker.ts", import.meta.url),
         { type: "module" },
@@ -403,6 +416,7 @@ export function createSimBridge(): SimBridge {
           type: "init",
           wasmBaseUrl: wasmUrl,
           worldSize,
+          skipStarterCity,
         } satisfies WorkerInbound);
         });
       } catch (err) {

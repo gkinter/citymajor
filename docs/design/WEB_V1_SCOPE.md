@@ -199,6 +199,14 @@ Committed `9b82eb1` · uncommitted polish in `citymajor-web-r3f-spike` WT (citiz
 | Herald / LLM narrative | Quota-gated + templates | **68%** | Events + council cmds; preview LLM keys unset |
 | Cloud saves | 3 free / 20 Founder | **48%** | CMJR interim JSON chunk; full SoA + auth TBD |
 
+### Dev / QA toggles (non-player)
+
+| Toggle | How | WASM effect |
+|--------|-----|-------------|
+| **Empty city start** | `/play?empty=1` or Play HUD **Empty start** checkbox | Skips `SeedStarterCity`, `SeedStartingPopulation`, and `BootstrapServiceCoverage` in `WasmSimHost.Init` — terrain-only 256×256 map for greenfield zoning/build tests |
+
+Worker flag: `init.skipStarterCity` → `Program.Init(worldSize, skipStarterCity)` (C# second arg).
+
 ---
 
 ## 12. v2 architecture note — inter-city trade ([SB-3728](https://linear.app/softblaze/issue/SB-3728))
@@ -246,4 +254,4 @@ Phase 2 of [`OPEN_WORLD_SCALE_PROPOSAL.md`](OPEN_WORLD_SCALE_PROPOSAL.md) §2, �
 
 ---
 
-*Last updated: 2026-07-05 (§12 inter-city trade architecture note, SB-3728). Changes to locked parameters require explicit product sign-off and an update to this file.*
+*Last updated: 2026-07-05 (§11 empty-city dev toggle; §12 inter-city trade architecture note, SB-3728). Changes to locked parameters require explicit product sign-off and an update to this file.*

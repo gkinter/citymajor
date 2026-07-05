@@ -2,7 +2,7 @@
 
 import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { ChunkState, CityData, FpsStats, PickResult } from "@/lib/types";
 import {
@@ -10,6 +10,7 @@ import {
   updateChunkVisibility,
   visibleBuildingCount,
 } from "@/lib/chunks";
+import { getLoadedChunkCount } from "@/lib/chunk-load-state";
 import type { RoadTile, TrafficTile, ZoneTile } from "@/lib/zoning";
 import type { CitizenDotPick } from "@/lib/population-l2";
 import type { ActiveEventSnapshot, EraProgress, ServiceCoverageSnapshot, ServiceViewMode } from "@/lib/sim-bridge";
@@ -52,6 +53,7 @@ type CitySceneProps = {
   population?: number;
   householdCount?: number;
   onCitizenDotClick?: (pick: CitizenDotPick) => void;
+  onRegisterCameraReset?: (reset: (() => void) | null) => void;
 };
 
 export function CityScene({
@@ -77,13 +79,29 @@ export function CityScene({
   population = 0,
   householdCount,
   onCitizenDotClick,
+  onRegisterCameraReset,
 }: CitySceneProps) {
-  const { camera } = useThree();
+  const { camera, controls } = useThree();
   const fpsAccum = useRef({ frames: 0, last: performance.now(), fps: 0 });
   const statsSnapshot = useRef<Partial<FpsStats>>({});
 
   const dirLight = useMemo(() => new THREE.DirectionalLight("#fff5e6", 1.1), []);
   dirLight.position.set(80, 120, 40);
+
+  const resetCamera = useCallback(() => {
+    camera.position.set(...DEFAULT_CAMERA_POSITION);
+    const orbit = controls as (THREE.EventDispatcher & {
+      target: THREE.Vector3;
+      update: () => void;
+    }) | null;
+    orbit?.target.set(GRID_CENTER, 0, GRID_CENTER);
+    orbit?.update();
+  }, [camera, controls]);
+
+  useEffect(() => {
+    onRegisterCameraReset?.(resetCamera);
+    return () => onRegisterCameraReset?.(null);
+  }, [onRegisterCameraReset, resetCamera]);
 
   useFrame(() => {
     const visibleChunks = updateChunkVisibility(chunks, camera);
@@ -112,6 +130,7 @@ export function CityScene({
       fps: Math.round(fpsAccum.current.fps),
       dpr,
       visibleChunks,
+      loadedChunks: getLoadedChunkCount(),
       visibleBuildings,
       lodCounts,
       pickedTile,
@@ -164,3 +183,4 @@ export function CityScene({
 }
 
 const GRID_CENTER = 128;
+const DEFAULT_CAMERA_POSITION = [140, 120, 140] as const;

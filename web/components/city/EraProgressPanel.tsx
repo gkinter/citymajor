@@ -2,13 +2,17 @@
 
 import type { CSSProperties } from "react";
 import { eraQuestTitle } from "@/lib/era-narrative";
-import { hudEraName } from "@/lib/era";
+import { hudEraBadgeStyle, hudEraName } from "@/lib/era";
 import {
   HUD_COLORS,
   HUD_Z,
   HUD_ZONE,
+  hudEraBadgeChrome,
+  hudEraHeaderRow,
   hudInfoPanel,
   hudLabel,
+  hudProgressFill,
+  hudProgressTrack,
 } from "@/lib/hud-theme";
 import type { EraProgress, SimResources } from "@/lib/sim-bridge";
 
@@ -18,7 +22,6 @@ type EraProgressPanelProps = {
 
 const sectionTitle: CSSProperties = {
   fontWeight: 700,
-  marginBottom: 6,
   fontSize: 11,
   letterSpacing: "0.06em",
   textTransform: "uppercase",
@@ -58,23 +61,22 @@ function checklistMark(met: boolean): CSSProperties {
   };
 }
 
-function progressBar(percent: number): CSSProperties {
-  return {
-    height: 4,
-    marginTop: 8,
-    borderRadius: 2,
-    background: HUD_COLORS.rowBg,
-    overflow: "hidden",
-  };
-}
-
-function progressFill(percent: number): CSSProperties {
-  return {
-    height: "100%",
-    width: `${Math.min(100, Math.max(0, percent))}%`,
-    background: `linear-gradient(90deg, ${HUD_COLORS.accent}, ${HUD_COLORS.accentHighlight})`,
-    transition: "width 0.25s ease",
-  };
+function CurrentEraHeader({ era }: { era: number }) {
+  const name = hudEraName(era);
+  return (
+    <div style={hudEraHeaderRow()}>
+      <span style={sectionTitle}>Current Era</span>
+      <span
+        style={{
+          ...hudEraBadgeChrome(),
+          ...hudEraBadgeStyle(era),
+        }}
+        aria-label={`Current era: ${name}`}
+      >
+        {name}
+      </span>
+    </div>
+  );
 }
 
 function EraQuestChecklist({ progress }: { progress: EraProgress }) {
@@ -106,63 +108,58 @@ function EraQuestChecklist({ progress }: { progress: EraProgress }) {
   );
 }
 
-function EraProgressContent({
-  progress,
-  currentEra,
-}: {
-  progress: EraProgress;
-  currentEra: number;
-}) {
+function EraProgressContent({ progress }: { progress: EraProgress }) {
   if (progress.gates.length === 0) {
     return (
-      <div style={{ opacity: 0.75 }}>
-        {hudEraName(currentEra)} — max era reached
+      <div style={{ fontSize: 11, color: HUD_COLORS.textMuted }}>
+        Maximum era reached
       </div>
     );
   }
 
   const targetName = progress.nextEraName || hudEraName(progress.nextEra);
   const questTitle = eraQuestTitle(progress.nextEra);
+  const percent = Math.round(progress.percent);
 
   return (
     <>
+      <div
+        style={hudProgressTrack({ marginBottom: 6 })}
+        role="progressbar"
+        aria-valuenow={percent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Progress toward ${targetName}`}
+      >
+        <div style={hudProgressFill(progress.percent)} />
+      </div>
+      <div style={{ marginBottom: 2, fontSize: 11 }}>
+        <span style={hudLabel()}>Next</span>
+        {targetName}
+        <span style={{ marginLeft: 8, opacity: 0.7, fontVariantNumeric: "tabular-nums" }}>
+          {percent}%
+        </span>
+      </div>
       {questTitle ? (
         <div style={questSubtitle}>
           <span style={hudLabel()}>Quest</span>
           {questTitle}
         </div>
       ) : null}
-      <div style={{ marginBottom: 2 }}>
-        <span style={hudLabel()}>Next</span>
-        {targetName}
-        <span style={{ marginLeft: 8, opacity: 0.7 }}>
-          {Math.round(progress.percent)}%
-        </span>
-      </div>
-      <div
-        style={progressBar(progress.percent)}
-        role="progressbar"
-        aria-valuenow={Math.round(progress.percent)}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={`Progress toward ${targetName}`}
-      >
-        <div style={progressFill(progress.percent)} />
-      </div>
       <EraQuestChecklist progress={progress} />
     </>
   );
 }
 
 export function EraProgressPanel({ resources }: EraProgressPanelProps) {
-  const progress = resources?.eraProgress;
-  const currentEra = resources?.era ?? 0;
+  if (!resources) return null;
 
-  if (!progress) return null;
+  const currentEra = resources.era ?? 0;
+  const progress = resources.eraProgress;
 
   return (
     <aside
-      aria-label="Era quest progress"
+      aria-label="Era progress"
       data-onboarding-target="era-quest"
       style={{
         ...HUD_ZONE.topRight,
@@ -171,8 +168,8 @@ export function EraProgressPanel({ resources }: EraProgressPanelProps) {
         ...hudInfoPanel({ minWidth: 220, maxWidth: 280 }),
       }}
     >
-      <div style={sectionTitle}>Era Quest</div>
-      <EraProgressContent progress={progress} currentEra={currentEra} />
+      <CurrentEraHeader era={currentEra} />
+      {progress ? <EraProgressContent progress={progress} /> : null}
     </aside>
   );
 }

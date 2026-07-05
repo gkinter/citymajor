@@ -119,7 +119,7 @@ type SimExports = {
 };
 
 let sim: SimExports | null = null;
-/** 0 = paused, 1–3 = tick rate multiplier */
+/** 0 = paused, 1/2/4 = tick rate multiplier */
 let speedLevel = 1;
 let worldSize = 256;
 /** Sim tick rate — decouple from display RAF to keep 256×256 WASM within budget. */
@@ -789,10 +789,11 @@ function loadSnapshot(snapshot: SimSnapshot) {
   post({ type: "load_complete", ok: true });
 }
 
-function clampSpeedLevel(level: number): 0 | 1 | 2 | 3 {
+function clampSpeedLevel(level: number): 0 | 1 | 2 | 4 {
   if (level <= 0) return 0;
-  if (level >= 3) return 3;
-  return level as 1 | 2 | 3;
+  if (level >= 4) return 4;
+  if (level >= 2) return 2;
+  return 1;
 }
 
 function handleCommand(command: SimCommand) {

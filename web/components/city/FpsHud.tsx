@@ -7,6 +7,7 @@ import {
   hudInfoPanel,
   hudLabel,
 } from "@/lib/hud-theme";
+import { CHUNK_COUNT } from "@/lib/constants";
 import type { FpsStats } from "@/lib/types";
 import type { ZoningTool } from "@/lib/zoning";
 
@@ -14,6 +15,8 @@ type FpsHudProps = {
   stats: FpsStats;
   totalBuildings: number;
   activeTool?: ZoningTool;
+  /** When true (`?debug=chunks`), show cumulative loaded chunk count. */
+  showChunkDebug?: boolean;
 };
 
 const sectionTitle: CSSProperties = {
@@ -30,7 +33,12 @@ function formatCoveragePct(value: number | undefined): string {
   return `${Math.round(value * 100)}%`;
 }
 
-export function FpsHud({ stats, totalBuildings, activeTool }: FpsHudProps) {
+export function FpsHud({
+  stats,
+  totalBuildings,
+  activeTool,
+  showChunkDebug = false,
+}: FpsHudProps) {
   const simLabel = stats.simSource === "wasm" ? "WASM sim" : "procedural";
   const showCoverage =
     stats.healthcareCoverage !== undefined ||
@@ -44,9 +52,14 @@ export function FpsHud({ stats, totalBuildings, activeTool }: FpsHudProps) {
       <div>FPS: {stats.fps || "—"}</div>
       <div>DPR: {stats.dpr.toFixed(2)}</div>
       <div>
-        Chunks: {stats.visibleChunks}/64 · Buildings: {stats.visibleBuildings}/
-        {totalBuildings}
+        Chunks: {stats.visibleChunks}/{CHUNK_COUNT} · Buildings:{" "}
+        {stats.visibleBuildings}/{totalBuildings}
       </div>
+      {showChunkDebug ? (
+        <div style={{ color: HUD_COLORS.accentHighlight }}>
+          Loaded chunks: {stats.loadedChunks ?? 0}/{CHUNK_COUNT}
+        </div>
+      ) : null}
       <div>LOD L0–L3: {stats.lodCounts.join(" / ")}</div>
       {showCoverage ? (
         <div

@@ -29,13 +29,14 @@ import {
   EMPTY_CITY_STORAGE_KEY,
   GRAPHICS_QUALITY_STORAGE_KEY,
   TRAFFIC_OVERLAY_STORAGE_KEY,
+  parseStoredQualityTier,
   type GraphicsQualityTier,
 } from "@/lib/constants";
 import type { FpsStats } from "@/lib/types";
 import { PopulationGrowthTracker } from "@/lib/population-growth";
 import type { ZoningTool, PaintBrushSize } from "@/lib/zoning";
 import { ApprovalMoodOverlay } from "@/components/city/ApprovalMoodOverlay";
-import { CityCanvas } from "@/components/city/CityCanvas";
+import { CityCanvas, type CityCanvasHandle } from "@/components/city/CityCanvas";
 import { CrisisWarningModal } from "@/components/city/CrisisWarningModal";
 import { EraTransitionModal } from "@/components/city/EraTransitionModal";
 import { NewsTicker } from "@/components/city/NewsTicker";
@@ -54,15 +55,17 @@ import { CitizenPanel } from "@/components/city/CitizenPanel";
 import { HudToast } from "@/components/city/HudToast";
 import { ResearchUnlockToast } from "@/components/city/ResearchUnlockToast";
 import { detectNewlyUnlockedContent, type NewlyUnlockedResearch } from "@/lib/tech-unlocks";
-import { HUD_ZONE, hudActionButton } from "@/lib/hud-theme";
+import { HUD_ZONE, HUD_Z, hudActionButton } from "@/lib/hud-theme";
 import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
 import { DemandOverlay } from "@/components/city/DemandOverlay";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
+import { HappinessMeter } from "@/components/city/HappinessMeter";
 import { PopulationPanel } from "@/components/city/PopulationPanel";
 import { EraProgressPanel } from "@/components/city/EraProgressPanel";
 import { BudgetPanel } from "@/components/city/BudgetPanel";
+import { ApprovalMeter } from "@/components/city/ApprovalMeter";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
 import { SpeedToolbar } from "@/components/city/SpeedToolbar";
 import { ZoningToolbar } from "@/components/city/ZoningToolbar";
@@ -93,6 +96,7 @@ import {
 } from "@/lib/education-buildings";
 import { handlePlayKeyboardShortcut } from "@/lib/play-keyboard";
 import { HelpPanel } from "@/components/city/HelpPanel";
+import { isChunkDebugEnabled } from "@/lib/debug-flags";
 
 export type BuildMode = "zone" | "road" | "plop" | "education";
 
@@ -107,10 +111,10 @@ function formatQuota(remaining: number | undefined): string {
 }
 
 function readStoredQualityTier(): GraphicsQualityTier {
-  if (typeof window === "undefined") return "low";
-  const stored = window.localStorage.getItem(GRAPHICS_QUALITY_STORAGE_KEY);
-  if (stored === "high" || stored === "low") return stored;
-  return "low";
+  if (typeof window === "undefined") return "med";
+  return parseStoredQualityTier(
+    window.localStorage.getItem(GRAPHICS_QUALITY_STORAGE_KEY),
+  );
 }
 
 function readStoredTrafficOverlay(): boolean {
@@ -185,6 +189,7 @@ export function PlayClient() {
   );
   const [buildOpen, setBuildOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [showChunkDebug] = useState(() => isChunkDebugEnabled());
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -196,6 +201,7 @@ export function PlayClient() {
   const prevCashCrisisKindRef = useRef<CashCrisisKind | null>(null);
   const simApiRef = useRef(simApi);
   simApiRef.current = simApi;
+  const cityCanvasRef = useRef<CityCanvasHandle>(null);
   const populationGrowthRef = useRef(new PopulationGrowthTracker());
 
   const refreshEntitlements = useCallback(async () => {
@@ -636,6 +642,7 @@ export function PlayClient() {
       <GltfPreloader />
       <CityCanvas
         key={emptyCity ? "empty" : "starter"}
+        ref={cityCanvasRef}
         activeTool={canvasActiveTool}
         brushSize={brushSize}
         buildTypeId={
@@ -657,6 +664,26 @@ export function PlayClient() {
       />
       <ApprovalMoodOverlay approval={simResources?.approval} />
       <HudWordmark />
+      <div
+        style={{
+          position: "absolute",
+          top: 52,
+          left: 12,
+          zIndex: HUD_Z.controls,
+          pointerEvents: "auto",
+        }}
+      >
+        <button
+          type="button"
+          data-testid="camera-home-button"
+          style={hudActionButton()}
+          title="Reset camera to default view"
+          aria-label="Reset camera to home view"
+          onClick={() => cityCanvasRef.current?.resetCamera()}
+        >
+          Home
+        </button>
+      </div>
       <SpeedToolbar speedLevel={gameSpeed} onSpeedChange={setGameSpeed} />
       <QualityToolbar qualityTier={qualityTier} onQualityChange={handleQualityChange} />
       <label
@@ -699,6 +726,7 @@ export function PlayClient() {
         entitlements={entitlements}
         onSlotsChanged={refreshEntitlements}
       />
+      <HappinessMeter resources={simResources} />
       <ResourcesHud
         resources={simResources}
         populationGrowthPerMonth={populationGrowthPerMonth}
@@ -707,10 +735,12 @@ export function PlayClient() {
       <PopulationPanel resources={simResources} />
       <EraProgressPanel resources={simResources} />
       <BudgetPanel resources={simResources} />
+      <ApprovalMeter resources={simResources} />
       <FpsHud
         stats={stats}
         totalBuildings={stats.totalBuildings}
         activeTool={canvasActiveTool}
+        showChunkDebug={showChunkDebug}
       />
       <MinimapPanel />
       <div style={{ ...HUD_ZONE.bottomLeft, pointerEvents: "auto" }}>

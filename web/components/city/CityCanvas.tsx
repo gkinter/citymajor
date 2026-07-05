@@ -1,12 +1,16 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import type * as THREE from "three";
 import type { FpsStats, PickResult, CityData } from "@/lib/types";
 import { cityDataFromSnapshot, getCityData } from "@/lib/city-data";
 import { createChunkStates } from "@/lib/chunks";
-import { LOW_APPROVAL_WARNING_THRESHOLD, MAX_DPR } from "@/lib/constants";
+import {
+  isPostProcessingEnabled,
+  LOW_APPROVAL_WARNING_THRESHOLD,
+  MAX_DPR,
+} from "@/lib/constants";
 import { LOW_HAPPINESS_APPROVAL } from "@/lib/sim-metrics";
 import type { GraphicsQualityTier } from "@/lib/constants";
 import type { CitizenDotPick } from "@/lib/population-l2";
@@ -74,13 +78,18 @@ type CityCanvasProps = {
   skipStarterCity?: boolean;
 };
 
+export type CityCanvasHandle = {
+  resetCamera: () => void;
+};
+
 /** Encode road tier into roadFlags bits 4–5 (ToolSystem.cs); WASM PlaceRoad ignores tier. */
 function roadFlagsForTier(roadTier: number | undefined): number {
   const tier = roadTier ?? 0;
   return ((tier & 0x03) << 4) | 0x01;
 }
 
-export function CityCanvas({
+export const CityCanvas = forwardRef<CityCanvasHandle, CityCanvasProps>(function CityCanvas(
+{
   activeTool,
   brushSize,
   buildTypeId,
@@ -97,7 +106,22 @@ export function CityCanvas({
   onSimApi,
   onZonePainted,
   skipStarterCity = false,
-}: CityCanvasProps) {
+}: CityCanvasProps,
+ref,
+) {
+  const resetCameraRef = useRef<(() => void) | null>(null);
+  const handleRegisterCameraReset = useCallback((reset: (() => void) | null) => {
+    resetCameraRef.current = reset;
+  }, []);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      resetCamera: () => resetCameraRef.current?.(),
+    }),
+    [],
+  );
+
   const [city, setCity] = useState<CityData>(() => getCityData());
   const [zones, setZones] = useState<ZoneTile[]>([]);
   const [roads, setRoads] = useState<RoadTile[]>([]);
@@ -490,6 +514,7 @@ export function CityCanvas({
               activeEvents={activeEvents}
               onEventMarkerClick={onEventMarkerClick}
               onCitizenDotClick={onCitizenDotClick}
+              onRegisterCameraReset={handleRegisterCameraReset}
               onPick={handlePick}
               onHover={handleHover}
               onHoverEnd={handleHoverEnd}
@@ -513,7 +538,7 @@ export function CityCanvas({
           <CanvasRenderHealth
             stats={renderHealthStats}
             postProcessingActive={
-              qualityTier === "high" && !postProcessingDisabled
+              isPostProcessingEnabled(qualityTier) && !postProcessingDisabled
             }
             onDisablePostProcessing={() => setPostProcessingDisabled(true)}
             onRenderFallback={handleRenderFallback}
@@ -531,4 +556,4 @@ export function CityCanvas({
       ) : null}
     </div>
   );
-}
+});

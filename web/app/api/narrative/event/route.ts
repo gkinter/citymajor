@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   generateNarrativeWithLlm,
   isNarrativeLlmAllowedForTier,
+  isNarrativeLlmConfigured,
 } from "@/lib/narrative-prompt";
 import { resolveTierFromRequest } from "@/lib/resolve-tier";
 import {

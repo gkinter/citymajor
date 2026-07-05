@@ -77,6 +77,8 @@ export function handleStripeWebhookEvent(event: Stripe.Event): WebhookHandleResu
       break;
   }
 
-  markStripeEventProcessed(event.id);
+  if (result.status === "processed") {
+    markStripeEventProcessed(event.id);
+  }
   return result;
 }

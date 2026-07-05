@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 import * as THREE from "three";
+import { hueForServiceMode } from "@/lib/service-coverage";
 import type { ServiceCoverageSnapshot, ServiceViewMode } from "@/lib/sim-bridge";
 
 type ServiceCoverageOverlayProps = {
@@ -41,22 +42,6 @@ function valueForMode(tile: ServiceCoverageSnapshot, mode: ServiceViewMode): num
   }
 }
 
-/** Hue anchor per service type (health=green, police=blue, fire=orange, education=purple). */
-function hueForMode(mode: ServiceViewMode): number {
-  switch (mode) {
-    case "health":
-      return 130;
-    case "police":
-      return 220;
-    case "fire":
-      return 28;
-    case "education":
-      return 270;
-    default:
-      return 0;
-  }
-}
-
 /**
  * Semi-transparent coverage heat planes above zoned tiles.
  */
@@ -70,7 +55,7 @@ export function ServiceCoverageOverlay({
     const mesh = meshRef.current;
     if (!mesh || mode === "off") return;
 
-    const hue = hueForMode(mode);
+    const hue = hueForServiceMode(mode);
     const count = Math.min(tiles.length, MAX_INSTANCES);
     for (let i = 0; i < count; i++) {
       const tile = tiles[i]!;

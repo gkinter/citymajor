@@ -328,6 +328,15 @@ async function fixPivot(glbBytes) {
  * @param {ReturnType<typeof parseArgs>} opts
  */
 
+/** @param {Record<string, unknown>} response */
+function throwIfMcpHttpError(response) {
+  const status = response.status;
+  if (typeof status === "number" && status >= 400) {
+    const detail = response.message ?? response.error ?? "request failed";
+    throw new Error(`${status} ${detail}`);
+  }
+}
+
 /**
  * @param {MeshyJob} job
  * @param {MeshyManifest} manifest
@@ -353,6 +362,7 @@ async function runJobMcp(job, manifest, opts) {
     should_remesh: true,
     topology: "triangle",
   });
+  throwIfMcpHttpError(previewCreate);
   const previewId = String(previewCreate.result ?? "");
   if (!previewId) throw new Error(`Preview create missing task id for ${job.key}`);
   console.log(`  preview task: ${previewId}`);
@@ -370,6 +380,7 @@ async function runJobMcp(job, manifest, opts) {
     preview_task_id: previewId,
     enable_pbr: true,
   });
+  throwIfMcpHttpError(refineCreate);
   const refineId = String(refineCreate.result ?? refineCreate.id ?? "");
   if (!refineId) throw new Error(`Refine create missing task id for ${job.key}`);
   console.log(`  refine task: ${refineId}`);

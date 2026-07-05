@@ -63,6 +63,7 @@ import { ResourcesHud } from "@/components/city/ResourcesHud";
 import { PopulationPanel } from "@/components/city/PopulationPanel";
 import { EraProgressPanel } from "@/components/city/EraProgressPanel";
 import { BudgetPanel } from "@/components/city/BudgetPanel";
+import { ApprovalMeter } from "@/components/city/ApprovalMeter";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
 import { SpeedToolbar } from "@/components/city/SpeedToolbar";
 import { ZoningToolbar } from "@/components/city/ZoningToolbar";
@@ -707,6 +708,7 @@ export function PlayClient() {
       <PopulationPanel resources={simResources} />
       <EraProgressPanel resources={simResources} />
       <BudgetPanel resources={simResources} />
+      <ApprovalMeter resources={simResources} />
       <FpsHud
         stats={stats}
         totalBuildings={stats.totalBuildings}

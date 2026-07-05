@@ -205,7 +205,7 @@ public sealed class WasmSimHost
         if (!IsInitialized) return "{}";
 
         var snap = SimSnapshot.CaptureFrom(_state);
-        var dto = SimSnapshotDto.From(snap, _state, _events, _economy, _services, _population);
+        var dto = SimSnapshotDto.From(snap, _state, _events, _economy, _services, _population, _research);
         return JsonSerializer.Serialize(dto, JsonContext.Default.SimSnapshotDto);
     }
 
@@ -430,6 +430,8 @@ public sealed class WasmSimHost
         if (dto.MonthlyExpenses > 0)
             _state.Expenses.InfrastructureMaintenance = dto.MonthlyExpenses;
 
+        RestoreResearchState(dto);
+
         _trafficLiteAccumulator = 0;
         _trafficEdgeBatchAccumulator = 0;
         _dayAccumulator = 0;
@@ -438,6 +440,55 @@ public sealed class WasmSimHost
 
         _services.RebuildFromWorld(_state);
         _services.DailyTick(_state, WasmConfig.GameDayInterval);
+    }
+
+    private void RestoreResearchState(SimSnapshotDto dto)
+    {
+        _state.ResearchPoints = dto.ResearchPoints;
+        _state.CurrentResearchId = dto.CurrentResearchId;
+        _state.CurrentResearchProgress = dto.CurrentResearchProgress;
+
+        if (dto.UnlockedTechIds is { Length: > 0 })
+        {
+            foreach (int techId in dto.UnlockedTechIds)
+            {
+                if (techId >= 0 && techId < ResearchSystem.MaxTechnologies)
+                    _state.UnlockTech(techId);
+            }
+        }
+
+        for (int i = 0; i < ResearchSystem.MaxResearchQueue; i++)
+        {
+            _research.ResearchQueue[i] = -1;
+            _research.QueueProgress[i] = 0f;
+        }
+
+        if (dto.ResearchQueue is { Length: > 0 })
+        {
+            int n = Math.Min(dto.ResearchQueue.Length, ResearchSystem.MaxResearchQueue);
+            for (int i = 0; i < n; i++)
+            {
+                _research.ResearchQueue[i] = dto.ResearchQueue[i];
+                _research.QueueProgress[i] =
+                    dto.QueueProgress is not null && i < dto.QueueProgress.Length
+                        ? dto.QueueProgress[i]
+                        : 0f;
+            }
+        }
+
+        _research.EurekaBonuses.Clear();
+        if (dto.EurekaBonuses is not null)
+        {
+            foreach (var kv in dto.EurekaBonuses)
+                _research.EurekaBonuses[kv.Key] = kv.Value;
+        }
+
+        _research.BranchingChoices.Clear();
+        if (dto.BranchingChoices is not null)
+        {
+            foreach (var kv in dto.BranchingChoices)
+                _research.BranchingChoices[kv.Key] = kv.Value;
+        }
     }
 
     private void ClearBuildings()
@@ -1154,6 +1205,14 @@ public sealed class SimSnapshotDto
     public EconomySnapshotDto Economy { get; init; } = new();
     /// <summary>Top households sample for CitizenPanel L2 drill-down.</summary>
     public PopulationL2Dto PopulationL2 { get; init; } = new();
+    public float ResearchPoints { get; init; }
+    public int CurrentResearchId { get; init; } = -1;
+    public float CurrentResearchProgress { get; init; }
+    public int[] UnlockedTechIds { get; init; } = [];
+    public int[] ResearchQueue { get; init; } = [];
+    public float[] QueueProgress { get; init; } = [];
+    public Dictionary<int, float> EurekaBonuses { get; init; } = new();
+    public Dictionary<int, int> BranchingChoices { get; init; } = new();
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
@@ -1161,7 +1220,8 @@ public sealed class SimSnapshotDto
         EventSystem? events = null,
         EconomySystem? economy = null,
         ServiceSystem? services = null,
-        PopulationSystem? population = null)
+        PopulationSystem? population = null,
+        ResearchSystem? research = null)
     {
         var buildings = CollectBuildings(state);
         var zones = CollectZones(state);
@@ -1191,7 +1251,26 @@ public sealed class SimSnapshotDto
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
             Economy = EconomySnapshotDto.From(economy),
             PopulationL2 = PopulationL2Dto.From(state, population),
+            ResearchPoints = state.ResearchPoints,
+            CurrentResearchId = state.CurrentResearchId,
+            CurrentResearchProgress = state.CurrentResearchProgress,
+            UnlockedTechIds = CollectUnlockedTechIds(state),
+            ResearchQueue = research is null ? [] : (int[])research.ResearchQueue.Clone(),
+            QueueProgress = research is null ? [] : (float[])research.QueueProgress.Clone(),
+            EurekaBonuses = research is null ? new() : new Dictionary<int, float>(research.EurekaBonuses),
+            BranchingChoices = research is null ? new() : new Dictionary<int, int>(research.BranchingChoices),
         };
+    }
+
+    private static int[] CollectUnlockedTechIds(WorldState state)
+    {
+        var ids = new List<int>();
+        for (int i = 0; i < ResearchSystem.MaxTechnologies; i++)
+        {
+            if (state.IsTechUnlocked(i)) ids.Add(i);
+        }
+
+        return ids.ToArray();
     }
 
     private static ActiveEventDto[] CollectActiveEvents(EventSystem events)
@@ -1443,4 +1522,6 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(EraProgressGate))]
 [JsonSerializable(typeof(EraProgressGate[]))]
 [JsonSerializable(typeof(string[]))]
+[JsonSerializable(typeof(Dictionary<int, float>))]
+[JsonSerializable(typeof(Dictionary<int, int>))]
 internal partial class JsonContext : JsonSerializerContext;

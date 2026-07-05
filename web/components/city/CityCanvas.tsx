@@ -36,7 +36,6 @@ import { CityScene } from "./CityScene";
 import { AdaptiveDpr } from "./AdaptiveDpr";
 import { CityPostProcessing } from "./CityPostProcessing";
 import { CanvasRenderHealth } from "./CanvasRenderHealth";
-import { Minimap } from "./Minimap";
 import { TileTooltip } from "./TileTooltip";
 
 function skyColorForApproval(approval: number | undefined): string {
@@ -530,7 +529,6 @@ export function CityCanvas({
           y={hoveredTile.y}
         />
       ) : null}
-      <Minimap zones={zones} city={city} />
     </div>
   );
 }

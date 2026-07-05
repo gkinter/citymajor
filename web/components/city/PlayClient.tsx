@@ -40,6 +40,7 @@ import { CrisisWarningModal } from "@/components/city/CrisisWarningModal";
 import { EraTransitionModal } from "@/components/city/EraTransitionModal";
 import { NewsTicker } from "@/components/city/NewsTicker";
 import { FpsHud } from "@/components/city/FpsHud";
+import { MinimapPanel } from "@/components/city/MinimapPanel";
 import { HeraldButton } from "@/components/city/HeraldButton";
 import { HeraldPanel } from "@/components/city/HeraldPanel";
 import { ResearchButton } from "@/components/city/ResearchButton";
@@ -639,6 +640,7 @@ export function PlayClient() {
         totalBuildings={stats.totalBuildings}
         activeTool={canvasActiveTool}
       />
+      <MinimapPanel />
       <div style={{ ...HUD_ZONE.bottomLeft, pointerEvents: "auto" }}>
         <button
           type="button"

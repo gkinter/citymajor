@@ -31,6 +31,8 @@ export const HUD_FONT = {
 
 export const HUD_RADIUS = { sm: 6, md: 8, lg: 10 } as const;
 
+export const HUD_MINIMAP = { sizePx: 160 } as const;
+
 export const HUD_Z = {
   base: 10,
   controls: 15,
@@ -94,6 +96,14 @@ export const HUD_ZONE = {
     bottom: 12,
     left: 12,
     zIndex: HUD_Z.base,
+  },
+  /** Bottom-left corner minimap — above toolbars, non-interactive until click-to-pan lands. */
+  minimap: {
+    position: "absolute",
+    bottom: 12,
+    left: 12,
+    zIndex: HUD_Z.base,
+    pointerEvents: "none",
   },
   bottomCenter: {
     position: "absolute",
@@ -187,6 +197,20 @@ export function hudInfoPanel(extra?: CSSProperties): CSSProperties {
     minWidth: 200,
     ...extra,
   });
+}
+
+export function hudMinimapShell(extra?: CSSProperties): CSSProperties {
+  return {
+    ...HUD_ZONE.minimap,
+    width: HUD_MINIMAP.sizePx,
+    height: HUD_MINIMAP.sizePx,
+    borderRadius: HUD_RADIUS.md,
+    overflow: "hidden",
+    background: HUD_COLORS.panelBg,
+    border: `1px solid ${HUD_COLORS.border}`,
+    boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
+    ...extra,
+  };
 }
 
 export function hudModalShell(): CSSProperties {

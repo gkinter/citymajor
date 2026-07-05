@@ -1,4 +1,5 @@
 import {
+  assertHttpOk,
   BASE_URL,
   PLAY_VIEWPORT,
   SMOKE_SKIP_SAVES,
@@ -508,6 +509,31 @@ export async function assertSaveApiHealth(tag) {
   }
   pass(tag, "POST /api/saves rejects malformed JSON");
   return true;
+}
+
+const HERO_CITY_HALL_GLB = "/assets/gltf/heroes/hero_frontier_city_hall.glb";
+const HERO_CHURCH_GLB = "/assets/gltf/heroes/hero_frontier_church.glb";
+
+/**
+ * WASM preview builds ship hero landmark GLBs via LFS — verify static serving.
+ * @param {string} tag
+ * @param {string} path
+ * @param {string} label
+ */
+async function assertHeroLandmarkGltf(tag, path, label) {
+  if (!WASM_EXPECTED) return;
+  await assertHttpOk(tag, path);
+  pass(tag, `${label} GLB reachable`);
+}
+
+/** @param {string} tag */
+async function assertHeroCityHallLandmark(tag) {
+  await assertHeroLandmarkGltf(tag, HERO_CITY_HALL_GLB, "hero_frontier_city_hall");
+}
+
+/** @param {string} tag */
+async function assertHeroChurchLandmark(tag) {
+  await assertHeroLandmarkGltf(tag, HERO_CHURCH_GLB, "hero_frontier_church");
 }
 
 /**
@@ -1415,6 +1441,8 @@ export async function runPlayChecks(page, options = {}) {
   await assertCanvasRenderHealth(page, tag);
 
   const savesAvailable = await assertSaveApiHealth(tag);
+  await assertHeroCityHallLandmark(tag);
+  await assertHeroChurchLandmark(tag);
   await assertHudPanels(page, tag);
   await waitForWasmSim(page, tag);
   await assertEraQuestPanel(page, tag);

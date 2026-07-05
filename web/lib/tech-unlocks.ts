@@ -32,7 +32,7 @@ export function isContentUnlocked(
   return collectUnlockedContentKeys(unlockedTechIds).has(contentKey);
 }
 
-/** Starter content available before any research (zone growth, dirt roads). */
+/** Starter content available before any research (low-tier zones, dirt roads). */
 export const BASELINE_CONTENT_KEYS = new Set([
   "dirt_road",
   "residential_zone",

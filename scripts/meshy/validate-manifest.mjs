@@ -62,7 +62,8 @@ export function validateManifest({ requireOnDisk = true } = {}) {
 
     const rel = `${job.era}/${job.key}.glb`;
     manifestRels.add(rel);
-    if (requireOnDisk) {
+    const pending = job.pending === true;
+    if (requireOnDisk && !pending) {
       const abs = join(OUT_ROOT, rel);
       if (!existsSync(abs)) {
         errors.push(`missing GLB: web/public/assets/gltf/${rel}`);

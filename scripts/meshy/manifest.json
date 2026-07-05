@@ -290,6 +290,55 @@
       "prompt": "A modern city police station, flat roof with accent stripe, concrete, low poly, stylized game asset",
       "category": "svc",
       "era": "modern"
+    },
+    {
+      "key": "svc_modern_01",
+      "prompt": "A frontier doctors office or small town hall, wooden civic building, flat roof with accent stripe, low poly, stylized game asset",
+      "category": "svc",
+      "era": "modern",
+      "pending": true
+    },
+    {
+      "key": "svc_modern_02",
+      "prompt": "An elementary school building, brick classroom block, flat roof with accent stripe, low poly, stylized game asset",
+      "category": "svc",
+      "era": "modern",
+      "pending": true
+    },
+    {
+      "key": "svc_modern_03",
+      "prompt": "A volunteer fire brigade or fire station, brick civic service building, flat roof with accent stripe, low poly, stylized game asset",
+      "category": "svc",
+      "era": "modern",
+      "pending": true
+    },
+    {
+      "key": "svc_modern_04",
+      "prompt": "A sheriffs office or high school building, brick civic structure, flat roof with accent stripe, low poly, stylized game asset",
+      "category": "svc",
+      "era": "modern",
+      "pending": true
+    },
+    {
+      "key": "svc_modern_05",
+      "prompt": "A city hospital or surgical wing, brick and stone civic medical building, flat roof with accent stripe, low poly, stylized game asset",
+      "category": "svc",
+      "era": "modern",
+      "pending": true
+    },
+    {
+      "key": "svc_modern_06",
+      "prompt": "A public library, brick civic building with columns, flat roof with accent stripe, low poly, stylized game asset",
+      "category": "svc",
+      "era": "modern",
+      "pending": true
+    },
+    {
+      "key": "svc_modern_07",
+      "prompt": "A police station, brick civic law enforcement building, flat roof with accent stripe, low poly, stylized game asset",
+      "category": "svc",
+      "era": "modern",
+      "pending": true
     }
   ]
 }

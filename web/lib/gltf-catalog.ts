@@ -66,6 +66,7 @@ export type ShippedGltfKey = (typeof SHIPPED_GLTF_KEYS)[number];
  */
 export const OPTIONAL_HERO_LANDMARKS = {
   hero_frontier_city_hall: "/assets/gltf/heroes/hero_frontier_city_hall.glb",
+  hero_frontier_church: "/assets/gltf/heroes/hero_frontier_church.glb",
 } as const;
 
 export type OptionalHeroLandmarkKey = keyof typeof OPTIONAL_HERO_LANDMARKS;
@@ -218,18 +219,27 @@ export const HERO_GLTF_BASE = "/assets/gltf/heroes" as const;
  * Hero GLB keys with documented paths. Assets load on demand (HEAD probe) — not
  * preloaded via `allGltfPaths()` until the file ships.
  */
-export const HERO_GLTF_KEYS = ["hero_frontier_city_hall"] as const;
+export const HERO_GLTF_KEYS = [
+  "hero_frontier_city_hall",
+  "hero_frontier_church",
+] as const;
 
 export type HeroGltfKey = (typeof HERO_GLTF_KEYS)[number];
 
 export const HERO_GLTF_CATALOG: Record<HeroGltfKey, string> = {
   hero_frontier_city_hall: `${HERO_GLTF_BASE}/hero_frontier_city_hall.glb`,
+  hero_frontier_church: `${HERO_GLTF_BASE}/hero_frontier_church.glb`,
 };
+
+/** True when a hero landmark key is registered in `HERO_GLTF_CATALOG`. */
+export function hasHeroGltfKey(key: string): key is HeroGltfKey {
+  return key in HERO_GLTF_CATALOG;
+}
 
 /** Resolve a hero landmark key to its public GLB path, or null when unmapped. */
 export function resolveHeroGltfPath(key: string): string | null {
-  if (key in HERO_GLTF_CATALOG) {
-    return HERO_GLTF_CATALOG[key as HeroGltfKey];
+  if (hasHeroGltfKey(key)) {
+    return HERO_GLTF_CATALOG[key];
   }
   return null;
 }

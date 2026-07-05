@@ -9,7 +9,7 @@ Deploy the Next.js web client (`web/`) to Coolify for branch previews. Productio
 | **Coolify app name** | `citymajor-web` |
 | **App UUID** | `w134tsftvj327kp96j45kcsb` |
 | **Preview URL** | [https://citymajor.apps.softblaze.net](https://citymajor.apps.softblaze.net) |
-| Repository | `DigitalSoftDistribution/citymajor` |
+| Repository | `gkinter/citymajor` |
 | Branch | `feat/wasm-r3f-integration-2026-07-04` |
 | Build pack | **Dockerfile** (repo root) |
 | Dockerfile | `/Dockerfile` |
@@ -17,6 +17,62 @@ Deploy the Next.js web client (`web/`) to Coolify for branch previews. Productio
 | Port exposes | `3000` |
 | Health check | `GET /play` (or `GET /`) |
 | Auto-deploy | Enable for the watched branch |
+
+## Auto-deploy incident — commit `79ef561` (2026-07-04)
+
+### Symptom
+
+Push `79ef561` (`feat/web`: economy panel, Meshy catalog, etc.) landed on `feat/wasm-r3f-integration-2026-07-04` at **2026-07-04T14:24:55Z**, but Coolify did not build until a **manual** deploy at **2026-07-04T14:57:39Z** (`deployment_uuid` `xan322w8hhmjxcfi5l1z71xw`). The prior automatic-looking deploy was `3076c29` at **13:58:41Z**; intermediate commit `86dd2ff` (**14:07:29Z**) also never queued a deployment.
+
+### What we checked (Coolify app `w134tsftvj327kp96j45kcsb`)
+
+| Check | Result |
+|-------|--------|
+| `git_branch` | `feat/wasm-r3f-integration-2026-07-04` (matches pushed branch) |
+| `git_repository` | `gkinter/citymajor` |
+| `watch_paths` | empty (full repo) |
+| `application_settings.is_auto_deploy_enabled` | **true** |
+| `application_settings.is_preview_deployments_enabled` | false |
+| GitHub `PushEvent` for the branch | present at 14:25Z (GitHub received the push) |
+| Deployment rows (`application_deployment_queues`) | **no row** for `86dd2ff` or `79ef561` until manual deploy |
+
+### Root cause
+
+The app is bound to Coolify source **`Public GitHub`** (`applications.source_id = 0`), not the fleet **GitHub App** source (`source_id = 1`, installation on `digitalsoftdistribution`). Every deployment for this app is flagged **`is_api = true`, `is_webhook = false`** — pushes do not enqueue builds even when **Automatic Deployment** is enabled in settings.
+
+Contrast: apps wired to the GitHub App (e.g. `tracklayer`, `source_id = 1`) record **`is_webhook = true`** on push-triggered deploys.
+
+Creating the app via **Public Repository** / `Public GitHub` without the org GitHub App explains why early deploys only happened when someone clicked **Deploy** or called `coolify deploy --force`.
+
+### Fix (required for push → deploy)
+
+1. **Install** the Coolify GitHub App on the **`gkinter`** org (or grant the existing app access to `gkinter/citymajor`) — Settings → GitHub App → configure repository access.
+2. In Coolify UI: **`citymajor-web`** → **Source** → switch from **Public GitHub** to **GitHub App** (same app used for `DigitalSoftDistribution/*` previews).
+3. Re-select repository **`gkinter/citymajor`**, branch **`feat/wasm-r3f-integration-2026-07-04`**, keep **Automatic Deployment** enabled.
+4. Push a no-op doc commit **or** `coolify deploy citymajor-web --force` once after reconnecting.
+5. **Verify** the next push creates a deployment with **`is_webhook = true`** (SQL via Beast: `application_deployment_queues` for this app, or watch Coolify UI “Webhook” trigger).
+
+Optional hardening:
+
+- Retire duplicate preview app **`citymajor-wasm-r3f-integration`** if still on `source_id = 0`.
+- Enable HTTP health check (currently disabled on this app).
+- Refresh Mac `~/.secrets/coolify-api.env` if local `coolify` returns **401** (Beast `/home/devops/bin/coolify` remains authoritative).
+
+### Ops queries (no secrets)
+
+```bash
+# App summary
+ssh beast '/home/devops/bin/coolify status citymajor-web'
+
+# Last deployments + SHAs
+ssh beast '/home/devops/bin/coolify deploys w134tsftvj327kp96j45kcsb 10'
+
+# Auto-deploy flag + webhook vs API trigger (Beast → Coolify Postgres)
+ssh beast 'bash -lc "source /home/devops/.coolify-mcp.env; eval "\$(sed -n "/^vps_psql()/,/^}/p" /home/devops/bin/coolify)"; vps_psql "SELECT s.is_auto_deploy_enabled, a.source_id, a.git_branch FROM application_settings s JOIN applications a ON s.application_id=a.id WHERE a.uuid='"'"'w134tsftvj327kp96j45kcsb'"'"'""'
+ssh beast 'bash -lc "source /home/devops/.coolify-mcp.env; eval "\$(sed -n "/^vps_psql()/,/^}/p" /home/devops/bin/coolify)"; vps_psql "SELECT deployment_uuid, commit, is_webhook, is_api, created_at FROM application_deployment_queues WHERE application_id::text=(SELECT id::text FROM applications WHERE uuid='"'"'w134tsftvj327kp96j45kcsb'"'"') ORDER BY created_at DESC LIMIT 5""'
+```
+
+After the fix, `source_id` should be **1** (or another non-zero GitHub App row), and push deploys should show **`is_webhook = true`**.
 
 > **Deprecated preview:** `citymajor-wasm-r3f-integration` (branch-slug FQDN e.g. `citymajor-feat-wasm-r3f-integration-2026-07-04.apps.softblaze.net`) is superseded by **`citymajor-web`** at the canonical URL above. Use `coolify doctor citymajor-web` and the UUID in CLI/MCP calls; retire or disable the old app once traffic is confirmed on the canonical preview.
 
@@ -27,15 +83,15 @@ Use this checklist when creating the **first** preview app for the WASM + R3F in
 ### Prerequisites
 
 1. Access to Coolify at [https://coolify.softblaze.net](https://coolify.softblaze.net).
-2. GitHub App **Softblaze Coolify** installed on `DigitalSoftDistribution/citymajor` (read + deploy hooks).
+2. GitHub App **Softblaze Coolify** installed on `gkinter/citymajor` (read + deploy hooks).
 3. Branch `feat/wasm-r3f-integration-2026-07-04` pushed to GitHub with root `Dockerfile` present.
 4. Server destination: default preview server (AX41, `*.apps.softblaze.net` wildcard via Cloudflare tunnel).
 
 ### 1. Create the application
 
 1. **Projects** → open the CityMajor project (or create one, e.g. `citymajor`).
-2. **+ New** → **Application** → **Public Repository** or **Private Repository (GitHub App)**.
-3. Select repository **`DigitalSoftDistribution/citymajor`**.
+2. **+ New** → **Application** → **Private Repository (GitHub App)** only — do **not** use **Public GitHub** (`source_id = 0`); push webhooks will not auto-deploy (see [Auto-deploy incident](#auto-deploy-incident--commit-79ef561-2026-07-04)).
+3. Select repository **`gkinter/citymajor`**.
 4. **Name**: `citymajor-web` (canonical Coolify app; custom FQDN `citymajor.apps.softblaze.net`).
 5. **Environment**: `production` (Coolify env name — still a preview URL, not live prod).
 

@@ -108,7 +108,10 @@ export function ZoningToolbar({
   );
 
   return (
-    <div style={{ ...HUD_ZONE.bottomCenter, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, pointerEvents: "auto" }}>
+    <div
+      data-testid="zoning-toolbar"
+      style={{ ...HUD_ZONE.bottomCenter, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, pointerEvents: "auto" }}
+    >
       <div
         style={{
           ...hudToolbar(),

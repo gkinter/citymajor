@@ -37,18 +37,19 @@ export default function HomePage() {
         <p style={styles.eyebrow}>CityMajor Web v1</p>
         <h1 style={styles.hero}>Build your city across 200 years</h1>
         <p style={styles.lead}>
-          From frontier outpost to modern megacity — zone districts, balance resources, and let Herald
-          chronicle every turning point. All in your browser.
+          From frontier outpost to industrial powerhouse — zone districts, balance the budget, and let
+          Herald chronicle every turning point. Play instantly in your browser.
         </p>
 
         <div style={styles.ctaRow}>
-          <Link href="/play" style={styles.ctaPrimary}>
-            Play Free
+          <Link href="/play" style={styles.ctaPrimary} aria-label="Start playing CityMajor in your browser">
+            Start playing →
           </Link>
           <Link href="/shop" style={styles.ctaSecondary}>
-            Shop
+            Founder Pass
           </Link>
         </div>
+        <p style={styles.ctaHint}>Free · no install · full sim depth</p>
       </header>
 
       <section style={styles.features} aria-labelledby="features-heading">
@@ -71,7 +72,7 @@ export default function HomePage() {
         <p style={styles.footerNote}>Sim depth is never paywalled. Founder Pass unlocks cosmetics &amp; narrative quota.</p>
         <div style={styles.footerLinks}>
           <Link href="/play" style={styles.footerLink}>
-            Launch game →
+            Start playing →
           </Link>
           <Link href="/shop" style={styles.footerLink}>
             Founder Pass →
@@ -137,6 +138,12 @@ const styles: Record<string, CSSProperties> = {
     justifyContent: "center",
     gap: "0.75rem",
     marginTop: "2rem",
+  },
+  ctaHint: {
+    margin: "0.85rem 0 0",
+    fontSize: "0.85rem",
+    color: "#7a8aa8",
+    letterSpacing: "0.02em",
   },
   ctaPrimary: {
     display: "inline-block",

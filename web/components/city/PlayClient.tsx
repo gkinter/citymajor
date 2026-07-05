@@ -79,6 +79,7 @@ import {
   isEducationBuildTypeId,
   type EducationBuildTypeId,
 } from "@/lib/education-buildings";
+import { isChunkDebugEnabled } from "@/lib/debug-flags";
 
 export type BuildMode = "zone" | "road" | "plop" | "education";
 
@@ -156,6 +157,7 @@ export function PlayClient() {
   const [buildTypeId, setBuildTypeId] = useState<number | null>(null);
   const [roadTier, setRoadTier] = useState<RoadTier>(DEFAULT_ROAD_TIER);
   const [buildOpen, setBuildOpen] = useState(false);
+  const [showChunkDebug] = useState(() => isChunkDebugEnabled());
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -576,6 +578,7 @@ export function PlayClient() {
         stats={stats}
         totalBuildings={stats.totalBuildings}
         activeTool={canvasActiveTool}
+        showChunkDebug={showChunkDebug}
       />
       <div style={{ ...HUD_ZONE.bottomLeft, pointerEvents: "auto" }}>
         <button

@@ -26,13 +26,6 @@ public sealed class LawSystem
     /// <summary>Ordinances currently enabled by the player.</summary>
     public int ActiveLawCount { get; private set; }
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true,
-    };
-
     /// <summary>Load ordinance definitions from base/data/laws/laws.json.</summary>
     public void LoadFromFile(string filePath)
     {
@@ -47,11 +40,18 @@ public sealed class LawSystem
     {
         Clear();
 
-        var definitions = JsonSerializer.Deserialize<LawDefinition[]>(json, JsonOptions)
-            ?? throw new InvalidDataException("Failed to deserialize laws.json.");
-
-        foreach (var definition in definitions)
+        using var doc = JsonDocument.Parse(json, new JsonDocumentOptions
         {
+            CommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true,
+        });
+
+        if (doc.RootElement.ValueKind != JsonValueKind.Array)
+            throw new InvalidDataException("laws.json must be a top-level array.");
+
+        foreach (var elem in doc.RootElement.EnumerateArray())
+        {
+            var definition = ParseLawDefinition(elem);
             if (string.IsNullOrWhiteSpace(definition.Id))
                 continue;
             if (_definitions.Count >= MaxLaws)
@@ -64,6 +64,77 @@ public sealed class LawSystem
             _indexById[definition.Id] = index;
             _parameterValues[index] = CreateDefaultParameters(definition);
         }
+    }
+
+    private static LawDefinition ParseLawDefinition(JsonElement elem)
+    {
+        static string ReadString(JsonElement el, string name) =>
+            el.TryGetProperty(name, out var prop) && prop.ValueKind == JsonValueKind.String
+                ? prop.GetString() ?? ""
+                : "";
+
+        static float ReadFloat(JsonElement el, string name) =>
+            el.TryGetProperty(name, out var prop) && prop.ValueKind == JsonValueKind.Number
+                ? (float)prop.GetDouble()
+                : 0f;
+
+        static int ReadInt(JsonElement el, string name) =>
+            el.TryGetProperty(name, out var prop) && prop.ValueKind == JsonValueKind.Number
+                ? prop.GetInt32()
+                : 0;
+
+        var parameters = new List<LawParameterDefinition>();
+        if (elem.TryGetProperty("parameters", out var paramsEl) && paramsEl.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var param in paramsEl.EnumerateArray())
+            {
+                parameters.Add(new LawParameterDefinition
+                {
+                    Name = ReadString(param, "name"),
+                    Min = ReadFloat(param, "min"),
+                    Max = ReadFloat(param, "max"),
+                    Default = ReadFloat(param, "default"),
+                    Step = ReadFloat(param, "step"),
+                });
+            }
+        }
+
+        string? techPrerequisite = null;
+        if (elem.TryGetProperty("tech_prerequisite", out var techEl)
+            && techEl.ValueKind == JsonValueKind.String)
+        {
+            techPrerequisite = techEl.GetString();
+        }
+
+        return new LawDefinition
+        {
+            Id = ReadString(elem, "id"),
+            Name = ReadString(elem, "name"),
+            Category = ReadString(elem, "category"),
+            EraMin = ReadString(elem, "era_min"),
+            Parameters = parameters.ToArray(),
+            Effects = ParseFloatMap(elem, "effects"),
+            FactionReactions = ParseFloatMap(elem, "faction_reactions"),
+            CostMonthly = ReadInt(elem, "cost_monthly"),
+            ComplianceBase = ReadFloat(elem, "compliance_base"),
+            TechPrerequisite = techPrerequisite,
+            Description = ReadString(elem, "description"),
+        };
+    }
+
+    private static Dictionary<string, float> ParseFloatMap(JsonElement elem, string name)
+    {
+        var map = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+        if (!elem.TryGetProperty(name, out var obj) || obj.ValueKind != JsonValueKind.Object)
+            return map;
+
+        foreach (var prop in obj.EnumerateObject())
+        {
+            if (prop.Value.ValueKind == JsonValueKind.Number)
+                map[prop.Name] = (float)prop.Value.GetDouble();
+        }
+
+        return map;
     }
 
     /// <summary>Resolve a definition index by slug id, or -1 when unknown.</summary>

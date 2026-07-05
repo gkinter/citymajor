@@ -150,42 +150,22 @@ function createSaveApiSessionFromPage(page) {
   return {
     /** @param {string} path @param {RequestInit} [init] */
     async fetch(path, init = {}) {
-      const { body, ...rest } = init;
-      /** @type {import('playwright').APIRequestContext['fetch'] extends (...args: infer A) => unknown ? A[1] : never} */
-      const requestOptions = { ...rest };
-      if (body !== undefined) {
-        if (typeof body === "string") {
-          try {
-            requestOptions.json = JSON.parse(body);
-          } catch {
-            requestOptions.data = body;
-          }
-        } else {
-          requestOptions.data = body;
-        }
-      }
-      const res = await page.request.fetch(`${BASE_URL}${path}`, requestOptions);
-      const headerRecord = res.headers();
-      return {
-        ok: res.ok(),
-        status: res.status(),
+      const cookies = await page.context().cookies(BASE_URL);
+      const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+      return fetch(`${BASE_URL}${path}`, {
+        ...init,
         headers: {
-          get: (name) => headerRecord[name.toLowerCase()] ?? null,
-          getSetCookie: () => {
-            const raw = headerRecord["set-cookie"];
-            return raw ? [raw] : [];
-          },
+          ...(init.headers ?? {}),
+          ...(cookieHeader ? { Cookie: cookieHeader } : {}),
         },
-        json: () => res.json(),
-        text: () => res.text(),
-      };
+      });
     },
     /** @param {string} saveId */
     async deleteSave(saveId) {
-      const res = await page.request.delete(`${BASE_URL}/api/saves/${saveId}`);
-      if (res.status() !== 204) {
+      const res = await this.fetch(`/api/saves/${saveId}`, { method: "DELETE" });
+      if (res.status !== 204) {
         console.warn(
-          `[smoke] WARN: DELETE /api/saves/${saveId} returned ${res.status()} (non-fatal)`,
+          `[smoke] WARN: DELETE /api/saves/${saveId} returned ${res.status} (non-fatal)`,
         );
       }
     },
@@ -555,11 +535,19 @@ async function assertHudPanels(page, tag) {
     state: "visible",
     timeout: 15_000,
   });
+  const narrativeResponse = page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/narrative/event") &&
+      res.request().method() === "POST" &&
+      res.ok(),
+    { timeout: 30_000 },
+  );
   await heraldBtn.click();
 
   const heraldPanel = page.getByRole("dialog", { name: /Daily Herald/ });
   await heraldPanel.waitFor({ state: "visible" });
-  await page.locator("#herald-event-headline").waitFor({ state: "visible", timeout: 15_000 });
+  await narrativeResponse;
+  await page.locator("#herald-event-headline").waitFor({ state: "visible", timeout: 10_000 });
   const headline = await page.locator("#herald-event-headline").innerText();
   if (!headline.trim()) {
     fail(tag, "Herald panel loaded but headline is empty");

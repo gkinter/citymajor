@@ -15,6 +15,7 @@ import {
   deriveNarrativeBucket,
   explainNarrativeBucket,
   type CashCrisisKind,
+  type CashCrisisWarning,
 } from "@/lib/sim-metrics";
 import { narrativeFromSimEvent } from "@/lib/event-catalog";
 import { heraldOptionToSimCommands } from "@/lib/herald-option-commands";
@@ -52,6 +53,7 @@ import { LawPanel } from "@/components/city/LawPanel";
 import { CitizenButton } from "@/components/city/CitizenButton";
 import { CitizenPanel } from "@/components/city/CitizenPanel";
 import { HudToast } from "@/components/city/HudToast";
+import { HudToastStack } from "@/components/city/HudToastStack";
 import { ResearchUnlockToast } from "@/components/city/ResearchUnlockToast";
 import { detectNewlyUnlockedContent, type NewlyUnlockedResearch } from "@/lib/tech-unlocks";
 import { HUD_ZONE, hudActionButton } from "@/lib/hud-theme";
@@ -175,7 +177,9 @@ export function PlayClient() {
   const [researchUnlock, setResearchUnlock] = useState<NewlyUnlockedResearch | null>(
     null,
   );
-  const [cashCrisisToast, setCashCrisisToast] = useState<string | null>(null);
+  const [cashCrisisToast, setCashCrisisToast] = useState<CashCrisisWarning | null>(
+    null,
+  );
   const [residentialZonePainted, setResidentialZonePainted] = useState(false);
   const [buildMode, setBuildMode] = useState<BuildMode>("zone");
   const [buildTypeId, setBuildTypeId] = useState<number | null>(null);
@@ -430,7 +434,7 @@ export function PlayClient() {
       return;
     }
 
-    setCashCrisisToast(crisis.message);
+    setCashCrisisToast(crisis);
   }, [simResources]);
 
   useEffect(() => {
@@ -870,17 +874,17 @@ export function PlayClient() {
         onSelectHousehold={handleSelectHousehold}
       />
 
-      <ResearchUnlockToast
-        unlock={researchUnlock}
-        onDismiss={() => setResearchUnlock(null)}
-        style={{ top: 130 }}
-      />
-
-      <HudToast
-        message={cashCrisisToast}
-        onDismiss={() => setCashCrisisToast(null)}
-        style={{ top: researchUnlock ? 168 : 130 }}
-      />
+      <HudToastStack>
+        <ResearchUnlockToast
+          unlock={researchUnlock}
+          onDismiss={() => setResearchUnlock(null)}
+        />
+        <HudToast
+          message={cashCrisisToast?.message ?? null}
+          severity={cashCrisisToast?.severity}
+          onDismiss={() => setCashCrisisToast(null)}
+        />
+      </HudToastStack>
 
       <HeraldPanel
         open={heraldOpen}

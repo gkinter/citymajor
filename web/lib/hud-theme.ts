@@ -42,6 +42,9 @@ export const HUD_Z = {
   modal: 40,
 } as const;
 
+/** Vertical gap between stacked play HUD toasts. */
+export const HUD_TOAST_STACK_GAP = 8;
+
 /** Screen zones — positioned for 1280×720 without overlap. */
 export const HUD_ZONE = {
   topLeft: {
@@ -88,6 +91,13 @@ export const HUD_ZONE = {
   toast: {
     position: "absolute",
     top: 94,
+    left: 12,
+    zIndex: HUD_Z.controls,
+  },
+  /** Play HUD toast column — below SaveLoadControls + PopulationPanel left stack. */
+  playToastStack: {
+    position: "absolute",
+    top: 130,
     left: 12,
     zIndex: HUD_Z.controls,
   },

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import type { CSSProperties } from "react";
-import { HUD_COLORS, HUD_ZONE, hudPanel } from "@/lib/hud-theme";
+import { HUD_COLORS, hudPanel } from "@/lib/hud-theme";
 import { formatUnlockLabel, techNameFromIndex } from "@/lib/tech-catalog";
 import { ROAD_TIER_DEFINITIONS } from "@/lib/road-types";
 import type { NewlyUnlockedResearch } from "@/lib/tech-unlocks";
@@ -35,14 +34,12 @@ type ResearchUnlockToastProps = {
   unlock: NewlyUnlockedResearch | null;
   durationMs?: number;
   onDismiss?: () => void;
-  style?: CSSProperties;
 };
 
 export function ResearchUnlockToast({
   unlock,
   durationMs = 5_000,
   onDismiss,
-  style,
 }: ResearchUnlockToastProps) {
   useEffect(() => {
     if (!unlock || !onDismiss) return;
@@ -91,8 +88,8 @@ export function ResearchUnlockToast({
     <div
       role="status"
       aria-live="polite"
+      data-testid="research-unlock-toast"
       style={{
-        ...HUD_ZONE.toast,
         ...hudPanel({
           padding: "10px 14px",
           fontSize: 12,
@@ -101,7 +98,6 @@ export function ResearchUnlockToast({
           maxWidth: 340,
           lineHeight: 1.45,
         }),
-        ...style,
       }}
     >
       <div style={{ fontWeight: 600, marginBottom: hasUnlocks ? 6 : 0 }}>

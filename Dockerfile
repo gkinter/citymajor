@@ -22,8 +22,9 @@ COPY web/wasm/build-wasm.sh ./web/wasm/build-wasm.sh
 RUN mkdir -p web/public/dotnet
 ENV NODE_OPTIONS=
 RUN if [ "$BUILD_WASM" = "1" ]; then \
-      bash web/wasm/build-wasm.sh \
-        || { echo "WARN: WASM build failed — runtime will use procedural fallback"; mkdir -p web/public/dotnet; }; \
+      bash web/wasm/build-wasm.sh; \
+      test -f web/public/dotnet/_framework/blazor.boot.json \
+        || { echo "ERROR: WASM publish succeeded but blazor.boot.json missing under web/public/dotnet/_framework/" >&2; exit 1; }; \
     else \
       echo "BUILD_WASM=0 — skipping WASM; procedural fallback at runtime"; \
     fi

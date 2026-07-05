@@ -272,6 +272,35 @@ public sealed class WasmSimHost
         RefreshRoadFlagsAt(x, y + 1);
     }
 
+    /// <summary>
+    /// Place one building on a zoned, buildable tile. Returns false when placement is rejected.
+    /// </summary>
+    public bool PlaceBuilding(int x, int y, int typeId)
+    {
+        if (!IsInitialized || typeId <= 0 || !_state.Tiles.InBounds(x, y)) return false;
+
+        int idx = _state.Tiles.Index(x, y);
+        if (!_state.Tiles.IsBuildable(x, y)) return false;
+        if (_state.Tiles.ZoneType[idx] == 0) return false;
+
+        int slot = _state.Buildings.Allocate();
+        if (slot < 0) return false;
+
+        _state.Buildings.GridX[slot] = x;
+        _state.Buildings.GridY[slot] = y;
+        _state.Buildings.Width[slot] = 1;
+        _state.Buildings.Height[slot] = 1;
+        _state.Buildings.TypeId[slot] = (ushort)typeId;
+        _state.Buildings.Level[slot] = 1;
+        _state.Buildings.State[slot] = 1; // operational
+        _state.Buildings.Condition[slot] = 255;
+        _state.Buildings.Occupants[slot] = 0;
+        _state.Buildings.MaxOccupants[slot] = 48;
+
+        _state.Tiles.BuildingId[idx] = (ushort)slot;
+        return true;
+    }
+
     /// <summary>Enqueue a technology for research. Returns true if added to the queue.</summary>
     public bool EnqueueResearch(int techId)
     {

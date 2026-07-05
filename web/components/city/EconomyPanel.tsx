@@ -32,6 +32,7 @@ const sectionTitle: CSSProperties = {
   fontSize: 11,
   letterSpacing: "0.06em",
   textTransform: "uppercase",
+  color: HUD_COLORS.textMuted,
 };
 
 const fallbackNote: CSSProperties = {
@@ -54,6 +55,74 @@ type EconomyPanelProps = {
   onClose: () => void;
   resources: SimResources | null;
 };
+
+function formatTreasury(cityFunds: number): string {
+  const abs = Math.abs(cityFunds);
+  if (abs >= 1_000_000) return `$${(cityFunds / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `$${(cityFunds / 1_000).toFixed(1)}K`;
+  return `$${cityFunds.toLocaleString()}`;
+}
+
+function formatTaxRate(rate: number): string {
+  const normalized = rate <= 1 ? rate * 100 : rate;
+  return Number.isInteger(normalized)
+    ? `${normalized}%`
+    : `${normalized.toFixed(1)}%`;
+}
+
+function SummaryStat({
+  label,
+  value,
+  valueClassName,
+}: {
+  label: string;
+  value: string;
+  valueClassName?: string;
+}) {
+  return (
+    <div className="hud-economy-stat">
+      <span className="hud-economy-stat__label">{label}</span>
+      <span
+        className={
+          valueClassName
+            ? `hud-economy-stat__value ${valueClassName}`
+            : "hud-economy-stat__value"
+        }
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function EconomySummary({ resources }: { resources: SimResources | null }) {
+  if (!resources) {
+    return (
+      <section className="hud-economy-section" aria-label="City treasury">
+        <div className="hud-economy-section-title">Summary</div>
+        <p className="hud-economy-empty">Treasury unavailable — sim not loaded.</p>
+      </section>
+    );
+  }
+
+  const taxRate = resources.taxRate;
+
+  return (
+    <section className="hud-economy-section" aria-label="City treasury">
+      <div className="hud-economy-section-title">Summary</div>
+      <div className="hud-economy-summary">
+        <SummaryStat
+          label="Treasury"
+          value={formatTreasury(resources.cityFunds)}
+          valueClassName="hud-economy-stat__value--treasury"
+        />
+        {taxRate !== undefined ? (
+          <SummaryStat label="Tax rate" value={formatTaxRate(taxRate)} />
+        ) : null}
+      </div>
+    </section>
+  );
+}
 
 function formatTradeMoney(amount: number): string {
   const abs = Math.abs(amount);
@@ -250,6 +319,8 @@ export function EconomyPanel({ open, onClose, resources }: EconomyPanelProps) {
       </header>
 
       <div style={bodyStyle}>
+        <EconomySummary resources={resources} />
+
         {hasTradeData(resources) ? (
           <section className="hud-economy-section" aria-label="Global trade">
             <div style={{ ...sectionTitle, color: "#9ecbff" }}>Global trade</div>

@@ -148,6 +148,8 @@ export type SimResources = {
   unlockedTechIds?: number[];
   /** WASM GetStatus — mayor approval percent (0–100) when PoliticsSystem is exported. */
   approval?: number;
+  /** WASM GetStatus — income tax rate (0–100 percent) when PoliticsSystem exports it. */
+  taxRate?: number;
   /** City happiness (0–1). */
   happiness?: number;
   /** WASM GetStatus — building pool count; used to detect growth without full render diff. */

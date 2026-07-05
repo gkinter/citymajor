@@ -418,7 +418,7 @@ public sealed class WasmSimHost
         }
 
         _state.TickCount = dto.Tick;
-        _state.Population = dto.Population;
+        RestoreHouseholds(dto.Population, dto.HouseholdCount);
         _state.CityFunds = dto.CityFunds;
         _state.Era = dto.Era;
         _state.Happiness = dto.Happiness;
@@ -435,6 +435,9 @@ public sealed class WasmSimHost
         _dayAccumulator = 0;
         _monthAccumulator = 0;
         _populationStaggerBucket = 0;
+
+        _services.RebuildFromWorld(_state);
+        _services.DailyTick(_state, WasmConfig.GameDayInterval);
     }
 
     private void ClearBuildings()
@@ -454,6 +457,69 @@ public sealed class WasmSimHost
         Array.Clear(tiles.ZoneDensity, 0, tiles.ZoneDensity.Length);
         Array.Clear(tiles.RoadFlags, 0, tiles.RoadFlags.Length);
         Array.Clear(tiles.Traffic, 0, tiles.Traffic.Length);
+        _state.Roads.Clear();
+    }
+
+    private void ClearHouseholds()
+    {
+        var pool = _state.Households;
+        for (int i = 0; i < pool.Capacity; i++)
+        {
+            if (pool.IsActive(i))
+                pool.Free(i);
+        }
+    }
+
+    /// <summary>
+    /// Rebuild household agents to match saved population scalars after load.
+    /// </summary>
+    private void RestoreHouseholds(int targetPopulation, int householdCount)
+    {
+        ClearHouseholds();
+        targetPopulation = Math.Max(0, targetPopulation);
+
+        int households = householdCount > 0
+            ? Math.Min(householdCount, _state.Households.Capacity)
+            : Math.Max(1, Math.Min(200, targetPopulation / 3));
+        if (targetPopulation == 0)
+        {
+            _state.Population = 0;
+            return;
+        }
+        if (households <= 0)
+            households = 1;
+
+        var rng = new Random(99);
+        int baseMembers = Math.Max(1, targetPopulation / households);
+        int remainder = Math.Max(0, targetPopulation - baseMembers * households);
+
+        for (int i = 0; i < households; i++)
+        {
+            int slot = _state.Households.Allocate();
+            if (slot < 0) break;
+
+            int members = baseMembers + (i < remainder ? 1 : 0);
+            _state.Households.MemberCount[slot] = (byte)Math.Clamp(members, 1, 8);
+            _state.Households.AgeGroup[slot] = 1;
+            _state.Households.Education[slot] = (byte)rng.Next(0, 4);
+            _state.Households.Income[slot] = 1500 + rng.Next(0, 3000);
+            _state.Households.Savings[slot] = rng.Next(500, 10000);
+            _state.Households.WealthLevel[slot] = (byte)rng.Next(1, 4);
+            _state.Households.Happiness[slot] = 160;
+            _state.Households.HealthSatisfaction[slot] = 150;
+            _state.Households.SafetySatisfaction[slot] = 150;
+            _state.Households.TransportSatisfaction[slot] = 128;
+            _state.Households.LeisureSatisfaction[slot] = 128;
+        }
+
+        int totalPop = 0;
+        for (int i = 0; i < _state.Households.Capacity; i++)
+        {
+            if (_state.Households.IsActive(i))
+                totalPop += _state.Households.MemberCount[i];
+        }
+
+        _state.Population = totalPop > 0 ? totalPop : targetPopulation;
     }
 
     private byte ComputeRoadFlags(int x, int y)

@@ -26,6 +26,15 @@ public sealed class RoadGraph
     public int NodeCount => _nodeCount;
     public int EdgeCount => _edgeCount;
 
+    /// <summary>Reset all nodes and edges (e.g. before restoring a saved road layout).</summary>
+    public void Clear()
+    {
+        _nodeCount = 0;
+        _edgeCount = 0;
+        _gridToNode.Clear();
+        Array.Clear(_rowOffsets, 0, _rowOffsets.Length);
+    }
+
     public RoadGraph(int maxNodes)
     {
         _rowOffsets = new int[maxNodes + 1];

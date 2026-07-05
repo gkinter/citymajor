@@ -1,3 +1,15 @@
+/**
+ * Paint feedback — short SFX blips + optional haptics while painting.
+ *
+ * SFX gains (peak → exponential decay): zone 0.036, road 0.042, bulldoze 0.048.
+ * Lower bulldoze pitch + triangle wave would sound louder at equal gain; gains are
+ * tuned so rapid zone/road/bulldoze drags feel equally loud.
+ *
+ * Haptics: bulldoze only (12 ms). Skipped when prefers-reduced-motion is set,
+ * feedback is muted, or vibrate is unsupported. Zone/road are audio-only.
+ *
+ * Mute: localStorage `citymajor_paint_feedback_off` = "1" disables SFX and haptics.
+ */
 /** localStorage key — set to "1" to mute paint SFX / haptics. */
 export const PAINT_FEEDBACK_DISABLED_KEY = "citymajor_paint_feedback_off";
 

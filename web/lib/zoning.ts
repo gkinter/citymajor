@@ -1,6 +1,7 @@
 import { GRID_SIZE } from "./constants";
 import {
   ENGINE_ZONE_TYPE_ID,
+  ZONE_OVERLAY_COLORS,
   ZONE_TIERS,
   type ZoneTierTool,
 } from "./zone-tiers";
@@ -24,18 +25,7 @@ export const ENGINE_ZONE_TYPE: Record<
 ) as Record<Exclude<ZoningTool, "bulldoze" | "road">, number>;
 
 /** Re-export engine zone constants for callers that need raw IDs. */
-export { ENGINE_ZONE_TYPE_ID };
-
-/** Semi-transparent overlay tints keyed by engine zone type. */
-export const ZONE_OVERLAY_COLORS: Record<number, string> = {
-  [ENGINE_ZONE_TYPE_ID.residentialLow]: "#4a90d9",
-  [ENGINE_ZONE_TYPE_ID.residentialHigh]: "#3a7bc8",
-  [ENGINE_ZONE_TYPE_ID.commercial]: "#e8b84a",
-  [ENGINE_ZONE_TYPE_ID.industrial]: "#8b7355",
-  [ENGINE_ZONE_TYPE_ID.office]: "#9b7ed9",
-  [ENGINE_ZONE_TYPE_ID.mixedUse]: "#5cb88a",
-  [ENGINE_ZONE_TYPE_ID.agricultural]: "#8cb43c",
-};
+export { ENGINE_ZONE_TYPE_ID, ZONE_OVERLAY_COLORS };
 
 export type ZoneTile = {
   tileX: number;

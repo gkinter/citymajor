@@ -81,6 +81,9 @@ export function isPostProcessingEnabled(tier: GraphicsQualityTier): boolean {
 /** Persist traffic heatmap overlay visibility on /play. */
 export const TRAFFIC_OVERLAY_STORAGE_KEY = "citymajor_traffic_overlay";
 
+/** Persist global-market trade summary overlay on /play. */
+export const TRADE_OVERLAY_STORAGE_KEY = "citymajor_trade_overlay";
+
 /** Set when the /play guided onboarding tour is completed or dismissed. */
 export const ONBOARDING_STORAGE_KEY = "citymajor_onboarding_done";
 

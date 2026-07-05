@@ -180,6 +180,27 @@ export function hudLabel(): CSSProperties {
   return { opacity: 0.65, marginRight: 6 };
 }
 
+/** Compact progress track for research / era meters. */
+export function hudProgressTrack(extra?: CSSProperties): CSSProperties {
+  return {
+    height: 5,
+    borderRadius: 3,
+    background: HUD_COLORS.rowBg,
+    overflow: "hidden",
+    ...extra,
+  };
+}
+
+export function hudProgressFill(percent: number, extra?: CSSProperties): CSSProperties {
+  return {
+    height: "100%",
+    width: `${Math.min(100, Math.max(0, percent))}%`,
+    background: `linear-gradient(90deg, ${HUD_COLORS.accent}, ${HUD_COLORS.accentHighlight})`,
+    transition: "width 0.25s ease",
+    ...extra,
+  };
+}
+
 export function hudInfoPanel(extra?: CSSProperties): CSSProperties {
   return hudPanel({
     padding: "10px 14px",

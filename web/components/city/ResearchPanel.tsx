@@ -5,8 +5,11 @@ import type { CSSProperties } from "react";
 import {
   HUD_COLORS,
   hudActionButton,
+  hudProgressFill,
+  hudProgressTrack,
   hudSlidePanel,
 } from "@/lib/hud-theme";
+import { hudEraBadgeStyle } from "@/lib/era";
 import {
   TECH_CATALOG_TOTAL,
   TECH_V1_CATALOG,
@@ -17,6 +20,14 @@ import {
   type TechAvailability,
   type TechPreview,
 } from "@/lib/tech-catalog";
+
+const ERA_TAG_INDEX: Record<string, number> = {
+  frontier: 0,
+  industrial: 1,
+  postwar: 2,
+  modern: 3,
+  future: 4,
+};
 
 const headerStyle: CSSProperties = {
   display: "flex",
@@ -61,16 +72,16 @@ function formatMonthsRemaining(value: number | undefined): string | null {
 }
 
 function availabilityClass(availability: TechAvailability): string {
-  switch (availability) {
-    case "unlocked":
-      return "hud-research-list__item--unlocked";
-    case "researching":
-      return "hud-research-list__item--researching";
-    case "available":
-      return "hud-research-list__item--available";
-    default:
-      return "hud-research-list__item--locked";
-  }
+  return `hud-research-list__item--${availability}`;
+}
+
+function eraTagStyle(era: string): CSSProperties {
+  const palette = hudEraBadgeStyle(ERA_TAG_INDEX[era] ?? 0);
+  return {
+    color: palette.color,
+    background: palette.background,
+    border: palette.border,
+  };
 }
 
 type ResearchPanelProps = {
@@ -177,16 +188,13 @@ export function ResearchPanel({
               <span style={{ opacity: 0.75 }}>{progressPct}%</span>
             </div>
             <div
-              className="hud-research-progress"
+              style={hudProgressTrack()}
               role="progressbar"
               aria-valuenow={progressPct}
               aria-valuemin={0}
               aria-valuemax={100}
             >
-              <div
-                className="hud-research-progress__fill"
-                style={{ width: `${progressPct}%` }}
-              />
+              <div style={hudProgressFill(progressPct)} />
             </div>
             {etaLabel ? (
               <div className="hud-research-progress__eta">{etaLabel} remaining</div>
@@ -232,43 +240,43 @@ export function ResearchPanel({
                           ? `Enqueue research: ${tech.name}`
                           : `${tech.name} — locked`
                   }
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    margin: 0,
-                    padding: 0,
-                    border: "none",
-                    background: "transparent",
-                    color: "inherit",
-                    font: "inherit",
-                    textAlign: "left",
-                    cursor: canEnqueue ? "pointer" : "default",
-                  }}
                 >
                   <div className="hud-research-list__row">
                     <span className="hud-research-list__id">{tech.id}</span>
                     <span className="hud-research-list__name">{tech.name}</span>
                     {availability === "unlocked" ? (
                       <span className="hud-research-list__badge hud-research-list__badge--done">
-                        ✓
+                        Unlocked
                       </span>
                     ) : availability === "researching" ? (
                       <span className="hud-research-list__badge hud-research-list__badge--active">
-                        …
+                        Active
                       </span>
                     ) : (
                       <span className="hud-research-list__cost">{tech.cost_rp} RP</span>
                     )}
                   </div>
                   <div className="hud-research-list__meta">
-                    {tech.era} · {tech.category}
-                    {tech.prerequisites.length > 0
-                      ? ` · req ${tech.prerequisites.join(", ")}`
-                      : ""}
-                    {tech.unlocks && tech.unlocks.length > 0
-                      ? ` · unlocks ${tech.unlocks.map(formatUnlockLabel).join(", ")}`
-                      : ""}
+                    <span
+                      className="hud-research-list__tag hud-research-list__tag--era"
+                      style={eraTagStyle(tech.era)}
+                    >
+                      {tech.era}
+                    </span>
+                    <span className="hud-research-list__tag hud-research-list__tag--category">
+                      {tech.category}
+                    </span>
+                    {tech.prerequisites.length > 0 ? (
+                      <span className="hud-research-list__prereq">
+                        Requires {tech.prerequisites.join(", ")}
+                      </span>
+                    ) : null}
                   </div>
+                  {tech.unlocks && tech.unlocks.length > 0 ? (
+                    <div className="hud-research-list__prereq" style={{ marginTop: 4 }}>
+                      Unlocks {tech.unlocks.map(formatUnlockLabel).join(", ")}
+                    </div>
+                  ) : null}
                   <p className="hud-research-list__desc">{tech.description}</p>
                 </button>
               </li>

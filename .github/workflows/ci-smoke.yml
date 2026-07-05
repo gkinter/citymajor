@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: pnpm
 
       - name: Install dependencies
@@ -51,11 +51,7 @@ jobs:
           exit 1
 
       - name: Run smoke suite
-        run: pnpm smoke:all
-        env:
-          SMOKE_SKIP_SAVES: "1"
-          PLAY_VIEWPORT: "1280x720"
-          HEADLESS: "1"
+        run: pnpm smoke:ci
 
       - name: Stop dev server
         if: always()

@@ -45,7 +45,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.residentialLow,
     contentKey: "residential_zone",
     requiredTechCatalogId: null,
-    overlayColor: "#4a90d9",
+    overlayColor: "#5eb3f5",
   },
   {
     tool: "residential_high",
@@ -54,7 +54,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.residentialHigh,
     contentKey: "residential_high_zone",
     requiredTechCatalogId: "T029",
-    overlayColor: "#3a7bc8",
+    overlayColor: "#6366f1",
   },
   {
     tool: "commercial",
@@ -63,7 +63,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.commercial,
     contentKey: "commercial_zone",
     requiredTechCatalogId: null,
-    overlayColor: "#e8b84a",
+    overlayColor: "#f0b429",
   },
   {
     tool: "industrial",
@@ -72,7 +72,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.industrial,
     contentKey: "industrial_zone",
     requiredTechCatalogId: null,
-    overlayColor: "#8b7355",
+    overlayColor: "#b87333",
   },
   {
     tool: "office",
@@ -81,7 +81,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.office,
     contentKey: "office_zone",
     requiredTechCatalogId: "T134",
-    overlayColor: "#9b7ed9",
+    overlayColor: "#c084fc",
   },
   {
     tool: "mixed",
@@ -90,7 +90,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.mixedUse,
     contentKey: "mixed_use_zone",
     requiredTechCatalogId: "T086",
-    overlayColor: "#5cb88a",
+    overlayColor: "#2dd4a8",
   },
   {
     tool: "agricultural",
@@ -99,9 +99,14 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.agricultural,
     contentKey: "agricultural_zone",
     requiredTechCatalogId: "T047",
-    overlayColor: "#8cb43c",
+    overlayColor: "#84cc16",
   },
 ];
+
+/** Overlay tints keyed by engine zone type — single source for map/minimap/3D. */
+export const ZONE_OVERLAY_COLORS: Record<number, string> = Object.fromEntries(
+  ZONE_TIERS.map((tier) => [tier.engineZoneType, tier.overlayColor]),
+);
 
 export function zoneTierByTool(tool: ZoneTierTool): ZoneTier | undefined {
   return ZONE_TIERS.find((tier) => tier.tool === tool);

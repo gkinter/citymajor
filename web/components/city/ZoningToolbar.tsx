@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  HUD_COLORS,
   HUD_ZONE,
   hudButton,
   hudLabel,
@@ -25,6 +26,7 @@ import {
 import {
   isZoneTierUnlocked,
   lockedTierTechName,
+  ZONE_TIERS,
   zoneTierByTool,
   type ZoneTierTool,
 } from "@/lib/zone-tiers";
@@ -108,7 +110,10 @@ export function ZoningToolbar({
   );
 
   return (
-    <div style={{ ...HUD_ZONE.bottomCenter, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, pointerEvents: "auto" }}>
+    <div
+      data-testid="zoning-toolbar"
+      style={{ ...HUD_ZONE.bottomCenter, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, pointerEvents: "auto" }}
+    >
       <div
         style={{
           ...hudToolbar(),
@@ -184,6 +189,7 @@ export function ZoningToolbar({
             <button
               key={id}
               type="button"
+              data-testid={isZoneTierTool(id) ? `zoning-tool-${id}` : undefined}
               className={highDemand ? "hud-zoning-btn--demand" : undefined}
               style={hudButton(activeTool === id && unlocked, stub || locked)}
               disabled={stub || locked}
@@ -199,6 +205,47 @@ export function ZoningToolbar({
               {highDemand ? " ↑" : null}
               {stub ? " ⏳" : null}
             </button>
+          );
+        })}
+      </div>
+
+      <div
+        data-testid="zoning-legend"
+        style={{
+          ...hudToolbar(),
+          padding: "3px 10px",
+          fontSize: 10,
+          gap: 8,
+          opacity: 0.85,
+        }}
+        aria-label="Zone color legend"
+      >
+        {ZONE_TIERS.map((tier) => {
+          const unlocked = isZoneTierUnlocked(tier, [...unlockedTechSet]);
+          return (
+            <span
+              key={tier.tool}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+                color: unlocked ? HUD_COLORS.textMuted : HUD_COLORS.textDisabled,
+              }}
+              title={unlocked ? tier.label : lockedTierTechName(tier) ?? "Locked"}
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 2,
+                  background: tier.overlayColor,
+                  opacity: unlocked ? 1 : 0.35,
+                  flexShrink: 0,
+                }}
+                aria-hidden
+              />
+              {tier.shortLabel}
+            </span>
           );
         })}
       </div>

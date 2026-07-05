@@ -32,6 +32,27 @@ function getAudioContext(): AudioContext | null {
   }
 }
 
+function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch {
+    return false;
+  }
+}
+
+/** Light bulldoze paint haptic (ms) — skipped when reduced-motion is preferred. */
+const BULLDOZE_HAPTIC_MS = 12;
+
+function playBulldozeHaptic(): void {
+  if (prefersReducedMotion()) return;
+  try {
+    navigator.vibrate?.(BULLDOZE_HAPTIC_MS);
+  } catch {
+    // Haptics unsupported — skip.
+  }
+}
+
 const TONE_HZ: Record<PaintFeedbackKind, number> = {
   zone: 520,
   bulldoze: 200,
@@ -80,11 +101,7 @@ export function playPaintFeedback(kind: PaintFeedbackKind): void {
     }
   }
 
-  try {
-    navigator.vibrate?.(kind === "bulldoze" ? 12 : 6);
-  } catch {
-    // Haptics unsupported — skip.
-  }
+  if (kind === "bulldoze") playBulldozeHaptic();
 }
 
 export function setPaintFeedbackEnabled(enabled: boolean): void {

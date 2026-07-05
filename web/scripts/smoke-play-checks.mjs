@@ -156,11 +156,11 @@ function createSaveApiSessionFromPage(page) {
       const requestOptions = { ...rest };
       if (body !== undefined) {
         if (typeof body === "string") {
-          try {
-            requestOptions.json = JSON.parse(body);
-          } catch {
-            requestOptions.data = body;
-          }
+          requestOptions.data = body;
+          requestOptions.headers = {
+            ...(requestOptions.headers ?? {}),
+            "Content-Type": "application/json",
+          };
         } else {
           requestOptions.data = body;
         }
@@ -324,6 +324,9 @@ async function exportWasmBlobViaHook(page, tag) {
     const api = window.__citymajorSimApi;
     if (!api) return { ok: false, reason: "no-api" };
     try {
+      // Drain tick backlog so ExportCmjr is not starved behind RAF command queue.
+      api.sendCommand?.({ type: "pause" });
+      await new Promise((resolve) => setTimeout(resolve, 250));
       const base64 = await api.exportWasmSave();
       if (typeof base64 !== "string" || base64.length < 64) {
         return { ok: false, reason: "empty-blob", len: base64?.length ?? 0 };
@@ -1697,12 +1700,14 @@ export async function runPlayChecks(page, options = {}) {
   }
   pass(tag, `sim source: ${simSource}`);
 
-  await assertRoadPlacementOrStatus(page, tag, simSource === "WASM sim");
-  await assertPlaceBuildingWasm(page, tag, simSource === "WASM sim");
-
   if (savesAvailable) {
+    // Run before place_road / place_building — worker tick backlog after those
+    // commands can exceed the 15s ExportCmjr bridge timeout on preview CPUs.
     await assertCmjrSaveRoundTrip(tag, page, { simIsWasm: simSource === "WASM sim" });
   }
+
+  await assertRoadPlacementOrStatus(page, tag, simSource === "WASM sim");
+  await assertPlaceBuildingWasm(page, tag, simSource === "WASM sim");
 
   const buildingsMatch = hudText.match(/Buildings:\s*(\d+)\/(\d+)/);
   const visible = Number(buildingsMatch?.[1] ?? 0);

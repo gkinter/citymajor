@@ -929,6 +929,9 @@ ctx.onmessage = async (event: MessageEvent<WorkerInbound>) => {
 
   if (msg.type === "export_cmjr") {
     try {
+      // Pause and drop tick backlog so export is not queued behind heavy tick batches.
+      speedLevel = 0;
+      simAccumMs = 0;
       if (!sim?.ExportCmjr) {
         post({ type: "error", message: "ExportCmjr not available" });
         return;

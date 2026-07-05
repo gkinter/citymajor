@@ -50,7 +50,7 @@ import { CitizenButton } from "@/components/city/CitizenButton";
 import { CitizenPanel } from "@/components/city/CitizenPanel";
 import { HudToast } from "@/components/city/HudToast";
 import { techNameFromIndex } from "@/lib/tech-catalog";
-import { HUD_ZONE } from "@/lib/hud-theme";
+import { HUD_ZONE, hudActionButton } from "@/lib/hud-theme";
 import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
@@ -59,6 +59,9 @@ import { EraProgressPanel } from "@/components/city/EraProgressPanel";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
 import { SpeedToolbar } from "@/components/city/SpeedToolbar";
 import { ZoningToolbar } from "@/components/city/ZoningToolbar";
+import { BuildToolbar } from "@/components/city/BuildToolbar";
+import { RoadTypeToolbar } from "@/components/city/RoadTypeToolbar";
+import { EducationToolbar } from "@/components/city/EducationToolbar";
 import { ServicesToolbar } from "@/components/city/ServicesToolbar";
 import type { ServiceViewMode } from "@/lib/sim-bridge";
 import {
@@ -68,6 +71,16 @@ import {
 import { resolveRci } from "@/lib/zoning-economy";
 import { GltfPreloader } from "@/components/city/GltfPreloader";
 import type { HouseholdPreview } from "@/lib/population-l2";
+import {
+  DEFAULT_ROAD_TIER,
+  type RoadTier,
+} from "@/lib/road-types";
+import {
+  isEducationBuildTypeId,
+  type EducationBuildTypeId,
+} from "@/lib/education-buildings";
+
+export type BuildMode = "zone" | "road" | "plop" | "education";
 
 const NarrativeApiResponseSchema = NarrativeEventResponseSchema.extend({
   narrativeEventsRemaining: z.number().int().nonnegative().optional(),
@@ -139,6 +152,10 @@ export function PlayClient() {
   const [researchToast, setResearchToast] = useState<string | null>(null);
   const [cashCrisisToast, setCashCrisisToast] = useState<string | null>(null);
   const [residentialZonePainted, setResidentialZonePainted] = useState(false);
+  const [buildMode, setBuildMode] = useState<BuildMode>("zone");
+  const [buildTypeId, setBuildTypeId] = useState<number | null>(null);
+  const [roadTier, setRoadTier] = useState<RoadTier>(DEFAULT_ROAD_TIER);
+  const [buildOpen, setBuildOpen] = useState(false);
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -436,6 +453,56 @@ export function PlayClient() {
     }
   }, []);
 
+  const handleToolChange = useCallback((tool: ZoningTool) => {
+    setActiveTool(tool);
+    setBuildOpen(false);
+    if (tool === "road") {
+      setBuildMode("road");
+      setBuildTypeId(null);
+      return;
+    }
+    setBuildMode("zone");
+    setBuildTypeId(null);
+  }, []);
+
+  const handleBuildSelect = useCallback((typeId: number) => {
+    setBuildTypeId(typeId);
+    if (isEducationBuildTypeId(typeId)) {
+      setBuildMode("education");
+      setServiceViewMode("education");
+    } else {
+      setBuildMode("plop");
+    }
+  }, []);
+
+  const handleEducationSelect = useCallback((typeId: EducationBuildTypeId | null) => {
+    setBuildTypeId(typeId);
+    if (typeId === null) {
+      setBuildMode((mode) => (mode === "education" ? "zone" : mode));
+      return;
+    }
+    setBuildMode("education");
+    setBuildOpen(false);
+  }, []);
+
+  const handleServiceViewModeChange = useCallback((mode: ServiceViewMode) => {
+    setServiceViewMode(mode);
+    if (mode !== "education" && buildMode === "education" && buildTypeId !== null) {
+      setBuildMode("plop");
+    }
+  }, [buildMode, buildTypeId]);
+
+  const handleRoadTierSelect = useCallback((tier: RoadTier) => {
+    setRoadTier(tier);
+    setBuildMode("road");
+    setActiveTool("road");
+    setBuildTypeId(null);
+    setBuildOpen(false);
+  }, []);
+
+  const canvasActiveTool: ZoningTool =
+    buildMode === "road" ? "road" : activeTool;
+
   const handleCitizenDotClick = useCallback(
     (pick: { tileX: number; tileZ: number; buildingIndex: number }) => {
       setCitizenSelection({ tileX: pick.tileX, tileZ: pick.tileZ });
@@ -462,8 +529,12 @@ export function PlayClient() {
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <GltfPreloader />
       <CityCanvas
-        activeTool={activeTool}
+        activeTool={canvasActiveTool}
         brushSize={brushSize}
+        buildTypeId={
+          buildMode === "plop" || buildMode === "education" ? buildTypeId : null
+        }
+        roadTier={buildMode === "road" ? roadTier : undefined}
         gameSpeed={gameSpeed}
         qualityTier={qualityTier}
         showTrafficOverlay={showTrafficOverlay}
@@ -486,7 +557,7 @@ export function PlayClient() {
       />
       <ServicesToolbar
         viewMode={serviceViewMode}
-        onViewModeChange={setServiceViewMode}
+        onViewModeChange={handleServiceViewModeChange}
         healthcareCoverage={simResources?.healthcareCoverage}
         policeCoverage={simResources?.policeCoverage}
         fireCoverage={simResources?.fireCoverage}
@@ -504,15 +575,58 @@ export function PlayClient() {
       <FpsHud
         stats={stats}
         totalBuildings={stats.totalBuildings}
-        activeTool={activeTool}
+        activeTool={canvasActiveTool}
       />
+      <div style={{ ...HUD_ZONE.bottomLeft, pointerEvents: "auto" }}>
+        <button
+          type="button"
+          style={{
+            ...hudActionButton(),
+            ...(buildOpen || buildMode === "plop" || buildMode === "education"
+              ? { fontWeight: 700 }
+              : {}),
+          }}
+          aria-pressed={buildOpen || buildMode === "plop" || buildMode === "education"}
+          title="Open build catalog — place civic and service buildings"
+          onClick={() => setBuildOpen((open) => !open)}
+        >
+          Build
+        </button>
+      </div>
       <ZoningToolbar
         activeTool={activeTool}
         brushSize={brushSize}
-        onToolChange={setActiveTool}
+        onToolChange={handleToolChange}
         onBrushSizeChange={setBrushSize}
         rci={resolveRci(simResources)}
+        unlockedTechIds={simResources?.unlockedTechIds}
       />
+      <EducationToolbar
+        viewMode={serviceViewMode}
+        onViewModeChange={handleServiceViewModeChange}
+        educationCoverage={simResources?.educationCoverage}
+        selectedTypeId={
+          buildMode === "education" && buildTypeId !== null && isEducationBuildTypeId(buildTypeId)
+            ? buildTypeId
+            : null
+        }
+        onSelectTypeId={handleEducationSelect}
+      />
+      {buildMode === "road" ? (
+        <RoadTypeToolbar
+          activeRoadTier={roadTier}
+          onSelect={handleRoadTierSelect}
+          unlockedTechIds={simResources?.unlockedTechIds}
+        />
+      ) : null}
+      {buildOpen ? (
+        <BuildToolbar
+          activeBuildTypeId={buildTypeId}
+          onSelect={handleBuildSelect}
+          unlockedTechIds={simResources?.unlockedTechIds ?? []}
+          onClose={() => setBuildOpen(false)}
+        />
+      ) : null}
 
       <div
         style={{

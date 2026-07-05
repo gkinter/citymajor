@@ -13,17 +13,25 @@ const ZONE_RCI_KEY: Record<
   keyof RciDemand
 > = {
   residential: "residential",
+  residential_high: "residential",
   commercial: "commercial",
   industrial: "industrial",
+  office: "commercial",
+  mixed: "residential",
+  agricultural: "industrial",
 };
 
 const ZONE_LETTER: Record<
   Exclude<ZoningTool, "bulldoze" | "road">,
-  "R" | "C" | "I"
+  string
 > = {
   residential: "R",
+  residential_high: "R",
   commercial: "C",
   industrial: "I",
+  office: "O",
+  mixed: "M",
+  agricultural: "A",
 };
 
 const ZONE_NAME: Record<
@@ -31,8 +39,12 @@ const ZONE_NAME: Record<
   string
 > = {
   residential: "residential",
+  residential_high: "high-density residential",
   commercial: "commercial",
   industrial: "industrial",
+  office: "office",
+  mixed: "mixed-use",
+  agricultural: "agricultural",
 };
 
 function clampDemand(value: number): number {

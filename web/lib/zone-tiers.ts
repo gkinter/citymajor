@@ -53,7 +53,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     shortLabel: "R-high",
     engineZoneType: ENGINE_ZONE_TYPE_ID.residentialHigh,
     contentKey: "residential_high_zone",
-    requiredTechCatalogId: "T029",
+    requiredTechCatalogId: "T030",
     overlayColor: "#3a7bc8",
   },
   {
@@ -80,7 +80,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     shortLabel: "Office",
     engineZoneType: ENGINE_ZONE_TYPE_ID.office,
     contentKey: "office_zone",
-    requiredTechCatalogId: "T134",
+    requiredTechCatalogId: "T086",
     overlayColor: "#9b7ed9",
   },
   {
@@ -89,7 +89,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     shortLabel: "Mixed",
     engineZoneType: ENGINE_ZONE_TYPE_ID.mixedUse,
     contentKey: "mixed_use_zone",
-    requiredTechCatalogId: "T086",
+    requiredTechCatalogId: "T085",
     overlayColor: "#5cb88a",
   },
   {

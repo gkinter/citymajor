@@ -22,6 +22,12 @@
       "era": "industrial"
     },
     {
+      "key": "com_industrial_01",
+      "prompt": "A 19th-century brick storefront, industrial era commercial building, flat roof with lip, low poly, stylized, silhouette variant 01",
+      "category": "com",
+      "era": "industrial"
+    },
+    {
       "key": "com_modern_00",
       "prompt": "A modern glass storefront retail building, flat roof with lip and HVAC units, low poly, stylized game asset",
       "category": "com",

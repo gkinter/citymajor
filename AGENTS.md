@@ -34,6 +34,36 @@ cd "../citymajor-${TOPIC}"
 
 **WASM:** `pnpm build:wasm` runs `web/wasm/build-wasm.sh` — `dotnet publish` on `src/Forge.SimWasm`, copies `AppBundle` to `web/public/dotnet/`. Re-run after any C# sim change. Without WASM, `/play` falls back to procedural city data (HUD shows `Data: procedural`).
 
+### WASM boot triage
+
+**Symptoms (WASM failed to boot — app still playable on procedural fallback):**
+
+- FPS HUD shows **`Data: procedural`** instead of **`Data: WASM sim`**
+- Browser console: `[CityMajor] WASM sim unavailable — using procedural city fallback` or init timeout after ~45s
+- Worker never posts `ready` (bad `/dotnet` URL, missing boot manifest, dotnet module exception)
+
+**Quick check (local or deployed FQDN):**
+
+```bash
+# Local dev (after pnpm build:wasm)
+curl -sf http://localhost:3000/dotnet/_framework/blazor.boot.json && echo "WASM assets OK"
+
+# Preview / prod
+FQDN="https://citymajor.apps.softblaze.net"
+curl -sf "$FQDN/dotnet/_framework/blazor.boot.json" && echo "WASM assets OK"
+```
+
+404 or connection refused → bundle not published or not copied into the image. Fix publish/build, not runtime env.
+
+**`BUILD_WASM` gate (Docker / Coolify):**
+
+| Value | Effect |
+|-------|--------|
+| `BUILD_WASM=1` (default) | `wasm` stage runs `pnpm build:wasm`; Dockerfile **fails** if `web/public/dotnet/_framework/blazor.boot.json` is missing |
+| `BUILD_WASM=0` | Skip .NET publish — procedural-only preview (faster CI); boot check will 404 by design |
+
+Set `BUILD_WASM=1` on production previews. If build fails with OOM/SDK errors, increase builder RAM — do not silently ship `BUILD_WASM=0` when WASM is expected. Details: [`docs/DEPLOY_WEB.md`](docs/DEPLOY_WEB.md).
+
 **Smoke:** Prereq is a running dev server (`pnpm dev` or `pnpm dev:wasm`). First run: `npx playwright install chromium`. Optional: `SCREENSHOT=1 pnpm smoke:all` saves `test-results/smoke-play.png`. Smoke records a single HUD FPS snapshot (warn-only if `—`); **`pnpm perf:gate`** samples FPS over 5s and fails below **30** (WEB_V1_SCOPE §4). Optional: `PERF_GATE=1 pnpm smoke:play` runs smoke + perf gate in one session.
 
 ## Key paths

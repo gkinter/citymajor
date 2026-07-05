@@ -177,7 +177,6 @@ export function ZoningToolbar({
         style={hudToolbar()}
         role="toolbar"
         aria-label="Zoning tools"
-        data-testid="zoning-toolbar"
         data-onboarding-target="zoning"
       >
         {ZONING_TOOLS.map(({ id, label, shortLabel, stub }) => {

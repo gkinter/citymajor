@@ -63,6 +63,7 @@ import { SpeedToolbar } from "@/components/city/SpeedToolbar";
 import { ZoningToolbar } from "@/components/city/ZoningToolbar";
 import { BuildToolbar } from "@/components/city/BuildToolbar";
 import { RoadTypeToolbar } from "@/components/city/RoadTypeToolbar";
+import { TransportToolbar } from "@/components/city/TransportToolbar";
 import { EducationToolbar } from "@/components/city/EducationToolbar";
 import { ServicesToolbar } from "@/components/city/ServicesToolbar";
 import type { ServiceViewMode } from "@/lib/sim-bridge";
@@ -77,6 +78,10 @@ import {
   DEFAULT_ROAD_TIER,
   type RoadTier,
 } from "@/lib/road-types";
+import {
+  DEFAULT_TRANSIT_MODE,
+  type TransitModeId,
+} from "@/lib/transit-modes";
 import {
   isEducationBuildTypeId,
   type EducationBuildTypeId,
@@ -166,6 +171,9 @@ export function PlayClient() {
   const [buildMode, setBuildMode] = useState<BuildMode>("zone");
   const [buildTypeId, setBuildTypeId] = useState<number | null>(null);
   const [roadTier, setRoadTier] = useState<RoadTier>(DEFAULT_ROAD_TIER);
+  const [transitMode, setTransitMode] = useState<TransitModeId>(
+    DEFAULT_TRANSIT_MODE,
+  );
   const [buildOpen, setBuildOpen] = useState(false);
 
   const statsRef = useRef(stats);
@@ -523,6 +531,14 @@ export function PlayClient() {
     setBuildOpen(false);
   }, []);
 
+  const handleTransitModeSelect = useCallback((modeId: TransitModeId) => {
+    setTransitMode(modeId);
+    setBuildMode("road");
+    setActiveTool("road");
+    setBuildTypeId(null);
+    setBuildOpen(false);
+  }, []);
+
   const canvasActiveTool: ZoningTool =
     buildMode === "road" ? "road" : activeTool;
 
@@ -662,11 +678,18 @@ export function PlayClient() {
         onSelectTypeId={handleEducationSelect}
       />
       {buildMode === "road" ? (
-        <RoadTypeToolbar
-          activeRoadTier={roadTier}
-          onSelect={handleRoadTierSelect}
-          unlockedTechIds={simResources?.unlockedTechIds}
-        />
+        <>
+          <RoadTypeToolbar
+            activeRoadTier={roadTier}
+            onSelect={handleRoadTierSelect}
+            unlockedTechIds={simResources?.unlockedTechIds}
+          />
+          <TransportToolbar
+            activeTransitMode={transitMode}
+            onSelect={handleTransitModeSelect}
+            unlockedTechIds={simResources?.unlockedTechIds}
+          />
+        </>
       ) : null}
       {buildOpen ? (
         <BuildToolbar

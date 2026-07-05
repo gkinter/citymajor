@@ -23,6 +23,8 @@ import { TrafficOverlay } from "./TrafficOverlay";
 import { ServiceCoverageOverlay } from "./ServiceCoverageOverlay";
 import { EventMarkers } from "./EventMarkers";
 import { EraLandmarkPlaceholder } from "./EraLandmarkPlaceholder";
+import { hasHeroGltfKey } from "@/lib/gltf-catalog";
+import { FrontierChurchLandmark } from "./FrontierChurchLandmark";
 import { FrontierCityHallLandmark } from "./FrontierCityHallLandmark";
 
 type CitySceneProps = {
@@ -148,6 +150,9 @@ export function CityScene({
         onEventClick={onEventMarkerClick}
       />
       <FrontierCityHallLandmark era={era} />
+      {hasHeroGltfKey("hero_frontier_church") ? (
+        <FrontierChurchLandmark era={era} />
+      ) : null}
       <EraLandmarkPlaceholder era={era} eraProgress={eraProgress} />
       <TilePicker onPick={onPick} />
     </>

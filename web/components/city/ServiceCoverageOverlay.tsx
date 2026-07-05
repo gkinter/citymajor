@@ -34,12 +34,14 @@ function valueForMode(tile: ServiceCoverageSnapshot, mode: ServiceViewMode): num
       return tile.police;
     case "fire":
       return tile.fire;
+    case "education":
+      return tile.education;
     default:
       return 0;
   }
 }
 
-/** Hue anchor per service type (health=green, police=blue, fire=orange). */
+/** Hue anchor per service type (health=green, police=blue, fire=orange, education=purple). */
 function hueForMode(mode: ServiceViewMode): number {
   switch (mode) {
     case "health":
@@ -48,6 +50,8 @@ function hueForMode(mode: ServiceViewMode): number {
       return 220;
     case "fire":
       return 28;
+    case "education":
+      return 270;
     default:
       return 0;
   }

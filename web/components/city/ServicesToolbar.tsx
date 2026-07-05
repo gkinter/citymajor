@@ -16,7 +16,7 @@ type ServicesToolbarProps = {
   fireCoverage?: number;
 };
 
-const SUBMODES: { id: Exclude<ServiceViewMode, "off">; label: string }[] = [
+const SUBMODES: { id: Exclude<ServiceViewMode, "off" | "education">; label: string }[] = [
   { id: "health", label: "Health" },
   { id: "police", label: "Police" },
   { id: "fire", label: "Fire" },

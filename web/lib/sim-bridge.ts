@@ -57,9 +57,10 @@ export type ServiceCoverageSnapshot = {
   health: number;
   police: number;
   fire: number;
+  education: number;
 };
 
-export type ServiceViewMode = "off" | "health" | "police" | "fire";
+export type ServiceViewMode = "off" | "health" | "police" | "fire" | "education";
 
 export type BuildingSnapshot = {
   id: number;
@@ -162,6 +163,8 @@ export type SimResources = {
   policeCoverage?: number;
   /** WASM GetStatus — mean fire coverage over zoned tiles (0–1). */
   fireCoverage?: number;
+  /** WASM GetStatus — mean education coverage over zoned tiles (0–1). */
+  educationCoverage?: number;
   /** WASM — top Leontief goods shortages and surpluses. */
   economy?: EconomySnapshot;
   /** WASM GetStatus — global-market export revenue from last trade month. */
@@ -207,7 +210,7 @@ export type SimSnapshot = SimResources & {
   roads?: RoadSnapshot[];
   /** Sparse road tiles with congestion density (≥0.01). */
   traffic?: TrafficSnapshot[];
-  /** Sparse zoned tiles with health/police/fire coverage (0–1). */
+  /** Sparse zoned tiles with health/police/fire/education coverage (0–1). */
   serviceCoverage?: ServiceCoverageSnapshot[];
 };
 

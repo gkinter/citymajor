@@ -38,11 +38,11 @@ const TONE_HZ: Record<PaintFeedbackKind, number> = {
   road: 340,
 };
 
-/** Peak gain — bulldoze is quieter; low Hz reads louder at equal gain. */
+/** Peak gain — scaled by pitch/waveform so rapid zone/road/bulldoze drags feel equal. */
 const TONE_GAIN: Record<PaintFeedbackKind, number> = {
-  zone: 0.07,
+  zone: 0.036,
   bulldoze: 0.048,
-  road: 0.07,
+  road: 0.042,
 };
 
 const TONE_DECAY_S: Record<PaintFeedbackKind, number> = {

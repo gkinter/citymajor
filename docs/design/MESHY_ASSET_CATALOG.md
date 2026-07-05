@@ -56,10 +56,10 @@ git add .gitattributes
 |-------|-------|---------------|-------|
 | **Meshy zone GLBs (on disk)** | **27** | Git LFS | `res_low_frontier_00`–`21` + v1-core frontier/industrial `*_00` samples |
 | **Procedural placeholders** | 13 | Plain git | era `00` samples in manifest still awaiting Meshy |
-| **Hero landmarks** | 2 | Git LFS | `hero_frontier_city_hall.glb`, `hero_frontier_church.glb` |
-| **P0 shipped (batch manifests)** | **18 / 108** | — | 16/100 zone (core ∪ fi-80 deduped) + 2/8 heroes (**16.7%**) |
+| **Hero landmarks** | **8** | Git LFS | `hero_*` pilot set — **8/8 complete** (SB-3741) |
+| **P0 shipped (batch manifests)** | **24 / 108** | — | 16/100 zone (core ∪ fi-80 deduped) + **8/8 heroes** (**22.2%**) |
 
-**29 Meshy assets on disk** (27 zone + 2 hero). Manifest registers 38 zone keys; 25 have Meshy refine GLBs (&gt;100 KB), 13 remain procedural. `res_low_frontier_11`–`19` are in manifest but outside the fi-80 P0 batch (variants `01`–`10` only); spike extras `res_low_frontier_20`–`21` are outside manifest. Do not commit new Meshy outputs as plain git blobs — full P0 (108 assets) would exceed **1 GB** without LFS.
+**35 Meshy assets on disk** (27 zone + 8 hero). Manifest registers 38 zone keys; 25 have Meshy refine GLBs (&gt;100 KB), 13 remain procedural. `res_low_frontier_11`–`19` are in manifest but outside the fi-80 P0 batch (variants `01`–`10` only); spike extras `res_low_frontier_20`–`21` are outside manifest. Do not commit new Meshy outputs as plain git blobs — full P0 (108 assets) would exceed **1 GB** without LFS.
 
 ### Raw-blob inventory (HEAD, `citymajor-web-r3f-spike`)
 
@@ -218,14 +218,14 @@ Separate from instanced zone meshes. Output: `web/public/assets/gltf/heroes/`
 
 | # | File | Era | Footprint | Tris | Linear |
 |---|------|-----|-----------|------|--------|
-| 1 | `hero_frontier_city_hall.glb` | frontier | 2×2 | 3,500 | SB-3741 | **shipped** (LFS, WT staged) |
-| 2 | `hero_frontier_church.glb` | frontier | 2×2 | 3,000 | SB-3741 |
-| 3 | `hero_industrial_steel_mill.glb` | industrial | 4×4 | 7,500 | SB-3741 |
-| 4 | `hero_industrial_train_station.glb` | industrial | 3×3 | 6,000 | SB-3741 |
-| 5 | `hero_postwar_civic_hall.glb` | postwar | 3×3 | 5,500 | SB-3741 |
-| 6 | `hero_postwar_hospital.glb` | postwar | 3×3 | 5,000 | SB-3741 |
-| 7 | `hero_modern_glass_tower.glb` | modern | 2×2 | 4,500 | SB-3741 |
-| 8 | `hero_future_eco_tower.glb` | future | 3×3 | 6,500 | SB-3741 |
+| 1 | `hero_frontier_city_hall.glb` | frontier | 2×2 | 3,500 | SB-3741 | **shipped** (LFS) |
+| 2 | `hero_frontier_church.glb` | frontier | 2×2 | 3,000 | SB-3741 | **shipped** (LFS) |
+| 3 | `hero_industrial_steel_mill.glb` | industrial | 4×4 | 7,500 | SB-3741 | **shipped** (LFS) |
+| 4 | `hero_industrial_train_station.glb` | industrial | 3×3 | 6,000 | SB-3741 | **shipped** (LFS) |
+| 5 | `hero_postwar_civic_hall.glb` | postwar | 3×3 | 5,500 | SB-3741 | **shipped** (LFS) |
+| 6 | `hero_postwar_hospital.glb` | postwar | 3×3 | 5,000 | SB-3741 | **shipped** (LFS) |
+| 7 | `hero_modern_glass_tower.glb` | modern | 2×2 | 4,500 | SB-3741 | **shipped** (LFS) |
+| 8 | `hero_future_eco_tower.glb` | future | 3×3 | 6,500 | SB-3741 | **shipped** (LFS) |
 
 **Era-gate monuments:** Placeholder monument at era transition (procedural today; hero swap at 100% era progress per `SB-3719`).
 

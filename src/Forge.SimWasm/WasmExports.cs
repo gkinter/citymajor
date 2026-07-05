@@ -58,6 +58,12 @@ public static partial class Program
     }
 
     [JSExport]
+    public static bool PlaceBuilding(int tileX, int tileY, int typeId)
+    {
+        return _host?.PlaceBuilding(tileX, tileY, typeId) ?? false;
+    }
+
+    [JSExport]
     public static bool EnqueueResearch(int techId)
     {
         return _host?.EnqueueResearch(techId) ?? false;

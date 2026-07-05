@@ -100,6 +100,7 @@ type SimExports = {
   PaintZone?: (x: number, y: number, zoneType: number) => void;
   Bulldoze?: (x: number, y: number) => void;
   PlaceRoad?: (x: number, y: number) => void;
+  PlaceBuilding?: (x: number, y: number, typeId: number) => boolean;
   EnqueueResearch?: (techId: number) => boolean;
   SetLawActive?: (lawId: string, active: boolean) => boolean;
   LoadSnapshot?: (snapshotJson: string) => boolean;
@@ -261,6 +262,7 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
   const paintZone = source.PaintZone ?? source.paintZone;
   const bulldoze = source.Bulldoze ?? source.bulldoze;
   const placeRoad = source.PlaceRoad ?? source.placeRoad;
+  const placeBuilding = source.PlaceBuilding ?? source.placeBuilding;
   const enqueueResearch = source.EnqueueResearch ?? source.enqueueResearch;
   const setLawActive = source.SetLawActive ?? source.setLawActive;
   const loadSnapshot = source.LoadSnapshot ?? source.loadSnapshot;
@@ -300,6 +302,10 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
     PlaceRoad:
       typeof placeRoad === "function"
         ? (placeRoad as (x: number, y: number) => void)
+        : undefined,
+    PlaceBuilding:
+      typeof placeBuilding === "function"
+        ? (placeBuilding as (x: number, y: number, typeId: number) => boolean)
         : undefined,
     EnqueueResearch:
       typeof enqueueResearch === "function"
@@ -629,6 +635,13 @@ function placeRoadTile(tileX: number, tileZ: number) {
   publishSnapshot();
 }
 
+function placeBuildingTile(tileX: number, tileZ: number, typeId: number) {
+  if (tileX < 0 || tileZ < 0 || tileX >= worldSize || tileZ >= worldSize) return;
+  if (typeId <= 0) return;
+  const ok = sim?.PlaceBuilding?.(tileX, tileZ, typeId) ?? false;
+  if (ok) publishSnapshot();
+}
+
 function enqueueResearchTech(techId: number) {
   if (techId < 0) return;
   const ok = sim?.EnqueueResearch?.(techId) ?? false;
@@ -824,7 +837,7 @@ function handleCommand(command: SimCommand) {
       }
       break;
     case "place_building":
-      // WASM placement API lands in a follow-up; tick-driven growth still runs.
+      placeBuildingTile(command.tileX, command.tileZ, command.typeId);
       break;
     case "place_road":
       placeRoadTile(command.tileX, command.tileZ);

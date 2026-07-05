@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
-export const metadata = {
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
   title: "CityMajor — Build your city across 200 years",
   description:
-    "Deep city simulation in your browser. Zone, grow, and guide your metropolis from frontier town to megacity with Herald AI.",
+    "Deep city simulation in your browser. Zone districts, balance the economy, and guide your metropolis from frontier town to megacity with Herald AI.",
 };
 
 const FEATURES = [

@@ -1475,6 +1475,38 @@ async function readDiagnosticsHud(page) {
   return page.locator("div").filter({ hasText: "Diagnostics" }).first().innerText();
 }
 
+/**
+ * /play?debug=perf — AdaptiveDpr telemetry line in Diagnostics HUD.
+ * Non-blocking: logs NOTE when the line is absent (headless GPU / telemetry lag).
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function assertAdaptiveDprPerfDebugLine(page, tag) {
+  await page.goto(`${BASE_URL}/play?debug=perf`, { waitUntil: "domcontentloaded" });
+
+  const hud = page.getByText("Diagnostics");
+  await hud.waitFor({ state: "visible", timeout: 30_000 });
+  await skipOnboardingScrim(page, tag);
+
+  const deadline = Date.now() + 15_000;
+  while (Date.now() < deadline) {
+    const hudText = await readDiagnosticsHud(page);
+    const lineMatch = hudText.match(/AdaptiveDpr:\s*[^\n]+/);
+    if (lineMatch) {
+      pass(tag, `?debug=perf AdaptiveDpr line visible (${lineMatch[0].trim()})`);
+      return;
+    }
+    await page.waitForTimeout(500);
+  }
+
+  const hudText = await readDiagnosticsHud(page);
+  const dprMatch = hudText.match(/DPR:\s*([\d.]+)/);
+  console.log(
+    `[${tag}] NOTE: ?debug=perf AdaptiveDpr line not visible within 15s` +
+      (dprMatch ? ` (DPR ${dprMatch[1]} present — telemetry may lag on headless GPU)` : ""),
+  );
+}
+
 /** @param {string} hudText */
 function parseHudRenderStats(hudText) {
   const buildingsMatch = hudText.match(/Buildings:\s*(\d+)\/(\d+)/);
@@ -1705,6 +1737,8 @@ export async function runPlayChecks(page, options = {}) {
   if (PERF_GATE) {
     await runPerfGate(page, { tag: `${tag}-perf`, skipNavigate: true });
   }
+
+  await assertAdaptiveDprPerfDebugLine(page, tag);
 
   // Anything not on the WASM-fallback allowlist should FAIL the smoke run —
   // silently downgrading to `console.warn` masked several real regressions on

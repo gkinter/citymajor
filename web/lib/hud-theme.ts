@@ -180,6 +180,45 @@ export function hudLabel(): CSSProperties {
   return { opacity: 0.65, marginRight: 6 };
 }
 
+/** Uppercase section label shared by slide-out panels. */
+export function hudPanelSectionTitle(extra?: CSSProperties): CSSProperties {
+  return {
+    fontWeight: 700,
+    marginBottom: 8,
+    fontSize: 11,
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    color: HUD_COLORS.textMuted,
+    ...extra,
+  };
+}
+
+/** Status / empty / loading box for slide-out panel bodies. */
+export function hudPanelStatusBox(
+  tone: "neutral" | "loading" | "error" | "accent",
+  extra?: CSSProperties,
+): CSSProperties {
+  const borders = {
+    neutral: HUD_COLORS.borderSubtle,
+    loading: HUD_COLORS.accentRing,
+    error: "rgba(255, 154, 168, 0.45)",
+    accent: HUD_COLORS.accentBorder,
+  };
+  const backgrounds = {
+    neutral: HUD_COLORS.rowBg,
+    loading: HUD_COLORS.accentSoft,
+    error: "rgba(255, 154, 168, 0.08)",
+    accent: HUD_COLORS.accentSoft,
+  };
+  return {
+    padding: "14px 16px",
+    borderRadius: HUD_RADIUS.md,
+    border: `1px solid ${borders[tone]}`,
+    background: backgrounds[tone],
+    ...extra,
+  };
+}
+
 export function hudInfoPanel(extra?: CSSProperties): CSSProperties {
   return hudPanel({
     padding: "10px 14px",

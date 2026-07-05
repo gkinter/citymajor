@@ -3,8 +3,8 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import {
   HUD_COLORS,
-  HUD_RADIUS,
   hudActionButton,
+  hudPanelStatusBox,
   hudSlidePanel,
 } from "@/lib/hud-theme";
 import type { NarrativeEventResponse } from "@/lib/narrative-templates";
@@ -21,23 +21,6 @@ const bodyStyle: CSSProperties = {
   flex: 1,
   overflowY: "auto",
   padding: "16px 18px 24px",
-};
-
-const optionStyle: CSSProperties = {
-  marginTop: 12,
-  padding: "10px 12px",
-  borderRadius: HUD_RADIUS.sm,
-  border: `1px solid ${HUD_COLORS.borderSubtle}`,
-  background: HUD_COLORS.rowBg,
-};
-
-const optionButtonStyle: CSSProperties = {
-  ...optionStyle,
-  width: "100%",
-  textAlign: "left",
-  cursor: "pointer",
-  font: "inherit",
-  color: "inherit",
 };
 
 const FOCUSABLE_SELECTOR =
@@ -68,6 +51,54 @@ function formatQuota(remaining: number | undefined): string {
   if (remaining === undefined) return "…";
   if (remaining === Number.MAX_SAFE_INTEGER) return "∞";
   return String(remaining);
+}
+
+function HeraldLoadingState() {
+  return (
+    <div
+      className="hud-herald-status hud-herald-status--loading"
+      style={hudPanelStatusBox("loading")}
+      aria-live="polite"
+      aria-label="Loading Herald story"
+    >
+      <p className="hud-herald-status__eyebrow">Press room</p>
+      <p className="hud-herald-status__message">Fetching today&apos;s lead story…</p>
+      <div className="hud-herald-skeleton" aria-hidden>
+        <div className="hud-herald-skeleton__line hud-herald-skeleton__line--short" />
+        <div className="hud-herald-skeleton__line hud-herald-skeleton__line--headline" />
+        <div className="hud-herald-skeleton__line hud-herald-skeleton__line--medium" />
+        <div className="hud-herald-skeleton__line" />
+      </div>
+    </div>
+  );
+}
+
+function HeraldErrorState({ message }: { message: string }) {
+  return (
+    <div
+      className="hud-herald-status hud-herald-status--error"
+      style={hudPanelStatusBox("error")}
+      role="alert"
+    >
+      <p className="hud-herald-status__eyebrow">Transmission failed</p>
+      <p className="hud-herald-status__message">{message}</p>
+    </div>
+  );
+}
+
+function HeraldEmptyState() {
+  return (
+    <div
+      className="hud-herald-status"
+      style={hudPanelStatusBox("neutral")}
+    >
+      <p className="hud-herald-status__eyebrow">No edition</p>
+      <p className="hud-herald-status__message">
+        No story loaded — open Herald when a city event fires or quota allows a
+        fresh headline.
+      </p>
+    </div>
+  );
 }
 
 type HeraldPanelProps = {
@@ -130,6 +161,7 @@ export function HeraldPanel({
   return (
     <aside
       ref={panelRef}
+      className="hud-herald-panel"
       style={hudSlidePanel()}
       role="dialog"
       aria-labelledby="herald-panel-title"
@@ -167,73 +199,49 @@ export function HeraldPanel({
 
       <div style={bodyStyle}>
         {loading ? (
-          <div style={{ opacity: 0.75 }} aria-live="polite">
-            Fetching today&apos;s lead story…
-          </div>
+          <HeraldLoadingState />
         ) : error ? (
-          <div style={{ color: HUD_COLORS.error }} role="alert">
-            {error}
-          </div>
+          <HeraldErrorState message={error} />
         ) : event ? (
           <>
             <div
-              style={{
-                fontSize: 11,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                opacity: 0.55,
-                marginBottom: 8,
-              }}
+              className="hud-herald-bucket"
               title={bucketReason ?? undefined}
             >
               {event.bucket.replace(/_/g, " ")} · {event.source}
             </div>
             {bucketReason ? (
-              <p
-                style={{
-                  margin: "0 0 10px",
-                  fontSize: 11,
-                  lineHeight: 1.45,
-                  opacity: 0.72,
-                  color: HUD_COLORS.accentHighlight,
-                }}
-                title={bucketReason}
-              >
+              <p className="hud-herald-driver" title={bucketReason}>
                 Story driver: {bucketReason}
               </p>
             ) : null}
-            <h2
-              id="herald-event-headline"
-              style={{ margin: "0 0 12px", fontSize: 18, fontWeight: 700, lineHeight: 1.35 }}
-            >
+            <h2 id="herald-event-headline" className="hud-herald-headline">
               {event.headline}
             </h2>
-            <p style={{ margin: 0, opacity: 0.92 }}>{event.body}</p>
+            <p className="hud-herald-body">{event.body}</p>
             {event.options.length > 0 ? (
               <div style={{ marginTop: 20 }}>
-                <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 8 }}>
+                <div className="hud-herald-options__heading">
                   Council options
                 </div>
                 {event.options.map((opt) => (
                   <button
                     key={opt.id}
                     type="button"
-                    style={optionButtonStyle}
+                    className="hud-herald-option"
                     onClick={() => onOptionSelect?.(opt.id)}
                     disabled={!onOptionSelect}
                     aria-label={`Council option: ${opt.label}. ${opt.tradeoff}`}
                   >
-                    <div style={{ fontWeight: 600 }}>{opt.label}</div>
-                    <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>
-                      {opt.tradeoff}
-                    </div>
+                    <div className="hud-herald-option__label">{opt.label}</div>
+                    <div className="hud-herald-option__tradeoff">{opt.tradeoff}</div>
                   </button>
                 ))}
               </div>
             ) : null}
           </>
         ) : (
-          <div style={{ opacity: 0.65 }}>No story loaded.</div>
+          <HeraldEmptyState />
         )}
       </div>
     </aside>

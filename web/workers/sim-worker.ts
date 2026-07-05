@@ -75,6 +75,7 @@ type WasmStatus = {
   healthcareCoverage?: number;
   policeCoverage?: number;
   fireCoverage?: number;
+  educationCoverage?: number;
   economy?: {
     shortages?: Array<{ name?: string; magnitude?: number }>;
     surpluses?: Array<{ name?: string; magnitude?: number }>;
@@ -395,6 +396,7 @@ function parseServiceCoverage(
       health: typeof t.health === "number" ? t.health : 0,
       police: typeof t.police === "number" ? t.police : 0,
       fire: typeof t.fire === "number" ? t.fire : 0,
+      education: typeof t.education === "number" ? t.education : 0,
     });
   }
   return tiles.length > 0 ? tiles : undefined;
@@ -453,6 +455,7 @@ function readStatus(): Pick<
   | "healthcareCoverage"
   | "policeCoverage"
   | "fireCoverage"
+  | "educationCoverage"
   | "economy"
   | "monthlyExportValue"
   | "monthlyImportCost"
@@ -511,6 +514,7 @@ function readStatus(): Pick<
       healthcareCoverage: parsed.healthcareCoverage,
       policeCoverage: parsed.policeCoverage,
       fireCoverage: parsed.fireCoverage,
+      educationCoverage: parsed.educationCoverage,
       economy: parseEconomy(parsed.economy),
       monthlyExportValue: parsed.monthlyExportValue,
       monthlyImportCost: parsed.monthlyImportCost,
@@ -575,6 +579,7 @@ function readSnapshot(): SimSnapshot {
       parsed.healthcareCoverage ?? status?.healthcareCoverage,
     policeCoverage: parsed.policeCoverage ?? status?.policeCoverage,
     fireCoverage: parsed.fireCoverage ?? status?.fireCoverage,
+    educationCoverage: parsed.educationCoverage ?? status?.educationCoverage,
     economy: parseEconomy(parsed.economy) ?? status?.economy,
     monthlyExportValue:
       parsed.monthlyExportValue ?? status?.monthlyExportValue,

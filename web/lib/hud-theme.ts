@@ -180,6 +180,54 @@ export function hudLabel(): CSSProperties {
   return { opacity: 0.65, marginRight: 6 };
 }
 
+/** Era badge chrome — pair with hudEraBadgeStyle(era) from @/lib/era. */
+export function hudEraBadgeChrome(extra?: CSSProperties): CSSProperties {
+  return {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "2px 9px",
+    borderRadius: 4,
+    fontWeight: 700,
+    fontSize: 12,
+    letterSpacing: "0.03em",
+    lineHeight: 1.3,
+    ...extra,
+  };
+}
+
+/** Header row for era panels — label left, badge right. */
+export function hudEraHeaderRow(extra?: CSSProperties): CSSProperties {
+  return {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    marginBottom: 8,
+    ...extra,
+  };
+}
+
+/** Compact progress track for era / quest meters. */
+export function hudProgressTrack(extra?: CSSProperties): CSSProperties {
+  return {
+    height: 5,
+    borderRadius: 3,
+    background: HUD_COLORS.rowBg,
+    overflow: "hidden",
+    ...extra,
+  };
+}
+
+export function hudProgressFill(percent: number, extra?: CSSProperties): CSSProperties {
+  return {
+    height: "100%",
+    width: `${Math.min(100, Math.max(0, percent))}%`,
+    background: `linear-gradient(90deg, ${HUD_COLORS.accent}, ${HUD_COLORS.accentHighlight})`,
+    transition: "width 0.25s ease",
+    ...extra,
+  };
+}
+
 export function hudInfoPanel(extra?: CSSProperties): CSSProperties {
   return hudPanel({
     padding: "10px 14px",

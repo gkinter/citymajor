@@ -107,6 +107,13 @@ export function zoneTierByTool(tool: ZoneTierTool): ZoneTier | undefined {
   return ZONE_TIERS.find((tier) => tier.tool === tool);
 }
 
+/** Human-readable label for an engine zone type id (0 = unzoned). */
+export function engineZoneTypeLabel(zoneType: number): string {
+  if (zoneType === 0) return "None";
+  const tier = ZONE_TIERS.find((t) => t.engineZoneType === zoneType);
+  return tier?.shortLabel ?? tier?.label ?? `Type ${zoneType}`;
+}
+
 export function requiredTechIndex(catalogId: string): number {
   return techIdFromCatalogId(catalogId);
 }

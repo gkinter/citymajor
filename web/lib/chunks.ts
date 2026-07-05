@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { CHUNK_COUNT, CHUNK_SIZE, CHUNKS_PER_AXIS } from "./constants";
 import { chunkCenter } from "./city-data";
 import { LOD_THRESHOLDS } from "./constants";
+import { markChunkLoaded } from "./chunk-load-state";
 import type { ChunkState } from "./types";
 
 export function createChunkStates(): ChunkState[] {
@@ -37,7 +38,10 @@ export function updateChunkVisibility(
     _box.min.set(originX, -2, originZ);
     _box.max.set(originX + CHUNK_SIZE, 80, originZ + CHUNK_SIZE);
     chunk.visible = _frustum.intersectsBox(_box);
-    if (chunk.visible) visible += 1;
+    if (chunk.visible) {
+      visible += 1;
+      markChunkLoaded(chunk.index);
+    }
   }
   return visible;
 }

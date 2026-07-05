@@ -47,6 +47,8 @@ export type FpsStats = {
   fps: number;
   dpr: number;
   visibleChunks: number;
+  /** Chunks that have been frustum-visible at least once (streaming debug). */
+  loadedChunks?: number;
   visibleBuildings: number;
   totalBuildings: number;
   lodCounts: [number, number, number, number];

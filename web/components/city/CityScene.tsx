@@ -10,6 +10,7 @@ import {
   updateChunkVisibility,
   visibleBuildingCount,
 } from "@/lib/chunks";
+import { getLoadedChunkCount } from "@/lib/chunk-load-state";
 import type { RoadTile, TrafficTile, ZoneTile } from "@/lib/zoning";
 import type { CitizenDotPick } from "@/lib/population-l2";
 import type { ActiveEventSnapshot, EraProgress, ServiceCoverageSnapshot, ServiceViewMode } from "@/lib/sim-bridge";
@@ -129,6 +130,7 @@ export function CityScene({
       fps: Math.round(fpsAccum.current.fps),
       dpr,
       visibleChunks,
+      loadedChunks: getLoadedChunkCount(),
       visibleBuildings,
       lodCounts,
       pickedTile,

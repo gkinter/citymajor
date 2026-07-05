@@ -96,6 +96,7 @@ import {
 } from "@/lib/education-buildings";
 import { handlePlayKeyboardShortcut } from "@/lib/play-keyboard";
 import { HelpPanel } from "@/components/city/HelpPanel";
+import { isChunkDebugEnabled } from "@/lib/debug-flags";
 
 export type BuildMode = "zone" | "road" | "plop" | "education";
 
@@ -187,7 +188,11 @@ export function PlayClient() {
     DEFAULT_TRANSIT_MODE,
   );
   const [buildOpen, setBuildOpen] = useState(false);
+<<<<<<< HEAD
   const [helpOpen, setHelpOpen] = useState(false);
+=======
+  const [showChunkDebug] = useState(() => isChunkDebugEnabled());
+>>>>>>> 3df109a (feat(web): show loaded chunk count with ?debug=chunks)
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -738,6 +743,7 @@ export function PlayClient() {
         stats={stats}
         totalBuildings={stats.totalBuildings}
         activeTool={canvasActiveTool}
+        showChunkDebug={showChunkDebug}
       />
       <MinimapPanel />
       <div style={{ ...HUD_ZONE.bottomLeft, pointerEvents: "auto" }}>

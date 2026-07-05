@@ -14,7 +14,7 @@
 
 **Preview:** https://citymajor.apps.softblaze.net/play
 
-**Smoke:** `WASM_EXPECTED=1 pnpm smoke:all` — **46/46** deploy parity (local WASM + Coolify FQDN + GHA `ci-smoke`); `verify:tech-unlocks` precheck green. Era quest aria-label restored (`8cd8691`); SEO route probes (`/sitemap.xml`, `/robots.txt`) pending merge from `feat/smoke-probes-bundle-2026-07-05`.
+**Smoke:** `WASM_EXPECTED=1 pnpm smoke:all` — **49/49 localhost** green (`verify:tech-unlocks` precheck green). **Preview blocked** — Coolify build fails on Dockerfile `corepack` step until `feat/docker-corepack-fix-2026-07-05` merges. **`place_building` probe** — pending preview deploy (requires live FQDN WASM bundle).
 
 **WASM boot:** `848e45c` restores `WasmSimHost.PlaceBuilding` + Docker `BUILD_WASM=1` gate — `dotnet publish` no longer ships empty `web/public/dotnet/` (404 on `blazor.boot.json` → procedural fallback). Triage: [`AGENTS.md`](../AGENTS.md) § WASM boot triage.
 
@@ -108,9 +108,11 @@ Wave 16 HUD stack ────────────────────�
 
 ## Test plan
 
-- [x] `WASM_EXPECTED=1 pnpm smoke:all` — **46/46** on integration HEAD (`8cd8691`)
+- [x] `WASM_EXPECTED=1 pnpm smoke:all` — **49/49 localhost** on integration HEAD (`8cd8691`)
+- [ ] Preview FQDN smoke — blocked on Dockerfile `corepack` until fix merges
+- [ ] `place_building` smoke probe — pending preview deploy
 - [x] `pnpm verify:tech-unlocks` — zone + build content keys resolve
-- [x] Coolify preview — https://citymajor.apps.softblaze.net/play
+- [ ] Coolify preview — https://citymajor.apps.softblaze.net/play (deploy blocked: Dockerfile `corepack`)
 - [x] WASM boot — `curl -sf $FQDN/dotnet/_framework/blazor.boot.json` returns 200 (not procedural fallback)
 - [ ] `pnpm build:wasm && pnpm dev` — paint all 7 zone tiers; plop civic via build menu; place education schoolhouse
 - [ ] Wave 16 HUD — demand strip, budget/pop meters, approval/happiness, time controls, help overlay

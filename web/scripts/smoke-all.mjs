@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Full web smoke suite: /, /shop, /play (HTTP 200 + key copy + WebGL on /play).
+ * Full web smoke suite: /, /shop, /play, /sitemap.xml, /robots.txt (HTTP 200 + key copy + WebGL on /play).
  *
  * Prereq: pnpm dev (or pnpm dev:wasm) on BASE_URL (default http://localhost:3000)
  *
@@ -69,7 +69,7 @@ async function main() {
   try {
     runTechUnlocksPrecheck();
 
-    for (const route of ["/", "/shop", "/play"]) {
+    for (const route of ["/", "/shop", "/play", "/sitemap.xml", "/robots.txt"]) {
       await assertHttpOk(TAG, route);
     }
 

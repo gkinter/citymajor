@@ -136,9 +136,11 @@ export function formatCommuteMin(value: number): string {
 }
 
 /**
- * Citizen dots render at street/neighborhood chunk LOD (0–1), not city heatmap bands.
- * "Population L2" is the WASM household drill-down layer — unrelated to chunk.lod === 2.
+ * Citizen dots render through district zoom (chunk LOD 0–2). Default /play camera
+ * keeps most visible chunks at LOD 2 — hiding at <=1 made dots invisible on boot.
+ * LOD 3 is the city heatmap band where dots are suppressed.
+ * "Population L2" is the WASM household drill-down layer — unrelated to chunk.lod.
  */
 export function citizenDotsVisibleAtChunkLod(lod: number): boolean {
-  return lod <= 1;
+  return lod <= 2;
 }

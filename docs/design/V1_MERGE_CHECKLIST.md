@@ -261,6 +261,7 @@ Art pipeline: [MESHY_ASSET_PIPELINE.md](./MESHY_ASSET_PIPELINE.md) · [MESHY_ASS
 | `com_frontier_00` | frontier | Meshy MCP (`3c5a851`) |
 | `ind_frontier_00` | frontier | Meshy MCP (`f93b855`) |
 | `res_low_frontier_00` | frontier | Meshy MCP |
+| `res_low_frontier_01` | frontier | Meshy MCP (`3c5a851`) |
 | `res_low_frontier_02` | frontier | Meshy MCP (`737425d`) |
 | `res_low_frontier_03` | frontier | Meshy MCP (`737425d`) |
 | `ind_industrial_00` | industrial | Meshy MCP (`79ef561`) |
@@ -358,7 +359,7 @@ Targets from [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) §4 and `web/PERF.md`.
 
 ### CI automation (`817b1a1`)
 
-Manual-dispatch workflow `.github/workflows/perf-gate.yml` runs `PERF_GATE=1 pnpm smoke:all` on `workflow_dispatch`. Software-renderer GHA runners auto-skip when max FPS < 15 unless `PERF_GATE_STRICT=1`. **Meaningful ≥30 FPS sign-off requires GPU host** — not blocking PR until self-hosted runner exists.
+Manual-dispatch workflow `.github/workflows/perf-gate.yml` runs `PERF_GATE=1 pnpm smoke:all` on `workflow_dispatch`. `.github/workflows/smoke.yml` runs on push (`34d85a2`) — **currently red** on Node 20 (`--experimental-strip-types`). Software-renderer GHA runners auto-skip when max FPS < 15 unless `PERF_GATE_STRICT=1`. **Meaningful ≥30 FPS sign-off requires GPU host** — not blocking PR until self-hosted runner exists.
 
 **Status:** Spike expectations documented; **formal gate not signed**; CI stub landed for future GPU runner.
 
@@ -433,7 +434,7 @@ Master tracker: [SB-3708](https://linear.app/softblaze/issue/SB-3708) — links 
 - [ ] Cloud saves + auth ([SB-3686](https://linear.app/softblaze/issue/SB-3686) full CMJR SoA + multi-device, [SB-3693](https://linear.app/softblaze/issue/SB-3693))
 - [ ] Stripe live test path verified on preview
 - [ ] Phase 3 depth complete — `populationL2` WASM export, LLM Herald on preview, hero GLTF on disk ([SB-3727](https://linear.app/softblaze/issue/SB-3727))
-- [ ] Laws toggle + effect application in sim (panel counts shipped `9b82eb1`)
+- [ ] Laws toggle effect application in sim (toggle + panel smoke shipped `dcb4c4f` / `4b78131`)
 - [ ] CTO P0 player-loop items in [CTO_IMPROVEMENT_ROADMAP_2026-07.md](./CTO_IMPROVEMENT_ROADMAP_2026-07.md) § v1 Launch Blockers
 
 ---

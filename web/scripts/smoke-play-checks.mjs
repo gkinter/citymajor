@@ -692,6 +692,86 @@ async function assertCitizenPanel(page, tag) {
 }
 
 /**
+ * Population L2 citizen dots — warm instanced spheres at street/neighborhood LOD.
+ * Skips when procedural fallback (no household badge) or headless readPixels black.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function assertCitizenDotsRender(page, tag) {
+  const citizenBtn = page.getByRole("button", { name: /^Citizens\b/ });
+  const badgeMatch = (await citizenBtn.innerText()).match(/Citizens\s*([\d,]+|—)/);
+  const badgeCount = badgeMatch?.[1];
+  if (!badgeCount || badgeCount === "—") {
+    console.log(`[${tag}] SKIP: citizen dots (no household badge — WASM/procedural)`);
+    return;
+  }
+
+  const probe = await page.evaluate(() => {
+    const canvas = document.querySelector('[data-testid="city-canvas"] canvas');
+    if (!canvas) return { err: "no canvas" };
+
+    const sampleWarm = () => {
+      const gl =
+        canvas.getContext("webgl2", { preserveDrawingBuffer: true }) ??
+        canvas.getContext("webgl", { preserveDrawingBuffer: true });
+      let warmCount = 0;
+      let anyNonBlack = 0;
+      if (gl) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.finish();
+        const buf = new Uint8Array(4);
+        for (let y = 80; y < canvas.height - 80; y += 24) {
+          for (let x = 80; x < canvas.width - 80; x += 24) {
+            gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+            const sum = buf[0] + buf[1] + buf[2];
+            if (sum > 0) anyNonBlack += 1;
+            if (buf[0] > 200 && buf[1] > 150 && buf[2] < 220) warmCount += 1;
+          }
+        }
+      }
+
+      const probe = document.createElement("canvas");
+      probe.width = 32;
+      probe.height = 32;
+      const ctx = probe.getContext("2d");
+      let warm2d = 0;
+      if (ctx) {
+        const sx = Math.max(0, Math.floor(canvas.width / 2) - 16);
+        const sy = Math.max(0, Math.floor(canvas.height / 2) - 16);
+        ctx.drawImage(canvas, sx, sy, 32, 32, 0, 0, 32, 32);
+        const px = ctx.getImageData(0, 0, 32, 32).data;
+        for (let i = 0; i < px.length; i += 4) {
+          if (px[i] > 200 && px[i + 1] > 150 && px[i + 2] < 220) warm2d += 1;
+        }
+      }
+
+      return { warmCount, warm2d, anyNonBlack };
+    };
+
+    return sampleWarm();
+  });
+
+  if (probe.err) {
+    fail(tag, `citizen dot probe failed: ${probe.err}`);
+  }
+
+  const warmHits = Math.max(probe.warmCount ?? 0, probe.warm2d ?? 0);
+  if (warmHits < 1) {
+    if ((probe.anyNonBlack ?? 0) === 0) {
+      console.log(
+        `[${tag}] SKIP: citizen dots warm-pixel probe (canvas black — GPU/readPixels); household badge=${badgeCount}`,
+      );
+      return;
+    }
+    fail(
+      tag,
+      `citizen dots invisible at default street zoom (warm pixels=0, households=${badgeCount})`,
+    );
+  }
+
+  pass(tag, `citizen dots visible (${warmHits} warm samples, households=${badgeCount})`);
+}
+/**
  * Laws HUD panel opens and shows WASM definition + active ordinance counts.
  * @param {import('playwright').Page} page
  * @param {string} tag
@@ -1063,6 +1143,7 @@ export async function runPlayChecks(page, options = {}) {
   await assertEraQuestPanel(page, tag);
   await assertEconomyPanel(page, tag);
   await assertCitizenPanel(page, tag);
+  await assertCitizenDotsRender(page, tag);
   await assertLawPanel(page, tag);
   await assertOptionalOverlayToolbars(page, tag);
 

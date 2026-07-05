@@ -100,6 +100,12 @@
       "era": "frontier"
     },
     {
+      "key": "res_low_frontier_16",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 16",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
       "key": "com_frontier_00",
       "prompt": "A frontier general store, wooden facade, flat roof with lip, wild west style, low poly, stylized game asset",
       "category": "com",

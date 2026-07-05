@@ -151,22 +151,42 @@ function createSaveApiSessionFromPage(page) {
   return {
     /** @param {string} path @param {RequestInit} [init] */
     async fetch(path, init = {}) {
-      const cookies = await page.context().cookies(BASE_URL);
-      const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
-      return fetch(`${BASE_URL}${path}`, {
-        ...init,
+      const { body, ...rest } = init;
+      /** @type {import('playwright').APIRequestContext['fetch'] extends (...args: infer A) => unknown ? A[1] : never} */
+      const requestOptions = { ...rest };
+      if (body !== undefined) {
+        if (typeof body === "string") {
+          requestOptions.data = body;
+          requestOptions.headers = {
+            ...(requestOptions.headers ?? {}),
+            "Content-Type": "application/json",
+          };
+        } else {
+          requestOptions.data = body;
+        }
+      }
+      const res = await page.request.fetch(`${BASE_URL}${path}`, requestOptions);
+      const headerRecord = res.headers();
+      return {
+        ok: res.ok(),
+        status: res.status(),
         headers: {
-          ...(init.headers ?? {}),
-          ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+          get: (name) => headerRecord[name.toLowerCase()] ?? null,
+          getSetCookie: () => {
+            const raw = headerRecord["set-cookie"];
+            return raw ? [raw] : [];
+          },
         },
-      });
+        json: () => res.json(),
+        text: () => res.text(),
+      };
     },
     /** @param {string} saveId */
     async deleteSave(saveId) {
-      const res = await this.fetch(`/api/saves/${saveId}`, { method: "DELETE" });
-      if (res.status !== 204) {
+      const res = await page.request.delete(`${BASE_URL}/api/saves/${saveId}`);
+      if (res.status() !== 204) {
         console.warn(
-          `[smoke] WARN: DELETE /api/saves/${saveId} returned ${res.status} (non-fatal)`,
+          `[smoke] WARN: DELETE /api/saves/${saveId} returned ${res.status()} (non-fatal)`,
         );
       }
     },
@@ -304,6 +324,9 @@ async function exportWasmBlobViaHook(page, tag) {
     const api = window.__citymajorSimApi;
     if (!api) return { ok: false, reason: "no-api" };
     try {
+      // Drain tick backlog so ExportCmjr is not starved behind RAF command queue.
+      api.sendCommand?.({ type: "pause" });
+      await new Promise((resolve) => setTimeout(resolve, 250));
       const base64 = await api.exportWasmSave();
       if (typeof base64 !== "string" || base64.length < 64) {
         return { ok: false, reason: "empty-blob", len: base64?.length ?? 0 };
@@ -1802,12 +1825,14 @@ export async function runPlayChecks(page, options = {}) {
   }
   pass(tag, `sim source: ${simSource}`);
 
-  await assertRoadPlacementOrStatus(page, tag, simSource === "WASM sim");
-  await assertPlaceBuildingWasm(page, tag, simSource === "WASM sim");
-
   if (savesAvailable) {
+    // Run before place_road / place_building — worker tick backlog after those
+    // commands can exceed the 15s ExportCmjr bridge timeout on preview CPUs.
     await assertCmjrSaveRoundTrip(tag, page, { simIsWasm: simSource === "WASM sim" });
   }
+
+  await assertRoadPlacementOrStatus(page, tag, simSource === "WASM sim");
+  await assertPlaceBuildingWasm(page, tag, simSource === "WASM sim");
 
   const buildingsMatch = hudText.match(/Buildings:\s*(\d+)\/(\d+)/);
   const visible = Number(buildingsMatch?.[1] ?? 0);

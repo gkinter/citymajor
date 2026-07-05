@@ -291,6 +291,8 @@ type WorkerOutbound =
   | { type: "error"; message: string };
 
 const LOAD_SNAPSHOT_TIMEOUT_MS = 15_000;
+/** CMJR export serializes full sim JSON — allow extra headroom on preview/CI CPUs. */
+const EXPORT_CMJR_TIMEOUT_MS = 45_000;
 
 /** Worker-backed bridge loading the published dotnet WASM bundle at runtime. */
 export function createSimBridge(): SimBridge {
@@ -534,7 +536,7 @@ export function createSimBridge(): SimBridge {
           if (!pendingExport) return;
           pendingExport = null;
           reject(new Error("Export CMJR timed out"));
-        }, LOAD_SNAPSHOT_TIMEOUT_MS);
+        }, EXPORT_CMJR_TIMEOUT_MS);
 
         pendingExport = {
           resolve: (base64) => {
@@ -547,6 +549,10 @@ export function createSimBridge(): SimBridge {
           },
         };
 
+        localWorker.postMessage({
+          type: "command",
+          command: { type: "pause" } satisfies SimCommand,
+        } satisfies WorkerInbound);
         localWorker.postMessage({ type: "export_cmjr" } satisfies WorkerInbound);
       });
     },

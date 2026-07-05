@@ -50,16 +50,16 @@ git lfs track "web/public/assets/gltf/**/*.glb"
 git add .gitattributes
 ```
 
-**Spike inventory (manifest, 31 zone keys + heroes) — 2026-07-05 WT:**
+**Spike inventory (manifest, 36 zone keys + heroes) — `14a1881` (`citymajor-web-r3f-spike`):**
 
 | Class | Count | Git mechanism | Notes |
 |-------|-------|---------------|-------|
-| **Meshy zone GLBs (manifest, on disk)** | **18** | WT uncommitted | `res_low_frontier_00`–`12` + v1-core frontier/industrial `*_00` samples (~150 MB) |
+| **Meshy zone GLBs (on disk)** | **23** | Git LFS | `res_low_frontier_00`–`17` + v1-core frontier/industrial `*_00` samples |
 | **Procedural placeholders** | 13 | Plain git | era `00` samples in manifest still awaiting Meshy |
-| **Hero landmarks** | 1 | WT uncommitted | `hero_frontier_city_hall.glb` (~10 MB) |
-| **P0 shipped (batch manifests)** | **17 / 108** | — | 16/100 zone (core ∪ fi-80 deduped) + 1/8 heroes (**15.7%**) |
+| **Hero landmarks** | 2 | Git LFS | `hero_frontier_city_hall.glb`, `hero_frontier_church.glb` |
+| **P0 shipped (batch manifests)** | **18 / 108** | — | 16/100 zone (core ∪ fi-80 deduped) + 2/8 heroes (**16.7%**) |
 
-**19 Meshy assets on disk** (18 zone + 1 hero). Manifest registers 31 zone keys; 18 have Meshy refine GLBs (&gt;100 KB), 13 remain procedural. Do not commit new Meshy outputs as plain git blobs — full P0 (108 assets) would exceed **1 GB** without LFS.
+**25 Meshy assets on disk** (23 zone + 2 hero). Manifest registers 36 zone keys; 23 have Meshy refine GLBs (&gt;100 KB), 13 remain procedural. Spike extras `res_low_frontier_11`–`17` are outside the fi-80 P0 batch (variants `01`–`10` only). Do not commit new Meshy outputs as plain git blobs — full P0 (108 assets) would exceed **1 GB** without LFS.
 
 ### Raw-blob inventory (HEAD, `citymajor-web-r3f-spike`)
 
@@ -277,11 +277,11 @@ Props use separate manifest namespace under `web/public/assets/gltf/props/` (TBD
 
 | Priority | Batches | Assets | Credits | Shipped (Meshy) |
 |----------|---------|--------|---------|-----------------|
-| **P0 v1 ship** | core + fi-80 + heroes | 108 | **3,240** | **17** (15.7%) |
+| **P0 v1 ship** | core + fi-80 + heroes | 108 | **3,240** | **18** (16.7%) |
 | **P1 v1.5** | fi-full + postwar + modern + svc | 370 | **11,100** | 0 |
 | **P2 v2** | future | 100 | **3,000** | 0 |
 | **P3** | LOD | 120 | 0 | 0 |
-| **Full zone set** | all zone batches | 500 | **15,000** | 17 |
+| **Full zone set** | all zone batches | 500 | **15,000** | 18 |
 
 *v1 ship minimum (40 zone keys):* core batch variant-`00` samples (20) + fi-80 `res_low` frontier `01`–`05` (5 Meshy) — **13 Meshy `res_low_frontier`** on disk (`00`–`12`); procedural fallback for all other fi-80 keys.
 

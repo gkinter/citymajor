@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { Tier } from "@/lib/entitlements";
+import { entitlementsForTier } from "@/lib/entitlements";
 import {
   NarrativeOptionSchema,
   type NarrativeEventRequest,
@@ -16,6 +18,20 @@ const LLM_TIMEOUT_MS = 15_000;
 
 export function isNarrativeLlmConfigured(): boolean {
   return resolveNarrativeLlmProvider() !== null;
+}
+
+/** Non-production only: skip Founder tier gate when keys are set (local LLM smoke). */
+export function isNarrativeLlmDevOverride(): boolean {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    process.env.NARRATIVE_LLM_DEV_OVERRIDE === "1"
+  );
+}
+
+export function isNarrativeLlmAllowedForTier(tier: Tier): boolean {
+  if (!isNarrativeLlmConfigured()) return false;
+  const { llmEnabled } = entitlementsForTier(tier);
+  return llmEnabled || isNarrativeLlmDevOverride();
 }
 
 function resolveNarrativeLlmProvider(): "openai" | "anthropic" | null {
@@ -153,7 +169,13 @@ export async function generateNarrativeWithLlm(params: {
 }): Promise<NarrativeEventResponse | null> {
   const system = buildSystemPrompt();
   const user = buildUserPrompt(params.bucket, params.context, params.template);
-  const raw = await callNarrativeLlm(system, user);
+  let raw: string | null;
+  try {
+    raw = await callNarrativeLlm(system, user);
+  } catch (err) {
+    console.error("[narrative-prompt] LLM call failed:", err);
+    return null;
+  }
   if (!raw) return null;
 
   const parsed = LlmPayloadSchema.safeParse(extractJsonObject(raw));

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { entitlementsForTier } from "@/lib/entitlements";
-import { generateNarrativeWithLlm, isNarrativeLlmConfigured } from "@/lib/narrative-prompt";
+import {
+  generateNarrativeWithLlm,
+  isNarrativeLlmAllowedForTier,
+} from "@/lib/narrative-prompt";
 import { resolveTierFromRequest } from "@/lib/resolve-tier";
 import {
   consumeNarrativeEvent,
@@ -79,8 +81,7 @@ export async function POST(req: Request) {
     event = personalizeNarrativeEvent(event, cityName);
   }
 
-  const { llmEnabled } = entitlementsForTier(tier);
-  if (llmEnabled && isNarrativeLlmConfigured()) {
+  if (isNarrativeLlmAllowedForTier(tier)) {
     try {
       const llmEvent = await generateNarrativeWithLlm({
         bucket,
@@ -95,10 +96,18 @@ export async function POST(req: Request) {
     }
   }
 
-  const payload = NarrativeEventResponseSchema.parse(event);
+  const validated = NarrativeEventResponseSchema.safeParse(event);
+  if (!validated.success) {
+    console.error("[narrative/event] response validation failed:", validated.error.flatten());
+    return applyUserIdCookie(
+      NextResponse.json({ error: "Failed to build narrative response" }, { status: 500 }),
+      newCookie,
+    );
+  }
+
   return applyUserIdCookie(
     NextResponse.json({
-      ...payload,
+      ...validated.data,
       narrativeEventsRemaining: quota.remaining,
     }),
     newCookie,

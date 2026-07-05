@@ -549,7 +549,7 @@ public sealed class EventSystem
 
             var evt = _activeEvents[i];
             evt.Phase = EventPhase.Waning;
-            evt.ElapsedDays = Math.Max(evt.ElapsedDays, (int)(evt.DurationDays * 0.6f));
+            evt.ElapsedDays = Math.Max(evt.ElapsedDays, (int)(evt.DurationDays * 0.65f));
             _activeEvents[i] = evt;
             return true;
         }

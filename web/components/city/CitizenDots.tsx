@@ -9,7 +9,10 @@ import {
   allocateDotsPerBuilding,
   resolveHouseholdBudget,
 } from "@/lib/population-growth";
-import type { CitizenDotPick } from "@/lib/population-l2";
+import {
+  citizenDotsVisibleAtChunkLod,
+  type CitizenDotPick,
+} from "@/lib/population-l2";
 import type { ChunkState, CityData } from "@/lib/types";
 
 type CitizenDotsProps = {
@@ -45,8 +48,9 @@ function isResidential(category: BuildingCategory): boolean {
 }
 
 /**
- * Warm citizen markers above residential buildings at LOD L2 — reads alive from
- * the render snapshot without per-building household IDs (SB-3689 / SB-3712).
+ * Warm citizen markers above residential buildings at street/neighborhood zoom.
+ * Population L2 household rows power CitizenPanel drill-down; dot budget uses
+ * householdCount / population from the WASM snapshot (SB-3689 / SB-3712).
  */
 export function CitizenDots({
   city,
@@ -123,7 +127,8 @@ export function CitizenDots({
       const slot = slots[i]!;
       const building = city.buildings[slot.buildingIndex]!;
       const chunk = chunks[building.chunkIndex];
-      const show = chunk?.visible && chunk.lod === 2;
+      const show =
+        chunk?.visible && citizenDotsVisibleAtChunkLod(chunk.lod);
 
       if (!show) {
         _scale.set(0, 0, 0);

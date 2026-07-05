@@ -85,6 +85,11 @@ type WasmStatus = {
   populationL2?: unknown;
   lawDefinitionCount?: number;
   activeLawCount?: number;
+  sampleLaw?: {
+    id?: string;
+    name?: string;
+    active?: boolean;
+  };
 };
 
 type SimExports = {
@@ -96,6 +101,7 @@ type SimExports = {
   Bulldoze?: (x: number, y: number) => void;
   PlaceRoad?: (x: number, y: number) => void;
   EnqueueResearch?: (techId: number) => boolean;
+  SetLawActive?: (lawId: string, active: boolean) => boolean;
   LoadSnapshot?: (snapshotJson: string) => boolean;
   ExportCmjr?: () => string;
   LoadFromCmjr?: (base64Cmjr: string) => boolean;
@@ -256,6 +262,7 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
   const bulldoze = source.Bulldoze ?? source.bulldoze;
   const placeRoad = source.PlaceRoad ?? source.placeRoad;
   const enqueueResearch = source.EnqueueResearch ?? source.enqueueResearch;
+  const setLawActive = source.SetLawActive ?? source.setLawActive;
   const loadSnapshot = source.LoadSnapshot ?? source.loadSnapshot;
   const exportCmjr = source.ExportCmjr ?? source.exportCmjr;
   const loadFromCmjr = source.LoadFromCmjr ?? source.loadFromCmjr;
@@ -297,6 +304,10 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
     EnqueueResearch:
       typeof enqueueResearch === "function"
         ? (enqueueResearch as (techId: number) => boolean)
+        : undefined,
+    SetLawActive:
+      typeof setLawActive === "function"
+        ? (setLawActive as (lawId: string, active: boolean) => boolean)
         : undefined,
     LoadSnapshot:
       typeof loadSnapshot === "function"
@@ -348,6 +359,19 @@ function parseActiveEvents(
     });
   }
   return events.length > 0 ? events : undefined;
+}
+
+function parseSampleLaw(
+  raw: unknown,
+): { id: string; name: string; active: boolean } | undefined {
+  if (typeof raw !== "object" || raw === null) return undefined;
+  const law = raw as Record<string, unknown>;
+  if (typeof law.id !== "string" || typeof law.name !== "string") return undefined;
+  return {
+    id: law.id,
+    name: law.name,
+    active: law.active === true,
+  };
 }
 
 function parseServiceCoverage(
@@ -430,6 +454,7 @@ function readStatus(): Pick<
   | "populationL2"
   | "lawDefinitionCount"
   | "activeLawCount"
+  | "sampleLaw"
 > | null {
   if (!sim?.GetStatus) return null;
   try {

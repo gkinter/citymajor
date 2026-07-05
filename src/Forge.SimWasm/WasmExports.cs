@@ -64,6 +64,12 @@ public static partial class Program
     }
 
     [JSExport]
+    public static bool SetLawActive(string lawId, bool active)
+    {
+        return _host?.SetLawActive(lawId, active) ?? false;
+    }
+
+    [JSExport]
     public static void AdjustBudget(double deltaFunds)
     {
         _host?.AdjustBudget((long)deltaFunds);

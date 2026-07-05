@@ -134,3 +134,11 @@ export function formatCommuteMin(value: number): string {
   const hours = value / 60;
   return `${hours.toFixed(1)} hr`;
 }
+
+/**
+ * Citizen dots render at street/neighborhood chunk LOD (0–1), not city heatmap bands.
+ * "Population L2" is the WASM household drill-down layer — unrelated to chunk.lod === 2.
+ */
+export function citizenDotsVisibleAtChunkLod(lod: number): boolean {
+  return lod <= 1;
+}

@@ -272,6 +272,27 @@ public sealed class WasmSimHost
         return _research.EnqueueResearch(techId, _state);
     }
 
+    /// <summary>Enable or disable an ordinance by slug id. Effect application deferred.</summary>
+    public bool SetLawActive(string lawId, bool active)
+    {
+        if (!IsInitialized || _laws is null || string.IsNullOrWhiteSpace(lawId)) return false;
+        return _laws.SetActive(lawId, active);
+    }
+
+    /// <summary>First catalog entry for HUD sample toggle (v1.5 stub).</summary>
+    public LawPreviewDto? GetSampleLawPreview()
+    {
+        if (_laws is null || _laws.DefinitionCount == 0) return null;
+
+        var definition = _laws.Definitions[0];
+        return new LawPreviewDto
+        {
+            Id = definition.Id,
+            Name = definition.Name,
+            Active = _laws.IsActive(0),
+        };
+    }
+
     /// <summary>Apply a one-time treasury change from a Herald council budget option.</summary>
     public void AdjustBudget(long deltaFunds)
     {
@@ -930,6 +951,8 @@ public sealed class WasmStatusDto
     public int EventDefinitionCount { get; init; }
     public int LawDefinitionCount { get; init; }
     public int ActiveLawCount { get; init; }
+    /// <summary>First ordinance for HUD sample toggle (v1.5 stub).</summary>
+    public LawPreviewDto? SampleLaw { get; init; }
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
     public int TechCount { get; init; }
     public int CurrentResearchId { get; init; } = -1;
@@ -983,6 +1006,7 @@ public sealed class WasmStatusDto
         EventDefinitionCount = host.EventDefinitionCount,
         LawDefinitionCount = host.LawDefinitionCount,
         ActiveLawCount = host.ActiveLawCount,
+        SampleLaw = host.GetSampleLawPreview(),
         ActiveEvents = host.ActiveEvents,
         TechCount = host.UnlockedTechCount,
         CurrentResearchId = host.CurrentResearchId,
@@ -1278,6 +1302,13 @@ public sealed class ActiveEventDto
     public int TileY { get; init; }
 }
 
+public sealed class LawPreviewDto
+{
+    public string Id { get; init; } = "";
+    public string Name { get; init; } = "";
+    public bool Active { get; init; }
+}
+
 public sealed class GoodImbalanceDto
 {
     public string Name { get; init; } = "";
@@ -1332,6 +1363,7 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(ServiceCoverageDto[]))]
 [JsonSerializable(typeof(ActiveEventDto))]
 [JsonSerializable(typeof(ActiveEventDto[]))]
+[JsonSerializable(typeof(LawPreviewDto))]
 [JsonSerializable(typeof(GoodImbalanceDto))]
 [JsonSerializable(typeof(GoodImbalanceDto[]))]
 [JsonSerializable(typeof(EconomySnapshotDto))]

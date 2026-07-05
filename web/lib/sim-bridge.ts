@@ -13,6 +13,7 @@ export type SimCommand =
   | { type: "zone_paint"; tileX: number; tileZ: number; zoneType: number }
   | { type: "bulldoze"; tileX: number; tileZ: number }
   | { type: "enqueue_research"; techId: number }
+  | { type: "set_law_active"; lawId: string; active: boolean }
   | { type: "set_speed"; level: GameSpeedLevel }
   | { type: "pause" }
   | { type: "resume" }
@@ -175,6 +176,14 @@ export type SimResources = {
   lawDefinitionCount?: number;
   /** WASM GetStatus — ordinances currently in effect. */
   activeLawCount?: number;
+  /** WASM GetStatus — first catalog entry for sample HUD toggle (v1.5 stub). */
+  sampleLaw?: LawPreview;
+};
+
+export type LawPreview = {
+  id: string;
+  name: string;
+  active: boolean;
 };
 
 /** Strip render payload from a full sim snapshot for HUD consumers. */

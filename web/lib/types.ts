@@ -52,6 +52,10 @@ export type FpsStats = {
   lodCounts: [number, number, number, number];
   pickedTile: PickResult;
   simSource?: "wasm" | "procedural";
-  /** 0–1 healthcare coverage heuristic from city buildings (M0). */
+  /** 0–1 mean health coverage over zoned tiles (WASM or M0 heuristic). */
   healthcareCoverage?: number;
+  /** 0–1 mean police coverage over zoned tiles (WASM). */
+  policeCoverage?: number;
+  /** 0–1 mean fire coverage over zoned tiles (WASM). */
+  fireCoverage?: number;
 };

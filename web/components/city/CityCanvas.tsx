@@ -105,6 +105,8 @@ export function CityCanvas({
     () => simResources?.healthcareCoverage ?? estimateHealthcareCoverage(city),
     [simResources?.healthcareCoverage, city],
   );
+  const policeCoverage = simResources?.policeCoverage;
+  const fireCoverage = simResources?.fireCoverage;
   const [dpr, setDpr] = useState(1);
   useEffect(() => {
     setDpr(Math.min(MAX_DPR, window.devicePixelRatio));
@@ -320,9 +322,11 @@ export function CityCanvas({
       dpr,
       simSource,
       healthcareCoverage,
+      policeCoverage,
+      fireCoverage,
     };
     onStats(latestStats.current);
-  }, [pickedTile, dpr, simSource, healthcareCoverage, onStats]);
+  }, [pickedTile, dpr, simSource, healthcareCoverage, policeCoverage, fireCoverage, onStats]);
 
   const handleRenderHealth = useCallback(
     (partial: Pick<FpsStats, "visibleBuildings" | "visibleChunks" | "totalBuildings">) => {
@@ -347,6 +351,8 @@ export function CityCanvas({
       dpr,
       simSource,
       healthcareCoverage,
+      policeCoverage,
+      fireCoverage,
       totalBuildings: city.buildings.length,
     };
     onStats(latestStats.current);

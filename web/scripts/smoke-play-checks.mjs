@@ -1106,6 +1106,54 @@ async function assertOptionalOverlayToolbars(page, tag) {
   }
 }
 
+/**
+ * Diagnostics HUD Coverage line — H/P/F % when WASM status or M0 heuristic exports values.
+ * Falls back to Services toolbar strip when diagnostics line is absent.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function assertServiceCoverageDiagnostics(page, tag) {
+  const hudText = await readDiagnosticsHud(page);
+  const coverageMatch = hudText.match(
+    /Coverage:\s*H\s*(\d+%|—)\s*·\s*P\s*(\d+%|—)\s*·\s*F\s*(\d+%|—)/,
+  );
+
+  if (coverageMatch) {
+    const [, health, police, fire] = coverageMatch;
+    const hasPct = [health, police, fire].some((v) => /^\d+%$/.test(v));
+    if (!hasPct) {
+      if (WASM_EXPECTED) {
+        fail(
+          tag,
+          `Diagnostics coverage line present but all placeholders (H ${health} · P ${police} · F ${fire})`,
+        );
+      }
+      console.log(
+        `[${tag}] NOTE: diagnostics coverage pending WASM status (H ${health} · P ${police} · F ${fire})`,
+      );
+      return;
+    }
+    pass(tag, `diagnostics HUD coverage (H ${health} · P ${police} · F ${fire})`);
+    return;
+  }
+
+  const servicesToolbar = page.getByTestId("services-toolbar");
+  if ((await servicesToolbar.count()) > 0) {
+    const toolbarText = await servicesToolbar.innerText();
+    const stripMatch = toolbarText.match(
+      /H\s*(\d+%|—)\s*·\s*P\s*(\d+%|—)\s*·\s*F\s*(\d+%|—)/,
+    );
+    if (stripMatch) {
+      pass(tag, `service coverage on toolbar strip (${stripMatch[0]})`);
+      return;
+    }
+  }
+
+  console.log(
+    `[${tag}] NOTE: service coverage not shown in diagnostics HUD or services toolbar`,
+  );
+}
+
 /** @param {import('playwright').Page} page @param {string} tag */
 async function readDiagnosticsHud(page) {
   return page.locator("div").filter({ hasText: "Diagnostics" }).first().innerText();
@@ -1286,6 +1334,7 @@ export async function runPlayChecks(page, options = {}) {
   await assertCitizenDotsRender(page, tag);
   await assertLawPanel(page, tag);
   await assertOptionalOverlayToolbars(page, tag);
+  await assertServiceCoverageDiagnostics(page, tag);
 
   if (options.screenshotPath) {
     await page.screenshot({ path: options.screenshotPath, fullPage: false });

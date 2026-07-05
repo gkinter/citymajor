@@ -25,8 +25,17 @@ const sectionTitle: CSSProperties = {
   color: HUD_COLORS.textMuted,
 };
 
+function formatCoveragePct(value: number | undefined): string {
+  if (value === undefined) return "—";
+  return `${Math.round(value * 100)}%`;
+}
+
 export function FpsHud({ stats, totalBuildings, activeTool }: FpsHudProps) {
   const simLabel = stats.simSource === "wasm" ? "WASM sim" : "procedural";
+  const showCoverage =
+    stats.healthcareCoverage !== undefined ||
+    stats.policeCoverage !== undefined ||
+    stats.fireCoverage !== undefined;
 
   return (
     <div style={{ ...HUD_ZONE.bottomLeft, ...hudInfoPanel() }}>
@@ -39,6 +48,21 @@ export function FpsHud({ stats, totalBuildings, activeTool }: FpsHudProps) {
         {totalBuildings}
       </div>
       <div>LOD L0–L3: {stats.lodCounts.join(" / ")}</div>
+      {showCoverage ? (
+        <div
+          style={{
+            marginTop: 4,
+            fontFamily: "ui-monospace, monospace",
+            fontSize: 11,
+            color: HUD_COLORS.textDim,
+          }}
+          title="City-wide mean coverage over zoned tiles"
+        >
+          Coverage: H {formatCoveragePct(stats.healthcareCoverage)} · P{" "}
+          {formatCoveragePct(stats.policeCoverage)} · F{" "}
+          {formatCoveragePct(stats.fireCoverage)}
+        </div>
+      ) : null}
       {activeTool ? (
         <div style={{ marginTop: 4, opacity: 0.85 }}>
           <span style={hudLabel()}>Tool</span>

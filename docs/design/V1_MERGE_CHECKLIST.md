@@ -254,11 +254,11 @@ Art pipeline: [MESHY_ASSET_PIPELINE.md](./MESHY_ASSET_PIPELINE.md) · [MESHY_ASS
 | Batch script + seed manifest | `scripts/meshy/batch-generate.mjs` | **Done** |
 | **Asset catalog + batch manifests** | `MESHY_ASSET_CATALOG.md`, `generate-manifest-batches.mjs` | **Done** (`79ef561`) — 500-key taxonomy, P0–P3 batches [SB-3739](https://linear.app/softblaze/issue/SB-3739)–[SB-3747](https://linear.app/softblaze/issue/SB-3747) |
 | MCP gateway path | `6095f2f` — `MESHY_USE_MCP=1` | **Done** — Softblaze Meshy MCP when API key unset |
-| `SHIPPED_GLTF_KEYS` registry | `web/lib/gltf-catalog.ts` | **Done** — 30+ keys (`res_low_frontier_00`–`12` + industrial samples + heroes) |
-| **Spike manifest jobs** | `scripts/meshy/manifest.json` | **33 jobs** — 31 zone keys + 2 hero pilots (`6e68ef6`, `9e52e5c`) |
-| v1 minimum GLBs | ~80–120 core archetypes (Frontier + Industrial) | **Partial** — **19 Meshy GLBs** on disk; P0 **17/108** shipped; 13 procedural placeholders |
-| Hero landmarks | 8 pilot heroes | **Partial** — `hero_frontier_city_hall.glb` LFS + `hero_frontier_church` WT; era-gate spawn + GLB probe ([SB-3719](https://linear.app/softblaze/issue/SB-3719)) |
-| On-disk assets | `web/public/assets/gltf/{era}/*.glb` | **Partial** — frontier `res_low` 00–12 + industrial samples; P0 batch [SB-3740](https://linear.app/softblaze/issue/SB-3740) |
+| `SHIPPED_GLTF_KEYS` registry | `web/lib/gltf-catalog.ts` | **Done** — 40+ keys (`res_low_frontier_00`–`17` + industrial samples + 2 heroes) |
+| **Spike manifest jobs** | `scripts/meshy/manifest.json` | **37 jobs** — frontier `res_low` 00–17 + era samples (`14a1881`) |
+| v1 minimum GLBs | ~80–120 core archetypes (Frontier + Industrial) | **Partial** — **25 Meshy GLBs** on disk; P0 **22/108** shipped; 13 procedural placeholders |
+| Hero landmarks | 8 pilot heroes | **Partial** — `hero_frontier_city_hall` + `hero_frontier_church` LFS; era-gate spawn + GLB probe ([SB-3719](https://linear.app/softblaze/issue/SB-3719), [SB-3741](https://linear.app/softblaze/issue/SB-3741)) |
+| On-disk assets | `web/public/assets/gltf/{era}/*.glb` | **Partial** — frontier `res_low` 00–17 + industrial samples; P0 batch [SB-3740](https://linear.app/softblaze/issue/SB-3740) |
 | Runtime fallback | InstancedMesh + procedural modules | **Works** — merge OK for spine, not for art-complete v1 |
 
 ### Meshy GLBs on disk (production-quality)
@@ -280,17 +280,24 @@ Art pipeline: [MESHY_ASSET_PIPELINE.md](./MESHY_ASSET_PIPELINE.md) · [MESHY_ASS
 | `res_low_frontier_10` | frontier | Meshy LFS (`ea216de`) |
 | `res_low_frontier_11` | frontier | Meshy (`6e68ef6`) |
 | `res_low_frontier_12` | frontier | Meshy (`6e68ef6`) |
+| `res_low_frontier_13` | frontier | Meshy LFS (`82d56ab`) |
+| `res_low_frontier_14` | frontier | Meshy LFS (`82d56ab`) |
+| `res_low_frontier_15` | frontier | Meshy LFS (`82d56ab`) |
+| `res_low_frontier_16` | frontier | Meshy LFS (`cd803b2`, `14a1881`) |
+| `res_low_frontier_17` | frontier | Meshy LFS (`14a1881`) |
 | `ind_industrial_00` | industrial | Meshy MCP (`79ef561`) |
 | `res_high_industrial_00` | industrial | Meshy MCP (`86dd2ff`) |
 | `res_low_industrial_00` | industrial | Meshy MCP (`3076c29`) |
 | `hero_frontier_city_hall` | heroes | Meshy LFS (`de480ec`) |
+| `hero_frontier_church` | heroes | Meshy LFS (`0e555de`) |
 
-### LFS-shipped (on remote + preview at `9e52e5c`)
+### LFS-shipped (on remote + preview at `14a1881`)
 
 | Key | Era | Status |
 |-----|-----|--------|
-| `res_low_frontier_02`–`10` | frontier | **Pushed** — 9 LFS zone GLBs |
+| `res_low_frontier_02`–`17` | frontier | **Pushed** — 16 LFS zone GLBs |
 | `hero_frontier_city_hall` | heroes | **Pushed** (`de480ec`) |
+| `hero_frontier_church` | heroes | **Pushed** (`0e555de`) |
 | `com_industrial_00` | industrial | LFS pointer; procedural on disk until Meshy re-export |
 
 ### Raw-blob zone GLBs (migrate TBD)
@@ -355,7 +362,7 @@ Founder Pass ($24.99) per [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) §5.
 
 **Docs:** Stripe env vars + webhook FQDN — quick ops [`STRIPE_COOLIFY_SETUP.md`](../STRIPE_COOLIFY_SETUP.md); full walkthrough [`DEPLOY_WEB.md`](../DEPLOY_WEB.md) (`2ce1bb1`).
 
-**Status (preview `9e52e5c`):** **Mock checkout active** — `GET /api/shop` → `stripeCheckoutEnabled: false`, `missing: ["STRIPE_SECRET_KEY","STRIPE_FOUNDER_PASS_PRICE_ID"]`. Live Stripe optional for integration merge, **required for launch**.
+**Status (preview `14a1881`):** **Mock checkout active** — `GET /api/shop` → `stripeCheckoutEnabled: false`, `missing: ["STRIPE_SECRET_KEY","STRIPE_FOUNDER_PASS_PRICE_ID"]`. Live Stripe optional for integration merge, **required for launch**.
 
 ---
 
@@ -381,7 +388,7 @@ Targets from [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) §4 and `web/PERF.md`.
 
 ### CI automation (`817b1a1`)
 
-Manual-dispatch workflow `.github/workflows/perf-gate.yml` runs `pnpm perf:gate` on `workflow_dispatch` with **LFS checkout** (`e4d707c`, matches `d5b8daa` on `ci-smoke`). `.github/workflows/smoke.yml` runs on push — **green** on `9e52e5c` (`93f4341`).
+Manual-dispatch workflow `.github/workflows/perf-gate.yml` runs `pnpm perf:gate` on `workflow_dispatch` with **LFS checkout** (`e4d707c`, matches `d5b8daa` on `ci-smoke`). `.github/workflows/smoke.yml` runs on push — **green** on `14a1881` (`93f4341`).
 
 **Software renderer behavior:** Headless Chromium on GHA/ubuntu-latest reports `maxFps` &lt; 15 (software WebGL). With default `PERF_GATE_STRICT=0`, the gate **skips** threshold and exits 0. With `PERF_GATE_STRICT=1` (or `PERF_SOFT_RENDERER_MAX=0`), the gate **fails** — min FPS 1–2 &lt; 30. This is **expected** on headless CI; it is **not** a product regression and **does not block PR #1 spine merge**.
 
@@ -413,8 +420,8 @@ Only these block merging PR #1 to `main`. Everything else is **post-merge** or *
 | ID | Title | Milestone | Spine merge? |
 |----|-------|-----------|--------------|
 | ~~[SB-3715](https://linear.app/softblaze/issue/SB-3715)~~ | ~~Coolify deploy — preview app~~ | **Done** — `citymajor-web` | — |
-| — | Smoke **41/41** WASM on preview + GHA green | M4 Launch | **Required** — green on `9e52e5c` |
-| — | Bugbot NEUTRAL, zero Critical/Major | M4 Launch | **Required** — `9e52e5c` |
+| — | Smoke **42/42** WASM deploy parity (local + preview + GHA) | M4 Launch | **Required** — green on `14a1881` |
+| — | Bugbot NEUTRAL, zero Critical/Major | M4 Launch | **Required** — `14a1881` |
 | — | Coolify preview current (manual deploy OK) | M4 Launch | **Required** — FQDN 200 |
 
 ### v1 launch NO-GO (post-merge — do not call shipped)
@@ -436,8 +443,8 @@ Only these block merging PR #1 to `main`. Everything else is **post-merge** or *
 | ~~[SB-3690](https://linear.app/softblaze/issue/SB-3690)~~ | Leontief economy + trade | **Panel + trade HUD shipped**; full I/O matrix deferred |
 | ~~[SB-3691](https://linear.app/softblaze/issue/SB-3691)~~ | Utility grid & service overlays | **Shipped** (`3066f59`) |
 | ~~[SB-3719](https://linear.app/softblaze/issue/SB-3719)~~ | Era landmark placeholder | **Shipped** (`ce31f4f`) |
-| [SB-3678](https://linear.app/softblaze/issue/SB-3678) | Meshy asset pipeline | Catalog + **33 manifest jobs** done; batch run pending |
-| [SB-3680](https://linear.app/softblaze/issue/SB-3680) | Hero landmark pipeline | GLB probe + procedural fallback in scene |
+| [SB-3678](https://linear.app/softblaze/issue/SB-3678) | Meshy asset pipeline | Catalog + **37 manifest jobs** done; batch run pending |
+| [SB-3680](https://linear.app/softblaze/issue/SB-3680) | Hero landmark pipeline | **2/8** heroes LFS (`city_hall`, `church`); GLB probe + procedural fallback in scene |
 
 ### In progress / triage (non-blocking for PR spine merge)
 
@@ -460,13 +467,13 @@ Only these block merging PR #1 to `main`. Everything else is **post-merge** or *
 
 ### Safe to merge PR #1 spine when
 
-- [x] Bugbot NEUTRAL or clean on HEAD (`9e52e5c`) — **NEUTRAL**, zero Critical/Major
-- [x] Smoke **41/41** preview WASM + local on WASM build + `verify:tech-unlocks` pass
-- [x] GHA `smoke` workflow **green** on `9e52e5c` (Node 22, `93f4341`)
-- [x] Coolify preview **current** — `https://citymajor.apps.softblaze.net` on `9e52e5c` ([SB-3715](https://linear.app/softblaze/issue/SB-3715) Done; **manual deploy** until webhook fix)
+- [x] Bugbot NEUTRAL or clean on HEAD (`14a1881`) — **NEUTRAL**, zero Critical/Major
+- [x] Smoke **42/42** deploy parity — preview WASM + local on WASM build + GHA green + `verify:tech-unlocks` pass
+- [x] GHA `smoke` workflow **green** on `14a1881` (Node 22, `93f4341`)
+- [x] Coolify preview **current** — `https://citymajor.apps.softblaze.net` on `14a1881` ([SB-3715](https://linear.app/softblaze/issue/SB-3715) Done; **manual deploy** until webhook fix)
 - [x] Phase 2 gameplay sprint shipped — roads, traffic, events, citizens, services, research UX, onboarding, landmarks
 - [x] Phase 3 kickoff stability — black canvas fix, economy panel, overlay a11y (`79ef561`)
-- [x] Phase 3 wave 4 — herald commands, era gates, tech bridge, CMJR/citizen/law/trade/LLM paths + `place_road` smoke (`9e52e5c`)
+- [x] Phase 3 wave 4 — herald commands, era gates, tech bridge, CMJR/citizen/law/trade/LLM paths + `place_road` smoke + **2 hero GLBs** (`14a1881`)
 - [x] Team acknowledges Meshy partial batch / Stripe live / **GPU** perf sign-off / **webhook manual deploy** as **post-merge** parallel tracks ([SB-3726](https://linear.app/softblaze/issue/SB-3726))
 
 ### Do **not** call v1 launched until (narrowed NO-GO)
@@ -485,7 +492,7 @@ Only these block merging PR #1 to `main`. Everything else is **post-merge** or *
 |-----|---------|
 | [DEPLOY_WEB.md](../DEPLOY_WEB.md) | Coolify + Docker + env vars |
 | [MESHY_ASSET_CATALOG.md](./MESHY_ASSET_CATALOG.md) | 500-key taxonomy + batch manifests |
-| [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPLAY_BUILD_PLAN.md) | Phase 2 shipped · Phase 3 active · wave-4 `9e52e5c` |
+| [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPLAY_BUILD_PLAN.md) | Phase 2 shipped · Phase 3 active · wave-4 `14a1881` |
 | [WASM_SIM_BRIDGE.md](./WASM_SIM_BRIDGE.md) | Worker / snapshot contract |
 | [SAVE_FORMAT_WEB.md](./SAVE_FORMAT_WEB.md) | CMJR cloud save schema (§3 — wave-2 interim JSON chunk) |
 | [GAP_AUDIT_DESIGN_DOCS.md](./GAP_AUDIT_DESIGN_DOCS.md) | Doc contradictions resolved |

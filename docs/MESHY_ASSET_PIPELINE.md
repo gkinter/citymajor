@@ -120,6 +120,21 @@ Do **not** rename archetype keys when swapping art — rendering applies state (
 
 ---
 
+## Git LFS (Meshy GLBs)
+
+Meshy refine outputs are **~8–12 MB each**; a full v1 spike batch (20 keys) is **~140 MB** on disk — above the ~50 MB practical git commit threshold. **Do not commit raw GLBs to git** without LFS.
+
+```bash
+# One-time repo setup (when ready to version art in git)
+git lfs install
+git lfs track "web/public/assets/gltf/**/*.glb"
+git add .gitattributes
+```
+
+Until LFS is enabled, keep generated GLBs **local or on CDN** (see SB-3682). Commit only `scripts/meshy/batch-generate.mjs`, manifests, and catalog wiring. Regenerate on CI/preview hosts via `MESHY_USE_MCP=1 pnpm meshy:batch:mcp -- --skip-existing` or direct `MESHY_API_KEY` + `pnpm meshy:batch`.
+
+---
+
 ## Future integration
 
 - `BuildingInstances` (or a dedicated `GltfBuildingInstances`) will `useGLTF(resolveGltfPath(key))` with fallback to procedural boxes when a path is missing.

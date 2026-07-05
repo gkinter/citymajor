@@ -4,6 +4,13 @@
  *
  * Prereq: pnpm dev (or pnpm dev:wasm) on BASE_URL (default http://localhost:3000)
  *
+ * Prod smoke against preview/live: target must set CITYMAJOR_SESSION_SECRET (≥32 chars)
+ * or save API checks auto-skip on 500; override with SMOKE_SKIP_SAVES=1.
+ *
+ * CI (see .github/workflows/ci-smoke.yml):
+ *   SMOKE_SKIP_SAVES=1 PLAY_VIEWPORT=1280x720 HEADLESS=1 pnpm smoke:all
+ *   # or: pnpm smoke:ci
+ *
  *   pnpm smoke:all
  *   SCREENSHOT=1 pnpm smoke:all   # saves test-results/smoke-play.png
  *
@@ -18,8 +25,10 @@ import {
   BASE_URL,
   HEADLESS,
   SCREENSHOT,
+  SMOKE_NARRATIVE,
   TIMEOUT_MS,
   assertHttpOk,
+  assertNarrativeEventApi,
   fail,
   pass,
 } from "./smoke-lib.mjs";
@@ -31,7 +40,7 @@ const WEB_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 function runTechUnlocksPrecheck() {
   const result = spawnSync(
     process.execPath,
-    ["./scripts/verify-tech-unlocks.mjs"],
+    ["--experimental-strip-types", "./scripts/verify-tech-unlocks.mts"],
     { cwd: WEB_ROOT, stdio: "inherit" },
   );
   if (result.status !== 0) {
@@ -61,6 +70,10 @@ async function main() {
 
     for (const route of ["/", "/shop", "/play"]) {
       await assertHttpOk(TAG, route);
+    }
+
+    if (SMOKE_NARRATIVE) {
+      await assertNarrativeEventApi(TAG);
     }
 
     browser = await chromium.launch({ headless: HEADLESS });

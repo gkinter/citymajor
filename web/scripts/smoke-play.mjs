@@ -11,6 +11,8 @@
  *   BASE_URL=http://127.0.0.1:3000 node web/scripts/smoke-play.mjs
  *   PERF_GATE=1 pnpm smoke:play   # smoke + FPS threshold gate
  *
+ * Prod: CITYMAJOR_SESSION_SECRET on target required for /api/saves checks (auto-skip if missing).
+ *
  * First run: npx playwright install chromium
  */
 import { chromium } from "playwright";

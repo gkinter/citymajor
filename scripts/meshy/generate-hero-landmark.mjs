@@ -3,7 +3,7 @@
  * Generate a single hero landmark GLB via Meshy MCP → web/public/assets/gltf/heroes/
  * Usage: MESHY_USE_MCP=1 node scripts/meshy/generate-hero-landmark.mjs [basenameWithoutExt]
  */
-import { mkdirSync, existsSync } from "node:fs";
+import { mkdirSync, existsSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Document, NodeIO, getBounds } from "@gltf-transform/core";
@@ -20,13 +20,49 @@ const HERO_BRIEFS = {
     prompt:
       "Mid-fidelity game asset, 1850s American frontier town hall, two-story wooden clapboard with covered porch, bell tower cupola, whitewashed timber walls with brown trim, peaked shingle roof, flagpole, gas lamp by entrance, simple symmetrical facade, clean readable silhouette, no surrounding terrain, isolated building on flat ground, PBR game-ready, orthographic-friendly three-quarter view",
     target_polycount: 3500,
-    ai_model: "meshy-6",
+    ai_model: "meshy-5",
   },
   hero_frontier_church: {
     prompt:
       "Mid-fidelity game asset, 1860s frontier wooden church, white painted clapboard walls, steep gabled roof, simple steeple with cross, arched double doors, tall narrow windows, small cemetery-free isolated building, warm timber and white palette, clean silhouette for city builder game, PBR game-ready, no landscape",
     target_polycount: 3000,
-    ai_model: "meshy-6",
+    ai_model: "meshy-5",
+  },
+  hero_industrial_steel_mill: {
+    prompt:
+      "Mid-fidelity game asset, Victorian industrial steel mill complex 1890s, red brick main hall with tall chimney stacks, sawtooth clerestory roof, iron trusses, blast furnace pipe, coal hopper, soot-stained brick and dark iron, compact factory footprint, no workers, isolated building on flat pad, city builder landmark, PBR game-ready, readable silhouette from distance",
+    target_polycount: 7500,
+    ai_model: "meshy-5",
+  },
+  hero_industrial_train_station: {
+    prompt:
+      "Mid-fidelity game asset, Victorian era grand train station 1905, red brick and sandstone facade, clock tower, arched windows, iron and glass canopy over platform entrance, Edwardian civic architecture, symmetrical front elevation, no train tracks or locomotive, isolated building on flat ground, city builder game landmark, PBR game-ready",
+    target_polycount: 6000,
+    ai_model: "meshy-5",
+  },
+  hero_postwar_civic_hall: {
+    prompt:
+      "Mid-fidelity game asset, 1930s Art Deco city hall, stepped ziggurat crown, limestone and cream concrete facade, vertical chrome fins, tall central tower, geometric relief patterns, flat roof sections, civic government building, no flags with text, isolated on flat pad, city builder landmark, PBR game-ready, clean 3/4 view silhouette",
+    target_polycount: 5500,
+    ai_model: "meshy-5",
+  },
+  hero_postwar_hospital: {
+    prompt:
+      "Mid-fidelity game asset, 1950s modernist general hospital, white and cream concrete wings, flat roofs with small mechanical penthouse, red cross emblem on central bay, ribbon windows, ambulance bay canopy, clean institutional architecture, isolated building no parking lot details, city builder service building, PBR game-ready",
+    target_polycount: 5000,
+    ai_model: "meshy-5",
+  },
+  hero_modern_glass_tower: {
+    prompt:
+      "Mid-fidelity game asset, 1980s modern glass office civic tower, blue reflective curtain wall, steel mullions, flat roof with mechanical bulkhead, square footprint skyscraper proportion, lobby glass at base, no surrounding plaza furniture, isolated tower on flat ground, city builder landmark, PBR game-ready, readable window grid",
+    target_polycount: 4500,
+    ai_model: "meshy-5",
+  },
+  hero_future_eco_tower: {
+    prompt:
+      "Mid-fidelity game asset, 2040s sustainable eco civic tower, white curved facade with integrated vertical gardens, cyan solar glass panels, green roof terrace, soft organic geometry mixed with clean tech lines, holographic accent bands without readable text, isolated building on flat pad, city builder future era landmark, PBR game-ready",
+    target_polycount: 6500,
+    ai_model: "meshy-5",
   },
 };
 
@@ -178,6 +214,25 @@ async function main() {
   const io = new NodeIO();
   await io.write(outPath, document);
   console.log(`  ✓ wrote ${outPath}`);
+  const metaPath = join(HERO_ROOT, `${key}.meshy.json`);
+  writeFileSync(
+    metaPath,
+    JSON.stringify(
+      {
+        key,
+        brief,
+        preview_task_id: previewId,
+        refine_task_id: refineId,
+        model_urls: refineTask.model_urls,
+        generated_at: new Date().toISOString(),
+        output_bytes: (await import('node:fs')).statSync(outPath).size,
+      },
+      null,
+      2,
+    ),
+  );
+  console.log(`  ✓ wrote ${metaPath}`);
+
 }
 
 main().catch((e) => {

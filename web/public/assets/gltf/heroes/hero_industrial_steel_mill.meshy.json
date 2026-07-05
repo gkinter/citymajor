@@ -1,0 +1,20 @@
+{
+  "key": "hero_industrial_steel_mill",
+  "brief": {
+    "prompt": "Mid-fidelity game asset, Victorian industrial steel mill complex 1890s, red brick main hall with tall chimney stacks, sawtooth clerestory roof, iron trusses, blast furnace pipe, coal hopper, soot-stained brick and dark iron, compact factory footprint, no workers, isolated building on flat pad, city builder landmark, PBR game-ready, readable silhouette from distance",
+    "target_polycount": 7500,
+    "ai_model": "meshy-5"
+  },
+  "preview_task_id": "019f3119-0f94-76a9-b2fb-d411cd2e6d8d",
+  "refine_task_id": "019f3123-e343-78a5-a2f2-3e9a306149eb",
+  "model_urls": {
+    "glb": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3123-e343-78a5-a2f2-3e9a306149eb/output/model.glb?Expires=4936809600&Signature=CLB1zKwkmVLy85P4bAiUFJaTqU3Q7zsceXR3kpJUuuraeVE26KX6swgB73763Y6U78Aoc-uaNAvcJY7kVSbZIe8FsSO77in6OmKVW2Ht4Jo47C1kSaaGZPanZ7PYueDlZFPWgmV77-~jVpezvKoUicDQaw9wnP-qdrnl1dfGQ3hLVDlR8k4AtDNhqr8Wm0NdqwKk9cJ~cH37UFYBiJLd~YrlNIpaqfvXLjQ9PGmXOHkq9gEGKS8hdRYG0SH1YUIVuLFrrWHATtDlk4y4oKDyeblHGHoy5WT1PvtNxLvD7zIe2c0z0JxR784CaC6zCSB3AOpdbXAkcSyHBIqCnmZv6w__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "fbx": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3123-e343-78a5-a2f2-3e9a306149eb/output/model.fbx?Expires=4936809600&Signature=eiU5QyTNmv9Lb00zPwi4mUMWsjeTZzlaoDRh294EvEElPOvATRfcNX22euBLzGi53tqb7FxLHjJsawQRnCkUPForz9R~uMsNT8sJBX-p3ssxDIRWJKfbaojDyJqeHTx5zN0uZ2w2ZyvPt8PIasyjjYQ1gF3wTHR6fnxX5E7tiS5zUTyu~vIN7yw7dhlTgfN85hkKKoAMfdhRSdGzcuNV139C4LpOw54hd51eXtikRn54OP33-jjQHMhdqfHNKnCnASVY6nsJa~5h28kzcXl1aYE7aZDH3Mo1IHuXTUe1aLZL2Pifd319VayjSp7cKSqlRnGRaT1-1AjEdtFkB3MoOw__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "usdz": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3123-e343-78a5-a2f2-3e9a306149eb/output/model.usdz?Expires=4936809600&Signature=jd0Ah-3GmtQsG-HNsDEzQHRHOv3hfNSC5t1iHelea-uLXMdbwfMYikAMLpmgE5m93hN7vfoM5V556i2lUNMl3SHn3OVcsHmu6rPnP5GmnUtXR7zCs5Cq-rKBp5s8oslClNLVtfJJh6xRj-XjP-YuUluW3wZxxSkX7Oe5LURJw3whEFpgmEvEJ8OE47qfZ97HIWcnte8PtMqZlhk2wDBqs5agAGLoTgC~BqWAwol4DLJ69anMUghwI8KHgnKIVODcq7gw8CtyrEWoXwVhZiAhRzJT8j7HiJzklgEEkn0RNTKcJEpv6avM6TfLWCaUpLEWnJECXVaPWgYASrM0m~Q-DA__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "obj": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3123-e343-78a5-a2f2-3e9a306149eb/output/model.obj?Expires=4936809600&Signature=iilXk-QmYSIVXbBHJydqSOuJV85POJonreS5QeHKRAxj2pl1zexQWCwz2eFR58DpvGCIPdHEBZjCCNao7Xgy6SQxhIbGdIZzQOpj146LhI1b6Z-oeQSwQ7bkGJbaSUVWnpgcMnrj8AiUOoZ2u7b9s4A3C-JHZFhyTxGt3MKFuona3x6Tu3oZ22x38WhCFRqPI9oDZNlD4v~t9MV5H2QH4ni14x35lZtZHMugupoBzW97bruop1lOdM2UP5ygKVYTd5B8hH8rDoXQPBErxRUzdEilqqwlRhnVVXIUMSkYKRovP7dV9qMlYt5Wsm076AcCRdb6Vc5xw29zVY~F0IywyA__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "mtl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3123-e343-78a5-a2f2-3e9a306149eb/output/model.mtl?Expires=4936809600&Signature=qIjVF-8X2VlhWEuTHl-foMxikvW2LxaTyark21fq5yKywX2BHBsvB-7ekfaH7fCgp9tPRYcWiJjcaNXrRaI0hsM0grtd4~R~UbyMNJsiV3EJse7JpU1uQf8Dw1tWmc5oDXzatUvVeoaE7xMx6grINfpe-F7CFY97e7Fo06IjPHaCRZDEgeZbE49KdQVdpiZU2-nyd1obvImJu5-vH9wTnqDE4PyX9btVGd0Sdd4ys5bwTei03E9g7naG783wOXL-02l5vwduK4BltFVlToSdGg4js1dg0DBP4~EGIsoU0y7TUK-UHfV5DNX3L2YWPqPzGCWwUQrumUpJu-JS5BVk0A__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "stl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3123-e343-78a5-a2f2-3e9a306149eb/output/model.stl?Expires=4936809600&Signature=fBytRGX7jyD2Sne1E80XSfVHMb4cQ3HQfqdAMMlfWXUiy4JZ0mHbFlvv7Mlnw-jfmH2H-i8cFGcYnNgBdlBau1mhKf7e1h666UI~intx9l6Qjp0O-Tz7A~7cdUxwnNs6Q8DLig66r7lBONXuyjVl2yKU0KynLNhMVuRcONyLCx17oo3VmTp8N1zcQcNsdJ3WAO3oD7ZnzN5mN9E2~p45RTZWZBfRAEFuSZ6qdxqYU7uB07iLckZ9d0p910Pmnvmyiu2P4qqezg-qmG3UD9fqs-UpeZMHqg7wx0P0atrVDntzc5Um2i4S4YPqOgEK5i7SdLljwkRwxPyOJd~LKe8qfw__&Key-Pair-Id=K1VGYTHIYLM9UM"
+  },
+  "generated_at": "2026-07-05T07:19:36.979Z",
+  "output_bytes": 9427956
+}

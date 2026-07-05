@@ -1,0 +1,20 @@
+{
+  "key": "hero_postwar_hospital",
+  "brief": {
+    "prompt": "Mid-fidelity game asset, 1950s modernist general hospital, white and cream concrete wings, flat roofs with small mechanical penthouse, red cross emblem on central bay, ribbon windows, ambulance bay canopy, clean institutional architecture, isolated building no parking lot details, city builder service building, PBR game-ready",
+    "target_polycount": 5000,
+    "ai_model": "meshy-5"
+  },
+  "preview_task_id": "019f312a-f0cd-7978-8347-a95955622df1",
+  "refine_task_id": "019f312c-8804-7947-99d0-88977c08bc6f",
+  "model_urls": {
+    "glb": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312c-8804-7947-99d0-88977c08bc6f/output/model.glb?Expires=4936809600&Signature=EjJfemZF-ARkhQbyrEPqBNl-VrzSSpxomoQBVnZlG6DPuaWMRJkQH5SVvPDTK6xJmwvF6DpDzjHDUV9S-PuSnN7XGAKRQ41PJ0vk5olCGMLPtVf0OB7AJCtlSglzXqtQ~UCIpaMPiS69o0msAsmZOYjOaDB5BtIiL6QCU1rfDeM-4QYEjQfIriaepMycDxAJ2Aqp0gqxoG72xIYzR1rcNKbbEtTe0TlBZKKaLXY3JtRTU99rdctsYv~9Snz702YLOA9WLpNr7h46dR3PMnQ8URUZDzV4DTnpLttLCk9A~Tf1LEk9du9ZU9kQ7-sjskLEiOD8a7YTORbSQdV8ZiYR~Q__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "fbx": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312c-8804-7947-99d0-88977c08bc6f/output/model.fbx?Expires=4936809600&Signature=eLPl7Qn1rQLNxRAn3xvsZN0vjzdngSUXSHAHh5y5xbMk6o7MaRYmEcv4MoBKWHI7XuJn2M58iZp5Jm9T8Y~7Lh9YreKqOZW8ckywl2IHDr1VzxfbOMMQjTYxZMpKLhYxz961SkcFZ-NvR0WeTgsUFdt1pN5Ny97GAhTvdbMpJHg8EHdxT~U~BvUiT9sx9FVJoHbHOSnkKv-roMlFDj~WaoWaPA1wsJHxx51jxkyE8Qj3yEitk3vlKOR4mTaxsKygVzHYyGS3XNj4X95Djgzxm1dnwkQgFd~FxpAwRSKlQQXeoE8vF3t5RUywoWBHGkeYAC8EU4pWteg-N-s4p440lg__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "usdz": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312c-8804-7947-99d0-88977c08bc6f/output/model.usdz?Expires=4936809600&Signature=d8Yt8dooP4hEb1Qbk8knl9FaKxghu7GO-rdnd4U6QDmByjcYbGyoWneFHmWMHJC7xfypr6jjrN~GB2u0ZCKaCo8TTSPHVI0SU9iqfF3amlYBSevC-IHHEcmIGfzWi0hMm9xiBQ7dXhMaA98odjQms217aNyb8fO0Csx462t6eiVMdXURpgEJWSqU4vPxMb0CHQrZteoE3ogp~0uN7VAUXuFO7~rVxnkoB~lx5ZMp2Xim-VEhWhrHWahgoS4Epmo3k7Xhb1roTXiXElufN06syix5nJzmfU8aYSxgUBWfuK~m~SvbFGM6LlFlNzLWojz482yjKGkX5DUCYut0z7sXPg__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "obj": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312c-8804-7947-99d0-88977c08bc6f/output/model.obj?Expires=4936809600&Signature=mbdpDaLkZIWHx4X9Ml36~X3IXi9a4O2zKnDmKZ4RcxFnfCa88bdHb35c54XhoXQyzc1MV9WKyU8Va9TKloW9NTQQgrFPNQ0lMKBq9fnqAZXRuwmcKZ7UNAomAyo1v73j1PpGrH56a1sra8JbSv7iUaJPCXSB0HVPyF~HAZZsufPNtV9sN5Od5WAbRWpYd1kkUYSBI7loAwYqtJaqRf8SNMI~0YomUwnTJvwxYCwGIMCRsghzRe0DKf~0EurkknmIFxASc~JYCcz8qySqY60AlEjLUjlY0cNtx2fD1a5rvXkUfBvJt6xYYKD9iUtMItn04iPnBdY1gZCCJrFdsQJSMA__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "mtl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312c-8804-7947-99d0-88977c08bc6f/output/model.mtl?Expires=4936809600&Signature=ZKCKBGjgurDFAOy0Kcbu4ZcGcfEVajPFgQOr5FXyYUMdX~~r-DsvvKr~KvlGH7G9BSmOSXSLAVfhdTk0RI~EOHRYnsMLCKzs4LplIOMkoGeH5fOiAoCrcSUgEw40b6eMuMb3pJiosVRy4PnGUAAYckz5JpFodtipo4NHX99hhkw5npwX1b-gJLg1wS7HjfeL91aM7Dja4barO1QpdiAgplwPfr1PgB2RPL~RdWps6eTCpVsB61jjP9WFc8KJHI2JNUKQSgx9xf~fcS3CRNJuFL5GoFqhfUJqsoTNIEXxJOE~KcUGmUzXPQZBThEXatz6WYObbDjzkWz5v5o7L9nlYg__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "stl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312c-8804-7947-99d0-88977c08bc6f/output/model.stl?Expires=4936809600&Signature=Qz18pmkGhDnKUEbtHEUJ0Fmnhp10L--sIsTAGIbj0kZD0E8iSrpbPFntIbPO~4SL0FOqPrm0560bP-t5V6gCE0fFHyFjpJhsxPl5ddke4XqmVz7iR71L0h3PGkb-w0bJh6hQFyFn3qkN7Z7lbKgeUwDA7sGLwhVGOJBoVIoeHkklK9d~PuuG1EGKZgYbiFObKPC5FhKoASdT0CPANFaU1meiFS-4-uqG3YRzG1f8QO65oGrlCVgRTcWIIguexrzRpSDM1ZtU3POdIfHRXLL-FmxNaK6WjsR7mTEiHV-KXn9aX21aiH3E8frYr7IOpXcnXFtU6r0NwVyz8RT67abVMQ__&Key-Pair-Id=K1VGYTHIYLM9UM"
+  },
+  "generated_at": "2026-07-05T07:28:59.469Z",
+  "output_bytes": 8955568
+}

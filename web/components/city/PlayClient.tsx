@@ -61,6 +61,7 @@ import { SpeedToolbar } from "@/components/city/SpeedToolbar";
 import { ZoningToolbar } from "@/components/city/ZoningToolbar";
 import { BuildToolbar } from "@/components/city/BuildToolbar";
 import { RoadTypeToolbar } from "@/components/city/RoadTypeToolbar";
+import { EducationToolbar } from "@/components/city/EducationToolbar";
 import { ServicesToolbar } from "@/components/city/ServicesToolbar";
 import type { ServiceViewMode } from "@/lib/sim-bridge";
 import {
@@ -74,8 +75,12 @@ import {
   DEFAULT_ROAD_TIER,
   type RoadTier,
 } from "@/lib/road-types";
+import {
+  isEducationBuildTypeId,
+  type EducationBuildTypeId,
+} from "@/lib/education-buildings";
 
-export type BuildMode = "zone" | "road" | "plop";
+export type BuildMode = "zone" | "road" | "plop" | "education";
 
 const NarrativeApiResponseSchema = NarrativeEventResponseSchema.extend({
   narrativeEventsRemaining: z.number().int().nonnegative().optional(),
@@ -462,8 +467,30 @@ export function PlayClient() {
 
   const handleBuildSelect = useCallback((typeId: number) => {
     setBuildTypeId(typeId);
-    setBuildMode("plop");
+    if (isEducationBuildTypeId(typeId)) {
+      setBuildMode("education");
+      setServiceViewMode("education");
+    } else {
+      setBuildMode("plop");
+    }
   }, []);
+
+  const handleEducationSelect = useCallback((typeId: EducationBuildTypeId | null) => {
+    setBuildTypeId(typeId);
+    if (typeId === null) {
+      setBuildMode((mode) => (mode === "education" ? "zone" : mode));
+      return;
+    }
+    setBuildMode("education");
+    setBuildOpen(false);
+  }, []);
+
+  const handleServiceViewModeChange = useCallback((mode: ServiceViewMode) => {
+    setServiceViewMode(mode);
+    if (mode !== "education" && buildMode === "education" && buildTypeId !== null) {
+      setBuildMode("plop");
+    }
+  }, [buildMode, buildTypeId]);
 
   const handleRoadTierSelect = useCallback((tier: RoadTier) => {
     setRoadTier(tier);
@@ -504,7 +531,9 @@ export function PlayClient() {
       <CityCanvas
         activeTool={canvasActiveTool}
         brushSize={brushSize}
-        buildTypeId={buildMode === "plop" ? buildTypeId : null}
+        buildTypeId={
+          buildMode === "plop" || buildMode === "education" ? buildTypeId : null
+        }
         roadTier={buildMode === "road" ? roadTier : undefined}
         gameSpeed={gameSpeed}
         qualityTier={qualityTier}
@@ -528,7 +557,7 @@ export function PlayClient() {
       />
       <ServicesToolbar
         viewMode={serviceViewMode}
-        onViewModeChange={setServiceViewMode}
+        onViewModeChange={handleServiceViewModeChange}
         healthcareCoverage={simResources?.healthcareCoverage}
         policeCoverage={simResources?.policeCoverage}
         fireCoverage={simResources?.fireCoverage}
@@ -553,9 +582,11 @@ export function PlayClient() {
           type="button"
           style={{
             ...hudActionButton(),
-            ...(buildOpen || buildMode === "plop" ? { fontWeight: 700 } : {}),
+            ...(buildOpen || buildMode === "plop" || buildMode === "education"
+              ? { fontWeight: 700 }
+              : {}),
           }}
-          aria-pressed={buildOpen || buildMode === "plop"}
+          aria-pressed={buildOpen || buildMode === "plop" || buildMode === "education"}
           title="Open build catalog — place civic and service buildings"
           onClick={() => setBuildOpen((open) => !open)}
         >
@@ -568,6 +599,18 @@ export function PlayClient() {
         onToolChange={handleToolChange}
         onBrushSizeChange={setBrushSize}
         rci={resolveRci(simResources)}
+        unlockedTechIds={simResources?.unlockedTechIds}
+      />
+      <EducationToolbar
+        viewMode={serviceViewMode}
+        onViewModeChange={handleServiceViewModeChange}
+        educationCoverage={simResources?.educationCoverage}
+        selectedTypeId={
+          buildMode === "education" && buildTypeId !== null && isEducationBuildTypeId(buildTypeId)
+            ? buildTypeId
+            : null
+        }
+        onSelectTypeId={handleEducationSelect}
       />
       {buildMode === "road" ? (
         <RoadTypeToolbar

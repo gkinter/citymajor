@@ -959,6 +959,161 @@
   outline-offset: 2px;
 }
 
+/* Herald panel — narrative event drawer */
+.hud-herald-panel {
+  font-family: var(--hud-font-mono);
+}
+
+.hud-herald-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hud-herald-status__eyebrow {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hud-text-dim);
+}
+
+.hud-herald-status__message {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--hud-text-muted);
+}
+
+.hud-herald-status--loading .hud-herald-status__eyebrow {
+  color: var(--hud-accent-highlight);
+}
+
+.hud-herald-status--error .hud-herald-status__eyebrow {
+  color: var(--hud-error);
+}
+
+.hud-herald-status--error .hud-herald-status__message {
+  color: var(--hud-error);
+}
+
+.hud-herald-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.hud-herald-skeleton__line {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(94, 200, 255, 0.08) 0%,
+    rgba(94, 200, 255, 0.22) 50%,
+    rgba(94, 200, 255, 0.08) 100%
+  );
+  background-size: 200% 100%;
+  animation: hud-herald-shimmer 1.4s ease-in-out infinite;
+}
+
+.hud-herald-skeleton__line--short {
+  width: 62%;
+}
+
+.hud-herald-skeleton__line--medium {
+  width: 84%;
+}
+
+.hud-herald-skeleton__line--headline {
+  height: 12px;
+  width: 92%;
+  margin-top: 4px;
+}
+
+@keyframes hud-herald-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.hud-herald-bucket {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--hud-text-dim);
+  margin-bottom: 8px;
+}
+
+.hud-herald-driver {
+  margin: 0 0 10px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--hud-accent-highlight);
+  opacity: 0.92;
+}
+
+.hud-herald-headline {
+  margin: 0 0 12px;
+  font-family: var(--hud-font-sans);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--hud-text);
+}
+
+.hud-herald-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--hud-text);
+  opacity: 0.92;
+}
+
+.hud-herald-options__heading {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hud-text-dim);
+  margin-bottom: 8px;
+}
+
+.hud-herald-option {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--hud-radius-sm);
+  border: 1px solid var(--hud-border-subtle);
+  background: var(--hud-row-bg);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.hud-herald-option:first-of-type {
+  margin-top: 0;
+}
+
+.hud-herald-option:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.hud-herald-option__label {
+  font-weight: 600;
+}
+
+.hud-herald-option__tradeoff {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
 /* Citizen panel — household stats + L2 drill-down */
 .hud-citizen-button {
   font-family: var(--hud-font-mono);

@@ -257,18 +257,20 @@ export function CityCanvas({
       if (!pick) return;
 
       const bridge = bridgeRef.current;
-      if (!bridge) return;
+      const wasmLive = bridgeReady && simSource === "wasm" && bridge;
 
       if (activeTool === "road") {
         setRoads((prev) =>
           paintRoadBrush(prev, pick.tileX, pick.tileZ, 1, brushSize),
         );
-        for (const [dx, dz] of brushTileOffsets(brushSize)) {
-          bridge.send({
-            type: "place_road",
-            tileX: pick.tileX + dx,
-            tileZ: pick.tileZ + dz,
-          });
+        if (wasmLive) {
+          for (const [dx, dz] of brushTileOffsets(brushSize)) {
+            bridge.send({
+              type: "place_road",
+              tileX: pick.tileX + dx,
+              tileZ: pick.tileZ + dz,
+            });
+          }
         }
         playPaintFeedback("road");
         return;
@@ -278,10 +280,12 @@ export function CityCanvas({
         setZones((prev) =>
           paintZoneBrush(prev, pick.tileX, pick.tileZ, 0, brushSize),
         );
-        for (const [dx, dz] of brushTileOffsets(brushSize)) {
-          const tileX = pick.tileX + dx;
-          const tileZ = pick.tileZ + dz;
-          bridge.send({ type: "bulldoze", tileX, tileZ });
+        if (wasmLive) {
+          for (const [dx, dz] of brushTileOffsets(brushSize)) {
+            const tileX = pick.tileX + dx;
+            const tileZ = pick.tileZ + dz;
+            bridge.send({ type: "bulldoze", tileX, tileZ });
+          }
         }
         playPaintFeedback("bulldoze");
         return;
@@ -291,20 +295,22 @@ export function CityCanvas({
       setZones((prev) =>
         paintZoneBrush(prev, pick.tileX, pick.tileZ, zoneType, brushSize),
       );
-      for (const [dx, dz] of brushTileOffsets(brushSize)) {
-        const tileX = pick.tileX + dx;
-        const tileZ = pick.tileZ + dz;
-        bridge.send({
-          type: "zone_paint",
-          tileX,
-          tileZ,
-          zoneType,
-        });
+      if (wasmLive) {
+        for (const [dx, dz] of brushTileOffsets(brushSize)) {
+          const tileX = pick.tileX + dx;
+          const tileZ = pick.tileZ + dz;
+          bridge.send({
+            type: "zone_paint",
+            tileX,
+            tileZ,
+            zoneType,
+          });
+        }
       }
       playPaintFeedback("zone");
       onZonePainted?.(zoneType);
     },
-    [activeTool, brushSize, onZonePainted],
+    [activeTool, brushSize, bridgeReady, simSource, onZonePainted],
   );
 
   useEffect(() => {

@@ -58,6 +58,12 @@
       "era": "industrial"
     },
     {
+      "key": "ind_industrial_01",
+      "prompt": "An industrial era factory or plant, brick walls, sawtooth roof, chimney, low poly, stylized game asset, silhouette variant 01",
+      "category": "ind",
+      "era": "industrial"
+    },
+    {
       "key": "ind_modern_00",
       "prompt": "A modern logistics warehouse, metal panels, sawtooth roof, loading bays, low poly, stylized game asset",
       "category": "ind",
@@ -68,6 +74,12 @@
       "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset",
       "category": "ind",
       "era": "postwar"
+    },
+    {
+      "key": "res_high_frontier_01",
+      "prompt": "A two-story frontier boarding house, wooden clapboard, flat roof with lip, low poly, stylized game asset, silhouette variant 01",
+      "category": "res_high",
+      "era": "frontier"
     },
     {
       "key": "res_high_industrial_00",
@@ -252,6 +264,12 @@
     {
       "key": "res_low_industrial_01",
       "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 01",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
+      "key": "res_low_industrial_02",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 02",
       "category": "res_low",
       "era": "industrial"
     },

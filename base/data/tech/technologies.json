@@ -1551,6 +1551,7 @@
     "cost_rp": 30,
     "prerequisites": [],
     "unlocks": [
+      "doctors_office",
       "outhouse",
       "well"
     ],
@@ -3420,7 +3421,9 @@
     "unlocks": [
       "city_wall",
       "watchtower",
-      "fort"
+      "fort",
+      "volunteer_fire_brigade",
+      "sheriffs_office"
     ],
     "effects": {
       "defense_strength": 0.3,

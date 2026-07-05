@@ -11,10 +11,21 @@ import { isContentUnlocked } from "@/lib/tech-unlocks";
 export const BUILD_CATEGORIES = [
   "Civic",
   "Education",
-  "Safety",
+  "Fire",
+  "Police",
+  "Health",
   "Utilities",
   "Parks",
 ] as const;
+
+/** Service build tabs aligned with AGENT_06 coverage overlays (Health/Police/Fire). */
+export const SERVICE_BUILD_CATEGORIES = [
+  "Fire",
+  "Police",
+  "Health",
+] as const;
+
+export type ServiceBuildCategory = (typeof SERVICE_BUILD_CATEGORIES)[number];
 
 export type BuildCategory = (typeof BUILD_CATEGORIES)[number];
 
@@ -58,15 +69,19 @@ const CONTENT_KEYS_BY_CATEGORY: Readonly<
     "museum",
     "signal_tower",
     "city_wall",
+    "watchtower",
+    "barracks",
   ],
   Education: ["elementary_school", "military_academy", "public_library"],
-  Safety: [
-    "fire_station",
-    "police_station",
-    "barracks",
-    "watchtower",
-    "vaccination_clinic",
+  /** AGENT_06 Phase 2 — volunteer brigade (Frontier) → professional station (Industrial). */
+  Fire: ["volunteer_fire_brigade", "fire_station"],
+  /** AGENT_06 Phase 3 — sheriff patrol post (Frontier) → precinct (Industrial). */
+  Police: ["sheriffs_office", "police_station"],
+  /** AGENT_06 Phase 4 — clinic (Frontier) → hospital tiers (Industrial). */
+  Health: [
+    "doctors_office",
     "hospital",
+    "vaccination_clinic",
     "surgical_wing",
   ],
   Utilities: [
@@ -130,7 +145,9 @@ export const BUILD_CATALOG: Readonly<
 > = {
   Civic: buildCategoryCatalog("Civic"),
   Education: buildCategoryCatalog("Education"),
-  Safety: buildCategoryCatalog("Safety"),
+  Fire: buildCategoryCatalog("Fire"),
+  Police: buildCategoryCatalog("Police"),
+  Health: buildCategoryCatalog("Health"),
   Utilities: buildCategoryCatalog("Utilities"),
   Parks: buildCategoryCatalog("Parks"),
 };

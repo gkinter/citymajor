@@ -203,8 +203,8 @@ function persistStore(store: Store): void {
   }
 }
 
-function userKey(req: Request): string {
-  return getUserIdFromRequest(req) ?? "anonymous";
+function userKey(req: Request, userId?: string): string {
+  return userId ?? getUserIdFromRequest(req) ?? "anonymous";
 }
 
 function toListItem(slot: SaveSlot): SaveSlotListItem {
@@ -246,9 +246,9 @@ function resolvePayload(slot: SaveSlot, userId: string): Record<string, unknown>
   return slot.payload ?? {};
 }
 
-export function listSaves(req: Request, tier: Tier) {
+export function listSaves(req: Request, tier: Tier, userId?: string) {
   const store = loadStore();
-  const key = userKey(req);
+  const key = userKey(req, userId);
   const saves = (store[key] ?? []).map(toListItem);
   const maxSlots = entitlementsForTier(tier).maxSaveSlots;
 
@@ -273,11 +273,12 @@ function withWriteLock<T>(fn: () => T): Promise<T> {
 export function getSave(
   req: Request,
   saveId: string,
+  userId?: string,
 ):
   | { ok: true; save: SaveSlot; downloadUrl: string | null }
   | { ok: false; status: 404; error: string } {
   const store = loadStore();
-  const key = userKey(req);
+  const key = userKey(req, userId);
   const slot = (store[key] ?? []).find((s) => s.id === saveId);
   if (!slot) {
     return { ok: false, status: 404, error: "Save not found" };
@@ -301,6 +302,7 @@ export function createSave(
   req: Request,
   tier: Tier,
   body: z.infer<typeof CreateSaveBodySchema>,
+  userId?: string,
 ): Promise<
   | {
       ok: true;
@@ -333,7 +335,7 @@ export function createSave(
       memoryStoreLoaded = true;
 
       const store = memoryStore;
-      const key = userKey(req);
+      const key = userKey(req, userId);
       const saves = [...(store[key] ?? [])];
       const maxSlots = entitlementsForTier(tier).maxSaveSlots;
 
@@ -436,6 +438,7 @@ export function createSave(
 export function deleteSave(
   req: Request,
   saveId: string,
+  userId?: string,
 ): Promise<
   | { ok: true; status: 204 }
   | { ok: false; status: 404; error: string }
@@ -447,7 +450,7 @@ export function deleteSave(
       memoryStoreLoaded = true;
 
       const store = memoryStore;
-      const key = userKey(req);
+      const key = userKey(req, userId);
       const saves = store[key] ?? [];
       const index = saves.findIndex((s) => s.id === saveId);
       if (index === -1) {

@@ -6,9 +6,7 @@ import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 import {
   hasGltfAsset,
-  resolveCatalogKey,
 } from "@/lib/gltf-catalog";
-import { isGltfCatalogLoaded, isGltfCatalogFailed } from "@/lib/gltf-load-state";
 import type { ChunkState, CityData } from "@/lib/types";
 import {
   composeInstanceMatrix,
@@ -86,16 +84,8 @@ export function BuildingInstances({
             : visual;
         if (visual.wireframe) bucketWireframe = true;
 
-        const catalogKey = resolveCatalogKey(key);
-        const gltfCoversL0 =
-          useGltf &&
-          catalogKey !== null &&
-          isGltfCatalogLoaded(catalogKey) &&
-          !isGltfCatalogFailed(catalogKey) &&
-          !hidden &&
-          lod === 0 &&
-          !visual.wireframe;
-        const showBox = !gltfCoversL0;
+        // Keep box fallbacks visible — hiding boxes when GLTF mounts caused black frames.
+        const showBox = !hidden;
         const rotationY = tileYawRadians(
           building.tileX,
           building.tileZ,
@@ -159,6 +149,8 @@ export function BuildingInstances({
               vertexColors
               roughness={0.65}
               metalness={metalnessForCategory(category)}
+              emissive="#101820"
+              emissiveIntensity={0.35}
             />
           </instancedMesh>
         ) : null

@@ -24,8 +24,10 @@ const HERO_BRIEFS = {
   },
 };
 
-async function mcpToolCall(toolName, toolArgs) {
+async function mcpToolCall(toolName, toolArgs, retries = 8) {
   const url = process.env.MESHY_MCP_URL?.trim() || DEFAULT_MCP_URL;
+  for (let attempt = 0; attempt < retries; attempt++) {
+  try {
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -59,6 +61,11 @@ async function mcpToolCall(toolName, toolArgs) {
     }
   }
   throw new Error(`Meshy MCP ${toolName}: empty response`);
+  } catch (err) {
+    if (attempt === retries - 1) throw err;
+    await sleep(3000 * (attempt + 1));
+  }
+  }
 }
 
 function sleep(ms) {
@@ -127,7 +134,10 @@ async function main() {
     return;
   }
 
+  const previewIdArg = process.argv.find((a) => a.startsWith("--preview-id="))?.slice("--preview-id=".length);
   console.log(`▶ ${key} via Meshy MCP (${brief.ai_model})`);
+  let previewId = previewIdArg ?? "";
+  if (!previewId) {
   const previewCreate = await mcpToolCall("meshy_text_to_3d", {
     prompt: brief.prompt,
     mode: "preview",
@@ -136,9 +146,14 @@ async function main() {
     should_remesh: true,
     topology: "triangle",
   });
-  const previewId = String(previewCreate.result ?? "");
+  previewId = String(previewCreate.result ?? "");
+  }
   console.log(`  preview: ${previewId}`);
-  await pollTaskMcp(previewId);
+  if (!previewIdArg) await pollTaskMcp(previewId);
+  else {
+    const st = await pollTaskMcp(previewId);
+    if (!st.model_urls?.glb) await pollTaskMcp(previewId);
+  }
 
   const refineCreate = await mcpToolCall("meshy_refine_3d", {
     preview_task_id: previewId,

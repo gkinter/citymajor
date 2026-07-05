@@ -23,6 +23,8 @@ export type GltfEraSlug = (typeof ERA_SLUGS)[number];
 export const SHIPPED_GLTF_KEYS = [
   "res_low_frontier_00",
   "res_low_frontier_01",
+  "res_low_frontier_02",
+  "res_low_frontier_03",
   "com_frontier_00",
   "ind_frontier_00",
   "res_low_industrial_00",
@@ -89,6 +91,8 @@ export function gltfPublicPath(key: string): string | null {
 export const GLTF_CATALOG: Record<ShippedGltfKey, string> = {
   res_low_frontier_00: "/assets/gltf/frontier/res_low_frontier_00.glb",
   res_low_frontier_01: "/assets/gltf/frontier/res_low_frontier_01.glb",
+  res_low_frontier_02: "/assets/gltf/frontier/res_low_frontier_02.glb",
+  res_low_frontier_03: "/assets/gltf/frontier/res_low_frontier_03.glb",
   com_frontier_00: "/assets/gltf/frontier/com_frontier_00.glb",
   ind_frontier_00: "/assets/gltf/frontier/ind_frontier_00.glb",
   res_low_industrial_00: "/assets/gltf/industrial/res_low_industrial_00.glb",

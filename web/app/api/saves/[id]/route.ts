@@ -5,10 +5,10 @@ import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(req: Request, context: RouteContext) {
-  const { newCookie } = ensureUserId(req);
+  const { userId, newCookie } = ensureUserId(req);
   const { id } = await context.params;
 
-  const result = getSave(req, id);
+  const result = getSave(req, id, userId);
   if (!result.ok) {
     return applyUserIdCookie(
       NextResponse.json({ error: result.error }, { status: result.status }),
@@ -26,10 +26,10 @@ export async function GET(req: Request, context: RouteContext) {
 }
 
 export async function DELETE(req: Request, context: RouteContext) {
-  const { newCookie } = ensureUserId(req);
+  const { userId, newCookie } = ensureUserId(req);
   const { id } = await context.params;
 
-  const result = await deleteSave(req, id);
+  const result = await deleteSave(req, id, userId);
   if (!result.ok) {
     return applyUserIdCookie(
       NextResponse.json({ error: result.error }, { status: result.status }),

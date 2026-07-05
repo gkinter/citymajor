@@ -5,8 +5,9 @@ import { applyUserIdCookie, ensureUserId } from "@/lib/user-identity";
 
 export async function GET(req: Request) {
   let newCookie: ReturnType<typeof ensureUserId>["newCookie"];
+  let userId: string;
   try {
-    ({ newCookie } = ensureUserId(req));
+    ({ userId, newCookie } = ensureUserId(req));
   } catch (err) {
     console.error("[api/saves] ensureUserId failed:", err);
     return NextResponse.json(
@@ -18,7 +19,7 @@ export async function GET(req: Request) {
   const tier = resolveTierFromRequest(req);
   try {
     return applyUserIdCookie(
-      NextResponse.json(listSaves(req, tier)),
+      NextResponse.json(listSaves(req, tier, userId)),
       newCookie,
     );
   } catch (err) {
@@ -32,8 +33,9 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   let newCookie: ReturnType<typeof ensureUserId>["newCookie"];
+  let userId: string;
   try {
-    ({ newCookie } = ensureUserId(req));
+    ({ userId, newCookie } = ensureUserId(req));
   } catch (err) {
     console.error("[api/saves] ensureUserId failed:", err);
     return NextResponse.json(
@@ -65,7 +67,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const result = await createSave(req, tier, parsed.data);
+  const result = await createSave(req, tier, parsed.data, userId);
   if (!result.ok) {
     return applyUserIdCookie(
       NextResponse.json(

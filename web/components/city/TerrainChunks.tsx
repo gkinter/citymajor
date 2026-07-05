@@ -41,6 +41,8 @@ export function TerrainChunks({ chunks, pickedTile }: TerrainChunksProps) {
               color={chunk.index % 2 === 0 ? "#1a2438" : "#162032"}
               roughness={0.95}
               metalness={0}
+              emissive={chunk.index % 2 === 0 ? "#0a1020" : "#080c18"}
+              emissiveIntensity={0.85}
             />
           </mesh>
         );

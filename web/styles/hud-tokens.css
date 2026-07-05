@@ -741,6 +741,113 @@
   color: var(--hud-text-muted);
 }
 
+.hud-law-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--hud-row-bg);
+  border: 1px solid var(--hud-border-subtle);
+}
+
+.hud-law-row + .hud-law-row {
+  margin-top: 8px;
+}
+
+.hud-law-row--soon {
+  opacity: 0.72;
+}
+
+.hud-law-row__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hud-law-row__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hud-text);
+}
+
+.hud-law-row__hint {
+  font-size: 10px;
+  color: var(--hud-text-dim);
+}
+
+.hud-law-row__badge {
+  align-self: flex-start;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--hud-text-dim);
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--hud-border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.hud-law-toggle {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.hud-law-toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.hud-law-toggle__track {
+  position: relative;
+  display: block;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--hud-border-subtle);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.hud-law-toggle__track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--hud-text-muted);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.hud-law-toggle__input:checked + .hud-law-toggle__track {
+  background: rgba(201, 160, 255, 0.28);
+  border-color: rgba(201, 160, 255, 0.55);
+}
+
+.hud-law-toggle__input:checked + .hud-law-toggle__track::after {
+  transform: translateX(16px);
+  background: #e8d8ff;
+}
+
+.hud-law-toggle__input:disabled + .hud-law-toggle__track {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.hud-law-toggle__input:focus-visible + .hud-law-toggle__track {
+  outline: 2px solid #c9a0ff;
+  outline-offset: 2px;
+}
+
 /* Citizen panel — household stats + L2 drill-down */
 .hud-citizen-button {
   font-family: var(--hud-font-mono);

@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type * as THREE from "three";
 import type { FpsStats, PickResult, CityData } from "@/lib/types";
 import { cityDataFromSnapshot, getCityData } from "@/lib/city-data";
@@ -383,6 +383,7 @@ export function CityCanvas({
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <div data-testid="city-canvas" style={{ width: "100%", height: "100%" }}>
         <Canvas
+          frameloop="always"
           dpr={dpr}
           camera={{ position: [140, 120, 140], fov: 50, near: 0.1, far: 800 }}
           gl={{
@@ -394,8 +395,7 @@ export function CityCanvas({
           style={{ width: "100%", height: "100%", display: "block" }}
         >
           <color attach="background" args={[skyColor]} />
-          <Suspense fallback={null}>
-            <CityScene
+          <CityScene
               city={city}
               chunks={chunks}
               zones={zones}
@@ -417,24 +417,23 @@ export function CityCanvas({
               era={simResources?.era ?? 0}
               eraProgress={simResources?.eraProgress}
             />
-            <AdaptiveDpr dpr={dpr} onDprChange={setDpr} />
-            <CityPostProcessing
-              qualityTier={qualityTier}
-              disabled={postProcessingDisabled}
-              sceneReady={
-                renderHealthStats.visibleBuildings > 0 &&
-                renderHealthStats.visibleChunks > 0
-              }
-            />
-            <CanvasRenderHealth
-              stats={renderHealthStats}
-              postProcessingActive={
-                qualityTier === "high" && !postProcessingDisabled
-              }
-              onDisablePostProcessing={() => setPostProcessingDisabled(true)}
-              onRenderFallback={handleRenderFallback}
-            />
-          </Suspense>
+          <AdaptiveDpr dpr={dpr} onDprChange={setDpr} />
+          <CityPostProcessing
+            qualityTier={qualityTier}
+            disabled={postProcessingDisabled}
+            sceneReady={
+              renderHealthStats.visibleBuildings > 0 &&
+              renderHealthStats.visibleChunks > 0
+            }
+          />
+          <CanvasRenderHealth
+            stats={renderHealthStats}
+            postProcessingActive={
+              qualityTier === "high" && !postProcessingDisabled
+            }
+            onDisablePostProcessing={() => setPostProcessingDisabled(true)}
+            onRenderFallback={handleRenderFallback}
+          />
         </Canvas>
       </div>
       <Minimap zones={zones} city={city} />

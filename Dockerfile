@@ -47,6 +47,8 @@ COPY --from=deps /app/web/node_modules ./web/node_modules
 COPY --from=deps /app/web/packages/sim-types/node_modules ./web/packages/sim-types/node_modules
 COPY . .
 COPY --from=wasm /src/web/public/dotnet ./web/public/dotnet
+# wasm stage already published; builder image has no .NET SDK
+ENV SKIP_WASM_BUILD=1
 RUN --mount=type=cache,target=/app/web/.next/cache,sharing=locked \
     pnpm --filter @citymajor/web... build
 

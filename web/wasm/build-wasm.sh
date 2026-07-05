@@ -3,6 +3,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
+# Docker builder copies the wasm-stage bundle and sets SKIP_WASM_BUILD=1 (no .NET SDK in node image).
+if [[ "${SKIP_WASM_BUILD:-}" == "1" ]]; then
+  echo "SKIP_WASM_BUILD=1 — wasm publish handled by Docker wasm stage"
+  exit 0
+fi
+
 # Beast sets NODE_OPTIONS with --max-semi-space-size; emscripten bundled node rejects it.
 unset NODE_OPTIONS
 

@@ -1,0 +1,20 @@
+# Nixpacks fallback when Coolify is not using the root Dockerfile.
+# Ensures Forge.SimWasm publishes before Next build (populationL2, CMJR, trade exports).
+[phases.setup]
+nixPkgs = ["nodejs_20", "dotnet-sdk_8", "python3"]
+
+[phases.install]
+cmds = [
+  "corepack enable",
+  "corepack prepare pnpm@10.12.1 --activate",
+  "pnpm install --frozen-lockfile",
+]
+
+[phases.build]
+cmds = [
+  "pnpm build:wasm || echo 'WARN: WASM build failed — procedural fallback'",
+  "pnpm --filter @citymajor/web build",
+]
+
+[start]
+cmd = "pnpm --filter @citymajor/web start"

@@ -1,0 +1,46 @@
+{
+  "description": "Zone paint content keys for web/lib/zone-tiers.ts. Baseline keys match web/lib/tech-unlocks.ts BASELINE_CONTENT_KEYS. Research-gated keys match technologies.json unlocks on feat/tech-zone-unlocks-2026-07-05 (T029 res_high, T047 ag, T086 mixed+city_hall, T134 office).",
+  "baseline": [
+    "residential_zone",
+    "commercial_zone",
+    "industrial_zone"
+  ],
+  "research_gated": {
+    "residential_high_zone": {
+      "suggested_tech_id": "T029",
+      "suggested_tech_name": "Brick and Masonry",
+      "era": "frontier",
+      "rationale": "High-density residential zoning follows durable brick-and-stone construction (technologies.json T029).",
+      "needs_technologies_json_patch": false
+    },
+    "office_zone": {
+      "suggested_tech_id": "T134",
+      "suggested_tech_name": "Stock Exchange",
+      "era": "industrial",
+      "rationale": "Office districts unlock with formal capital markets (technologies.json T134).",
+      "needs_technologies_json_patch": false
+    },
+    "mixed_use_zone": {
+      "suggested_tech_id": "T086",
+      "suggested_tech_name": "Basic Zoning Laws",
+      "era": "industrial",
+      "rationale": "Mixed-use zoning is a Basic Zoning Laws unlock (technologies.json T086).",
+      "needs_technologies_json_patch": false
+    },
+    "agricultural_zone": {
+      "suggested_tech_id": "T047",
+      "suggested_tech_name": "Crop Rotation",
+      "era": "frontier",
+      "rationale": "Formal agricultural zoning pairs with improved farmland tech (technologies.json T047).",
+      "needs_technologies_json_patch": false
+    },
+    "city_hall": {
+      "suggested_tech_id": "T086",
+      "suggested_tech_name": "Basic Zoning Laws",
+      "era": "industrial",
+      "rationale": "City Hall building unlock co-gated with mixed-use zoning (technologies.json T086).",
+      "needs_technologies_json_patch": false,
+      "content_type": "building"
+    }
+  }
+}

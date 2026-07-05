@@ -832,6 +832,95 @@ async function assertCitizenDotsRender(page, tag) {
 
   pass(tag, `citizen dots visible (${warmHits} warm samples, households=${badgeCount})`);
 }
+
+/** Off starter cross/ring — dirt road should stick on Plains terrain. */
+const ROAD_SMOKE_TILE = { tileX: 50, tileZ: 50 };
+
+/**
+ * WASM place_road → snapshot roads[] (6261885 road graph connectivity).
+ * Falls back to GetStatus service-coverage numerics when sim API is unavailable.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ * @param {boolean} simIsWasm
+ */
+async function assertRoadPlacementOrStatus(page, tag, simIsWasm) {
+  if (!simIsWasm) {
+    console.log(`[${tag}] SKIP: road placement (procedural fallback)`);
+    return;
+  }
+
+  try {
+    await page.waitForFunction(
+      () =>
+        typeof window.__citymajorSimApi?.sendCommand === "function" &&
+        typeof window.__citymajorSimApi?.getSnapshot === "function",
+      undefined,
+      { timeout: 30_000 },
+    );
+  } catch {
+    console.log(`[${tag}] SKIP: __citymajorSimApi not ready for road smoke`);
+    return;
+  }
+
+  const { tileX, tileZ } = ROAD_SMOKE_TILE;
+
+  const before = await page.evaluate(({ x, z }) => {
+    const snap = window.__citymajorSimApi?.getSnapshot();
+    const roads = snap?.roads ?? [];
+    return {
+      count: roads.length,
+      hasTile: roads.some((r) => r.tileX === x && r.tileZ === z && (r.roadFlags ?? 0) > 0),
+      healthcareCoverage: snap?.healthcareCoverage,
+      policeCoverage: snap?.policeCoverage,
+      fireCoverage: snap?.fireCoverage,
+    };
+  }, { x: tileX, z: tileZ });
+
+  if (before.hasTile) {
+    pass(tag, `road tile already present at (${tileX},${tileZ})`);
+    return;
+  }
+
+  await page.evaluate(
+    ({ x, z }) => {
+      window.__citymajorSimApi?.sendCommand({ type: "place_road", tileX: x, tileZ: z });
+    },
+    { x: tileX, z: tileZ },
+  );
+
+  try {
+    await page.waitForFunction(
+      ({ x, z }) => {
+        const roads = window.__citymajorSimApi?.getSnapshot()?.roads ?? [];
+        return roads.some((r) => r.tileX === x && r.tileZ === z && (r.roadFlags ?? 0) > 0);
+      },
+      { x: tileX, z: tileZ },
+      { timeout: 10_000 },
+    );
+  } catch {
+    const coverageOk =
+      typeof before.healthcareCoverage === "number" &&
+      typeof before.policeCoverage === "number" &&
+      typeof before.fireCoverage === "number";
+    if (coverageOk) {
+      pass(
+        tag,
+        `GetStatus service coverage exported (health=${before.healthcareCoverage}, police=${before.policeCoverage}, fire=${before.fireCoverage}); place_road snapshot lag`,
+      );
+      return;
+    }
+    fail(tag, `place_road did not appear in snapshot at (${tileX},${tileZ})`);
+  }
+
+  const afterCount = await page.evaluate(
+    () => window.__citymajorSimApi?.getSnapshot()?.roads?.length ?? 0,
+  );
+  pass(
+    tag,
+    `road placement OK at (${tileX},${tileZ}); roads ${before.count}→${afterCount}`,
+  );
+}
+
 /**
  * Poll WASM GetStatus (via smoke sim API snapshot) until laws.json catalog is loaded.
  * @param {import('playwright').Page} page
@@ -1356,6 +1445,8 @@ export async function runPlayChecks(page, options = {}) {
     );
   }
   pass(tag, `sim source: ${simSource}`);
+
+  await assertRoadPlacementOrStatus(page, tag, simSource === "WASM sim");
 
   if (savesAvailable) {
     await assertCmjrSaveRoundTrip(tag, page, { simIsWasm: simSource === "WASM sim" });

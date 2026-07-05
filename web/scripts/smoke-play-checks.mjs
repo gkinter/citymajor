@@ -862,8 +862,11 @@ async function assertCitizenDotsRender(page, tag) {
 /** Off starter cross/ring — dirt road should stick on Plains terrain. */
 const ROAD_SMOKE_TILE = { tileX: 50, tileZ: 50 };
 
-/** Empty tile for civic placement smoke — far from starter cross. */
-const BUILD_SMOKE_TILE = { tileX: 200, tileZ: 200 };
+/** Empty buildable tile for civic placement — Plains, off starter cross (not water/rock). */
+const BUILD_SMOKE_TILE = { tileX: 145, tileZ: 145 };
+
+/** Zone tier required before WasmSimHost.PlaceBuilding (rejects unzoned tiles). */
+const BUILD_SMOKE_ZONE_TYPE = 3;
 
 /** Frontier civic service TypeId — see DATA_BRIDGE.md svc_frontier_fire_brigade. */
 const CIVIC_SMOKE_TYPE_ID = 502;
@@ -938,8 +941,8 @@ async function assertBuildMenuE2e(page, tag) {
 }
 
 /**
- * WASM place_building for one civic typeId on an empty tile.
- * Skips when sim API unavailable or WASM placement is still a no-op.
+ * WASM place_building for one civic typeId on a zoned, buildable tile.
+ * WasmSimHost.PlaceBuilding rejects unzoned tiles — zone_paint first, then assert buildingId.
  * @param {import('playwright').Page} page
  * @param {string} tag
  * @param {boolean} simIsWasm
@@ -965,34 +968,69 @@ async function assertPlaceBuildingWasm(page, tag, simIsWasm) {
 
   const { tileX, tileZ } = BUILD_SMOKE_TILE;
   const typeId = CIVIC_SMOKE_TYPE_ID;
+  const zoneType = BUILD_SMOKE_ZONE_TYPE;
 
-  const before = await page.evaluate(
+  const existing = await page.evaluate(
     ({ x, z, civicTypeId }) => {
-      const snap = window.__citymajorSimApi?.getSnapshot();
-      const buildings = snap?.buildings ?? [];
-      return {
-        count: buildings.length,
-        buildingCount: snap?.buildingCount ?? buildings.length,
-        occupied: buildings.some((b) => b.tileX === x && b.tileZ === z),
-        hasCivic: buildings.some(
-          (b) => b.tileX === x && b.tileZ === z && b.typeId === civicTypeId,
-        ),
-      };
+      const buildings = window.__citymajorSimApi?.getSnapshot()?.buildings ?? [];
+      return (
+        buildings.find(
+          (b) => b.tileX === x && b.tileZ === z && b.typeId === civicTypeId && b.id > 0,
+        ) ?? null
+      );
     },
     { x: tileX, z: tileZ, civicTypeId: typeId },
   );
 
-  if (before.hasCivic) {
-    pass(tag, `civic building already at (${tileX},${tileZ}) typeId=${typeId}`);
-    return;
-  }
-
-  if (before.occupied) {
-    console.log(
-      `[${tag}] SKIP: place_building tile (${tileX},${tileZ}) already occupied`,
+  if (existing) {
+    pass(
+      tag,
+      `place_building buildingId=${existing.id} already at (${tileX},${tileZ}) typeId=${typeId}`,
     );
     return;
   }
+
+  const zonedBefore = await page.evaluate(
+    ({ x, z }) => {
+      const zones = window.__citymajorSimApi?.getSnapshot()?.zones ?? [];
+      return zones.some((zn) => zn.tileX === x && zn.tileZ === z && zn.zoneType > 0);
+    },
+    { x: tileX, z: tileZ },
+  );
+
+  if (!zonedBefore) {
+    await page.evaluate(
+      ({ x, z, zone }) => {
+        window.__citymajorSimApi?.sendCommand({
+          type: "zone_paint",
+          tileX: x,
+          tileZ: z,
+          zoneType: zone,
+        });
+      },
+      { x: tileX, z: tileZ, zone: zoneType },
+    );
+
+    try {
+      await page.waitForFunction(
+        ({ x, z }) => {
+          const zones = window.__citymajorSimApi?.getSnapshot()?.zones ?? [];
+          return zones.some((zn) => zn.tileX === x && zn.tileZ === z && zn.zoneType > 0);
+        },
+        { x: tileX, z: tileZ },
+        { timeout: 10_000 },
+      );
+    } catch {
+      console.log(
+        `[${tag}] SKIP: place_building tile (${tileX},${tileZ}) not buildable (zone_paint no-op)`,
+      );
+      return;
+    }
+  }
+
+  const beforeCount = await page.evaluate(
+    () => window.__citymajorSimApi?.getSnapshot()?.buildings?.length ?? 0,
+  );
 
   await page.evaluate(
     ({ x, z, civicTypeId }) => {
@@ -1011,7 +1049,8 @@ async function assertPlaceBuildingWasm(page, tag, simIsWasm) {
       ({ x, z, civicTypeId }) => {
         const buildings = window.__citymajorSimApi?.getSnapshot()?.buildings ?? [];
         return buildings.some(
-          (b) => b.tileX === x && b.tileZ === z && b.typeId === civicTypeId,
+          (b) =>
+            b.tileX === x && b.tileZ === z && b.typeId === civicTypeId && b.id > 0,
         );
       },
       { x: tileX, z: tileZ, civicTypeId: typeId },
@@ -1024,8 +1063,7 @@ async function assertPlaceBuildingWasm(page, tag, simIsWasm) {
         const buildings = snap?.buildings ?? [];
         return {
           count: buildings.length,
-          buildingCount: snap?.buildingCount ?? buildings.length,
-          hasCivic: buildings.some(
+          building: buildings.find(
             (b) => b.tileX === x && b.tileZ === z && b.typeId === civicTypeId,
           ),
         };
@@ -1033,33 +1071,37 @@ async function assertPlaceBuildingWasm(page, tag, simIsWasm) {
       { x: tileX, z: tileZ, civicTypeId: typeId },
     );
 
-    if (after.hasCivic) {
-      pass(tag, `place_building civic typeId=${typeId} at (${tileX},${tileZ})`);
-      return;
-    }
-
-    const countDelta =
-      (after.buildingCount ?? after.count) - (before.buildingCount ?? before.count);
-    if (countDelta > 0) {
+    if (after.building?.id > 0) {
       pass(
         tag,
-        `place_building increased building pool (+${countDelta}); civic tile match pending`,
+        `place_building buildingId=${after.building.id} at (${tileX},${tileZ}) typeId=${typeId}`,
       );
       return;
     }
 
     console.log(
-      `[${tag}] SKIP: place_building WASM command is no-op in v1 (typeId=${typeId} at ${tileX},${tileZ})`,
+      `[${tag}] SKIP: place_building WASM command is no-op (typeId=${typeId} at ${tileX},${tileZ}; buildings ${beforeCount}→${after.count})`,
     );
     return;
   }
 
+  const placed = await page.evaluate(
+    ({ x, z, civicTypeId }) => {
+      const buildings = window.__citymajorSimApi?.getSnapshot()?.buildings ?? [];
+      return buildings.find(
+        (b) => b.tileX === x && b.tileZ === z && b.typeId === civicTypeId && b.id > 0,
+      );
+    },
+    { x: tileX, z: tileZ, civicTypeId: typeId },
+  );
+
   const afterCount = await page.evaluate(
     () => window.__citymajorSimApi?.getSnapshot()?.buildings?.length ?? 0,
   );
+
   pass(
     tag,
-    `place_building civic typeId=${typeId} at (${tileX},${tileZ}); buildings ${before.count}→${afterCount}`,
+    `place_building buildingId=${placed?.id} at (${tileX},${tileZ}) typeId=${typeId}; buildings ${beforeCount}→${afterCount}`,
   );
 }
 

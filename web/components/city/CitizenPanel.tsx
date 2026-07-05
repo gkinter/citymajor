@@ -3,8 +3,14 @@
 import type { CSSProperties } from "react";
 import {
   HUD_COLORS,
-  hudActionButton,
+  hudEmptyState,
+  hudSectionTitle,
   hudSlidePanel,
+  hudSlidePanelBody,
+  hudSlidePanelCloseButton,
+  hudSlidePanelHeader,
+  hudSlidePanelSubtitle,
+  hudSlidePanelTitle,
 } from "@/lib/hud-theme";
 import { formatGrowthPerMonth } from "@/lib/population-growth";
 import {
@@ -17,46 +23,12 @@ import {
 } from "@/lib/population-l2";
 import type { SimResources } from "@/lib/sim-bridge";
 
-const headerStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  padding: "14px 16px",
-  borderBottom: `1px solid ${HUD_COLORS.borderSubtle}`,
-};
-
-const bodyStyle: CSSProperties = {
-  flex: 1,
-  overflowY: "auto",
-  padding: "16px 18px 24px",
-};
-
 const statRowStyle: CSSProperties = {
   display: "flex",
   gap: 16,
   marginBottom: 16,
   fontSize: 12,
   flexWrap: "wrap",
-};
-
-const sectionTitle: CSSProperties = {
-  fontWeight: 700,
-  marginBottom: 8,
-  fontSize: 11,
-  letterSpacing: "0.06em",
-  textTransform: "uppercase",
-  color: HUD_COLORS.textMuted,
-};
-
-const fallbackNote: CSSProperties = {
-  marginBottom: 14,
-  padding: "8px 10px",
-  borderRadius: 6,
-  fontSize: 11,
-  lineHeight: 1.4,
-  color: HUD_COLORS.textMuted,
-  background: HUD_COLORS.rowBg,
-  border: `1px solid ${HUD_COLORS.borderSubtle}`,
 };
 
 const selectedCardStyle: CSSProperties = {
@@ -91,6 +63,38 @@ function StatBlock({ label, value }: { label: string; value: string }) {
       <span className="hud-citizen-stat__label">{label}</span>
       <span className="hud-citizen-stat__value">{value}</span>
     </div>
+  );
+}
+
+function CitizenEmptyState({ hasAggregate }: { hasAggregate: boolean }) {
+  return (
+    <section
+      className="hud-citizen-empty"
+      style={hudEmptyState()}
+      aria-label="Household list status"
+    >
+      <div style={{ ...hudSectionTitle({ marginBottom: 6, color: HUD_COLORS.text }) }}>
+        {hasAggregate ? "Named households pending" : "Awaiting simulation data"}
+      </div>
+      {hasAggregate ? (
+        <>
+          <p style={{ margin: "0 0 10px" }}>
+            Aggregate stats reflect the live WASM snapshot. A named household list
+            with happiness and commute fields will populate when the sim exports{" "}
+            <code style={{ fontSize: 10 }}>populationL2.households</code>.
+          </p>
+          <ul className="hud-citizen-empty__hints">
+            <li>Click a citizen dot on the map to drill down by tile</li>
+            <li>Residential zones grow the sample as population rises</li>
+          </ul>
+        </>
+      ) : (
+        <p style={{ margin: 0 }}>
+          Population and household counts appear once the WASM sim publishes its
+          first snapshot. Open this panel again after the city loads.
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -171,28 +175,31 @@ export function CitizenPanel({
   const selectedHousehold = resolveSelectedHousehold(resources, selection);
   const growthRate = resources?.populationGrowthRate;
 
+  const subtitle = aggregate
+    ? `${formatPopulation(aggregate.householdCount)} households · ${formatPopulation(aggregate.population)} residents`
+    : "Awaiting simulation data";
+
   return (
     <aside
       className="hud-citizen-panel"
       style={hudSlidePanel()}
       role="dialog"
-      aria-label="Citizens"
+      aria-labelledby="citizen-panel-title"
+      aria-describedby="citizen-panel-subtitle"
       aria-modal="true"
     >
-      <header style={headerStyle}>
+      <header style={hudSlidePanelHeader()}>
         <div>
-          <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: "0.04em" }}>
+          <div id="citizen-panel-title" style={hudSlidePanelTitle()}>
             Citizens
           </div>
-          <div style={{ opacity: 0.65, fontSize: 11, marginTop: 2 }}>
-            {aggregate
-              ? `${formatPopulation(aggregate.householdCount)} households · ${formatPopulation(aggregate.population)} residents`
-              : "Awaiting simulation data"}
+          <div id="citizen-panel-subtitle" style={hudSlidePanelSubtitle()}>
+            {subtitle}
           </div>
         </div>
         <button
           type="button"
-          style={{ ...hudActionButton(), padding: "4px 10px", fontSize: 12 }}
+          style={hudSlidePanelCloseButton()}
           onClick={onClose}
           aria-label="Close"
         >
@@ -200,7 +207,7 @@ export function CitizenPanel({
         </button>
       </header>
 
-      <div style={bodyStyle}>
+      <div style={hudSlidePanelBody()}>
         {aggregate ? (
           <div style={statRowStyle} aria-label="City-wide citizen stats">
             <StatBlock
@@ -236,7 +243,7 @@ export function CitizenPanel({
 
         {selectedHousehold ? (
           <section style={selectedCardStyle} aria-label="Selected household">
-            <div style={{ ...sectionTitle, color: "#ffd080" }}>Selected</div>
+            <div style={{ ...hudSectionTitle(), color: "#ffd080" }}>Selected</div>
             <div className="hud-citizen-list__row">
               <span className="hud-citizen-list__name">{selectedHousehold.id}</span>
               <span className="hud-citizen-list__happiness">
@@ -252,7 +259,7 @@ export function CitizenPanel({
           </section>
         ) : selection?.tileX !== undefined && selection.tileZ !== undefined ? (
           <section style={selectedCardStyle} aria-label="Selected household stub">
-            <div style={{ ...sectionTitle, color: "#ffd080" }}>Selected</div>
+            <div style={{ ...hudSectionTitle(), color: "#ffd080" }}>Selected</div>
             <p style={{ margin: 0, fontSize: 12, lineHeight: 1.45 }}>
               Residential tile ({selection.tileX}, {selection.tileZ})
             </p>
@@ -291,12 +298,7 @@ export function CitizenPanel({
             </ul>
           </>
         ) : (
-          <p style={fallbackNote}>
-            Aggregate stats reflect the live WASM snapshot. A named household
-            list with happiness and commute fields will populate when the sim
-            exports <code style={{ fontSize: 10 }}>populationL2.households</code>.
-            Click a citizen dot on the map to drill down.
-          </p>
+          <CitizenEmptyState hasAggregate={aggregate !== null} />
         )}
       </div>
     </aside>

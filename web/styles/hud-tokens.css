@@ -1045,6 +1045,16 @@
   border-color: rgba(255, 184, 77, 0.45);
 }
 
+.hud-citizen-empty__hints {
+  margin: 0;
+  padding-left: 16px;
+  color: var(--hud-text-dim);
+}
+
+.hud-citizen-empty__hints li + li {
+  margin-top: 4px;
+}
+
 /* Zoning toolbar — highlight tools matching high RCI demand */
 .hud-zoning-btn--demand {
   box-shadow:

@@ -4,7 +4,7 @@
 **Branch:** `feat/wasm-r3f-integration-2026-07-04`  
 **PR:** [#1 — feat: CityMajor Web v1 — R3F + WASM integration spine](https://github.com/gkinter/citymajor/pull/1)  
 **Scope charter:** [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) · [SB-3704](https://linear.app/softblaze/issue/SB-3704)  
-**Last updated:** 2026-07-05 (`776d65d` · worktree `citymajor-web-r3f-spike`)
+**Last updated:** 2026-07-05 (`e96fe1c` · worktree `citymajor-web-r3f-spike`)
 
 > PR #1 documents the v1 integration spine for review and preview deploys. **Do not merge to `main` until every **blocking** row below is checked.** Deferred items stay tracked in Linear under phase epics [SB-3726](https://linear.app/softblaze/issue/SB-3726)+.
 
@@ -492,6 +492,9 @@ Only these block merging PR #1 to `main`. Everything else is **post-merge** or *
 
 ## Merge decision
 
+> **DECISION (2026-07-05, `e96fe1c`): GO — merge PR #1 spine to `main`.**
+> All spine gates pass (Bugbot NEUTRAL, smoke 46/46 deploy parity, Coolify preview current, Phase 2 + Phase 3 wave-4 shipped). Remaining items below are **v1 LAUNCH NO-GO**, not spine blockers — they stay on post-merge parallel tracks under [SB-3726](https://linear.app/softblaze/issue/SB-3726)+.
+
 ### Safe to merge PR #1 spine when
 
 - [x] Bugbot NEUTRAL or clean on HEAD (`776d65d`) — **NEUTRAL**, zero Critical/Major
@@ -501,14 +504,17 @@ Only these block merging PR #1 to `main`. Everything else is **post-merge** or *
 - [x] Phase 2 gameplay sprint shipped — roads, traffic, events, citizens, services, research UX, onboarding, landmarks
 - [x] Phase 3 kickoff stability — black canvas fix, economy panel, overlay a11y (`79ef561`)
 - [x] Phase 3 wave 4 — herald commands, era gates, tech bridge, CMJR/citizen/law/trade/LLM paths + `place_road` smoke + **7 hero GLBs** + `res_low_frontier_22` + session secret fix (`776d65d`, `5dd6f62`)
+- [x] Industrial Meshy GLBs — `com/ind_industrial_00` + `res_high_industrial_00`/`_01` + `res_low_industrial_00`/`_01` + `com_industrial_01` LFS (`464fa29`, `1d9a115`, `e96fe1c`)
 - [x] Team acknowledges Meshy partial batch / Stripe live / **GPU** perf sign-off / **webhook manual deploy** as **post-merge** parallel tracks ([SB-3726](https://linear.app/softblaze/issue/SB-3726))
 
 ### Do **not** call v1 launched until (narrowed NO-GO)
 
-- [ ] Meshy P0 batch + 3 heroes in scene (not placeholders) — [SB-3730](https://linear.app/softblaze/issue/SB-3730) / [SB-3740](https://linear.app/softblaze/issue/SB-3740)
-- [ ] Perf gate **GPU** sign-off ≥30 FPS integrated — [SB-3703](https://linear.app/softblaze/issue/SB-3703) (headless software-renderer fail is expected)
-- [ ] Cloud saves + auth ([SB-3686](https://linear.app/softblaze/issue/SB-3686) full CMJR SoA, [SB-3693](https://linear.app/softblaze/issue/SB-3693))
-- [ ] Stripe live test path verified on preview
+Remaining **v1 LAUNCH NO-GO** at `e96fe1c`:
+
+- [ ] **Meshy — 84 more GLBs** to reach v1 art minimum (P0 core Frontier + Industrial archetypes, 3+ heroes placed in scene, not placeholders) — [SB-3730](https://linear.app/softblaze/issue/SB-3730) / [SB-3740](https://linear.app/softblaze/issue/SB-3740)
+- [ ] **Stripe live** — Founder Pass live test path verified on preview (Checkout Session + webhook → entitlements on Coolify FQDN) — [SB-3698](https://linear.app/softblaze/issue/SB-3698)
+- [ ] **GPU perf** — perf gate GPU sign-off ≥30 FPS integrated / ≥60 FPS discrete; QA matrix — [SB-3703](https://linear.app/softblaze/issue/SB-3703) / [SB-3705](https://linear.app/softblaze/issue/SB-3705) (headless software-renderer fail is expected, not a product regression)
+- [ ] **CMJR / auth** — full CMJR SoA chunks + deterministic WASM round-trip; auth, accounts & Founder Pass entitlements — [SB-3686](https://linear.app/softblaze/issue/SB-3686) / [SB-3693](https://linear.app/softblaze/issue/SB-3693)
 - [ ] Phase 3 depth — `populationL2` WASM export, LLM Herald on preview ([SB-3727](https://linear.app/softblaze/issue/SB-3727))
 
 ---

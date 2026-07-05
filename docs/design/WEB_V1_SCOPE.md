@@ -165,14 +165,40 @@ When a design doc contradicts this charter, **this charter wins** for v1 shippin
 
 ## 10. Acceptance checklist (v1 ship)
 
+**Overall (2026-07-05, post–wave-4): ~52% toward public launch · ~74% toward integration-spine / preview beta.** Detail: [CTO_IMPROVEMENT_ROADMAP_2026-07.md](./CTO_IMPROVEMENT_ROADMAP_2026-07.md) § v1 progress snapshot.
+
+| Criterion | Status |
+|-----------|--------|
+| 256×256 map playable start-to-Industrial transition | **~75%** — era gates + research path; full arc QA incomplete |
+| Stable ≥30 FPS on integrated GPU with 5k buildings / 10k HH | **~15%** — CI perf stub only; manual sign-off open [SB-3703](https://linear.app/softblaze/issue/SB-3703) |
+| WASM sim ticks in worker; R3F renders from snapshot | **~95%** shipped |
+| Founder Pass + cosmetic Stripe flow; free tier quotas enforced | **~35%** — stub checkout + cookie entitlements; live webhook TBD |
+| Cloud save (3 free / 20 Founder) | **~48%** — CMJR blob path + slot UI; auth + SoA chunks TBD |
+| No multiplayer code paths in production build | **~100%** |
+| LLM proxy with template fallback; 10/day free cap | **~65%** — API + quota shipped; preview keys + Founder gate TBD |
+
 - [ ] 256×256 map playable start-to-Industrial transition
 - [ ] Stable ≥30 FPS on integrated GPU with 5k buildings / 10k HH
-- [ ] WASM sim ticks in worker; R3F renders from snapshot
+- [x] WASM sim ticks in worker; R3F renders from snapshot
 - [ ] Founder Pass + cosmetic Stripe flow; free tier quotas enforced
 - [ ] Cloud save (3 free / 20 Founder)
-- [ ] No multiplayer code paths in production build
+- [x] No multiplayer code paths in production build
 - [ ] LLM proxy with template fallback; 10/day free cap
 
 ---
 
-*Last updated: 2026-07-04. Changes to locked parameters require explicit product sign-off and an update to this file.*
+## 11. Wave-4 depth progress (implementation)
+
+Committed `9b82eb1` · uncommitted polish in `citymajor-web-r3f-spike` WT (citizen/law smoke, `CanvasRenderHealth`, +2 frontier GLBs).
+
+| System | Charter §7 intent | Honest % | Notes |
+|--------|-------------------|----------|-------|
+| Citizens / cultural DNA | ~10k HH, satisfaction | **58%** | Panel + aggregates; named household WASM export pending |
+| Laws (70+ era-filtered) | Factions, elections, laws | **32%** | Catalog + counts; enactment UI deferred |
+| Economy / trade | Leontief chains | **52%** | Global market HUD; route UI deferred |
+| Herald / LLM narrative | Quota-gated + templates | **68%** | Events + council cmds; preview LLM keys unset |
+| Cloud saves | 3 free / 20 Founder | **48%** | CMJR interim JSON chunk; full SoA + auth TBD |
+
+---
+
+*Last updated: 2026-07-05 (wave-4 progress %). Changes to locked parameters require explicit product sign-off and an update to this file.*

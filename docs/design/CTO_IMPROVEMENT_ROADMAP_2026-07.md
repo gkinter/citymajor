@@ -2,15 +2,16 @@
 
 **Author:** CTO synthesis (parallel agent docs + PR #1 state)  
 **Worktree:** `citymajor-web-r3f-spike` · Branch: `feat/wasm-r3f-integration-2026-07-04`  
-**Sources:** `GAP_AUDIT_DESIGN_DOCS`, `GAMEPLAY_LOOP_IMPROVEMENTS`, `TECH_TREE_GAP_ANALYSIS`, `ERA_ARC_DESIGN_V2`, `MULTIPLAYER_LIVE_PLAY_PROPOSAL`, `LIVE_SERVICES_ARCHITECTURE`, `OPEN_WORLD_SCALE_PROPOSAL`, `COMPETITIVE_POSITIONING`, `MESHY_ASSET_PIPELINE`, `MESHY_HERO_LANDMARKS`, `FINAL_GAP_FILLS`, PR #1 (`feat: CityMajor Web v1 — R3F + WASM integration spine`)
+**Last progress update:** 2026-07-05 — wave-4 depth (`9b82eb1` + uncommitted WT)  
+**Sources:** `GAP_AUDIT_DESIGN_DOCS`, `GAMEPLAY_LOOP_IMPROVEMENTS`, `TECH_TREE_GAP_ANALYSIS`, `ERA_ARC_DESIGN_V2`, `MULTIPLAYER_LIVE_PLAY_PROPOSAL`, `LIVE_SERVICES_ARCHITECTURE`, `OPEN_WORLD_SCALE_PROPOSAL`, `COMPETITIVE_POSITIONING`, `MESHY_ASSET_PIPELINE`, `MESHY_HERO_LANDMARKS`, `FINAL_GAP_FILLS`, PR #1 (`feat: CityMajor Web v1 — R3F + WASM integration spine`), [V1_MERGE_CHECKLIST](./V1_MERGE_CHECKLIST.md)
 
 ---
 
 ## Executive Summary
 
-CityMajor has crossed a critical inflection point: the **web v1 integration spine** (R3F + WASM sim bridge, 256×256 world, zoning UI, Herald/narrative stubs) is in review on PR #1, while parallel design agents have produced coherent post-v1 roadmaps for multiplayer, open regions, era progression, and live services. The product wedge is clear — **deep simulation in the browser with zero install**, **Herald AI narrative**, and **co-op city building** in a genre where CS2 and Manor Lords have no multiplayer ([COMPETITIVE_POSITIONING](./COMPETITIVE_POSITIONING.md)).
+CityMajor has crossed a critical inflection point: the **web v1 integration spine** (R3F + WASM sim bridge, 256×256 world, zoning UI, mayor HUD, Herald narrative) is in review on PR #1, with **wave-4 depth** (citizens, CMJR saves, laws read-only, trade strip, Herald LLM + council commands) landed at `9b82eb1` and polish uncommitted in `citymajor-web-r3f-spike`. Parallel design agents have produced coherent post-v1 roadmaps for multiplayer, open regions, era progression, and live services. The product wedge is clear — **deep simulation in the browser with zero install**, **Herald AI narrative**, and **co-op city building** in a genre where CS2 and Manor Lords have no multiplayer ([COMPETITIVE_POSITIONING](./COMPETITIVE_POSITIONING.md)).
 
-**The sim is ahead of the player experience.** WASM runs economy, zone growth, 80 events, politics, budget, and era derivation — but `/play` is still a **3D zoning sandbox** with optional, disconnected Herald stories ([GAMEPLAY_LOOP_IMPROVEMENTS](./GAMEPLAY_LOOP_IMPROVEMENTS.md)). v1 launch is blocked not by vision but by **exporting what the sim already knows** (RCI, approval, active events), **sim parity gaps** (traffic stub, dead tech unlocks, era logic bypass), **missing research UI**, **incomplete 3D asset pipeline** (Meshy proposed, ~500 GLBs not shipped), and **persistence/auth stubs** (local JSON, no cloud saves). These are 6–10 weeks of focused engineering, not a replatform.
+**The sim is still ahead of the shipped player experience on art and persistence.** WASM runs economy, zone growth, 80 events, politics, budget, Leontief trade, law catalog, and era derivation — `/play` is now a **mayor sim with depth panels**, not just a zoning sandbox, but Meshy art (~7% of batch 1), cloud auth, and perf sign-off remain gaps ([GAMEPLAY_LOOP_IMPROVEMENTS](./GAMEPLAY_LOOP_IMPROVEMENTS.md)). v1 launch is blocked by **incomplete art pipeline** (~500 GLBs not shipped), **persistence/auth stubs** (CMJR interim JSON, no Supabase), and **perf gate** — not by greenfield sim architecture. **~52% toward public launch; ~74% toward preview-beta spine** (see § v1 progress snapshot).
 
 **v1.1 (30 days post-launch)** should ship quick wins that complete the mayor fantasy: RCI demand bars, Herald wired to `events.json`, era progress meter, approval/budget HUD, guided onboarding, and async cloud invites — before opening multiplayer or regional scope.
 
@@ -19,6 +20,38 @@ CityMajor has crossed a critical inflection point: the **web v1 integration spin
 **v3** unlocks **MMO-lite regional open world**: 512–1024 map streaming, simulation LOD, player cities on a shared regional map with server-authoritative trade and migration. Explicitly **not** v1 or v2 scope; scope creep here is the #1 product risk.
 
 **Resource ask:** v1–v1.1 is achievable solo + AI automation (Meshy batch gen, Herald templates, codegen). v2 needs **one backend/multiplayer engineer** (6-month contract) and **part-time 3D art QA** (~20 hrs/week). v3 needs a **dedicated sim infra engineer** or senior full-stack with .NET + WebTransport experience.
+
+### v1 progress snapshot (honest %, post–wave-4)
+
+> **Wave-4** = Phase 3 depth sprint: citizens, CMJR saves, laws (read-only), trade HUD, Herald LLM + commands. Committed at `9b82eb1`; smoke/canvas/GLB polish **uncommitted** in `citymajor-web-r3f-spike` WT (tip `90faca9` + dirty tree).
+
+| Roll-up | % | Basis |
+|---------|---|--------|
+| **v1 public launch** (Founder Pass + cloud + art-complete + perf sign-off) | **~52%** | Weighted: player loop ~78%, art ~7%, persistence/monetization ~38%, perf/QA ~22% |
+| **v1 integration spine** (PR #1 merge / preview beta) | **~74%** | WASM+R3F+zoning+HUD core shipped; wave-4 HUD paths land; Meshy/Stripe/perf still deferred |
+| **Phase 3 depth goal** ([V1_GAMEPLAY_BUILD_PLAN](./V1_GAMEPLAY_BUILD_PLAN.md) §4) | **~48%** | Leontief panel partial; L2 citizens partial; CMJR partial; Herald partial; hero GLB absent |
+
+#### Wave-4 feature areas
+
+| Area | % | Shipped | Still missing |
+|------|---|---------|---------------|
+| **Citizens** | **58%** | `CitizenPanel`, dot→tile drill-down, aggregate HH/resident stats, toolbar badge | WASM `populationL2.households` export (named list, per-HH happiness/commute); citizen smoke lands in uncommitted WT only |
+| **Saves (CMJR)** | **48%** | `export_cmjr` / `applyWasmSave`, POST/GET blob API, slot UI | Interim JSON in chunk `0x01` only — no SoA chunks; no Supabase auth/multi-device; deterministic WASM round-trip smoke skips when export unavailable |
+| **Laws** | **32%** | `LawSystem` catalog + active tracking in sim; read-only panel (definition/active counts) | Ordinance toggle UI; effect application to budget/approval/zoning; law panel smoke (uncommitted WT) |
+| **Trade HUD** | **52%** | Global market monthlies (`PartnerCityId=-1`); trade balance strip in `ResourcesHud` + `EconomyPanel` | Inter-city route UI; contract negotiation; Herald trade headlines |
+| **Herald** | **68%** | Active events → headlines; council options → WASM (`AdjustBudget`, `ApplyApprovalDelta`, `BoostResearch`, `ResolveHeraldEvent`); LLM path + quota + template fallback | Preview `NARRATIVE_LLM_*` keys unset; LLM smoke; Founder-tier entitlements still stubbed on preview |
+
+#### P0 launch blockers (§ v1 Launch Blockers) — item status
+
+| # | Item | % |
+|---|------|---|
+| 1–7 | RCI, approval/budget, research UI, era derivation, era meter, v1 tech subset, Herald↔events | **~95%** shipped (phase 1 + wave-4) |
+| 8 | Traffic (BPR, not stub) | **~55%** — heatmap + road paint; full BPR edge flow TBD |
+| 9–11 | Meshy batch 1, perf budget, 3 heroes | **~8% / ~15% / ~20%** — 8 Meshy GLBs on disk (~7% of 120 target); perf CI stub only; landmark GLB probe + box fallback |
+| 12–13 | Cloud save, entitlements | **~40% / ~35%** — CMJR blob path; no verified JWT + Founder on preview |
+| 14–16 | Herald clicks, onboarding, doc banners | **~90%** — council cmds shipped; onboarding shipped; doc supersession partial |
+
+**Honest read:** The mayor loop is **playable and legible** on preview; wave-4 closed the biggest *visibility* gaps (citizens, trade strip, save blob, Herald cmds). v1 launch is still blocked by **art batch** (~93% of GLBs missing), **auth/cloud parity**, and **perf sign-off** — not by sim greenfield work.
 
 ### Canonical tracking (Linear + Meshy)
 
@@ -29,18 +62,18 @@ Engineering priorities in this doc are mirrored in Linear for phase planning and
 
 ---
 
-## Current State (July 2026)
+## Current State (July 2026, post–wave-4)
 
 | Layer | Status | Gap |
 |-------|--------|-----|
-| **Client (R3F)** | M0→integration: instanced buildings, chunk LOD L0–L3, zoning toolbar, procedural fallback | Meshy GLBs mostly absent; hero landmarks not in scene |
-| **Sim (WASM)** | `Forge.SimWasm` ticks daily/monthly; ~220 starter buildings; zoning/roads wired; 80 events loaded | Traffic is stub; `WasmEraDeriver` bypasses `ResearchSystem` era logic; events not exported to client |
-| **Player loop** | Zoning paint + speed controls + save/load | No RCI bars, approval, budget panel, service overlays, or inert Herald choices |
-| **Research** | `ResearchSystem.cs` + `technologies.json` (156 techs) bundled | No UI; worker drops RP fields; most unlocks map to unimplemented buildings |
-| **Narrative** | Herald panel + `/api/narrative/event` stub (10/day quota) | Template fallback only; not connected to `events.json`; choices have no click handlers |
-| **Persistence** | In-memory `/api/saves`, local `.data/saves.json` | No cloud schema, auth, or conflict resolution |
+| **Client (R3F)** | Instanced buildings, chunk LOD L0–L3, zoning/road/tools, citizen/law/economy panels, Herald + research drawers, CMJR save UI | **8 Meshy GLBs** (~7% of v1 art target); hero landmark = GLB probe + box fallback |
+| **Sim (WASM)** | Daily/monthly tick; zoning/roads; 80 events; Leontief + global trade; law catalog; era gates via `ResearchSystem` | Traffic BPR incomplete; `populationL2` household list not exported; law toggles not wired to HUD |
+| **Player loop** | RCI, approval/budget, era checklist, services/traffic overlays, economy shortages, trade strip, onboarding | Law enactment; inter-city trade routes; Leontief→zoning hint upgrade |
+| **Research** | HUD + tech panel + `enqueue_research`; v1 unlock bridge + CI guard | Postwar/Modern techs hidden; some unlock effects still shallow |
+| **Narrative** | Herald ↔ `events.json`; council options → WASM; LLM path + template fallback; news ticker | Preview LLM keys unset; Herald LLM smoke; Founder entitlements stub |
+| **Persistence** | CMJR `export_cmjr` + blob API + slot list (interim JSON chunk) | SoA chunks; Supabase auth; multi-device conflict resolution |
 | **Multiplayer** | Not in v1 scope (`CLAUDE.md`) | Proposals ready (`MULTIPLAYER_LIVE_PLAY`, `LIVE_SERVICES`) |
-| **Docs** | Strong 3D ADRs; gap audit + gameplay loop audit complete | ~25/33 design docs still describe Godot/Steam/pixel at 10–100× scale |
+| **Docs** | `WEB_V1_SCOPE`, merge checklist, gameplay plan, this roadmap | Godot/Steam/pixel supersession banners incomplete on legacy agent briefs |
 
 **Competitive moat (validated):** Browser deep sim + Herald AI + era arc + frictionless co-op URL — no tier-1 city builder offers co-op.
 
@@ -523,4 +556,4 @@ Linear: Canonical Roadmap doc        ← phase epics + SB mapping
 
 ---
 
-*Synthesized 2026-07-04 from parallel agent outputs on branch `feat/wasm-r3f-integration-2026-07-04`. Revisit after v1 launch retrospective.*
+*Synthesized 2026-07-04 from parallel agent outputs on branch `feat/wasm-r3f-integration-2026-07-04`. Progress % updated 2026-07-05 after wave-4 (`9b82eb1` + uncommitted `citymajor-web-r3f-spike` WT). Revisit after v1 launch retrospective.*

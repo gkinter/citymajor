@@ -71,13 +71,13 @@ Depth + stability work after Phase 2 close. See [V1_GAMEPLAY_BUILD_PLAN.md](./V1
 
 Depth systems after Phase 3 kickoff. See [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPLAY_BUILD_PLAN.md) § Phase 3.
 
-| Area | Key files / issue | Status |
-|------|-------------------|--------|
-| **CitizenPanel** — L2 household drill-down | `CitizenPanel.tsx`, `CitizenButton.tsx`, `population-l2.ts` — [SB-3689](https://linear.app/softblaze/issue/SB-3689) | **Partial** — panel + dot→tile drill-down + aggregate stats shipped; named HH list awaits `populationL2.households` WASM export |
-| **CMJR save** — Layer B blob round-trip | `CmjrSave.cs`, `save-format.ts`, `save-store.ts`, `SaveLoadControls.tsx` — [SB-3686](https://linear.app/softblaze/issue/SB-3686) | **Partial** — `export_cmjr` / load + POST/GET blob wired; v1 interim JSON in chunk `0x01`; full SoA chunks + deterministic smoke round-trip TBD |
-| **Laws** — ordinance catalog in WASM | `LawSystem.cs`, `LawSystemTests.cs`, `LawPanel.tsx`, `LawButton.tsx` — [SB-3689](https://linear.app/softblaze/issue/SB-3689) adj. | **Partial** — catalog load + active tracking in sim; HUD panel shows definition/active counts; toggle + effect application deferred |
-| **Trade** — global market monthlies | `TradeSystem.cs`, `WasmSimHost.ProcessGlobalMarketTrade`, `ResourcesHud.tsx`, `EconomyPanel.tsx` | **Partial** — auto import/export (`PartnerCityId=-1`); HUD trade strip + economy panel; inter-city routes deferred [SB-3728](https://linear.app/softblaze/issue/SB-3728) |
-| **LLM Herald** — Founder narrative path | `narrative-prompt.ts`, `/api/narrative/event`, `NewsTicker.tsx` — [SB-3695](https://linear.app/softblaze/issue/SB-3695) | **Partial** — OpenAI/Anthropic path + quota + template fallback; requires `NARRATIVE_LLM_*` env + Founder tier; no smoke yet |
+| Area | Key files / issue | Status | % |
+|------|-------------------|--------|---|
+| **CitizenPanel** — L2 household drill-down | `CitizenPanel.tsx`, `CitizenButton.tsx`, `population-l2.ts` — [SB-3689](https://linear.app/softblaze/issue/SB-3689) | **Partial** | **58%** — panel + dot→tile drill-down + aggregate stats; named HH list awaits `populationL2.households` WASM export |
+| **CMJR save** — Layer B blob round-trip | `CmjrSave.cs`, `save-format.ts`, `save-store.ts`, `SaveLoadControls.tsx` — [SB-3686](https://linear.app/softblaze/issue/SB-3686) | **Partial** | **48%** — `export_cmjr` / load + POST/GET blob wired; v1 interim JSON in chunk `0x01`; full SoA chunks + deterministic smoke round-trip TBD |
+| **Laws** — ordinance catalog in WASM | `LawSystem.cs`, `LawSystemTests.cs`, `LawPanel.tsx`, `LawButton.tsx` — [SB-3689](https://linear.app/softblaze/issue/SB-3689) adj. | **Partial** | **32%** — catalog load + active tracking in sim; HUD panel shows definition/active counts; toggle + effect application deferred |
+| **Trade** — global market monthlies | `TradeSystem.cs`, `WasmSimHost.ProcessGlobalMarketTrade`, `ResourcesHud.tsx`, `EconomyPanel.tsx` | **Partial** | **52%** — auto import/export (`PartnerCityId=-1`); HUD trade strip + economy panel; inter-city routes deferred [SB-3728](https://linear.app/softblaze/issue/SB-3728) |
+| **LLM Herald** — Founder narrative path | `narrative-prompt.ts`, `/api/narrative/event`, `NewsTicker.tsx` — [SB-3695](https://linear.app/softblaze/issue/SB-3695) | **Partial** | **68%** — OpenAI/Anthropic path + quota + template fallback; requires `NARRATIVE_LLM_*` env + Founder tier; smoke in uncommitted WT |
 | **Herald commands** — council option → sim | `herald-option-commands.ts`, `PlayClient.tsx`, `WasmExports.AdjustBudget` / `ApplyApprovalDelta` / `BoostResearch` | **Shipped** — budget, approval, research-boost commands reach WASM; resolves linked `approval_event` |
 | **Era gates** — pop + tech checklist | `WasmEraDeriver.cs`, `EraProgressPanel.tsx`, `era-landmarks.ts` | **Shipped** — gates mirror `ResearchSystem.EraRequirements`; landmark spawns when all gates met |
 | **Hero GLTF landmark** — Meshy swap path | `EraLandmarkPlaceholder.tsx` — [SB-3680](https://linear.app/softblaze/issue/SB-3680) | **Partial** — probes hero GLB URL, procedural box fallback; no hero `.glb` on disk yet |
@@ -87,7 +87,7 @@ Depth systems after Phase 3 kickoff. See [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPL
 | **Meshy batch `--manifest`** | `batch-generate.mjs`, `.gitattributes` LFS policy | **Shipped** — manifest flag + Git LFS for GLB batches |
 | **HUD theming** | `hud-tokens.css`, `hud-theme.ts` | **Shipped** — shared tokens for citizen/law/economy panels |
 
-**Uncommitted WT** (`citymajor-web-r3f-spike`, post-`9b82eb1`): `CanvasRenderHealth.tsx` (canvas watchdog); Meshy `com_industrial_00.glb` (~10 MB, replaces placeholder removed in `9b82eb1`). Commit before next preview redeploy.
+**Uncommitted WT** (`citymajor-web-r3f-spike`, post-`90faca9`): citizen/law panel smoke (`smoke-play-checks.mjs`); `CanvasRenderHealth.tsx`; `res_low_frontier_02/03.glb`; `verify-tech-unlocks.mts`. Commit before next preview redeploy.
 
 ---
 

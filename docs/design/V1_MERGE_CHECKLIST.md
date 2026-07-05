@@ -154,7 +154,7 @@ HUD meters, slide-panel theming, and play chrome after wave-15 build loop. Five 
 
 **Wave-16 stack (merge order):** **a** `7d459fe` → **b** `321fb5e` → **c** `b83ac97` → **d** `7331e49` → **e** `3428d81` — apply in order after `pnpm verify:tech-unlocks` + smoke green. Integration `@ 848e45c` includes **a** + **b** at doc time; **c**, **d**, **e** pending FF.
 
-**Deferred (wave 17+):** full civic TypeId→tile persistence in snapshot smoke, office/mixed zone growth visuals at Industrial+ density, minimap live tile render, bus/rail WASM placement.
+**Deferred (wave 17+):** full civic TypeId→tile persistence in snapshot smoke, office/mixed zone growth visuals at Industrial+ density, minimap live tile render, bus/rail WASM placement — see [WAVE17_BACKLOG.md](./WAVE17_BACKLOG.md).
 
 ---
 
@@ -573,6 +573,7 @@ Remaining **v1 LAUNCH NO-GO** at `e96fe1c`:
 | [MESHY_ASSET_CATALOG.md](./MESHY_ASSET_CATALOG.md) | 500-key taxonomy + batch manifests |
 | [PR1_BODY_DRAFT.md](./PR1_BODY_DRAFT.md) | PR #1 body copy — wave-15 build loop deliverables |
 | [WAVE16_MERGE_MAP.md](./WAVE16_MERGE_MAP.md) | Phase 4 wave-16 HUD polish — branch SHAs, a→e merge order, worktrees |
+| [WAVE17_BACKLOG.md](./WAVE17_BACKLOG.md) | Wave 17 deferred backlog — transport WASM, civic GLBs, empty-city rebuild, panel polish |
 | [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPLAY_BUILD_PLAN.md) | Phase 2 shipped · Phase 3 active · wave-15 `5a0b08e` · wave-16 `3428d81` |
 | [WASM_SIM_BRIDGE.md](./WASM_SIM_BRIDGE.md) | Worker / snapshot contract |
 | [SAVE_FORMAT_WEB.md](./SAVE_FORMAT_WEB.md) | CMJR cloud save schema (§3 — wave-2 interim JSON chunk) |

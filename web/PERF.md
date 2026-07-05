@@ -140,9 +140,85 @@ Environment: Beast (Hetzner EPYC), headless Chromium, `BASE_URL=http://localhost
 | Smoke FPS snapshot | **3** |
 | Strict gate (`PERF_GATE_STRICT=1 PERF_SOFT_RENDERER_MAX=0`) | **FAIL** — min FPS 1 < 30 (expected on headless; not a product regression) |
 
-**Sign-off still open:** integrated/discrete interactive benchmarks (table below), `AdaptiveDpr` manual check, 5k-building WASM soak, [SB-3705](https://linear.app/softblaze/issue/SB-3705) QA matrix. Use `HEADLESS=0` on a GPU host or Mac interactive session for meaningful ≥30 FPS evidence.
+**Sign-off still open** — complete the checklist below on a Mac with discrete GPU (`HEADLESS=0`). Headless Beast/Chromium runs above are CI smoke only (software renderer).
 
-### Local benchmark (fill in after interactive `/play` session) (fill in after interactive `/play` session)
+### SB-3703 — sign-off checklist
+
+Worktree: `citymajor-web-r3f-spike` · Ticket: [SB-3703](https://linear.app/softblaze/issue/SB-3703) · Targets: [`WEB_V1_SCOPE.md`](../docs/design/WEB_V1_SCOPE.md) §4.
+
+| Gate | Target | Evidence |
+|------|--------|----------|
+| Discrete GPU (Mac) | **≥60 FPS** min sample, orbit + district | `perf-gate.json` + benchmark table |
+| Integrated GPU | **≥30 FPS** min sample | [SB-3705](https://linear.app/softblaze/issue/SB-3705) QA matrix |
+| WASM soak | ~220→5k buildings, no frame collapse | HUD building count + FPS during growth |
+| `AdaptiveDpr` | Steps down after 2s &lt;30 FPS | Integrated spot-check; discrete should not degrade |
+
+#### 1. Mac prep (discrete GPU)
+
+- MacBook Pro / Mac Studio with **discrete or M-series GPU** (not low-power mode).
+- Chrome or Safari — hardware acceleration on; close GPU-heavy apps.
+- First time: `cd web && npx playwright install chromium`.
+
+**Terminal 1** — from worktree root:
+
+```bash
+cd ~/citymajor/citymajor-web-r3f-spike
+unset NODE_OPTIONS
+pnpm build:wasm && pnpm dev
+```
+
+Wait for `http://localhost:3000/play` — HUD should read **WASM sim** (not procedural).
+
+#### 2. Interactive smoke (`HEADLESS=0`)
+
+**Terminal 2**:
+
+```bash
+cd ~/citymajor/citymajor-web-r3f-spike/web
+HEADLESS=0 WASM_EXPECTED=1 pnpm smoke:play
+```
+
+Watch the browser: WebGL canvas mounts, Diagnostics HUD shows numeric FPS (not `—`), building count matches HUD.
+
+#### 3. Discrete perf gate — **≥60 FPS**
+
+Same dev server; visible browser:
+
+```bash
+HEADLESS=0 MIN_FPS=60 PERF_GATE_STRICT=1 PERF_REPORT=1 pnpm perf:gate
+```
+
+Pass: exit 0 and `test-results/perf-gate.json` → `minFps >= 60`. Optional longer window: `PERF_WARMUP_MS=5000 PERF_SAMPLE_MS=10000`.
+
+Combine with full smoke in one session: `HEADLESS=0 MIN_FPS=60 PERF_GATE=1 pnpm smoke:play`.
+
+#### 4. Manual HUD verification (same `/play` tab)
+
+With dev server + `HEADLESS=0` (or plain `pnpm dev` + browser):
+
+- [ ] **Orbit, full city in view** — Diagnostics FPS **≥60** sustained (~10s)
+- [ ] **Zoom district** (~8 terrain chunks visible) — FPS **≥60**
+- [ ] **DPR** — initial 1.5–2; no `AdaptiveDpr` step-down on discrete
+- [ ] **Sim** — HUD `WASM sim`; snapshot rate ≤4 Hz
+
+Record results in the benchmark table below.
+
+#### 5. Integrated + soak (parallel / [SB-3705](https://linear.app/softblaze/issue/SB-3705))
+
+- [ ] **Integrated** — `HEADLESS=0 MIN_FPS=30 pnpm perf:gate` on iGPU / low-power Mac (or QA matrix machine)
+- [ ] **`AdaptiveDpr`** — FPS &lt;30 for 2s triggers DPR degrade; note `DPR after degrade`
+- [ ] **WASM soak** — zone growth toward **5k buildings** without sustained FPS collapse
+- [ ] **CTO P0 perf** — [CTO_IMPROVEMENT_ROADMAP_2026-07.md](../docs/design/CTO_IMPROVEMENT_ROADMAP_2026-07.md) item #10 acknowledged
+
+#### Sign-off boxes
+
+- [ ] Steps 1–4 complete on Mac discrete GPU (`HEADLESS=0`, `MIN_FPS=60` pass)
+- [ ] Local benchmark table filled
+- [ ] `test-results/perf-gate.json` from discrete run attached to [SB-3703](https://linear.app/softblaze/issue/SB-3703)
+- [ ] [SB-3705](https://linear.app/softblaze/issue/SB-3705) QA matrix complete (integrated)
+- [ ] Eng + product sign-off on checklist ([`V1_MERGE_CHECKLIST.md`](../docs/design/V1_MERGE_CHECKLIST.md) §6)
+
+### Local benchmark (fill in after interactive `/play` session)
 
 ```
 Machine:
@@ -178,3 +254,4 @@ Verify in DevTools → Network → document headers.
 | SB-3663 | InstancedMesh ×5 + chunk visibility |
 | SB-3664 | Terrain chunks + LOD L0–L3 hysteresis |
 | SB-3665 | OrbitControls, picking, adaptive DPR, FPS HUD |
+| SB-3703 | v1 perf sign-off — Mac `HEADLESS=0`, discrete ≥60 FPS gate |

@@ -16,7 +16,7 @@ Deploy the Next.js web client (`web/`) to Coolify for branch previews. Productio
 | Build arg | `BUILD_WASM=1` (build-time only) |
 | Port exposes | `3000` |
 | Health check | `GET /play` (or `GET /`) |
-| Auto-deploy | Enable for the watched branch |
+| Auto-deploy | Enable for the watched branch — see [Fix runbook §C](#c-coolify-ui--enable-automatic-deployment-webhooks) |
 
 ## Auto-deploy incident — commit `79ef561` (2026-07-04)
 
@@ -46,11 +46,103 @@ Creating the app via **Public Repository** / `Public GitHub` without the org Git
 
 ### Fix (required for push → deploy)
 
-1. **Install** the Coolify GitHub App on the **`gkinter`** org (or grant the existing app access to `gkinter/citymajor`) — Settings → GitHub App → configure repository access.
-2. In Coolify UI: **`citymajor-web`** → **Source** → switch from **Public GitHub** to **GitHub App** (same app used for `DigitalSoftDistribution/*` previews).
-3. Re-select repository **`gkinter/citymajor`**, branch **`feat/wasm-r3f-integration-2026-07-04`**, keep **Automatic Deployment** enabled.
-4. Push a no-op doc commit **or** `coolify deploy citymajor-web --force` once after reconnecting.
-5. **Verify** the next push creates a deployment with **`is_webhook = true`** (SQL via Beast: `application_deployment_queues` for this app, or watch Coolify UI “Webhook” trigger).
+Follow the UI runbook below end-to-end. Until **`source_id ≠ 0`** and push deploys show **`is_webhook = true`**, every build must be triggered manually (Deploy button or `coolify deploy --force`).
+
+#### A. GitHub — grant the Coolify App access to `gkinter/citymajor`
+
+The fleet GitHub App (**Softblaze Coolify**, same installation used for `DigitalSoftDistribution/*` previews) must be allowed to read `gkinter/citymajor` and receive push webhooks.
+
+1. Open **[github.com/settings/installations](https://github.com/settings/installations)** (personal account) **or** **[github.com/organizations/gkinter/settings/installations](https://github.com/organizations/gkinter/settings/installations)** (org — preferred if the repo lives under `gkinter`).
+2. Click **Configure** on the Coolify / Softblaze Coolify installation.
+   - If no Coolify app is listed, install it first: in Coolify → **Settings** → **Sources** → **GitHub App** → **Install GitHub App** (follow the redirect, choose **gkinter** org, grant **Repository contents: Read** and **Metadata: Read**).
+3. Under **Repository access**, choose one of:
+   - **Only select repositories** → **Select repositories** → add **`gkinter/citymajor`**, **or**
+   - **All repositories** (only if org policy allows — not required for this single repo).
+4. Click **Save**. Confirm **`gkinter/citymajor`** appears in the installation’s repository list.
+5. Optional sanity check on GitHub: repo **Settings** → **Integrations** → **Applications** — the Coolify app should list **Active** for this repository.
+
+#### B. Coolify UI — reconnect `citymajor-web` to the GitHub App source
+
+Switch the app off **Public GitHub** (`source_id = 0`) onto the GitHub App source so push events reach Coolify.
+
+1. Sign in to **[https://coolify.softblaze.net](https://coolify.softblaze.net)**.
+2. **Projects** → open the CityMajor project → application **`citymajor-web`** (`w134tsftvj327kp96j45kcsb`).
+3. Open the **Configuration** tab (left sidebar).
+4. Scroll to **Source** (or **General** → **Source** depending on Coolify version).
+5. **Source type**: change from **Public GitHub** / **Public Repository** to **Private Repository (GitHub App)** or **GitHub App** — **not** “Public GitHub”.
+6. **GitHub App / Source**: select the fleet installation (**Softblaze Coolify** / the same source row other preview apps use, typically `source_id = 1` in Postgres).
+7. **Repository**: pick **`gkinter/citymajor`** from the dropdown (refreshes after step A).
+8. **Branch**: **`feat/wasm-r3f-integration-2026-07-04`** — must match the branch you push to.
+9. **Base directory**: **`/`** (repo root; Dockerfile at `/Dockerfile`).
+10. **Watch paths**: leave **empty** (full-repo Docker build).
+11. Click **Save** (top-right). Coolify may offer to redeploy — **decline** for now; verify source wiring first with step C.
+
+> **Do not recreate the app.** Editing Source on the existing `citymajor-web` preserves env vars (`BUILD_WASM`, Stripe keys, FQDN). Creating a new app from Public GitHub repeats the incident.
+
+#### C. Coolify UI — enable automatic deployment (webhooks)
+
+Automatic Deployment is the Coolify-side switch that enqueues a build when the GitHub App delivers a push webhook.
+
+1. Still on **`citymajor-web`** → **Configuration**.
+2. Find **Automatic Deployment** (sometimes under **General** or **Advanced**).
+3. Toggle **ON** / enable the checkbox.
+4. Confirm **Preview Deployments** stays **OFF** for this app (canonical single-branch preview — not PR-per-branch mode).
+5. Click **Save**.
+
+Expected Postgres state after save (see [Ops queries](#ops-queries-no-secrets)):
+
+| Column | Before fix | After fix |
+|--------|------------|-----------|
+| `applications.source_id` | `0` (Public GitHub) | non-zero (GitHub App row, e.g. `1`) |
+| `application_settings.is_auto_deploy_enabled` | may already be `true` | `true` |
+
+#### D. Trigger a webhook deploy (test push)
+
+Manual deploys (`Deploy` button, `coolify deploy --force`) set **`is_webhook = false`** — they prove the Dockerfile still builds, **not** that webhooks work. After B+C, prove auto-deploy with a **git push** to the watched branch.
+
+1. From worktree **`citymajor-web-r3f-spike`** (branch `feat/wasm-r3f-integration-2026-07-04`), commit and push a small change (doc-only is fine, e.g. this file).
+2. Within ~30 s, Coolify **Deployments** for `citymajor-web` should show a new row **without** clicking Deploy.
+3. If nothing queues within 2 min: re-check A (repo in GitHub App list) and B (source type is GitHub App, branch exact match), then inspect GitHub **Settings** → **Webhooks** on `gkinter/citymajor` for a Coolify delivery (recent `push` event, HTTP 2xx).
+
+#### E. Verify `is_webhook = true` on the push-triggered deploy
+
+**Coolify UI**
+
+1. **`citymajor-web`** → **Deployments** → open the deployment created by your test push (not a manual/API deploy).
+2. Confirm trigger metadata shows **Webhook** (wording varies: “Triggered by webhook”, “GitHub Webhook”, or similar — **not** “API” / “Manual”).
+
+**CLI / SQL (authoritative)**
+
+```bash
+# Latest deploy for this app — push row should have is_webhook=t, is_api=f
+ssh beast 'bash -lc "source /home/devops/.coolify-mcp.env; eval "\$(sed -n "/^vps_psql()/,/^}/p" /home/devops/bin/coolify)"; vps_psql "SELECT deployment_uuid, LEFT(commit,8) AS sha, is_webhook, is_api, status, created_at FROM application_deployment_queues WHERE application_id=(SELECT id FROM applications WHERE uuid='"'"'w134tsftvj327kp96j45kcsb'"'"') ORDER BY created_at DESC LIMIT 3""'
+```
+
+Pass criteria for the **push** deployment:
+
+| Field | Expected |
+|-------|----------|
+| `commit` | SHA of your test push |
+| `is_webhook` | **`true`** |
+| `is_api` | **`false`** |
+| `status` | `finished` (after build completes) |
+
+Also confirm source wiring:
+
+```bash
+ssh beast 'bash -lc "source /home/devops/.coolify-mcp.env; eval "\$(sed -n "/^vps_psql()/,/^}/p" /home/devops/bin/coolify)"; vps_psql "SELECT a.source_id, a.git_repository, a.git_branch, s.is_auto_deploy_enabled FROM applications a JOIN application_settings s ON s.application_id=a.id WHERE a.uuid='"'"'w134tsftvj327kp96j45kcsb'"'"'""'
+```
+
+**`source_id`** must be non-zero; **`is_auto_deploy_enabled`** must be **`t`**.
+
+**Events MCP (optional)**
+
+```bash
+# Recent deployment_success for citymajor-web (fleet events sidecar)
+# mcp: coolify_events since=15min app_name=citymajor-web
+```
+
+Once E passes, routine workflow is: push to `feat/wasm-r3f-integration-2026-07-04` → one Coolify build → wait for `finished` before pushing again (deploy-discipline: one commit, one push, one deploy).
 
 Optional hardening:
 
@@ -90,7 +182,7 @@ Use this checklist when creating the **first** preview app for the WASM + R3F in
 ### 1. Create the application
 
 1. **Projects** → open the CityMajor project (or create one, e.g. `citymajor`).
-2. **+ New** → **Application** → **Private Repository (GitHub App)** only — do **not** use **Public GitHub** (`source_id = 0`); push webhooks will not auto-deploy (see [Auto-deploy incident](#auto-deploy-incident--commit-79ef561-2026-07-04)).
+2. **+ New** → **Application** → **Private Repository (GitHub App)** only — do **not** use **Public GitHub** (`source_id = 0`); push webhooks will not auto-deploy (see [Auto-deploy incident](#auto-deploy-incident--commit-79ef561-2026-07-04) and [Fix runbook §B](#b-coolify-ui--reconnect-citymajor-web-to-the-github-app-source)).
 3. Select repository **`gkinter/citymajor`**.
 4. **Name**: `citymajor-web` (canonical Coolify app; custom FQDN `citymajor.apps.softblaze.net`).
 5. **Environment**: `production` (Coolify env name — still a preview URL, not live prod).
@@ -179,10 +271,11 @@ M0 preview needs **no secrets**. Omit Stripe vars unless testing live Founder Pa
 | `PORT` | No | `3000` (set in Dockerfile) |
 | `HOSTNAME` | No | `0.0.0.0` (set in Dockerfile) |
 | `NODE_ENV` | No | `production` (set in Dockerfile) |
-| `STRIPE_*` | No | See [Stripe test-mode setup (SB-3714)](#stripe-test-mode-setup-sb-3714) |
+| `STRIPE_*` | No | See [Stripe test-mode setup (SB-3714)](#stripe-test-mode-setup-sb-3714) or quick ops runbook [`STRIPE_COOLIFY_SETUP.md`](./STRIPE_COOLIFY_SETUP.md) |
 
 #### Stripe test-mode setup (SB-3714)
 
+> **Quick ops (Beast `env-set`, `/api/shop` smoke, no secrets):** [`STRIPE_COOLIFY_SETUP.md`](./STRIPE_COOLIFY_SETUP.md)  
 > **Linear:** [SB-3714](https://linear.app/softblaze/issue/SB-3714) — Stripe test-mode env + webhook on `citymajor-web`  
 > **Related:** [SB-3693_AUTH_ENTITLEMENTS_GAP.md](./design/SB-3693_AUTH_ENTITLEMENTS_GAP.md) (checkout → webhook → tier-store flow)
 
@@ -479,8 +572,21 @@ The M0 spike runs with in-memory stubs — no secrets required for preview.
 | `STRIPE_FOUNDER_PASS_PRICE_ID` | No | — | Stripe Price ID for Founder Pass (`price_…`) |
 | `STRIPE_WEBHOOK_SECRET` | No | — | Verifies `POST /api/webhooks/stripe` (register Coolify FQDN + `/api/webhooks/stripe`) |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | No | — | Stripe publishable key (`pk_test_…` / `pk_live_…`); **build-time** Docker arg / Coolify env |
+| `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` | No | — | Herald LLM; omit on preview (see below) |
+| `NARRATIVE_LLM_PROVIDER` | No | first key present | `openai` or `anthropic` |
+| `NARRATIVE_LLM_DEV_OVERRIDE` | No | — | **`1` only in non-production** — call LLM without Founder tier when keys are set |
 
 Without Stripe vars, `/shop` uses the mock entitlements cookie path. Checkout reads `STRIPE_SECRET_KEY` + `STRIPE_FOUNDER_PASS_PRICE_ID` server-side; webhooks require `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET`. Diagnostic routes: `GET /api/shop`, `GET /api/checkout/founder-pass`, `GET /api/webhooks/stripe` (each returns `missing` / `missingCheckout` / `missingWebhook` when keys are absent). See `web/.env.example` and [Stripe test-mode setup (SB-3714)](#stripe-test-mode-setup-sb-3714).
+
+### Why Herald is template-only on preview
+
+`POST /api/narrative/event` returns `source: "template"` on [citymajor.apps.softblaze.net](https://citymajor.apps.softblaze.net) by design until LLM Herald is explicitly enabled:
+
+1. **No LLM keys on Coolify** — `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` are not set on the preview app (cost + secret hygiene).
+2. **Free tier by default** — anonymous visitors resolve to `tier: "free"`; `llmEnabled` is false unless Stripe webhook grants `founder_pass`.
+3. **Template fallback is the supported path** — headlines come from `narrative-templates.ts`; quota and Herald UI still work.
+
+To exercise the LLM path locally: set an API key in `web/.env.local`, optionally `NARRATIVE_LLM_DEV_OVERRIDE=1`, and grant tier via `X-CityMajor-Tier: founder_pass` or mock `citymajor_tier=founder_pass` cookie. Smoke: `SMOKE_NARRATIVE=1 pnpm smoke:all` (expects `source=template`); with override + keys, `SMOKE_NARRATIVE=1 SMOKE_NARRATIVE_LLM=1 pnpm smoke:all`.
 
 ## COOP / COEP headers (SharedArrayBuffer)
 
@@ -524,8 +630,34 @@ cd web && BASE_URL=https://<preview-fqdn> WASM_EXPECTED=0 node scripts/smoke-pla
 
 Set `WASM_EXPECTED=1` only when `BUILD_WASM=1` succeeded.
 
+## Git LFS and preview builds
+
+Seven Meshy refine GLBs (~70 MB) in the v1-core spike are still **raw git blobs** in history. `.gitattributes` tracks `web/public/assets/gltf/**/*.glb` for LFS, but past commits need **`git lfs migrate`** before scaling art batches — see [`design/MESHY_ASSET_CATALOG.md`](./design/MESHY_ASSET_CATALOG.md) § **`git lfs migrate` — approval required** (do not run without maintainer sign-off).
+
+### Coolify / Docker implications
+
+The root `Dockerfile` uses `COPY . .` — the Docker build context is whatever Coolify checked out. If the checkout contains **LFS pointer files** instead of real GLBs, `/assets/gltf/...` on preview will be broken (R3F loader errors, ~130-byte responses).
+
+| Phase | Requirement |
+|-------|-------------|
+| **Before migrate** | Raw blobs clone fine; no LFS step needed. Repo `.git` is bloated (~70 MB GLB overhead). |
+| **After migrate** | Coolify host must run **`git lfs pull`** after clone (install `git-lfs` on the build server if missing). Verify deploy log or container: `file web/public/assets/gltf/frontier/res_low_frontier_00.glb` → `glTF binary`, not ASCII. |
+| **New Meshy commits** | Always `git lfs install` locally; confirm with `git lfs ls-files` before push. |
+
+**Smoke after LFS migrate deploy:**
+
+```bash
+FQDN="https://citymajor.apps.softblaze.net"
+curl -sI "$FQDN/assets/gltf/frontier/res_low_frontier_00.glb" | grep -i content-length
+# Expect Content-Length in millions of bytes, not ~130
+```
+
+Optional: regenerate art on preview instead of LFS (`MESHY_API_KEY` + `pnpm meshy:batch --skip-existing`) per [MESHY_ASSET_PIPELINE.md](./MESHY_ASSET_PIPELINE.md) — CDN path [SB-3682](https://linear.app/softblaze/issue/SB-3682).
+
 ## Related docs
 
+- [`STRIPE_COOLIFY_SETUP.md`](./STRIPE_COOLIFY_SETUP.md) — Stripe env vars on `citymajor-web`, Beast `coolify env-set`, `GET /api/shop` smoke
 - [`web/README.md`](../web/README.md) — local dev, WASM build, procedural fallback
 - [`web/PERF.md`](../web/PERF.md) — FPS / instancing notes
+- [`design/MESHY_ASSET_CATALOG.md`](./design/MESHY_ASSET_CATALOG.md) — Meshy batch table + LFS migrate runbook
 - [`design/SB-3693_AUTH_ENTITLEMENTS_GAP.md`](./design/SB-3693_AUTH_ENTITLEMENTS_GAP.md) — checkout, webhook, tier-store acceptance

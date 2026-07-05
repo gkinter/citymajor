@@ -52,6 +52,118 @@ git add .gitattributes
 
 **Spike inventory (v1-core, 20 keys):** 7 Meshy GLBs in history as raw blobs (needs `git lfs migrate` before scaling); 13 procedural placeholders. Do not add another Meshy batch to plain git — P0 (108 assets) would exceed **1 GB**.
 
+### Raw-blob inventory (HEAD, `citymajor-web-r3f-spike`)
+
+These seven files are committed as **plain git blobs** (~**70 MB** total in `.git/objects`). `.gitattributes` already sets `filter=lfs` for new adds, but history was written before tracking — **`git add` alone does not rewrite past commits**.
+
+| Path | Size (approx.) | First Meshy commit |
+|------|----------------|--------------------|
+| `web/public/assets/gltf/frontier/res_low_frontier_00.glb` | 7.8 MB | `e4d3d4f` |
+| `web/public/assets/gltf/frontier/res_low_frontier_01.glb` | 8.8 MB | `3c5a851` |
+| `web/public/assets/gltf/frontier/ind_frontier_00.glb` | 8.8 MB | `f93b855` |
+| `web/public/assets/gltf/frontier/com_frontier_00.glb` | 9.5 MB | `3c5a851` |
+| `web/public/assets/gltf/industrial/res_low_industrial_00.glb` | 11 MB | `3076c29` |
+| `web/public/assets/gltf/industrial/res_high_industrial_00.glb` | 11 MB | `86dd2ff` |
+| `web/public/assets/gltf/industrial/ind_industrial_00.glb` | 10 MB | (v1-core batch) |
+
+The remaining 13 v1-core keys are procedural placeholders (&lt; 5 KB each). **`com_industrial_00.glb`** (~10 MB) exists on disk but is **untracked** — add it only **after** LFS migrate (or it will become another raw blob).
+
+### `git lfs migrate` — approval required
+
+> **Do not run without explicit maintainer approval.** This **rewrites git history** on every ref included in the migrate. All open PRs, worktrees, and clones must be rebased or re-cloned afterward. Coordinate before force-pushing.
+
+**Prerequisites**
+
+1. [Git LFS](https://git-lfs.com/) installed locally (`git lfs version`).
+2. GitHub **Git LFS** enabled on `gkinter/citymajor` (Settings → Git LFS). Budget ~70 MB storage + bandwidth per fresh clone until history is rewritten on all branches.
+3. Clean working tree on the branch to migrate (stash or commit unrelated edits).
+4. Announce freeze: no concurrent pushes to `feat/wasm-r3f-integration-2026-07-04` (or target branch) during migrate + force-push.
+5. List active worktrees: `git worktree list` — each must reset after migrate.
+
+**Pre-flight (read-only — safe to run anytime)**
+
+```bash
+cd /path/to/citymajor-web-r3f-spike   # or canonical clone
+git lfs install
+
+# Confirm .gitattributes tracks GLBs (expect filter=lfs)
+git check-attr filter -- web/public/assets/gltf/frontier/res_low_frontier_00.glb
+
+# Confirm HEAD still stores raw blobs (size >> 200 bytes; not an LFS pointer)
+git cat-file -s HEAD:web/public/assets/gltf/frontier/res_low_frontier_00.glb
+# ~8209608 today → raw blob. After migrate → ~130 (pointer).
+
+# Estimate repo bloat from large GLBs in history
+git rev-list --objects --all -- \
+  web/public/assets/gltf/frontier/res_low_frontier_00.glb \
+  web/public/assets/gltf/frontier/res_low_frontier_01.glb \
+  web/public/assets/gltf/frontier/ind_frontier_00.glb \
+  web/public/assets/gltf/frontier/com_frontier_00.glb \
+  web/public/assets/gltf/industrial/res_low_industrial_00.glb \
+  web/public/assets/gltf/industrial/res_high_industrial_00.glb \
+  web/public/assets/gltf/industrial/ind_industrial_00.glb \
+  | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize)' \
+  | awk '$1=="blob" && $3>1000000 {sum+=$3; n++} END {printf "%d blobs, %.1f MB\n", n, sum/1024/1024}'
+```
+
+**Migrate (destructive — run only after approval)**
+
+Migrate **only the seven Meshy files** (leave procedural &lt; 5 KB placeholders as plain git blobs):
+
+```bash
+BRANCH=feat/wasm-r3f-integration-2026-07-04
+
+git lfs migrate import \
+  --include="web/public/assets/gltf/frontier/res_low_frontier_00.glb,web/public/assets/gltf/frontier/res_low_frontier_01.glb,web/public/assets/gltf/frontier/ind_frontier_00.glb,web/public/assets/gltf/frontier/com_frontier_00.glb,web/public/assets/gltf/industrial/res_low_industrial_00.glb,web/public/assets/gltf/industrial/res_high_industrial_00.glb,web/public/assets/gltf/industrial/ind_industrial_00.glb" \
+  --include-ref=refs/heads/$BRANCH
+```
+
+To rewrite **all branches/tags** that contain these blobs (only if approved for full-repo cleanup):
+
+```bash
+git lfs migrate import \
+  --include="web/public/assets/gltf/frontier/res_low_frontier_00.glb,..." \
+  --everything
+```
+
+**Post-migrate verification (before push)**
+
+```bash
+# Pointer files in HEAD (~130 bytes), real bytes on disk after checkout
+git cat-file -s HEAD:web/public/assets/gltf/frontier/res_low_frontier_00.glb
+head -1 web/public/assets/gltf/frontier/res_low_frontier_00.glb
+# Expect: version https://git-lfs.github.com/spec/v1
+
+git lfs ls-files | wc -l          # expect ≥ 7
+file web/public/assets/gltf/frontier/res_low_frontier_00.glb
+# Expect: glTF binary, not ASCII pointer
+
+cd web && pnpm build              # GLBs must resolve in standalone output
+```
+
+**Push (after approval)**
+
+```bash
+git push --force-with-lease origin $BRANCH
+```
+
+Notify anyone with a clone/worktree:
+
+```bash
+git fetch origin
+git reset --hard origin/$BRANCH
+git lfs pull
+# or: re-clone + git lfs install
+```
+
+**After migrate — new Meshy assets**
+
+1. Ensure `git lfs install` once per clone.
+2. `git add web/public/assets/gltf/.../*.glb` — Git LFS smudge runs automatically via `.gitattributes`.
+3. Never commit Meshy refine outputs without LFS; run `git lfs ls-files` before push.
+
+Coolify preview builds: see [`DEPLOY_WEB.md`](../DEPLOY_WEB.md) § Git LFS and preview builds.
+
 ---
 
 ## LOD strategy

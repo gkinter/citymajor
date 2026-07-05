@@ -133,6 +133,8 @@ git add .gitattributes
 
 Until LFS is enabled, keep generated GLBs **local or on CDN** (see SB-3682). Commit only `scripts/meshy/batch-generate.mjs`, manifests, and catalog wiring. Regenerate on CI/preview hosts via `MESHY_USE_MCP=1 pnpm meshy:batch:mcp -- --skip-existing` or direct `MESHY_API_KEY` + `pnpm meshy:batch`.
 
+**Existing raw blobs:** seven v1-core Meshy GLBs (~70 MB) are already in git history as plain blobs. Rewriting them requires **`git lfs migrate`** (approval required) — full runbook in [`design/MESHY_ASSET_CATALOG.md`](./design/MESHY_ASSET_CATALOG.md) § `git lfs migrate`. Coolify notes: [`DEPLOY_WEB.md`](./DEPLOY_WEB.md) § Git LFS and preview builds.
+
 ---
 
 ## Future integration

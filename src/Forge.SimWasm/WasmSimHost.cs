@@ -111,6 +111,10 @@ public sealed class WasmSimHost
     public float FireCoverage =>
         _services is null || _state is null ? 0f : ComputeAverageCoverage(_services.FireCoverage);
 
+    /// <summary>City-wide average education coverage over zoned tiles (0–1).</summary>
+    public float EducationCoverage =>
+        _services is null || _state is null ? 0f : ComputeAverageCoverage(_services.EducationCoverage);
+
     public int[] CollectUnlockedTechIds()
     {
         if (_state is null) return [];
@@ -1087,6 +1091,8 @@ public sealed class WasmStatusDto
     public float PoliceCoverage { get; init; }
     /// <summary>Mean fire coverage over zoned tiles (0–1).</summary>
     public float FireCoverage { get; init; }
+    /// <summary>Mean education coverage over zoned tiles (0–1).</summary>
+    public float EducationCoverage { get; init; }
     /// <summary>Leontief goods shortages/surpluses for economy HUD.</summary>
     public EconomySnapshotDto Economy { get; init; } = new();
     /// <summary>Global-market export revenue from the last trade month.</summary>
@@ -1167,6 +1173,7 @@ public sealed class WasmStatusDto
         HealthcareCoverage = host.HealthcareCoverage,
         PoliceCoverage = host.PoliceCoverage,
         FireCoverage = host.FireCoverage,
+        EducationCoverage = host.EducationCoverage,
         Economy = host.EconomySnapshot,
         MonthlyExportValue = host.MonthlyExportValue,
         MonthlyImportCost = host.MonthlyImportCost,
@@ -1371,6 +1378,7 @@ public sealed class SimSnapshotDto
         var health = services.HealthCoverage;
         var police = services.PoliceCoverage;
         var fire = services.FireCoverage;
+        var education = services.EducationCoverage;
         var list = new List<ServiceCoverageDto>(512);
         for (int y = 0; y < tiles.Size; y++)
         for (int x = 0; x < tiles.Size; x++)
@@ -1381,6 +1389,7 @@ public sealed class SimSnapshotDto
             float h = Math.Clamp(health.GetValue(x, y), 0f, 1f);
             float p = Math.Clamp(police.GetValue(x, y), 0f, 1f);
             float f = Math.Clamp(fire.GetValue(x, y), 0f, 1f);
+            float e = Math.Clamp(education.GetValue(x, y), 0f, 1f);
             list.Add(new ServiceCoverageDto
             {
                 TileX = x,
@@ -1388,6 +1397,7 @@ public sealed class SimSnapshotDto
                 Health = h,
                 Police = p,
                 Fire = f,
+                Education = e,
             });
         }
 
@@ -1435,6 +1445,7 @@ public sealed class ServiceCoverageDto
     public float Health { get; init; }
     public float Police { get; init; }
     public float Fire { get; init; }
+    public float Education { get; init; }
 }
 
 public sealed class ActiveEventDto

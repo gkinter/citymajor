@@ -241,9 +241,25 @@ export function hasGltfAsset(key: string): boolean {
   return resolveCatalogKey(key) !== null;
 }
 
-/** All catalog GLB URLs for play-page preload. */
+/**
+ * Meshy manifest slots catalog-mapped but not on disk yet — resolve on demand,
+ * not preloaded (same pattern as hero landmarks).
+ */
+const PENDING_PRELOAD_GLTF_KEYS = new Set<ShippedGltfKey>([
+  "svc_modern_01",
+  "svc_modern_02",
+  "svc_modern_03",
+  "svc_modern_04",
+  "svc_modern_05",
+  "svc_modern_06",
+  "svc_modern_07",
+]);
+
+/** All on-disk catalog GLB URLs for play-page preload. */
 export function allGltfPaths(): string[] {
-  return Object.values(GLTF_CATALOG);
+  return (Object.keys(GLTF_CATALOG) as ShippedGltfKey[])
+    .filter((key) => !PENDING_PRELOAD_GLTF_KEYS.has(key))
+    .map((key) => GLTF_CATALOG[key]);
 }
 
 /** Hero landmarks — `web/public/assets/gltf/heroes/` (MESHY_HERO_LANDMARKS.md). */

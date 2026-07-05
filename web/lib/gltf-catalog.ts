@@ -37,10 +37,13 @@ export const SHIPPED_GLTF_KEYS = [
   "res_low_frontier_13",
   "res_low_frontier_14",
   "res_low_frontier_15",
-  "res_low_frontier_18",
   "res_low_frontier_16",
   "res_low_frontier_17",
+  "res_low_frontier_18",
   "res_low_frontier_19",
+  "res_low_frontier_20",
+  "res_low_frontier_21",
+  "res_low_frontier_22",
   "com_frontier_00",
   "ind_frontier_00",
   "res_low_industrial_00",
@@ -71,6 +74,12 @@ export type ShippedGltfKey = (typeof SHIPPED_GLTF_KEYS)[number];
 export const OPTIONAL_HERO_LANDMARKS = {
   hero_frontier_city_hall: "/assets/gltf/heroes/hero_frontier_city_hall.glb",
   hero_frontier_church: "/assets/gltf/heroes/hero_frontier_church.glb",
+  hero_industrial_steel_mill: "/assets/gltf/heroes/hero_industrial_steel_mill.glb",
+  hero_industrial_train_station: "/assets/gltf/heroes/hero_industrial_train_station.glb",
+  hero_postwar_civic_hall: "/assets/gltf/heroes/hero_postwar_civic_hall.glb",
+  hero_postwar_hospital: "/assets/gltf/heroes/hero_postwar_hospital.glb",
+  hero_modern_glass_tower: "/assets/gltf/heroes/hero_modern_glass_tower.glb",
+  hero_future_eco_tower: "/assets/gltf/heroes/hero_future_eco_tower.glb",
 } as const;
 
 export type OptionalHeroLandmarkKey = keyof typeof OPTIONAL_HERO_LANDMARKS;
@@ -126,6 +135,9 @@ export const GLTF_CATALOG: Record<ShippedGltfKey, string> = {
   res_low_frontier_17: "/assets/gltf/frontier/res_low_frontier_17.glb",
   res_low_frontier_18: "/assets/gltf/frontier/res_low_frontier_18.glb",
   res_low_frontier_19: "/assets/gltf/frontier/res_low_frontier_19.glb",
+  res_low_frontier_20: "/assets/gltf/frontier/res_low_frontier_20.glb",
+  res_low_frontier_21: "/assets/gltf/frontier/res_low_frontier_21.glb",
+  res_low_frontier_22: "/assets/gltf/frontier/res_low_frontier_22.glb",
   com_frontier_00: "/assets/gltf/frontier/com_frontier_00.glb",
   ind_frontier_00: "/assets/gltf/frontier/ind_frontier_00.glb",
   res_low_industrial_00: "/assets/gltf/industrial/res_low_industrial_00.glb",
@@ -230,6 +242,12 @@ export const HERO_GLTF_BASE = "/assets/gltf/heroes" as const;
 export const HERO_GLTF_KEYS = [
   "hero_frontier_city_hall",
   "hero_frontier_church",
+  "hero_industrial_steel_mill",
+  "hero_industrial_train_station",
+  "hero_postwar_civic_hall",
+  "hero_postwar_hospital",
+  "hero_modern_glass_tower",
+  "hero_future_eco_tower",
 ] as const;
 
 export type HeroGltfKey = (typeof HERO_GLTF_KEYS)[number];
@@ -237,6 +255,12 @@ export type HeroGltfKey = (typeof HERO_GLTF_KEYS)[number];
 export const HERO_GLTF_CATALOG: Record<HeroGltfKey, string> = {
   hero_frontier_city_hall: `${HERO_GLTF_BASE}/hero_frontier_city_hall.glb`,
   hero_frontier_church: `${HERO_GLTF_BASE}/hero_frontier_church.glb`,
+  hero_industrial_steel_mill: `${HERO_GLTF_BASE}/hero_industrial_steel_mill.glb`,
+  hero_industrial_train_station: `${HERO_GLTF_BASE}/hero_industrial_train_station.glb`,
+  hero_postwar_civic_hall: `${HERO_GLTF_BASE}/hero_postwar_civic_hall.glb`,
+  hero_postwar_hospital: `${HERO_GLTF_BASE}/hero_postwar_hospital.glb`,
+  hero_modern_glass_tower: `${HERO_GLTF_BASE}/hero_modern_glass_tower.glb`,
+  hero_future_eco_tower: `${HERO_GLTF_BASE}/hero_future_eco_tower.glb`,
 };
 
 /** True when a hero landmark key is registered in `HERO_GLTF_CATALOG`. */

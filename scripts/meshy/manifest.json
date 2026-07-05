@@ -202,6 +202,24 @@
       "era": "frontier"
     },
     {
+      "key": "res_low_frontier_20",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 20",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_21",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 21",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
+      "key": "res_low_frontier_22",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 22",
+      "category": "res_low",
+      "era": "frontier"
+    },
+    {
       "key": "res_low_future_00",
       "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized",
       "category": "res_low",

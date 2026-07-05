@@ -8,6 +8,7 @@ import {
   hudSlidePanel,
 } from "@/lib/hud-theme";
 import type { NarrativeEventResponse } from "@/lib/narrative-templates";
+import { HudSpinner } from "@/components/city/HudSpinner";
 
 const headerStyle: CSSProperties = {
   display: "flex",
@@ -167,9 +168,11 @@ export function HeraldPanel({
 
       <div style={bodyStyle}>
         {loading ? (
-          <div style={{ opacity: 0.75 }} aria-live="polite">
-            Fetching today&apos;s lead story…
-          </div>
+          <HudSpinner
+            ariaLabel="Loading Herald story"
+            eyebrow="Press room"
+            message="Fetching today&apos;s lead story…"
+          />
         ) : error ? (
           <div style={{ color: HUD_COLORS.error }} role="alert">
             {error}

@@ -3,9 +3,9 @@
 import { useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import {
-  BUILD_TABS,
-  buildsForCategory,
-  type BuildCatalogEntry,
+  BUILD_CATEGORIES,
+  BUILD_CATALOG,
+  isBuildUnlocked,
   type BuildCategory,
 } from "@/lib/build-catalog";
 import {
@@ -15,7 +15,6 @@ import {
   hudButton,
   hudPanel,
 } from "@/lib/hud-theme";
-import { isContentUnlocked } from "@/lib/tech-unlocks";
 
 type BuildToolbarProps = {
   activeBuildTypeId: number | null;
@@ -51,27 +50,19 @@ const listStyle: CSSProperties = {
   gap: 4,
 };
 
-function isEntryUnlocked(
-  entry: BuildCatalogEntry,
-  unlockedSet: ReadonlySet<number>,
-): boolean {
-  if (!entry.unlockKey) return true;
-  return isContentUnlocked(entry.unlockKey, unlockedSet);
-}
-
 export function BuildToolbar({
   activeBuildTypeId,
   onSelect,
   unlockedTechIds,
   onClose,
 }: BuildToolbarProps) {
-  const [activeTab, setActiveTab] = useState<BuildCategory>("civic");
+  const [activeTab, setActiveTab] = useState<BuildCategory>("Civic");
   const unlockedSet = useMemo(
     () => new Set(unlockedTechIds),
     [unlockedTechIds],
   );
   const entries = useMemo(
-    () => buildsForCategory(activeTab),
+    () => BUILD_CATALOG[activeTab],
     [activeTab],
   );
 
@@ -102,27 +93,27 @@ export function BuildToolbar({
       </header>
 
       <div style={tabRowStyle} role="tablist" aria-label="Build categories">
-        {BUILD_TABS.map(({ id, label }) => (
+        {BUILD_CATEGORIES.map((category) => (
           <button
-            key={id}
+            key={category}
             type="button"
             role="tab"
-            aria-selected={activeTab === id}
-            style={{ ...hudButton(activeTab === id), padding: "4px 8px", fontSize: 11 }}
-            onClick={() => setActiveTab(id)}
+            aria-selected={activeTab === category}
+            style={{ ...hudButton(activeTab === category), padding: "4px 8px", fontSize: 11 }}
+            onClick={() => setActiveTab(category)}
           >
-            {label}
+            {category}
           </button>
         ))}
       </div>
 
       <ul style={listStyle} role="listbox" aria-label={`${activeTab} buildings`}>
         {entries.map((entry) => {
-          const unlocked = isEntryUnlocked(entry, unlockedSet);
+          const unlocked = isBuildUnlocked(entry.contentKey, unlockedSet);
           const selected = activeBuildTypeId === entry.typeId;
 
           return (
-            <li key={entry.typeId}>
+            <li key={entry.contentKey}>
               <button
                 type="button"
                 role="option"
@@ -130,8 +121,8 @@ export function BuildToolbar({
                 disabled={!unlocked}
                 title={
                   unlocked
-                    ? entry.name
-                    : `${entry.name} — research required`
+                    ? entry.label
+                    : `${entry.label} — research required`
                 }
                 style={{
                   ...hudButton(selected && unlocked, !unlocked),
@@ -146,7 +137,7 @@ export function BuildToolbar({
                   if (unlocked) onSelect(entry.typeId);
                 }}
               >
-                <span>{entry.name}</span>
+                <span>{entry.label}</span>
                 {!unlocked ? (
                   <span style={{ opacity: 0.55, fontSize: 10 }}>🔒</span>
                 ) : null}

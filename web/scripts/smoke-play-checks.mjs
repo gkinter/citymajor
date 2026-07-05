@@ -142,6 +142,47 @@ function createSaveApiSession() {
 }
 
 /**
+ * Save API session bound to a Playwright page — shares citymajor_uid cookies from
+ * /play boot so POST + GET /api/saves hit the same user bucket as the browser.
+ * @param {import('playwright').Page} page
+ */
+function createSaveApiSessionFromPage(page) {
+  return {
+    /** @param {string} path @param {RequestInit} [init] */
+    async fetch(path, init = {}) {
+      const { body, ...rest } = init;
+      const res = await page.request.fetch(`${BASE_URL}${path}`, {
+        ...rest,
+        ...(body !== undefined ? { data: body } : {}),
+      });
+      const headerRecord = res.headers();
+      return {
+        ok: res.ok(),
+        status: res.status(),
+        headers: {
+          get: (name) => headerRecord[name.toLowerCase()] ?? null,
+          getSetCookie: () => {
+            const raw = headerRecord["set-cookie"];
+            return raw ? [raw] : [];
+          },
+        },
+        json: () => res.json(),
+        text: () => res.text(),
+      };
+    },
+    /** @param {string} saveId */
+    async deleteSave(saveId) {
+      const res = await page.request.delete(`${BASE_URL}/api/saves/${saveId}`);
+      if (res.status() !== 204) {
+        console.warn(
+          `[smoke] WARN: DELETE /api/saves/${saveId} returned ${res.status()} (non-fatal)`,
+        );
+      }
+    },
+  };
+}
+
+/**
  * @param {unknown} save
  * @param {string} tag
  * @param {string} label
@@ -268,21 +309,29 @@ async function exportWasmBlobViaHook(page, tag) {
     return null;
   }
 
-  const base64 = await page.evaluate(async () => {
+  const exportResult = await page.evaluate(async () => {
     const api = window.__citymajorSimApi;
-    if (!api) return null;
+    if (!api) return { ok: false, reason: "no-api" };
     try {
-      return await api.exportWasmSave();
-    } catch {
-      return null;
+      const base64 = await api.exportWasmSave();
+      if (typeof base64 !== "string" || base64.length < 64) {
+        return { ok: false, reason: "empty-blob", len: base64?.length ?? 0 };
+      }
+      return { ok: true, base64 };
+    } catch (err) {
+      return { ok: false, reason: String(err) };
     }
   });
 
-  if (typeof base64 !== "string" || base64.length < 64) {
-    console.log(`[${tag}] SKIP: exportWasmSave returned empty or tiny blob`);
+  if (!exportResult.ok) {
+    const detail =
+      exportResult.reason === "empty-blob"
+        ? `len=${exportResult.len ?? 0}`
+        : exportResult.reason;
+    console.log(`[${tag}] SKIP: exportWasmSave failed (${detail})`);
     return null;
   }
-  return base64;
+  return exportResult.base64;
 }
 
 /**
@@ -383,7 +432,7 @@ async function tryWasmCmjrSaveViaUi(page, tag) {
  */
 export async function assertCmjrSaveRoundTrip(tag, page, options = {}) {
   const simIsWasm = options.simIsWasm ?? false;
-  const session = createSaveApiSession();
+  const session = page ? createSaveApiSessionFromPage(page) : createSaveApiSession();
 
   if (page && simIsWasm) {
     const viaExport = await tryWasmCmjrExportAndPost(page, tag, session);

@@ -232,6 +232,12 @@
       "era": "industrial"
     },
     {
+      "key": "res_low_industrial_01",
+      "prompt": "A single-story 1800s brick rowhouse, industrial era, pitched roof, low poly, stylized game asset, matte colors, silhouette variant 01",
+      "category": "res_low",
+      "era": "industrial"
+    },
+    {
       "key": "res_low_modern_00",
       "prompt": "A single-story contemporary house, modern architecture, peaked roof, wood and stucco, stylized game asset, low poly",
       "category": "res_low",

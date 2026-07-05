@@ -138,5 +138,5 @@ Integration FF worktree: `citymajor-web-r3f-spike` → `feat/wasm-r3f-integratio
 
 ## Related docs
 
-- [V1_MERGE_CHECKLIST.md](./V1_MERGE_CHECKLIST.md) — PR #1 blocking gates
+- [V1_MERGE_CHECKLIST.md](./V1_MERGE_CHECKLIST.md) — PR #1 blocking gates · Phase 4 wave-16 HUD polish
 - [PR1_BODY_DRAFT.md](./PR1_BODY_DRAFT.md) — wave 15 build loop copy

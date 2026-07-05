@@ -4,7 +4,7 @@
 **Branch:** `feat/wasm-r3f-integration-2026-07-04`  
 **PR:** [#1 — feat: CityMajor Web v1 — R3F + WASM integration spine](https://github.com/gkinter/citymajor/pull/1)  
 **Scope charter:** [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) · [SB-3704](https://linear.app/softblaze/issue/SB-3704)  
-**Last updated:** 2026-07-05 (wave 15 build loop · worktree `citymajor-pr1-changelog` · see [PR1_BODY_DRAFT.md](./PR1_BODY_DRAFT.md))
+**Last updated:** 2026-07-05 (Phase 4 wave 16 HUD polish · worktree `citymajor-checklist-wave16` · see [WAVE16_MERGE_MAP.md](./WAVE16_MERGE_MAP.md))
 
 > PR #1 documents the v1 integration spine for review and preview deploys. **Do not merge to `main` until every **blocking** row below is checked.** Deferred items stay tracked in Linear under phase epics [SB-3726](https://linear.app/softblaze/issue/SB-3726)+.
 
@@ -17,7 +17,7 @@
 | [Cursor Bugbot](#1-cursor-bugbot) | Yes | **NEUTRAL** on `776d65d` — zero Critical/Major |
 | [Smoke suite](#2-smoke-suite) | Yes | **Green** — **46/46** deploy parity (local + FQDN + GHA); `WASM_EXPECTED=1` + LFS (`d5b8daa`) |
 | [Coolify preview URL](#3-coolify-preview-url) | Yes | **Current on `776d65d`** — FQDN 200; `CITYMAJOR_SESSION_SECRET` required (`5dd6f62`); **manual deploy** (webhook gap — [DEPLOY_WEB.md](../DEPLOY_WEB.md)) |
-| [Gameplay sprint](#8-gameplay-sprint) | Yes (player loop) | **Phase 3 wave 15** — **7 zone tiers**, categorized **build menu**, WASM **`place_building`**, **education toolbar** (`5a0b08e`); wave-4 depth retained |
+| [Gameplay sprint](#8-gameplay-sprint) | Yes (player loop) | **Phase 4 wave 16** — HUD + panel polish rollup **a→e** (`3428d81` tip); wave-15 build loop + wave-4 depth retained · merge map [WAVE16_MERGE_MAP.md](./WAVE16_MERGE_MAP.md) |
 | [Meshy assets](#4-meshy-assets) | Yes (v1 art minimum) | **Partial** — **41 manifest jobs**; **49 GLBs** on disk (7 heroes); P0 **25/108** shipped [SB-3730](https://linear.app/softblaze/issue/SB-3730) |
 | [Stripe stub vs live](#5-stripe-stub-vs-live) | Yes (monetization path) | **Mock on preview** — `stripeCheckoutEnabled: false`; live test-mode docs [SB-3714](https://linear.app/softblaze/issue/SB-3714) |
 | [Perf gate](#6-perf-gate) | Yes (launch only) | **Fails on software renderer** — headless GHA/Chromium `maxFps` &lt; 15 ⇒ exit 1 unless skipped; GPU sign-off open [SB-3703](https://linear.app/softblaze/issue/SB-3703) |
@@ -129,7 +129,32 @@ Player-facing **paint + plop** loop: tiered zoning, categorized civic build menu
 
 **Wave-15 stack (merge order):** tech-zone-unlocks → zone-tiers → zoning-toolbar → road-type-toolbar → place-building-canvas → wasm-place-building → build-catalog → build-toolbar → education-build-ui → build-menu-smoke → play-build integration (`5a0b08e`).
 
-**Deferred (wave 16+):** transport toolbar (bus/rail stubs), full civic TypeId→tile persistence in snapshot smoke, office/mixed zone growth visuals at Industrial+ density.
+### Phase 4 wave 16 — HUD polish (`3428d81`, 2026-07-05)
+
+HUD meters, slide-panel theming, and play chrome after wave-15 build loop. Five sequential merge branches (**a → e**) stack on integration base `848e45c`. Full branch SHAs, worktrees, and per-commit inventory: **[WAVE16_MERGE_MAP.md](./WAVE16_MERGE_MAP.md)**.
+
+| Area | Key files / branch | Status |
+|------|-------------------|--------|
+| **Zone overlay** — distinct tier colors + legend | `ZoningToolbar.tsx`, zone overlay polish — `feat/zone-overlay-polish-2026-07-05` | **Shipped** — wave **a** (`b515ed7`) |
+| **Transport toolbar** — bus/rail stubs in road mode | `TransportToolbar.tsx`, `PlayClient.tsx` — `feat/transport-toolbar-2026-07-05` | **Shipped** — wave **a** (`7d459fe`) |
+| **Empty city start** — `?empty=1` + HUD toggle | `PlayClient.tsx` — `feat/empty-city-option-2026-07-05` | **Shipped** — wave **a** (`26777e3`) |
+| **Build-menu smoke** — e2e toolbar + tier select | `smoke-play-checks.mjs` — `feat/build-menu-e2e-2026-07-05` | **Shipped** — wave **a** (`7d2a232`) |
+| **Services build tabs** — Fire / Police / Health | `build-catalog.ts`, `BuildToolbar.tsx` — `feat/services-build-catalog-2026-07-05` | **Shipped** — wave **b** (`12fbeb7`) |
+| **Research unlock HUD** — zones/buildings in toast | `ResearchUnlockToast.tsx` — `feat/research-unlock-hud-2026-07-05` | **Shipped** — wave **b** (`dd0a117`) |
+| **RCI demand overlay** — bottom-center strip | `DemandOverlay.tsx` — `feat/demand-overlay-2026-07-05` | **Shipped** — wave **b** (`c5e3707`) |
+| **Budget + population HUDs** — top-right meters | `BudgetPanel.tsx`, `PopulationPanel.tsx` | **Shipped** — wave **b** (`6ef5d45`, `eb894e9`) |
+| **Tile tooltip + minimap + help overlay** | `CityCanvas.tsx`, `MinimapPanel.tsx`, `HelpPanel.tsx` | **Shipped** — wave **b** (`df20273`, `5c93d2b`, `321fb5e`) |
+| **Approval + happiness meters** | `ApprovalMeter.tsx`, `HappinessMeter.tsx` | **Shipped** — wave **c** (`c004f69`, `b173b77`) |
+| **Time controls + save indicator** | `TimeControls.tsx`, `SaveLoadControls.tsx` | **Shipped** — wave **c** (`ce8db9a`, `5a93eb5`) |
+| **Era + quality preset polish** | `EraProgressPanel.tsx`, quality preset HUD | **Shipped** — wave **c** (`8f50a04`, `fe03d57`) |
+| **Camera home + chunk debug** | `PlayClient.tsx`, `?debug=chunks` | **Shipped** — wave **c** (`e980273`, `b83ac97`) |
+| **Panel polish** — Research / Citizen / Herald / Law | `ResearchPanel.tsx`, `CitizenPanel.tsx`, `HeraldPanel.tsx`, `LawPanel.tsx` | **Shipped** — wave **d** (`7331e49`) |
+| **Trade overlay scaffold** | `TradeOverlay.tsx`, `ServicesToolbar.tsx` | **Partial** — toggle scaffold; inter-city routes deferred [SB-3728](https://linear.app/softblaze/issue/SB-3728) |
+| **FPS tier colors + home CTA + economy summary** | `FpsHud.tsx`, home hero, `EconomyPanel.tsx` | **Shipped** — wave **e** (`3428d81`) |
+
+**Wave-16 stack (merge order):** **a** `7d459fe` → **b** `321fb5e` → **c** `b83ac97` → **d** `7331e49` → **e** `3428d81` — apply in order after `pnpm verify:tech-unlocks` + smoke green. Integration `@ 848e45c` includes **a** + **b** at doc time; **c**, **d**, **e** pending FF.
+
+**Deferred (wave 17+):** full civic TypeId→tile persistence in snapshot smoke, office/mixed zone growth visuals at Industrial+ density, minimap live tile render, bus/rail WASM placement.
 
 ---
 
@@ -524,6 +549,7 @@ Only these block merging PR #1 to `main`. Everything else is **post-merge** or *
 - [x] Phase 3 kickoff stability — black canvas fix, economy panel, overlay a11y (`79ef561`)
 - [x] Phase 3 wave 4 — herald commands, era gates, tech bridge, CMJR/citizen/law/trade/LLM paths + `place_road` smoke + **7 hero GLBs** + `res_low_frontier_22` + session secret fix (`776d65d`, `5dd6f62`)
 - [x] Phase 3 wave 15 — **7 zone tiers**, categorized **build menu**, WASM **`place_building`**, **education toolbar**, road-type toolbar, PlayClient `zone|road|plop|education` modes (`5a0b08e`)
+- [ ] Phase 4 wave 16 — HUD + panel polish rollup **a→e** (`3428d81` tip) — pending FF to integration · [WAVE16_MERGE_MAP.md](./WAVE16_MERGE_MAP.md)
 - [x] Industrial Meshy GLBs — `com/ind_industrial_00` + `res_high_industrial_00`/`_01` + `res_low_industrial_00`/`_01` + `com_industrial_01` LFS (`464fa29`, `1d9a115`, `e96fe1c`)
 - [x] Team acknowledges Meshy partial batch / Stripe live / **GPU** perf sign-off / **webhook manual deploy** as **post-merge** parallel tracks ([SB-3726](https://linear.app/softblaze/issue/SB-3726))
 
@@ -546,7 +572,8 @@ Remaining **v1 LAUNCH NO-GO** at `e96fe1c`:
 | [DEPLOY_WEB.md](../DEPLOY_WEB.md) | Coolify + Docker + env vars |
 | [MESHY_ASSET_CATALOG.md](./MESHY_ASSET_CATALOG.md) | 500-key taxonomy + batch manifests |
 | [PR1_BODY_DRAFT.md](./PR1_BODY_DRAFT.md) | PR #1 body copy — wave-15 build loop deliverables |
-| [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPLAY_BUILD_PLAN.md) | Phase 2 shipped · Phase 3 active · wave-15 `5a0b08e` |
+| [WAVE16_MERGE_MAP.md](./WAVE16_MERGE_MAP.md) | Phase 4 wave-16 HUD polish — branch SHAs, a→e merge order, worktrees |
+| [V1_GAMEPLAY_BUILD_PLAN.md](./V1_GAMEPLAY_BUILD_PLAN.md) | Phase 2 shipped · Phase 3 active · wave-15 `5a0b08e` · wave-16 `3428d81` |
 | [WASM_SIM_BRIDGE.md](./WASM_SIM_BRIDGE.md) | Worker / snapshot contract |
 | [SAVE_FORMAT_WEB.md](./SAVE_FORMAT_WEB.md) | CMJR cloud save schema (§3 — wave-2 interim JSON chunk) |
 | [GAP_AUDIT_DESIGN_DOCS.md](./GAP_AUDIT_DESIGN_DOCS.md) | Doc contradictions resolved |

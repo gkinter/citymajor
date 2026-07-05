@@ -60,6 +60,7 @@ import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
 import { DemandOverlay } from "@/components/city/DemandOverlay";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
+import { HappinessMeter } from "@/components/city/HappinessMeter";
 import { PopulationPanel } from "@/components/city/PopulationPanel";
 import { EraProgressPanel } from "@/components/city/EraProgressPanel";
 import { BudgetPanel } from "@/components/city/BudgetPanel";
@@ -700,6 +701,7 @@ export function PlayClient() {
         entitlements={entitlements}
         onSlotsChanged={refreshEntitlements}
       />
+      <HappinessMeter resources={simResources} />
       <ResourcesHud
         resources={simResources}
         populationGrowthPerMonth={populationGrowthPerMonth}

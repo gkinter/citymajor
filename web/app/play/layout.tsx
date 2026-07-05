@@ -11,6 +11,14 @@ export const metadata: Metadata = {
     url: "/play",
     siteName: "CityMajor",
     type: "website",
+    images: [
+      {
+        url: "/assets/og/citymajor-og.png",
+        width: 1200,
+        height: 630,
+        alt: "CityMajor — Build your city across 200 years",
+      },
+    ],
   },
   twitter: {
     card: "summary",

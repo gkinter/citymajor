@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const siteUrl = "https://citymajor.apps.softblaze.net";
+const ogImagePath = "/assets/og/citymajor-og.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -17,6 +18,14 @@ export const metadata: Metadata = {
     siteName: "CityMajor",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: ogImagePath,
+        width: 1200,
+        height: 630,
+        alt: "CityMajor — Build your city across 200 years",
+      },
+    ],
   },
   twitter: {
     card: "summary",

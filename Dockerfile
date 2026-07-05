@@ -24,8 +24,10 @@ COPY base/ ./base/
 COPY web/wasm/ ./web/wasm/
 COPY --from=base /usr/local/bin/node /usr/local/bin/node
 COPY --from=base /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=base /usr/local/bin/corepack /usr/local/bin/corepack
-RUN corepack enable && corepack prepare pnpm@10.12.1 --activate
+COPY --from=base /root/.cache/node/corepack /root/.cache/node/corepack
+# COPY dereferences bin symlinks; recreate pnpm shims (corepack dist + cache from base)
+RUN ln -sf ../lib/node_modules/corepack/dist/pnpm.js /usr/local/bin/pnpm \
+ && ln -sf ../lib/node_modules/corepack/dist/pnpx.js /usr/local/bin/pnpx
 RUN mkdir -p web/public/dotnet
 ENV NODE_OPTIONS=
 RUN if [ "$BUILD_WASM" = "1" ]; then \

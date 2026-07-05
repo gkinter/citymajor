@@ -8,9 +8,8 @@ import {
   hudPanel,
 } from "@/lib/hud-theme";
 import { detectCashCrisis, LOW_HAPPINESS_APPROVAL } from "@/lib/sim-metrics";
-import type { RciDemand, SimResources } from "@/lib/sim-bridge";
+import type { SimResources } from "@/lib/sim-bridge";
 import { formatGrowthPerMonth } from "@/lib/population-growth";
-import { resolveRci } from "@/lib/zoning-economy";
 
 function formatFunds(cityFunds: number): string {
   const abs = Math.abs(cityFunds);
@@ -55,14 +54,6 @@ function toneClass(tone: MetricTone, prefix: string): string {
   return `${prefix} ${prefix}--${tone}`;
 }
 
-function clampDemand(value: number): number {
-  return Math.max(-1, Math.min(1, value));
-}
-
-function demandToDisplay(normalized: number): number {
-  return Math.round(clampDemand(normalized) * 100);
-}
-
 function hasMonthlyBudget(resources: SimResources): boolean {
   return (
     resources.monthlyIncome !== undefined &&
@@ -90,38 +81,6 @@ function formatTradeOutflow(amount: number): string {
   if (abs >= 1_000_000) return `−$${(abs / 1_000_000).toFixed(1)}M`;
   if (abs >= 1_000) return `−$${(abs / 1_000).toFixed(1)}K`;
   return `−$${abs.toLocaleString()}`;
-}
-
-type RciMeterProps = {
-  label: "R" | "C" | "I";
-  demand: number;
-};
-
-function RciMeter({ label, demand }: RciMeterProps) {
-  const clamped = clampDemand(demand);
-  const display = demandToDisplay(clamped);
-  const halfPct = Math.abs(clamped) * 50;
-  const fillStyle: CSSProperties =
-    clamped >= 0
-      ? { left: "50%", width: `${halfPct}%` }
-      : { left: `${50 - halfPct}%`, width: `${halfPct}%` };
-
-  return (
-    <div className="hud-rci__row">
-      <span className={`hud-rci__label hud-rci__label--${label.toLowerCase()}`}>
-        {label}
-      </span>
-      <div className="hud-rci__track" aria-hidden>
-        <div
-          className={`hud-rci__fill hud-rci__fill--${label.toLowerCase()}`}
-          style={fillStyle}
-        />
-      </div>
-      <span className="hud-rci__value">
-        {display > 0 ? `+${display}` : display}
-      </span>
-    </div>
-  );
 }
 
 type ResourcesHudProps = {
@@ -157,7 +116,6 @@ export function ResourcesHud({
     ...hudEraBadgeStyle(era),
   };
 
-  const rci = resolveRci(resources);
   const monthlyNet =
     resources && hasMonthlyBudget(resources)
       ? resources.monthlyIncome! - resources.monthlyExpenses!
@@ -338,19 +296,6 @@ export function ResourcesHud({
           )}
         </div>
       </div>
-
-      {rci ? (
-        <div
-          className="hud-rci"
-          aria-label="RCI demand"
-          title="R/C/I demand — high values mean zone that type to grow"
-          data-onboarding-target="demand"
-        >
-          <RciMeter label="R" demand={rci.residential} />
-          <RciMeter label="C" demand={rci.commercial} />
-          <RciMeter label="I" demand={rci.industrial} />
-        </div>
-      ) : null}
       </div>
 
       {cashCrisis ? (

@@ -54,6 +54,7 @@ import { HUD_ZONE, hudActionButton } from "@/lib/hud-theme";
 import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
+import { DemandOverlay } from "@/components/city/DemandOverlay";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
 import { EraProgressPanel } from "@/components/city/EraProgressPanel";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
@@ -571,6 +572,7 @@ export function PlayClient() {
         resources={simResources}
         populationGrowthPerMonth={populationGrowthPerMonth}
       />
+      <DemandOverlay rci={resolveRci(simResources)} />
       <EraProgressPanel resources={simResources} />
       <FpsHud
         stats={stats}

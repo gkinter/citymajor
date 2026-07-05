@@ -245,7 +245,7 @@ export function hasGltfAsset(key: string): boolean {
  * Meshy manifest slots catalog-mapped but not on disk yet — resolve on demand,
  * not preloaded (same pattern as hero landmarks).
  */
-const PENDING_PRELOAD_GLTF_KEYS = new Set<ShippedGltfKey>([
+const PENDING_PRELOAD_GLTF_KEYS = new Set<string>([
   "svc_modern_01",
   "svc_modern_02",
   "svc_modern_03",

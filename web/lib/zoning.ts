@@ -2,6 +2,7 @@ import { GRID_SIZE } from "./constants";
 import {
   ENGINE_ZONE_TYPE_ID,
   ZONE_OVERLAY_COLORS,
+  engineZoneTypeLabel,
   ZONE_TIERS,
   type ZoneTierTool,
 } from "./zone-tiers";
@@ -187,6 +188,24 @@ export function paintRoadBrush(
 }
 
 /** Tile offsets covered by a square brush (for multi-command WASM paint). */
+/** Zone / road label for a grid tile (for hover tooltips). */
+export function tileZoneLabel(
+  tileX: number,
+  tileZ: number,
+  zones: ZoneTile[],
+  roads: RoadTile[],
+): string {
+  const zone = zones.find((z) => z.tileX === tileX && z.tileZ === tileZ);
+  if (zone && zone.zoneType !== 0) {
+    return engineZoneTypeLabel(zone.zoneType);
+  }
+  const hasRoad = roads.some(
+    (r) => r.tileX === tileX && r.tileZ === tileZ && r.roadFlags !== 0,
+  );
+  if (hasRoad) return "Road";
+  return "None";
+}
+
 export function brushTileOffsets(brushSize: PaintBrushSize): [number, number][] {
   const half = Math.floor(brushSize / 2);
   const offsets: [number, number][] = [];

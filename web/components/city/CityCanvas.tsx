@@ -31,11 +31,12 @@ import {
   paintZoneBrush,
 } from "@/lib/zoning";
 import { playPaintFeedback } from "@/lib/paint-feedback";
+import { tileZoneLabel } from "@/lib/zoning";
 import { CityScene } from "./CityScene";
 import { AdaptiveDpr } from "./AdaptiveDpr";
 import { CityPostProcessing } from "./CityPostProcessing";
 import { CanvasRenderHealth } from "./CanvasRenderHealth";
-import { Minimap } from "./Minimap";
+import { TileTooltip } from "./TileTooltip";
 
 function skyColorForApproval(approval: number | undefined): string {
   const base = { r: 0x0b, g: 0x10, b: 0x20 };
@@ -127,6 +128,12 @@ export function CityCanvas({
     setDpr(Math.min(MAX_DPR, window.devicePixelRatio));
   }, []);
   const [pickedTile, setPickedTile] = useState<PickResult>(null);
+  const [hoveredTile, setHoveredTile] = useState<{
+    pick: PickResult;
+    x: number;
+    y: number;
+  } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const bridgeRef = useRef<SimBridge | null>(null);
   const gameSpeedRef = useRef(gameSpeed);
   gameSpeedRef.current = gameSpeed;
@@ -346,6 +353,38 @@ export function CityCanvas({
     [activeTool, brushSize, buildTypeId, roadTier, bridgeReady, simSource, onZonePainted],
   );
 
+  const handleHover = useCallback(
+    (pick: PickResult, pointer: { clientX: number; clientY: number }) => {
+      const container = containerRef.current;
+      if (!pick || !container) {
+        setHoveredTile(null);
+        return;
+      }
+      const rect = container.getBoundingClientRect();
+      setHoveredTile({
+        pick,
+        x: pointer.clientX - rect.left,
+        y: pointer.clientY - rect.top,
+      });
+    },
+    [],
+  );
+
+  const handleHoverEnd = useCallback(() => setHoveredTile(null), []);
+
+  const hoverTooltip = useMemo(() => {
+    if (!hoveredTile?.pick) return null;
+    const { tileX, tileZ } = hoveredTile.pick;
+    const zoneLabel = tileZoneLabel(tileX, tileZ, zones, roads);
+    const building = city.buildings.find(
+      (b) => b.tileX === tileX && b.tileZ === tileZ,
+    );
+    return {
+      zoneLabel,
+      buildingId: building?.id ?? null,
+    };
+  }, [hoveredTile, zones, roads, city.buildings]);
+
   useEffect(() => {
     latestStats.current = {
       ...latestStats.current,
@@ -423,7 +462,7 @@ export function CityCanvas({
   );
 
   return (
-    <div style={{ width: "100%", height: "100%", position: "relative" }}>
+    <div ref={containerRef} style={{ width: "100%", height: "100%", position: "relative" }}>
       <div data-testid="city-canvas" style={{ width: "100%", height: "100%" }}>
         <Canvas
           frameloop="always"
@@ -452,6 +491,8 @@ export function CityCanvas({
               onEventMarkerClick={onEventMarkerClick}
               onCitizenDotClick={onCitizenDotClick}
               onPick={handlePick}
+              onHover={handleHover}
+              onHoverEnd={handleHoverEnd}
               onStats={handleStats}
               onRenderHealth={handleRenderHealth}
               dpr={dpr}
@@ -479,7 +520,15 @@ export function CityCanvas({
           />
         </Canvas>
       </div>
-      <Minimap zones={zones} city={city} />
+      {hoveredTile?.pick && hoverTooltip ? (
+        <TileTooltip
+          pick={hoveredTile.pick}
+          zoneLabel={hoverTooltip.zoneLabel}
+          buildingId={hoverTooltip.buildingId}
+          x={hoveredTile.x}
+          y={hoveredTile.y}
+        />
+      ) : null}
     </div>
   );
 }

@@ -40,6 +40,7 @@ import { CrisisWarningModal } from "@/components/city/CrisisWarningModal";
 import { EraTransitionModal } from "@/components/city/EraTransitionModal";
 import { NewsTicker } from "@/components/city/NewsTicker";
 import { FpsHud } from "@/components/city/FpsHud";
+import { MinimapPanel } from "@/components/city/MinimapPanel";
 import { HeraldButton } from "@/components/city/HeraldButton";
 import { HeraldPanel } from "@/components/city/HeraldPanel";
 import { ResearchButton } from "@/components/city/ResearchButton";
@@ -59,6 +60,7 @@ import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
 import { DemandOverlay } from "@/components/city/DemandOverlay";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
+import { PopulationPanel } from "@/components/city/PopulationPanel";
 import { EraProgressPanel } from "@/components/city/EraProgressPanel";
 import { BudgetPanel } from "@/components/city/BudgetPanel";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
@@ -89,6 +91,8 @@ import {
   isEducationBuildTypeId,
   type EducationBuildTypeId,
 } from "@/lib/education-buildings";
+import { handlePlayKeyboardShortcut } from "@/lib/play-keyboard";
+import { HelpPanel } from "@/components/city/HelpPanel";
 
 export type BuildMode = "zone" | "road" | "plop" | "education";
 
@@ -180,6 +184,7 @@ export function PlayClient() {
     DEFAULT_TRANSIT_MODE,
   );
   const [buildOpen, setBuildOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -532,6 +537,75 @@ export function PlayClient() {
     setBuildOpen(false);
   }, []);
 
+  const handleEnterZoneMode = useCallback(() => {
+    setBuildOpen(false);
+    setBuildTypeId(null);
+    setBuildMode("zone");
+    setActiveTool((tool) =>
+      tool === "road" || tool === "bulldoze" ? "residential" : tool,
+    );
+  }, []);
+
+  const handleToggleBuildMenu = useCallback(() => {
+    setBuildOpen((open) => !open);
+  }, []);
+
+  const handleKeyboardSelectRoad = useCallback(() => {
+    handleToolChange("road");
+  }, [handleToolChange]);
+
+  const handleToggleHelp = useCallback(() => {
+    setHelpOpen((open) => !open);
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const handlers = {
+        onToggleHelp: handleToggleHelp,
+        onToggleBuildMenu: handleToggleBuildMenu,
+        onEnterZoneMode: handleEnterZoneMode,
+        onSelectRoad: handleKeyboardSelectRoad,
+        onSelectZoneTool: handleToolChange,
+        unlockedTechIds: simResources?.unlockedTechIds,
+      };
+
+      if (event.key === "?") {
+        handlePlayKeyboardShortcut(event, handlers);
+        return;
+      }
+
+      if (helpOpen) return;
+
+      if (
+        heraldOpen ||
+        researchOpen ||
+        economyOpen ||
+        lawOpen ||
+        citizenOpen
+      ) {
+        return;
+      }
+
+      handlePlayKeyboardShortcut(event, handlers);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [
+    citizenOpen,
+    economyOpen,
+    handleEnterZoneMode,
+    handleKeyboardSelectRoad,
+    handleToggleBuildMenu,
+    handleToggleHelp,
+    handleToolChange,
+    helpOpen,
+    heraldOpen,
+    lawOpen,
+    researchOpen,
+    simResources?.unlockedTechIds,
+  ]);
+
   const canvasActiveTool: ZoningTool =
     buildMode === "road" ? "road" : activeTool;
 
@@ -630,6 +704,7 @@ export function PlayClient() {
         populationGrowthPerMonth={populationGrowthPerMonth}
       />
       <DemandOverlay rci={resolveRci(simResources)} />
+      <PopulationPanel resources={simResources} />
       <EraProgressPanel resources={simResources} />
       <BudgetPanel resources={simResources} />
       <FpsHud
@@ -637,6 +712,7 @@ export function PlayClient() {
         totalBuildings={stats.totalBuildings}
         activeTool={canvasActiveTool}
       />
+      <MinimapPanel />
       <div style={{ ...HUD_ZONE.bottomLeft, pointerEvents: "auto" }}>
         <button
           type="button"
@@ -702,7 +778,7 @@ export function PlayClient() {
           alignItems: "center",
           gap: 8,
           pointerEvents:
-            researchOpen || economyOpen || lawOpen || heraldOpen
+            researchOpen || economyOpen || lawOpen || heraldOpen || helpOpen
               ? "none"
               : "auto",
         }}
@@ -829,6 +905,8 @@ export function PlayClient() {
       />
 
       <CrisisWarningModal resources={simResources} />
+
+      <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
 
       <EraTransitionModal era={eraTransitionEra} onDismiss={dismissEraTransition} />
 

@@ -4,7 +4,7 @@
 **Branch:** `feat/wasm-r3f-integration-2026-07-04`  
 **PR:** [#1 — feat: CityMajor Web v1 — R3F + WASM integration spine](https://github.com/gkinter/citymajor/pull/1)  
 **Scope charter:** [WEB_V1_SCOPE.md](./WEB_V1_SCOPE.md) · [SB-3704](https://linear.app/softblaze/issue/SB-3704)  
-**Last updated:** 2026-07-05 (`e96fe1c` · worktree `citymajor-web-r3f-spike`)
+**Last updated:** 2026-07-05 (`0d07bd9` · Docker LFS fix · worktree `citymajor-web-r3f-spike`)
 
 > PR #1 documents the v1 integration spine for review and preview deploys. **Do not merge to `main` until every **blocking** row below is checked.** Deferred items stay tracked in Linear under phase epics [SB-3726](https://linear.app/softblaze/issue/SB-3726)+.
 

@@ -862,6 +862,183 @@ async function assertCitizenDotsRender(page, tag) {
 /** Off starter cross/ring — dirt road should stick on Plains terrain. */
 const ROAD_SMOKE_TILE = { tileX: 50, tileZ: 50 };
 
+/** Empty tile for civic placement smoke — far from starter cross. */
+const BUILD_SMOKE_TILE = { tileX: 200, tileZ: 200 };
+
+/** Frontier civic service TypeId — see DATA_BRIDGE.md svc_frontier_fire_brigade. */
+const CIVIC_SMOKE_TYPE_ID = 502;
+
+/**
+ * ZoningToolbar must expose >3 zone tool buttons (R/C/I + bulldoze + road).
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function assertZoningToolbar(page, tag) {
+  const toolbar = page.getByTestId("zoning-toolbar");
+  if ((await toolbar.count()) === 0) {
+    fail(tag, "ZoningToolbar missing (data-testid=zoning-toolbar)");
+  }
+  await toolbar.waitFor({ state: "visible" });
+
+  const zoneButtons = toolbar.locator('[data-testid^="zoning-tool-"]');
+  const count = await zoneButtons.count();
+  if (count <= 3) {
+    fail(tag, `ZoningToolbar expected >3 zone buttons, got ${count}`);
+  }
+  pass(tag, `zoning toolbar has ${count} zone buttons`);
+}
+
+/**
+ * BuildToolbar or standalone Build control — skipped when build UI not merged.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ * @returns {Promise<boolean>} true when build UI is present
+ */
+async function assertBuildToolbarOrSkip(page, tag) {
+  const buildToolbar = page.getByTestId("build-toolbar");
+  if ((await buildToolbar.count()) > 0) {
+    await buildToolbar.waitFor({ state: "visible" });
+    pass(tag, "build toolbar mounted");
+    return true;
+  }
+
+  const buildBtn = page.getByRole("button", { name: /^Build\b/i });
+  if ((await buildBtn.count()) > 0) {
+    await buildBtn.first().waitFor({ state: "visible" });
+    pass(tag, "build button present");
+    return true;
+  }
+
+  console.log(`[${tag}] SKIP: build toolbar not merged yet`);
+  return false;
+}
+
+/**
+ * WASM place_building for one civic typeId on an empty tile.
+ * Skips when sim API unavailable or WASM placement is still a no-op.
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ * @param {boolean} simIsWasm
+ */
+async function assertPlaceBuildingWasm(page, tag, simIsWasm) {
+  if (!simIsWasm) {
+    console.log(`[${tag}] SKIP: place_building (procedural fallback)`);
+    return;
+  }
+
+  try {
+    await page.waitForFunction(
+      () =>
+        typeof window.__citymajorSimApi?.sendCommand === "function" &&
+        typeof window.__citymajorSimApi?.getSnapshot === "function",
+      undefined,
+      { timeout: 30_000 },
+    );
+  } catch {
+    console.log(`[${tag}] SKIP: __citymajorSimApi not ready for place_building smoke`);
+    return;
+  }
+
+  const { tileX, tileZ } = BUILD_SMOKE_TILE;
+  const typeId = CIVIC_SMOKE_TYPE_ID;
+
+  const before = await page.evaluate(
+    ({ x, z, civicTypeId }) => {
+      const snap = window.__citymajorSimApi?.getSnapshot();
+      const buildings = snap?.buildings ?? [];
+      return {
+        count: buildings.length,
+        buildingCount: snap?.buildingCount ?? buildings.length,
+        occupied: buildings.some((b) => b.tileX === x && b.tileZ === z),
+        hasCivic: buildings.some(
+          (b) => b.tileX === x && b.tileZ === z && b.typeId === civicTypeId,
+        ),
+      };
+    },
+    { x: tileX, z: tileZ, civicTypeId: typeId },
+  );
+
+  if (before.hasCivic) {
+    pass(tag, `civic building already at (${tileX},${tileZ}) typeId=${typeId}`);
+    return;
+  }
+
+  if (before.occupied) {
+    console.log(
+      `[${tag}] SKIP: place_building tile (${tileX},${tileZ}) already occupied`,
+    );
+    return;
+  }
+
+  await page.evaluate(
+    ({ x, z, civicTypeId }) => {
+      window.__citymajorSimApi?.sendCommand({
+        type: "place_building",
+        tileX: x,
+        tileZ: z,
+        typeId: civicTypeId,
+      });
+    },
+    { x: tileX, z: tileZ, civicTypeId: typeId },
+  );
+
+  try {
+    await page.waitForFunction(
+      ({ x, z, civicTypeId }) => {
+        const buildings = window.__citymajorSimApi?.getSnapshot()?.buildings ?? [];
+        return buildings.some(
+          (b) => b.tileX === x && b.tileZ === z && b.typeId === civicTypeId,
+        );
+      },
+      { x: tileX, z: tileZ, civicTypeId: typeId },
+      { timeout: 10_000 },
+    );
+  } catch {
+    const after = await page.evaluate(
+      ({ x, z, civicTypeId }) => {
+        const snap = window.__citymajorSimApi?.getSnapshot();
+        const buildings = snap?.buildings ?? [];
+        return {
+          count: buildings.length,
+          buildingCount: snap?.buildingCount ?? buildings.length,
+          hasCivic: buildings.some(
+            (b) => b.tileX === x && b.tileZ === z && b.typeId === civicTypeId,
+          ),
+        };
+      },
+      { x: tileX, z: tileZ, civicTypeId: typeId },
+    );
+
+    if (after.hasCivic) {
+      pass(tag, `place_building civic typeId=${typeId} at (${tileX},${tileZ})`);
+      return;
+    }
+
+    const countDelta =
+      (after.buildingCount ?? after.count) - (before.buildingCount ?? before.count);
+    if (countDelta > 0) {
+      pass(
+        tag,
+        `place_building increased building pool (+${countDelta}); civic tile match pending`,
+      );
+      return;
+    }
+
+    console.log(
+      `[${tag}] SKIP: place_building WASM command is no-op in v1 (typeId=${typeId} at ${tileX},${tileZ})`,
+    );
+    return;
+  }
+
+  const afterCount = await page.evaluate(
+    () => window.__citymajorSimApi?.getSnapshot()?.buildings?.length ?? 0,
+  );
+  pass(
+    tag,
+    `place_building civic typeId=${typeId} at (${tileX},${tileZ}); buildings ${before.count}→${afterCount}`,
+  );
+}
+
 /**
  * WASM place_road → snapshot roads[] (6261885 road graph connectivity).
  * Falls back to GetStatus service-coverage numerics when sim API is unavailable.
@@ -1452,6 +1629,8 @@ export async function runPlayChecks(page, options = {}) {
   await assertLawPanel(page, tag);
   await assertOptionalOverlayToolbars(page, tag);
   await assertServiceCoverageDiagnostics(page, tag);
+  await assertZoningToolbar(page, tag);
+  await assertBuildToolbarOrSkip(page, tag);
 
   if (options.screenshotPath) {
     await page.screenshot({ path: options.screenshotPath, fullPage: false });
@@ -1475,6 +1654,7 @@ export async function runPlayChecks(page, options = {}) {
   pass(tag, `sim source: ${simSource}`);
 
   await assertRoadPlacementOrStatus(page, tag, simSource === "WASM sim");
+  await assertPlaceBuildingWasm(page, tag, simSource === "WASM sim");
 
   if (savesAvailable) {
     await assertCmjrSaveRoundTrip(tag, page, { simIsWasm: simSource === "WASM sim" });

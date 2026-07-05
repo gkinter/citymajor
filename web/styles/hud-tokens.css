@@ -993,6 +993,24 @@
     0 0 12px rgba(125, 255, 178, 0.2);
 }
 
+/* Zoning toolbar — brief red flash when a bulldoze paint confirms */
+.hud-zoning-btn--confirm-flash {
+  animation: hud-zoning-confirm-flash 0.45s ease-out;
+}
+
+@keyframes hud-zoning-confirm-flash {
+  0% {
+    box-shadow:
+      0 0 0 2px rgba(232, 93, 93, 0.85),
+      0 0 18px rgba(232, 93, 93, 0.55);
+    transform: scale(1.06);
+  }
+  100% {
+    box-shadow: none;
+    transform: scale(1);
+  }
+}
+
 /* Resources HUD — Pop, funds, approval, happiness, monthly budget */
 .hud-resources {
   display: flex;

@@ -56,6 +56,7 @@ import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
 import { EraProgressPanel } from "@/components/city/EraProgressPanel";
+import { BudgetPanel } from "@/components/city/BudgetPanel";
 import { SaveLoadControls } from "@/components/city/SaveLoadControls";
 import { SpeedToolbar } from "@/components/city/SpeedToolbar";
 import { ZoningToolbar } from "@/components/city/ZoningToolbar";
@@ -572,6 +573,7 @@ export function PlayClient() {
         populationGrowthPerMonth={populationGrowthPerMonth}
       />
       <EraProgressPanel resources={simResources} />
+      <BudgetPanel resources={simResources} />
       <FpsHud
         stats={stats}
         totalBuildings={stats.totalBuildings}

@@ -12,24 +12,49 @@ export type ZoningTool =
 export const PAINT_BRUSH_SIZES = [1, 3] as const;
 export type PaintBrushSize = (typeof PAINT_BRUSH_SIZES)[number];
 
-/** Engine zone type IDs (TileData.cs). */
-export const ENGINE_ZONE_TYPE: Record<
-  Exclude<ZoningTool, "bulldoze" | "road">,
-  number
-> = {
-  residential: 1, // residential_low
+/**
+ * All engine zone type IDs (TileData.cs).
+ * 0=none, 1=res_low, 2=res_high, 3=commercial, 4=industrial,
+ * 5=office, 6=mixed_use, 7=agricultural.
+ */
+export const ENGINE_ZONE_TYPES = {
+  none: 0,
+  residential_low: 1,
+  residential_high: 2,
   commercial: 3,
   industrial: 4,
+  office: 5,
+  mixed_use: 6,
+  agricultural: 7,
+} as const;
+
+export type EngineZoneTypeKey = Exclude<
+  keyof typeof ENGINE_ZONE_TYPES,
+  "none"
+>;
+
+export type EngineZoneTypeId =
+  (typeof ENGINE_ZONE_TYPES)[EngineZoneTypeKey];
+
+/** Legacy v1 toolbar tools → engine zone type ID. See zone-tiers.ts for all seven. */
+export const ENGINE_ZONE_TYPE: Record<
+  Exclude<ZoningTool, "bulldoze" | "road">,
+  EngineZoneTypeId
+> = {
+  residential: ENGINE_ZONE_TYPES.residential_low,
+  commercial: ENGINE_ZONE_TYPES.commercial,
+  industrial: ENGINE_ZONE_TYPES.industrial,
 };
 
 /** Semi-transparent overlay tints keyed by engine zone type. */
 export const ZONE_OVERLAY_COLORS: Record<number, string> = {
-  1: "#4a90d9",
-  2: "#4a90d9",
-  3: "#e8b84a",
-  4: "#8b7355",
-  5: "#9b7ed9",
-  6: "#5cb88a",
+  [ENGINE_ZONE_TYPES.residential_low]: "#4a90d9",
+  [ENGINE_ZONE_TYPES.residential_high]: "#3a6fb0",
+  [ENGINE_ZONE_TYPES.commercial]: "#e8b84a",
+  [ENGINE_ZONE_TYPES.industrial]: "#8b7355",
+  [ENGINE_ZONE_TYPES.office]: "#9b7ed9",
+  [ENGINE_ZONE_TYPES.mixed_use]: "#5cb88a",
+  [ENGINE_ZONE_TYPES.agricultural]: "#8cb83c",
 };
 
 export type ZoneTile = {

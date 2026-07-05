@@ -1,0 +1,38 @@
+{
+  "description": "Zone paint content keys for web/lib/zone-tiers.ts. Baseline keys match web/lib/tech-unlocks.ts BASELINE_CONTENT_KEYS. Research-gated keys are NOT yet present in technologies.json unlocks arrays — patch the listed tech entries when wiring the Research panel.",
+  "baseline": [
+    "residential_zone",
+    "commercial_zone",
+    "industrial_zone"
+  ],
+  "research_gated": {
+    "residential_high_zone": {
+      "suggested_tech_id": "T030",
+      "suggested_tech_name": "Structural Steel",
+      "era": "industrial",
+      "rationale": "High-density residential growth requires steel-frame construction (RESEARCH_TECH_TREE.md).",
+      "needs_technologies_json_patch": true
+    },
+    "office_zone": {
+      "suggested_tech_id": "T090",
+      "suggested_tech_name": "Higher Education",
+      "era": "postwar",
+      "rationale": "Office districts anchor on university-educated workforce (RESEARCH_TECH_TREE.md T090).",
+      "needs_technologies_json_patch": true
+    },
+    "mixed_use_zone": {
+      "suggested_tech_id": "T091",
+      "suggested_tech_name": "Urban Planning Department",
+      "era": "postwar",
+      "rationale": "Mixed-use zoning is an Urban Planning unlock (RESEARCH_TECH_TREE.md T091).",
+      "needs_technologies_json_patch": true
+    },
+    "agricultural_zone": {
+      "suggested_tech_id": "T047",
+      "suggested_tech_name": "Crop Rotation",
+      "era": "frontier",
+      "rationale": "Formal agricultural zoning pairs with improved farmland tech; could move to baseline if frontier playtests need Ag paint day one.",
+      "needs_technologies_json_patch": true
+    }
+  }
+}

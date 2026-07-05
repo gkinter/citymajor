@@ -212,6 +212,12 @@
       "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized",
       "category": "ind",
       "era": "future"
+    },
+    {
+      "key": "res_low_frontier_17",
+      "prompt": "A single-story frontier log cabin or wooden house, colonial era, peaked roof, low poly, stylized game asset, isometric view, silhouette variant 17",
+      "category": "res_low",
+      "era": "frontier"
     }
   ]
 }

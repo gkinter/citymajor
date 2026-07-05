@@ -22,7 +22,13 @@ import {
   zoningToolColor,
   zoningToolShortLabel,
 } from "@/lib/zoning";
-import { useCallback, useEffect, useState } from "react";
+import {
+  isZoneTierUnlocked,
+  lockedTierTechName,
+  zoneTierByTool,
+  type ZoneTierTool,
+} from "@/lib/zone-tiers";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type ZoningToolbarProps = {
   activeTool: ZoningTool;
@@ -31,7 +37,13 @@ type ZoningToolbarProps = {
   onBrushSizeChange: (size: PaintBrushSize) => void;
   /** Live RCI demand — drives tooltips and high-demand highlights. */
   rci?: RciDemand | null;
+  /** WASM research indices — gates advanced zone tiers when omitted. */
+  unlockedTechIds?: number[];
 };
+
+function isZoneTierTool(tool: ZoningTool): tool is ZoneTierTool {
+  return tool !== "bulldoze" && tool !== "road";
+}
 
 export function ZoningToolbar({
   activeTool,
@@ -39,12 +51,19 @@ export function ZoningToolbar({
   onToolChange,
   onBrushSizeChange,
   rci = null,
+  unlockedTechIds,
 }: ZoningToolbarProps) {
   const [feedbackOn, setFeedbackOn] = useState(false);
 
   useEffect(() => {
     setFeedbackOn(isPaintFeedbackEnabled());
   }, []);
+
+  const unlockedTechSet = useMemo(
+    () => new Set(unlockedTechIds ?? []),
+    [unlockedTechIds],
+  );
+
   const activeColor = zoningToolColor(activeTool);
   const showBrush = true;
 
@@ -57,6 +76,36 @@ export function ZoningToolbar({
   const cycleBrush = useCallback(() => {
     onBrushSizeChange(nextBrushSize(brushSize));
   }, [brushSize, onBrushSizeChange]);
+
+  const isToolUnlocked = useCallback(
+    (tool: ZoningTool): boolean => {
+      if (!isZoneTierTool(tool)) return true;
+      const tier = zoneTierByTool(tool);
+      if (!tier) return true;
+      return isZoneTierUnlocked(tier, [...unlockedTechSet]);
+    },
+    [unlockedTechSet],
+  );
+
+  const toolTitle = useCallback(
+    (tool: ZoningTool, label: string, stub?: boolean): string => {
+      if (stub) return "Road tool — coming soon";
+
+      if (isZoneTierTool(tool)) {
+        const tier = zoneTierByTool(tool);
+        if (tier && !isZoneTierUnlocked(tier, [...unlockedTechSet])) {
+          const techName = lockedTierTechName(tier);
+          return techName
+            ? `Locked — research ${techName}`
+            : `Locked — research required`;
+        }
+      }
+
+      const demandHint = zoningDemandHint(tool, rci);
+      return demandHint ? `${label}: ${demandHint}` : label;
+    },
+    [rci, unlockedTechSet],
+  );
 
   return (
     <div style={{ ...HUD_ZONE.bottomCenter, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, pointerEvents: "auto" }}>
@@ -125,32 +174,31 @@ export function ZoningToolbar({
         aria-label="Zoning tools"
         data-onboarding-target="zoning"
       >
-        {ZONING_TOOLS.map(({ id, label, stub }) => {
-          const demandHint = zoningDemandHint(id, rci);
-          const title = stub
-            ? "Road tool — coming soon"
-            : demandHint
-              ? `${label}: ${demandHint}`
-              : label;
-          const highDemand = !stub && isZoningDemandHigh(id, rci);
+        {ZONING_TOOLS.map(({ id, label, shortLabel, stub }) => {
+          const unlocked = isToolUnlocked(id);
+          const locked = !unlocked;
+          const title = toolTitle(id, label, stub);
+          const highDemand = unlocked && !stub && isZoningDemandHigh(id, rci);
 
           return (
-          <button
-            key={id}
-            type="button"
-            className={highDemand ? "hud-zoning-btn--demand" : undefined}
-            style={hudButton(activeTool === id, stub)}
-            disabled={stub}
-            title={title}
-            aria-pressed={activeTool === id}
-            onClick={() => {
-              if (!stub) onToolChange(id);
-            }}
-          >
-            {label}
-            {highDemand ? " ↑" : null}
-            {stub ? " ⏳" : ""}
-          </button>
+            <button
+              key={id}
+              type="button"
+              className={highDemand ? "hud-zoning-btn--demand" : undefined}
+              style={hudButton(activeTool === id && unlocked, stub || locked)}
+              disabled={stub || locked}
+              title={title}
+              aria-pressed={activeTool === id}
+              aria-disabled={locked || stub}
+              onClick={() => {
+                if (!stub && unlocked) onToolChange(id);
+              }}
+            >
+              {shortLabel}
+              {locked ? " 🔒" : null}
+              {highDemand ? " ↑" : null}
+              {stub ? " ⏳" : null}
+            </button>
           );
         })}
       </div>

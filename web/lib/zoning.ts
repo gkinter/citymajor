@@ -1,10 +1,13 @@
 import { GRID_SIZE } from "./constants";
+import {
+  ENGINE_ZONE_TYPE_ID,
+  ZONE_TIERS,
+  type ZoneTierTool,
+} from "./zone-tiers";
 
 /** Active zoning tool in the /play toolbar. */
 export type ZoningTool =
-  | "residential"
-  | "commercial"
-  | "industrial"
+  | ZoneTierTool
   | "bulldoze"
   | "road";
 
@@ -12,24 +15,26 @@ export type ZoningTool =
 export const PAINT_BRUSH_SIZES = [1, 3] as const;
 export type PaintBrushSize = (typeof PAINT_BRUSH_SIZES)[number];
 
-/** Engine zone type IDs (TileData.cs). */
+/** Engine zone type IDs keyed by toolbar tool. */
 export const ENGINE_ZONE_TYPE: Record<
   Exclude<ZoningTool, "bulldoze" | "road">,
   number
-> = {
-  residential: 1, // residential_low
-  commercial: 3,
-  industrial: 4,
-};
+> = Object.fromEntries(
+  ZONE_TIERS.map((tier) => [tier.tool, tier.engineZoneType]),
+) as Record<Exclude<ZoningTool, "bulldoze" | "road">, number>;
+
+/** Re-export engine zone constants for callers that need raw IDs. */
+export { ENGINE_ZONE_TYPE_ID };
 
 /** Semi-transparent overlay tints keyed by engine zone type. */
 export const ZONE_OVERLAY_COLORS: Record<number, string> = {
-  1: "#4a90d9",
-  2: "#4a90d9",
-  3: "#e8b84a",
-  4: "#8b7355",
-  5: "#9b7ed9",
-  6: "#5cb88a",
+  [ENGINE_ZONE_TYPE_ID.residentialLow]: "#4a90d9",
+  [ENGINE_ZONE_TYPE_ID.residentialHigh]: "#3a7bc8",
+  [ENGINE_ZONE_TYPE_ID.commercial]: "#e8b84a",
+  [ENGINE_ZONE_TYPE_ID.industrial]: "#8b7355",
+  [ENGINE_ZONE_TYPE_ID.office]: "#9b7ed9",
+  [ENGINE_ZONE_TYPE_ID.mixedUse]: "#5cb88a",
+  [ENGINE_ZONE_TYPE_ID.agricultural]: "#8cb43c",
 };
 
 export type ZoneTile = {
@@ -60,9 +65,11 @@ export const ZONING_TOOLS: {
   shortLabel: string;
   stub?: boolean;
 }[] = [
-  { id: "residential", label: "Residential", shortLabel: "R" },
-  { id: "commercial", label: "Commercial", shortLabel: "C" },
-  { id: "industrial", label: "Industrial", shortLabel: "I" },
+  ...ZONE_TIERS.map((tier) => ({
+    id: tier.tool,
+    label: tier.label,
+    shortLabel: tier.shortLabel,
+  })),
   { id: "bulldoze", label: "Bulldoze", shortLabel: "✕" },
   { id: "road", label: "Road", shortLabel: "Rd" },
 ];

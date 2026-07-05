@@ -159,7 +159,7 @@ export function EraProgressPanel({ resources }: EraProgressPanelProps) {
 
   return (
     <aside
-      aria-label="Era progress"
+      aria-label="Era quest progress"
       data-onboarding-target="era-quest"
       style={{
         ...HUD_ZONE.topRight,

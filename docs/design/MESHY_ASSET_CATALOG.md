@@ -1,7 +1,7 @@
 # CityMajor — Meshy Asset Catalog
 
 **Status:** Canonical  
-**Date:** 2026-07-04  
+**Date:** 2026-07-05 (inventory refresh)  
 **Linear epic:** [SB-3730](https://linear.app/softblaze/issue/SB-3730) · **Spec:** [SB-3678](https://linear.app/softblaze/issue/SB-3678)  
 **Related:** [`BUILDING_ARCHETYPE_3D.md`](BUILDING_ARCHETYPE_3D.md), [`MESHY_ASSET_PIPELINE.md`](MESHY_ASSET_PIPELINE.md), [`MESHY_HERO_LANDMARKS.md`](MESHY_HERO_LANDMARKS.md)
 
@@ -50,11 +50,20 @@ git lfs track "web/public/assets/gltf/**/*.glb"
 git add .gitattributes
 ```
 
-**Spike inventory (v1-core, 20 keys):** 7 Meshy GLBs in history as raw blobs (needs `git lfs migrate` before scaling); 13 procedural placeholders. Do not add another Meshy batch to plain git — P0 (108 assets) would exceed **1 GB**.
+**Spike inventory (manifest, 24 zone keys + heroes):**
+
+| Class | Count | Git mechanism | Notes |
+|-------|-------|---------------|-------|
+| **Meshy zone GLBs (raw history)** | 7 | Plain git blobs | v1-core batch `00` samples — needs `git lfs migrate` |
+| **Meshy zone GLBs (LFS)** | 4 | Git LFS pointers | `res_low_frontier_02`–`05` (~33 MB on disk) |
+| **Procedural placeholders** | 13 | Plain git | v1-core era samples still awaiting Meshy |
+| **Hero landmarks (LFS, staged)** | 1 | Git LFS pointer | `hero_frontier_city_hall.glb` (~10 MB) — staged, uncommitted WT |
+
+**11 Meshy zone assets on disk** (7 raw + 4 LFS). Do not add more Meshy outputs as plain git blobs — P0 (108 assets) would exceed **1 GB** without LFS.
 
 ### Raw-blob inventory (HEAD, `citymajor-web-r3f-spike`)
 
-These seven files are committed as **plain git blobs** (~**70 MB** total in `.git/objects`). `.gitattributes` already sets `filter=lfs` for new adds, but history was written before tracking — **`git add` alone does not rewrite past commits**.
+Pre-flight **2026-07-05** (read-only, no migrate run): **7 blobs, 67.4 MB** in `.git/objects` for Meshy zone GLBs. `.gitattributes` sets `filter=lfs` for new adds, but the v1-core seven were committed before tracking — **`git add` alone does not rewrite past commits**.
 
 | Path | Size (approx.) | First Meshy commit |
 |------|----------------|--------------------|
@@ -62,11 +71,24 @@ These seven files are committed as **plain git blobs** (~**70 MB** total in `.gi
 | `web/public/assets/gltf/frontier/res_low_frontier_01.glb` | 8.8 MB | `3c5a851` |
 | `web/public/assets/gltf/frontier/ind_frontier_00.glb` | 8.8 MB | `f93b855` |
 | `web/public/assets/gltf/frontier/com_frontier_00.glb` | 9.5 MB | `3c5a851` |
-| `web/public/assets/gltf/industrial/res_low_industrial_00.glb` | 11 MB | `3076c29` |
-| `web/public/assets/gltf/industrial/res_high_industrial_00.glb` | 11 MB | `86dd2ff` |
-| `web/public/assets/gltf/industrial/ind_industrial_00.glb` | 10 MB | (v1-core batch) |
+| `web/public/assets/gltf/industrial/res_low_industrial_00.glb` | 11.2 MB | `3076c29` |
+| `web/public/assets/gltf/industrial/res_high_industrial_00.glb` | 10.9 MB | `86dd2ff` |
+| `web/public/assets/gltf/industrial/ind_industrial_00.glb` | 10.4 MB | (v1-core batch) |
 
-The remaining 13 v1-core keys are procedural placeholders (&lt; 5 KB each). **`com_industrial_00.glb`** (~10 MB) exists on disk but is **untracked** — add it only **after** LFS migrate (or it will become another raw blob).
+### LFS-shipped inventory (HEAD, `citymajor-web-r3f-spike`)
+
+Frontier residential silhouettes `02`–`05` landed via Git LFS after migrate policy — **~33 MB on disk**, ~132-byte pointers in git:
+
+| Path | Disk (approx.) | Commit |
+|------|----------------|--------|
+| `web/public/assets/gltf/frontier/res_low_frontier_02.glb` | 8.2 MB | `737425d` |
+| `web/public/assets/gltf/frontier/res_low_frontier_03.glb` | 8.0 MB | `737425d` |
+| `web/public/assets/gltf/frontier/res_low_frontier_04.glb` | 8.4 MB | `bcabb2e` |
+| `web/public/assets/gltf/frontier/res_low_frontier_05.glb` | 8.4 MB | `bcabb2e` |
+
+Registered in `web/lib/gltf-catalog.ts` (`SHIPPED_GLTF_KEYS`) and `scripts/meshy/manifest.json`. Covers TypeIds 102–105 (`DATA_BRIDGE.md`).
+
+The remaining v1-core `*_00` keys outside the seven Meshy files above are procedural placeholders (&lt; 5 KB each). **`com_industrial_00.glb`** is an LFS pointer in HEAD with a procedural placeholder on disk until the Meshy refine is re-exported and `git lfs` push completes.
 
 ### `git lfs migrate` — approval required
 
@@ -75,7 +97,7 @@ The remaining 13 v1-core keys are procedural placeholders (&lt; 5 KB each). **`c
 **Prerequisites**
 
 1. [Git LFS](https://git-lfs.com/) installed locally (`git lfs version`).
-2. GitHub **Git LFS** enabled on `gkinter/citymajor` (Settings → Git LFS). Budget ~70 MB storage + bandwidth per fresh clone until history is rewritten on all branches.
+2. GitHub **Git LFS** enabled on `gkinter/citymajor` (Settings → Git LFS). Budget ~67 MB raw-blob storage until the seven v1-core files are migrated; LFS objects for frontier `02`–`05` add ~33 MB on disk.
 3. Clean working tree on the branch to migrate (stash or commit unrelated edits).
 4. Announce freeze: no concurrent pushes to `feat/wasm-r3f-integration-2026-07-04` (or target branch) during migrate + force-push.
 5. List active worktrees: `git worktree list` — each must reset after migrate.
@@ -91,19 +113,32 @@ git check-attr filter -- web/public/assets/gltf/frontier/res_low_frontier_00.glb
 
 # Confirm HEAD still stores raw blobs (size >> 200 bytes; not an LFS pointer)
 git cat-file -s HEAD:web/public/assets/gltf/frontier/res_low_frontier_00.glb
-# ~8209608 today → raw blob. After migrate → ~130 (pointer).
+# ~8209608 → raw blob. LFS pointers (e.g. res_low_frontier_02) → ~132.
 
-# Estimate repo bloat from large GLBs in history
-git rev-list --objects --all -- \
-  web/public/assets/gltf/frontier/res_low_frontier_00.glb \
-  web/public/assets/gltf/frontier/res_low_frontier_01.glb \
-  web/public/assets/gltf/frontier/ind_frontier_00.glb \
-  web/public/assets/gltf/frontier/com_frontier_00.glb \
-  web/public/assets/gltf/industrial/res_low_industrial_00.glb \
-  web/public/assets/gltf/industrial/res_high_industrial_00.glb \
-  web/public/assets/gltf/industrial/ind_industrial_00.glb \
-  | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize)' \
-  | awk '$1=="blob" && $3>1000000 {sum+=$3; n++} END {printf "%d blobs, %.1f MB\n", n, sum/1024/1024}'
+# LFS-tracked Meshy files in working tree
+git lfs ls-files
+# expect 4 zone + 1 industrial pointer (+ hero when staged)
+
+# Raw-blob bloat estimate (HEAD only — seven v1-core Meshy files)
+python3 - <<'PY'
+import subprocess
+paths = [
+  "web/public/assets/gltf/frontier/res_low_frontier_00.glb",
+  "web/public/assets/gltf/frontier/res_low_frontier_01.glb",
+  "web/public/assets/gltf/frontier/ind_frontier_00.glb",
+  "web/public/assets/gltf/frontier/com_frontier_00.glb",
+  "web/public/assets/gltf/industrial/res_low_industrial_00.glb",
+  "web/public/assets/gltf/industrial/res_high_industrial_00.glb",
+  "web/public/assets/gltf/industrial/ind_industrial_00.glb",
+]
+raw = n = 0
+for p in paths:
+    sz = int(subprocess.check_output(["git","cat-file","-s",f"HEAD:{p}"], text=True))
+    if sz > 1_000_000:
+        raw += sz; n += 1
+print(f"{n} blobs, {raw/1024/1024:.1f} MB")
+PY
+# 2026-07-05: 7 blobs, 67.4 MB
 ```
 
 **Migrate (destructive — run only after approval)**
@@ -134,7 +169,7 @@ git cat-file -s HEAD:web/public/assets/gltf/frontier/res_low_frontier_00.glb
 head -1 web/public/assets/gltf/frontier/res_low_frontier_00.glb
 # Expect: version https://git-lfs.github.com/spec/v1
 
-git lfs ls-files | wc -l          # expect ≥ 7
+git lfs ls-files | wc -l          # expect ≥ 7 (4 frontier res_low + com_industrial pointer + hero when committed)
 file web/public/assets/gltf/frontier/res_low_frontier_00.glb
 # Expect: glTF binary, not ASCII pointer
 
@@ -183,7 +218,7 @@ Separate from instanced zone meshes. Output: `web/public/assets/gltf/heroes/`
 
 | # | File | Era | Footprint | Tris | Linear |
 |---|------|-----|-----------|------|--------|
-| 1 | `hero_frontier_city_hall.glb` | frontier | 2×2 | 3,500 | SB-3741 |
+| 1 | `hero_frontier_city_hall.glb` | frontier | 2×2 | 3,500 | SB-3741 | **shipped** (LFS, WT staged) |
 | 2 | `hero_frontier_church.glb` | frontier | 2×2 | 3,000 | SB-3741 |
 | 3 | `hero_industrial_steel_mill.glb` | industrial | 4×4 | 7,500 | SB-3741 |
 | 4 | `hero_industrial_train_station.glb` | industrial | 3×3 | 6,000 | SB-3741 |
@@ -248,7 +283,7 @@ Props use separate manifest namespace under `web/public/assets/gltf/props/` (TBD
 | **P3** | LOD | 120 | 0 |
 | **Full zone set** | all zone batches | 500 | **15,000** |
 
-*v1 ship minimum (40 zone keys):* core batch variant-`00` samples (20) + fi-80 batch variants `01`–`03` subset (20) = 40 with procedural fallback for gaps.
+*v1 ship minimum (40 zone keys):* core batch variant-`00` samples (20) + fi-80 `res_low` frontier `01`–`05` (5 Meshy, LFS) — **6 Meshy frontier res_low** on disk (`00`–`05`); procedural fallback for all other fi-80 keys.
 
 ---
 

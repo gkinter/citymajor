@@ -14,6 +14,28 @@ Quick ops runbook for enabling **test-mode** Founder Pass checkout on the CityMa
 
 Omit all Stripe vars to keep **mock cookie checkout** on `/shop` (valid for M0 preview smoke).
 
+## Preview smoke snapshot (2026-07-05)
+
+Last checked against [preview FQDN](https://citymajor.apps.softblaze.net) — **still mock checkout** (`stripeCheckoutEnabled: false`). No secrets in responses; only missing env key names.
+
+```bash
+FQDN="https://citymajor.apps.softblaze.net"
+curl -s "$FQDN/api/shop" | jq '{stripeCheckoutEnabled, publishableKeyConfigured, missing}'
+```
+
+Observed (HTTP 200):
+
+```json
+{
+  "stripeCheckoutEnabled": false,
+  "publishableKeyConfigured": false,
+  "missing": ["STRIPE_SECRET_KEY", "STRIPE_FOUNDER_PASS_PRICE_ID"]
+}
+```
+
+`/shop` uses the mock entitlements cookie path until Phase A in this runbook is applied. See [Checklist](#checklist) and [`DEPLOY_WEB.md` § Stripe test-mode](./DEPLOY_WEB.md#stripe-test-mode-setup-sb-3714).
+
+
 ## Required environment variables
 
 | Key | Build time | Runtime | Required for | Source (test mode) |

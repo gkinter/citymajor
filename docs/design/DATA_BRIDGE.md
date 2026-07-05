@@ -57,7 +57,9 @@ Authoritative ADR: [BUILDING_ARCHETYPE_3D](./BUILDING_ARCHETYPE_3D.md). TypeScri
 | 200–299 | `res_high` | Residential high |
 | 300–399 | `com` | Commercial |
 | 400–499 | `ind` | Industrial |
-| *other* | `svc` | Service / civic |
+| 500–599 | `svc` | Service / civic (era band in TypeId; visual era forced to `modern`) |
+| 600–699 | — | Hero / infrastructure / special (per-slug; see §4.3) |
+| *other* | `svc` | Legacy / uncatalogued service |
 
 ### 3.2 Era bands (within each 100-ID zone block)
 
@@ -78,7 +80,7 @@ variant      = (typeId - categoryBase) % 20
 archetypeKey = "{prefix}_{eraSlug}_{variant:02d}"
 ```
 
-**Service exception:** TypeIds outside 100–499 use `svc_modern_{typeId % 20:02d}` — era is always `modern` in `deriveEra()`.
+**Service exception:** TypeIds in **500–599** encode era in the TypeId (`500 + era × 20 + variant`), but `deriveEra()` still returns `modern` for all service categories — mesh keys use `svc_modern_{typeId % 20:02d}`. TypeIds outside 100–599 that classify as service use the same `svc_modern_*` rule.
 
 ### 3.3 TypeId → archetype key → GLTF path
 
@@ -89,7 +91,8 @@ archetypeKey = "{prefix}_{eraSlug}_{variant:02d}"
 | 245 | `res_high_postwar_05` | `/assets/gltf/postwar/res_high_postwar_05.glb` |
 | 363 | `com_modern_03` | `/assets/gltf/modern/com_modern_03.glb` |
 | 487 | `ind_future_07` | `/assets/gltf/future/ind_future_07.glb` |
-| 7 | `svc_modern_07` | `/assets/gltf/modern/svc_modern_07.glb` |
+| 502 | `svc_modern_02` | `/assets/gltf/modern/svc_modern_02.glb` |
+| 525 | `svc_modern_05` | `/assets/gltf/modern/svc_modern_05.glb` |
 
 Path resolution: `web/lib/gltf-catalog.ts` — `gltfPublicPath(key)` → `/assets/gltf/{era}/{key}.glb` where `era` is parsed from the key (`res_low_frontier_05` → `frontier`).
 
@@ -116,12 +119,12 @@ Path resolution: `web/lib/gltf-catalog.ts` — `gltfPublicPath(key)` → `/asset
    - `residential` + `density ≥ 2` → `res_high` (base **200**)
    - `commercial` → `com` (base **300**)
    - `industrial` → `ind` (base **400**)
-   - `service` → `svc` (base **0** — era-agnostic; see gaps §6)
-2. **Era band** from `era` field: `typeId += era * 20` **(zone categories only — services skip this step, see rule 4)**.
+   - `service` → `svc` (base **500** — see rule 4)
+2. **Era band** from `era` field: `typeId += era * 20` **(zone categories only — services use base 500, see rule 4)**.
 3. **Variant index** within `(prefix, era)`: sort JSON entries by `id` ascending; assign `00` … `19` in order.
 4. **TypeId**:
    - Zone categories (`res_low`, `res_high`, `com`, `ind`): `TypeId = categoryBase + era * 20 + variantIndex`.
-   - `service`: `TypeId = variantIndex` (0–19 only). This matches §3.2's `svc_modern_{typeId % 20:02d}` rule, where `deriveEra()` always returns `modern` regardless of the JSON `era` field. **Services are era-agnostic in v1** — the 36 JSON service entries across all eras must be collapsed to a single 20-slot pool (see §6 for the collision-resolution proposal).
+   - `service`: `TypeId = 500 + era * 20 + variantIndex` (unique per JSON slug; **implemented** in `web/lib/building-type-id-map.ts`). Visual mesh key remains `svc_modern_{TypeId % 20:02d}` per `deriveEra()` / `deriveVariant()`.
 
 ### 4.3 Hero / non-zone buildings (`infrastructure`, `special`)
 
@@ -308,42 +311,42 @@ Density maps to variant offset 0/1/2 within frontier band. Luxury types (`110`, 
 | `res_future_biome_dome` | Residential Biome Dome | 180 | `res_low_future_00` | `/assets/gltf/future/res_low_future_00.glb` |
 | `res_future_eco_housing` | Eco-Housing Block | 181 | `res_low_future_01` | `/assets/gltf/future/res_low_future_01.glb` |
 | `res_future_floating_apt` | Floating Apartment | 182 | `res_low_future_02` | `/assets/gltf/future/res_low_future_02.glb` |
-| `svc_frontier_chapel` | Frontier Chapel | 0 | `svc_frontier_00` | `/assets/gltf/frontier/svc_frontier_00.glb` |
-| `svc_frontier_doctors_office` | Doctors Office | 1 | `svc_frontier_01` | `/assets/gltf/frontier/svc_frontier_01.glb` |
-| `svc_frontier_fire_brigade` | Volunteer Fire Brigade | 2 | `svc_frontier_02` | `/assets/gltf/frontier/svc_frontier_02.glb` |
-| `svc_frontier_schoolhouse` | One-Room Schoolhouse | 3 | `svc_frontier_03` | `/assets/gltf/frontier/svc_frontier_03.glb` |
-| `svc_frontier_sheriffs_office` | Sheriffs Office | 4 | `svc_frontier_04` | `/assets/gltf/frontier/svc_frontier_04.glb` |
-| `svc_frontier_town_hall` | Town Hall | 5 | `svc_frontier_05` | `/assets/gltf/frontier/svc_frontier_05.glb` |
-| `svc_industrial_church` | Church | 0 | `svc_industrial_00` | `/assets/gltf/industrial/svc_industrial_00.glb` |
-| `svc_industrial_city_hall` | City Hall | 1 | `svc_industrial_01` | `/assets/gltf/industrial/svc_industrial_01.glb` |
-| `svc_industrial_elementary` | Elementary School | 2 | `svc_industrial_02` | `/assets/gltf/industrial/svc_industrial_02.glb` |
-| `svc_industrial_fire_station` | Fire Station | 3 | `svc_industrial_03` | `/assets/gltf/industrial/svc_industrial_03.glb` |
-| `svc_industrial_high_school` | High School | 4 | `svc_industrial_04` | `/assets/gltf/industrial/svc_industrial_04.glb` |
-| `svc_industrial_hospital` | City Hospital | 5 | `svc_industrial_05` | `/assets/gltf/industrial/svc_industrial_05.glb` |
-| `svc_industrial_library` | Public Library | 6 | `svc_industrial_06` | `/assets/gltf/industrial/svc_industrial_06.glb` |
-| `svc_industrial_police_station` | Police Station | 7 | `svc_industrial_07` | `/assets/gltf/industrial/svc_industrial_07.glb` |
-| `svc_postwar_cathedral` | Cathedral | 0 | `svc_postwar_00` | `/assets/gltf/postwar/svc_postwar_00.glb` |
-| `svc_postwar_civic_center` | Civic Center | 1 | `svc_postwar_01` | `/assets/gltf/postwar/svc_postwar_01.glb` |
-| `svc_postwar_elementary` | Modern Elementary | 2 | `svc_postwar_02` | `/assets/gltf/postwar/svc_postwar_02.glb` |
-| `svc_postwar_fire_station` | Modern Fire Station | 3 | `svc_postwar_03` | `/assets/gltf/postwar/svc_postwar_03.glb` |
-| `svc_postwar_hospital` | General Hospital | 4 | `svc_postwar_04` | `/assets/gltf/postwar/svc_postwar_04.glb` |
-| `svc_postwar_library` | Modern Library | 5 | `svc_postwar_05` | `/assets/gltf/postwar/svc_postwar_05.glb` |
-| `svc_postwar_police_hq` | Police Headquarters | 6 | `svc_postwar_06` | `/assets/gltf/postwar/svc_postwar_06.glb` |
-| `svc_postwar_university` | University Campus | 7 | `svc_postwar_07` | `/assets/gltf/postwar/svc_postwar_07.glb` |
-| `svc_modern_community_college` | Community College | 0 | `svc_modern_00` | `/assets/gltf/modern/svc_modern_00.glb` |
-| `svc_modern_daycare` | Daycare Center | 1 | `svc_modern_01` | `/assets/gltf/modern/svc_modern_01.glb` |
-| `svc_modern_fire_station` | Modern Fire Station | 2 | `svc_modern_02` | `/assets/gltf/modern/svc_modern_02.glb` |
-| `svc_modern_hospital` | Modern Hospital | 3 | `svc_modern_03` | `/assets/gltf/modern/svc_modern_03.glb` |
-| `svc_modern_police_hq` | Police Headquarters | 4 | `svc_modern_04` | `/assets/gltf/modern/svc_modern_04.glb` |
-| `svc_modern_public_library` | Public Library | 5 | `svc_modern_05` | `/assets/gltf/modern/svc_modern_05.glb` |
-| `svc_modern_senior_center` | Senior Center | 6 | `svc_modern_06` | `/assets/gltf/modern/svc_modern_06.glb` |
-| `svc_modern_university` | University Campus | 7 | `svc_modern_07` | `/assets/gltf/modern/svc_modern_07.glb` |
-| `svc_future_ai_hospital` | AI Hospital | 0 | `svc_future_00` | `/assets/gltf/future/svc_future_00.glb` |
-| `svc_future_auto_fire` | Automated Fire Response | 1 | `svc_future_01` | `/assets/gltf/future/svc_future_01.glb` |
-| `svc_future_disaster_center` | Disaster Response Center | 2 | `svc_future_02` | `/assets/gltf/future/svc_future_02.glb` |
-| `svc_future_drone_police` | Drone Police Station | 3 | `svc_future_03` | `/assets/gltf/future/svc_future_03.glb` |
-| `svc_future_med_pod_clinic` | Med-Pod Clinic | 4 | `svc_future_04` | `/assets/gltf/future/svc_future_04.glb` |
-| `svc_future_online_uni` | Online University Hub | 5 | `svc_future_05` | `/assets/gltf/future/svc_future_05.glb` |
+| `svc_frontier_chapel` | Frontier Chapel | 500 | `svc_modern_00` | `/assets/gltf/modern/svc_modern_00.glb` |
+| `svc_frontier_doctors_office` | Doctors Office | 501 | `svc_modern_01` | `/assets/gltf/modern/svc_modern_01.glb` |
+| `svc_frontier_fire_brigade` | Volunteer Fire Brigade | 502 | `svc_modern_02` | `/assets/gltf/modern/svc_modern_02.glb` |
+| `svc_frontier_schoolhouse` | One-Room Schoolhouse | 503 | `svc_modern_03` | `/assets/gltf/modern/svc_modern_03.glb` |
+| `svc_frontier_sheriffs_office` | Sheriffs Office | 504 | `svc_modern_04` | `/assets/gltf/modern/svc_modern_04.glb` |
+| `svc_frontier_town_hall` | Town Hall | 505 | `svc_modern_05` | `/assets/gltf/modern/svc_modern_05.glb` |
+| `svc_industrial_church` | Church | 520 | `svc_modern_00` | `/assets/gltf/modern/svc_modern_00.glb` |
+| `svc_industrial_city_hall` | City Hall | 521 | `svc_modern_01` | `/assets/gltf/modern/svc_modern_01.glb` |
+| `svc_industrial_elementary` | Elementary School | 522 | `svc_modern_02` | `/assets/gltf/modern/svc_modern_02.glb` |
+| `svc_industrial_fire_station` | Fire Station | 523 | `svc_modern_03` | `/assets/gltf/modern/svc_modern_03.glb` |
+| `svc_industrial_high_school` | High School | 524 | `svc_modern_04` | `/assets/gltf/modern/svc_modern_04.glb` |
+| `svc_industrial_hospital` | City Hospital | 525 | `svc_modern_05` | `/assets/gltf/modern/svc_modern_05.glb` |
+| `svc_industrial_library` | Public Library | 526 | `svc_modern_06` | `/assets/gltf/modern/svc_modern_06.glb` |
+| `svc_industrial_police_station` | Police Station | 527 | `svc_modern_07` | `/assets/gltf/modern/svc_modern_07.glb` |
+| `svc_postwar_cathedral` | Cathedral | 540 | `svc_modern_00` | `/assets/gltf/modern/svc_modern_00.glb` |
+| `svc_postwar_civic_center` | Civic Center | 541 | `svc_modern_01` | `/assets/gltf/modern/svc_modern_01.glb` |
+| `svc_postwar_elementary` | Modern Elementary | 542 | `svc_modern_02` | `/assets/gltf/modern/svc_modern_02.glb` |
+| `svc_postwar_fire_station` | Modern Fire Station | 543 | `svc_modern_03` | `/assets/gltf/modern/svc_modern_03.glb` |
+| `svc_postwar_hospital` | General Hospital | 544 | `svc_modern_04` | `/assets/gltf/modern/svc_modern_04.glb` |
+| `svc_postwar_library` | Modern Library | 545 | `svc_modern_05` | `/assets/gltf/modern/svc_modern_05.glb` |
+| `svc_postwar_police_hq` | Police Headquarters | 546 | `svc_modern_06` | `/assets/gltf/modern/svc_modern_06.glb` |
+| `svc_postwar_university` | University Campus | 547 | `svc_modern_07` | `/assets/gltf/modern/svc_modern_07.glb` |
+| `svc_modern_community_college` | Community College | 560 | `svc_modern_00` | `/assets/gltf/modern/svc_modern_00.glb` |
+| `svc_modern_daycare` | Daycare Center | 561 | `svc_modern_01` | `/assets/gltf/modern/svc_modern_01.glb` |
+| `svc_modern_fire_station` | Modern Fire Station | 562 | `svc_modern_02` | `/assets/gltf/modern/svc_modern_02.glb` |
+| `svc_modern_hospital` | Modern Hospital | 563 | `svc_modern_03` | `/assets/gltf/modern/svc_modern_03.glb` |
+| `svc_modern_police_hq` | Police Headquarters | 564 | `svc_modern_04` | `/assets/gltf/modern/svc_modern_04.glb` |
+| `svc_modern_public_library` | Public Library | 565 | `svc_modern_05` | `/assets/gltf/modern/svc_modern_05.glb` |
+| `svc_modern_senior_center` | Senior Center | 566 | `svc_modern_06` | `/assets/gltf/modern/svc_modern_06.glb` |
+| `svc_modern_university` | University Campus | 567 | `svc_modern_07` | `/assets/gltf/modern/svc_modern_07.glb` |
+| `svc_future_ai_hospital` | AI Hospital | 580 | `svc_modern_00` | `/assets/gltf/modern/svc_modern_00.glb` |
+| `svc_future_auto_fire` | Automated Fire Response | 581 | `svc_modern_01` | `/assets/gltf/modern/svc_modern_01.glb` |
+| `svc_future_disaster_center` | Disaster Response Center | 582 | `svc_modern_02` | `/assets/gltf/modern/svc_modern_02.glb` |
+| `svc_future_drone_police` | Drone Police Station | 583 | `svc_modern_03` | `/assets/gltf/modern/svc_modern_03.glb` |
+| `svc_future_med_pod_clinic` | Med-Pod Clinic | 584 | `svc_modern_04` | `/assets/gltf/modern/svc_modern_04.glb` |
+| `svc_future_online_uni` | Online University Hub | 585 | `svc_modern_05` | `/assets/gltf/modern/svc_modern_05.glb` |
 
 ### 5.2 Hero / infrastructure / special (46 entries)
 
@@ -403,7 +406,7 @@ Density maps to variant offset 0/1/2 within frontier band. Luxury types (`110`, 
 | Gap | Detail | Mitigation |
 |-----|--------|------------|
 | **199 JSON vs 500 archetype slots** | [BUILDING_ARCHETYPE_3D](./BUILDING_ARCHETYPE_3D.md) cites **5 × 5 × 20 = 500** zone mesh variants. JSON defines **153** zone buildings + **46** heroes. **283** zone archetype keys (of 400) have no JSON content. | v1 ships **40–60** Meshy modules/era ([WEB_V1_SCOPE](./WEB_V1_SCOPE.md)); reuse archetype keys across similar JSON entries. |
-| **Service era mismatch** | JSON has **36** service buildings across 5 eras. `deriveEra()` forces **`svc_modern_*`** for all TypeIds outside 100–499. Proposed table assigns TypeId `0–19` per era band, but only one `svc_modern_00` key exists. | Extend service TypeId space (e.g. 500–599) **or** hero GLTF per `svc_*` slug **or** collapse service visuals to 20 civic archetypes. |
+| **Service visual key reuse** | 36 JSON service slugs map to unique TypeIds **500–599**, but `deriveEra()` / `deriveVariant()` still collapse mesh keys to `svc_modern_{TypeId % 20}` — multiple slugs share one GLTF archetype. | Hero GLTF per `svc_*` slug **or** extend `buildingArchetypes.ts` to derive era from the 500-band offset (future). |
 | **No runtime JSON loader** | `buildings.json` is not parsed into TypeIds in Forge or WASM. `ZoneGrowthSystem` uses 15 hard-coded constants. | Implement `BuildingCatalog` loader; wire `PlaceBuildingCommand` + growth to catalog. |
 | **Infrastructure / special** | 46 entries outside TypeId taxonomy. | Hero pipeline; separate from instanced zone meshes. |
 | **Placeholder GLTF coverage** | Only **5** keys in `GLTF_CATALOG`. `hasGltfAsset()` returns true only for catalog keys — other paths fall back to procedural boxes. | Meshy batch per `scripts/meshy/manifest.json`; expand catalog as assets land. |
@@ -428,6 +431,7 @@ Density maps to variant offset 0/1/2 within frontier band. Luxury types (`110`, 
 | Concern | Path |
 |---------|------|
 | Content DB | `base/data/buildings/buildings.json` |
+| JSON slug → TypeId (TS) | `web/lib/building-type-id-map.ts` |
 | TypeId → archetype (TS) | `web/packages/sim-types/src/buildingArchetypes.ts` |
 | TypeId → visuals (C#) | `src/Forge.Engine/Rendering/BuildingRenderer.cs` |
 | Growth TypeId selection | `src/Forge.Game/Simulation/ZoneGrowthSystem.cs` |

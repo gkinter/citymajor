@@ -15,7 +15,7 @@ CityMajor has crossed a critical inflection point: the **web v1 integration spin
 
 **v1.1 (30 days post-launch)** should ship quick wins that complete the mayor fantasy: RCI demand bars, Herald wired to `events.json`, era progress meter, approval/budget HUD, guided onboarding, and async cloud invites — before opening multiplayer or regional scope.
 
-**v2** is three pillars: **Live Co-op** (2–4 players, host-authoritative), **Open Region** (NPC neighbor towns + targeted trade via existing `TradeSystem`), and **Meshy art complete** (~500 archetype GLBs + 8 hero landmarks). This requires a **headless `Forge.SimCore` tick server** for competitive integrity — estimated ~$170–250/mo per 1K DAU vs ~$40 for async-only.
+**v2** is three pillars: **Live Co-op** (2–4 players, host-authoritative), **Open Region** (NPC neighbor towns + targeted trade via existing `TradeSystem`), and **Meshy art complete** (~500 archetype GLBs + 8 hero landmarks). The **Economic Control Spectrum** — CityMajor's defining slider mechanic — is **explicitly deferred to v2** ([SB-3729](https://linear.app/softblaze/issue/SB-3729)); v1 ships a fixed laissez-faire mayor loop (RCI + Leontief read-only). v2 co-op/region work requires a **headless `Forge.SimCore` tick server** for competitive integrity — estimated ~$170–250/mo per 1K DAU vs ~$40 for async-only.
 
 **v3** unlocks **MMO-lite regional open world**: 512–1024 map streaming, simulation LOD, player cities on a shared regional map with server-authoritative trade and migration. Explicitly **not** v1 or v2 scope; scope creep here is the #1 product risk.
 
@@ -73,6 +73,7 @@ Engineering priorities in this doc are mirrored in Linear for phase planning and
 | **Narrative** | Herald ↔ `events.json`; council options → WASM; LLM path + template fallback; news ticker | Preview LLM keys unset; Herald LLM smoke; Founder entitlements stub |
 | **Persistence** | CMJR `export_cmjr` + blob API + slot list (interim JSON chunk) | SoA chunks; Supabase auth; multi-device conflict resolution |
 | **Multiplayer** | Not in v1 scope (`CLAUDE.md`) | Proposals ready (`MULTIPLAYER_LIVE_PLAY`, `LIVE_SERVICES`) |
+| **Economic Control Spectrum** | Not in v1 `/play`; sim runs implicit market mode | Slider + progressive control panels deferred v2 ([SB-3729](https://linear.app/softblaze/issue/SB-3729)); spec in `MASTER_GAME_CONCEPT` §14 |
 | **Docs** | `WEB_V1_SCOPE`, merge checklist, gameplay plan, this roadmap | Godot/Steam/pixel supersession banners incomplete on legacy agent briefs |
 
 **Competitive moat (validated):** Browser deep sim + Herald AI + era arc + frictionless co-op URL — no tier-1 city builder offers co-op.
@@ -187,6 +188,28 @@ This delivers the "Victoria 3 trade on a map" fantasy without MMO complexity.
 | v2 complete | 8 heroes + polish pass | QA checklist from MESHY_HERO_LANDMARKS |
 
 **Pipeline automation (AI):** Prompt templates → Meshy preview/refine → gltf-transform pivot fix → LOD decimation → R2 CDN. Human QA: 20 hrs/week spot-check silhouettes and era readability.
+
+### Pillar D — Economic Control Spectrum (stub · deferred)
+
+> **Linear:** [SB-3729](https://linear.app/softblaze/issue/SB-3729) · **Spec:** [`MASTER_GAME_CONCEPT.md`](./MASTER_GAME_CONCEPT.md) §14 · **Status:** Stub only — not v1 scope
+
+CityMajor's product wedge includes a continuous **0–100% slider** from laissez-faire zoning mayor to centrally planned economy ([AI_ART_PIPELINE](./AI_ART_PIPELINE.md): prove this mechanic is fun before art spend). v1 intentionally ships **fixed market-mode play** (RCI, zoning, Leontief/trade read-only HUD) so the mayor loop can launch without progressive UI gating or factory-order depth.
+
+**v2 target (TBD — expand when v1 economy loop is stable):**
+
+| Component | Approach |
+|-----------|----------|
+| Slider | City settings panel; 0–100% continuous; mid-game adjustment with smooth UI reveal/hide |
+| Control bands | Five bands per `MASTER_GAME_CONCEPT` §14 (0–20% laissez-faire → 80–100% planned); laws/panels unlock by band |
+| Sim coupling | `EconomicControlLevel` gates which Leontief params are automated vs player-set (production quotas, prices, import caps) |
+| Herald | Headlines on ideology shifts, privatization/nationalization events, band transitions |
+| v2.0 MVP | Slider + 2–3 band transitions with visible budget/approval consequences; full W&R-depth at 100% is v2.1+ |
+
+**Gate to start:** v1 Leontief HUD + trade strip stable; law enactment wired; Open Region (Pillar B) optional but recommended for import-quota fantasy.
+
+**Out of scope v2:** Per-factory micromanagement at launch; nationalization quest chains; multiplayer ideology negotiation.
+
+---
 
 ### v2 Infrastructure
 
@@ -523,13 +546,56 @@ Live Co-op room protocol (Draft 1); Supabase Auth; R2 snapshot schema.
 
 ---
 
+### Draft 6: `[v2 stub] Economic Control Spectrum — Slider + Band-Gated Controls`
+
+**Priority:** Medium (v2 pillar D · stub)  
+**Labels:** `gameplay`, `economy`, `ui`, `simulation`  
+**Estimate:** TBD (8–12 weeks when promoted from stub)  
+**Epic:** [SB-3729](https://linear.app/softblaze/issue/SB-3729) — Full vision  
+**Status:** Stub — create sub-issues when v1 economy loop exits beta
+
+#### Problem
+
+CityMajor's defining mechanic is the **Economic Control Spectrum** — a continuous slider from SimCity-style zoning mayor to Victoria 3 / Workers & Resources depth ([MASTER_GAME_CONCEPT](./MASTER_GAME_CONCEPT.md) §14, [COMPETITIVE_POSITIONING](./COMPETITIVE_POSITIONING.md)). v1 ships implicit laissez-faire mode only. Without the slider, the product reads as "another zoning sim" despite Leontief depth in WASM.
+
+#### Proposed solution (stub)
+
+- Export `economicControlLevel` (0–100) from WASM; persist in CMJR
+- Settings slider with band labels; progressive panel unlock per §14 bands
+- Gate Leontief player controls (production orders, price floors, import quotas) by control level
+- Herald templates for band transitions and ideology events
+
+#### Acceptance criteria (draft — refine at kickoff)
+
+- [ ] Player can set slider 0–100% in city settings; value persists across save/load
+- [ ] Moving slider reveals/hides ≥3 distinct economy panels without jarring reset
+- [ ] At ≥60%, player can set production quota on ≥1 industrial building type
+- [ ] Budget/approval respond measurably to slider band changes within 3 in-game months
+- [ ] Herald emits ≥1 headline per band transition
+
+#### Out of scope
+
+Full planned-economy depth (housing assignment, five-year plans), multiplayer ideology sync, v3 regional command economies.
+
+#### References
+
+- `docs/design/MASTER_GAME_CONCEPT.md` §14
+- `docs/design/GAME_IDENTITY.md` — Axis 2
+- `docs/design/AI_ART_PIPELINE.md` — fun-before-art rationale
+
+#### Dependencies
+
+v1 Leontief HUD stable ([SB-3690](https://linear.app/softblaze/issue/SB-3690)); law enactment; optional Open Region (Draft 2) for import-quota play.
+
+---
+
 ## Milestone Timeline (Indicative)
 
 ```
 2026 Q3  │ v1 launch blockers closed → public beta / Founder Pass
 2026 Q4  │ v1.1 quick wins → era quests, Meshy batch 2, async invites
 2027 Q1  │ v2 Live Co-op + Open Region (NPC) beta
-2027 Q2  │ v2 Meshy complete + headless sim server GA
+2027 Q2  │ v2 Meshy complete + headless sim server GA; ECS slider stub → MVP ([SB-3729](https://linear.app/softblaze/issue/SB-3729))
 2027 H2+ │ v3 gate review → regional MMO-lite only if v2 metrics hit
 ```
 

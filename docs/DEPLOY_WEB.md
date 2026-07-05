@@ -262,12 +262,13 @@ Preview hostnames use the `*.apps.softblaze.net` wildcard (Cloudflare tunnel `so
 
 The `wasm` stage runs `dotnet publish` for browser WASM — under-provisioned builders OOM or time out; the Dockerfile logs a warning and ships procedural-only if publish fails.
 
-### 8. Runtime environment variables (optional)
+### 8. Runtime environment variables
 
-M0 preview needs **no secrets**. Omit Stripe vars unless testing live Founder Pass checkout.
+Coolify preview runs with `NODE_ENV=production` (set in the Dockerfile runner stage). **`CITYMAJOR_SESSION_SECRET` is required** — without it, `/api/saves`, entitlements, and checkout routes return 500 when minting or verifying the signed `citymajor_uid` cookie. Stripe vars remain optional unless testing live Founder Pass checkout.
 
 | Variable | Required | Notes |
 |----------|----------|-------|
+| `CITYMAJOR_SESSION_SECRET` | **Yes** | ≥32 chars; signs `citymajor_uid` cookie — see [`STRIPE_COOLIFY_SETUP.md`](./STRIPE_COOLIFY_SETUP.md) |
 | `PORT` | No | `3000` (set in Dockerfile) |
 | `HOSTNAME` | No | `0.0.0.0` (set in Dockerfile) |
 | `NODE_ENV` | No | `production` (set in Dockerfile) |
@@ -280,6 +281,9 @@ M0 preview needs **no secrets**. Omit Stripe vars unless testing live Founder Pa
 > **Related:** [SB-3693_AUTH_ENTITLEMENTS_GAP.md](./design/SB-3693_AUTH_ENTITLEMENTS_GAP.md) (checkout → webhook → tier-store flow)
 
 Live Founder Pass checkout needs **runtime** secrets plus a **build-time** publishable key. Omit all Stripe vars to keep the mock cookie checkout on `/shop`.
+
+**Preview status (2026-07-05):** [`GET /api/shop`](https://citymajor.apps.softblaze.net/api/shop) on `citymajor.apps.softblaze.net` returns `stripeCheckoutEnabled: false` — **mock `/shop` checkout** remains active. Smoke details and `curl` one-liners: [`STRIPE_COOLIFY_SETUP.md` § Preview smoke snapshot](./STRIPE_COOLIFY_SETUP.md#preview-smoke-snapshot-2026-07-05).
+
 
 **Quick reference — `coolify env-set` on `citymajor-web`** (`w134tsftvj327kp96j45kcsb`):
 
@@ -560,10 +564,11 @@ pnpm build && pnpm start                      # procedural fallback
 
 ## Environment variables
 
-The M0 spike runs with in-memory stubs — no secrets required for preview.
+Preview deploys use `NODE_ENV=production`. Set **`CITYMAJOR_SESSION_SECRET`** (≥32 chars) on every Coolify deploy — saves, entitlements, and Stripe checkout depend on the signed `citymajor_uid` cookie. Stripe and LLM keys remain optional for M0 procedural preview.
 
 | Variable | Required | Default | Notes |
 |----------|----------|---------|-------|
+| `CITYMAJOR_SESSION_SECRET` | **Yes** | — | Signs `citymajor_uid` cookie; omitting causes 500 on `/api/saves` and related routes |
 | `PORT` | No | `3000` | Set by Coolify / Dockerfile |
 | `HOSTNAME` | No | `0.0.0.0` | Bind all interfaces in container |
 | `NODE_ENV` | No | `production` | Set in Dockerfile runner stage |

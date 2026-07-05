@@ -140,7 +140,7 @@ See agent specs [`AGENT_02`–`AGENT_07`](.) — valid with scale footnotes; God
 
 ```
 CLAUDE.md                          ← agent/dev onboarding (links here)
-docs/design/WEB_V1_SCOPE.md        ← THIS FILE: locked product scope
+docs/design/WEB_V1_SCOPE.md        ← THIS FILE: locked product scope (+ §12 v2 trade architecture)
 docs/design/MASTER_GAME_CONCEPT.md ← sim/economy/narrative (+ web pivot §)
 docs/design/BUILDING_ARCHETYPE_3D.md
 docs/design/MESHY_*.md
@@ -195,10 +195,55 @@ Committed `9b82eb1` · uncommitted polish in `citymajor-web-r3f-spike` WT (citiz
 |--------|-------------------|----------|-------|
 | Citizens / cultural DNA | ~10k HH, satisfaction | **58%** | Panel + aggregates; named household WASM export pending |
 | Laws (70+ era-filtered) | Factions, elections, laws | **32%** | Catalog + counts; enactment UI deferred |
-| Economy / trade | Leontief chains | **52%** | Global market HUD; route UI deferred |
+| Economy / trade | Leontief chains | **52%** | Global market HUD; inter-city routes deferred — see §12 [SB-3728](https://linear.app/softblaze/issue/SB-3728) |
 | Herald / LLM narrative | Quota-gated + templates | **68%** | Events + council cmds; preview LLM keys unset |
 | Cloud saves | 3 free / 20 Founder | **48%** | CMJR interim JSON chunk; full SoA + auth TBD |
 
 ---
 
-*Last updated: 2026-07-05 (wave-4 progress %). Changes to locked parameters require explicit product sign-off and an update to this file.*
+## 12. v2 architecture note — inter-city trade ([SB-3728](https://linear.app/softblaze/issue/SB-3728))
+
+**Epic:** [SB-3728 — v2 Trade & MP](https://linear.app/softblaze/issue/SB-3728) (Open Region pillar; co-op + headless sim server are sibling tracks in the same epic).
+
+v1 ships **global-market-only** trade: `TradeSystem.ProcessTrade` auto-imports deficits and auto-exports surpluses against the anonymous world index (`PartnerCityId = -1`). Monthly export value and import cost surface in `ResourcesHud` and `EconomyPanel`; the **Trade routes** panel is a read-only stub linking SB-3728.
+
+### v1 baseline (shipped / partial)
+
+| Layer | v1 behavior |
+|-------|-------------|
+| **Sim** | `Forge.Game.Simulation.TradeSystem` — `GlobalPrices[]`, auto-trade thresholds, `ApplyGlobalEvent` shocks |
+| **WASM** | `WasmSimHost.ProcessGlobalMarketTrade` — monthly tick; no bilateral routes exported |
+| **Web HUD** | Trade balance strip + economy shortages; `EconomyPanel` → `TradeRoutesStub` ("No routes · read-only preview") |
+| **Data model** | `TradeRoute` struct already defines `PartnerCityId`, `GoodType`, `Quantity`, `AgreedPrice`, `DurationMonths` — **unused for partners in v1** |
+
+### v2 target (inter-city routes)
+
+Phase 2 of [`OPEN_WORLD_SCALE_PROPOSAL.md`](OPEN_WORLD_SCALE_PROPOSAL.md) §2, §5 — player-visible bilateral trade before full 1024×1024 shared maps:
+
+1. **Regional map UI** — 512×512 overview; player 256×256 claim highlighted; 3–5 **NPC town** markers with fixed supply/demand profiles (e.g. Coal Ridge → ore export, Harbor Vale → finished-goods import).
+2. **Route contracts** — Player selects partner (`PartnerCityId ≥ 0`), good, monthly volume cap, duration; `CreateTradeRoute` / `CancelTradeRoute` already exist in C#; wire through WASM exports + snapshot fields for active routes.
+3. **Settlement tick** — Reuse `ExecuteTradeRoutes` + monthly budget line (`BudgetSystem.TradeIncome`); stable `AgreedPrice` vs floating global index creates specialization incentives (`ProductionChainRegistry` multi-tier chains).
+4. **Sim LOD** — Full building-level sim in player city; aggregate chunk-level production/consumption for NPC tiles (must not regress ≥30 FPS target — §4).
+5. **Herald** — Trade headlines from route state (surplus, embargo risk, commodity spike); quota-gated like other narrative events.
+
+### Explicit v2 out-of-scope (same epic, later milestones)
+
+- Live PvP trade negotiation, player-owned cities on a shared 1024×1024 map ([`OPEN_WORLD_SCALE_PROPOSAL.md`](OPEN_WORLD_SCALE_PROPOSAL.md) Phase 3 / [SB-3729](https://linear.app/softblaze/issue/SB-3729))
+- Co-op host-authoritative sync ([`MULTIPLAYER_LIVE_PLAY_PROPOSAL.md`](MULTIPLAYER_LIVE_PLAY_PROPOSAL.md))
+- Headless `Forge.SimCore` tick server (required for competitive MP integrity — see [`CTO_IMPROVEMENT_ROADMAP_2026-07.md`](CTO_IMPROVEMENT_ROADMAP_2026-07.md) § v2 pillars)
+
+### Bridge work (v1.5 → v2)
+
+| Work item | Owner surface |
+|-----------|---------------|
+| Export `tradeRoutes[]` in WASM snapshot | `WasmSimHost`, `sim-worker.ts`, `snapshot-types.ts` |
+| `create_trade_route` / `cancel_trade_route` commands | WASM exports → worker message protocol |
+| Replace `TradeRoutesStub` with route list + create flow | `EconomyPanel.tsx` |
+| Regional map panel (read-only markers first) | New R3F overlay or 2D minimap component |
+| Smoke: active route affects budget line | `smoke-play-checks.mjs` (extends existing SB-3728 link assertion) |
+
+**Merge / launch implication:** Inter-city routes are **not** a v1 ship blocker. PR #1 spine may merge with global-market trade only; route UI remains stub until SB-3728 lands (tracked in [`V1_MERGE_CHECKLIST.md`](V1_MERGE_CHECKLIST.md) § Phase 3 wave 4).
+
+---
+
+*Last updated: 2026-07-05 (§12 inter-city trade architecture note, SB-3728). Changes to locked parameters require explicit product sign-off and an update to this file.*

@@ -264,5 +264,3 @@ docs/research/*                    ← linked from design index, phase-tagged
 ---
 
 **Summary:** The July 2026 spike added strong 3D/R3F ADRs and updated `CLAUDE.md`, but ~25 of 33 design docs still describe Iron & Oak as a Godot/Steam pixel game at 10–100× web v1 scale. The highest-risk gaps are missing web-specific specs (era arc, save format, WASM bridge, UI) and contradictory platform/multiplayer/art claims in `MASTER_GAME_CONCEPT`’s opening sections.
-
-[REDACTED]

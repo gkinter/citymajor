@@ -128,6 +128,33 @@ public sealed class ServiceSystem
     // =========================================================================
 
     /// <summary>
+    /// Rebuild all influence maps from the current building pool (save/load restore).
+    /// </summary>
+    public void RebuildFromWorld(WorldState state)
+    {
+        _fireCoverage.ClearAll();
+        _policeCoverage.ClearAll();
+        _healthCoverage.ClearAll();
+        _educationCoverage.ClearAll();
+        _pollutionMap.ClearAll();
+        _noiseMap.ClearAll();
+        _crimeMap.ClearAll();
+
+        var pool = state.Buildings;
+        for (int i = 0; i < pool.Capacity; i++)
+        {
+            if (!pool.IsActive(i)) continue;
+            OnBuildingPlaced(new BuildingPlacedEvent
+            {
+                BuildingId = i,
+                TileX = pool.GridX[i],
+                TileY = pool.GridY[i],
+                TypeId = pool.TypeId[i],
+            }, state);
+        }
+    }
+
+    /// <summary>
     /// Called when a building is placed. Adds influence sources for any services
     /// the building provides and pollution/noise sources for industrial buildings.
     /// </summary>

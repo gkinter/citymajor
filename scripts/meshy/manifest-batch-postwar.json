@@ -1,0 +1,609 @@
+{
+  "pipeline_version": "1.0",
+  "batch_id": "postwar",
+  "meshy_model": "meshy-6",
+  "export_format": "glb",
+  "linear_issue": "SB-3743",
+  "jobs": [
+    {
+      "key": "res_low_postwar_00",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 00",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_01",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 01",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_02",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 02",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_03",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 03",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_04",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 04",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_05",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 05",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_06",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 06",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_07",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 07",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_08",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 08",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_09",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 09",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_10",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 10",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_11",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 11",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_12",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 12",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_13",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 13",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_14",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 14",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_15",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 15",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_16",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 16",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_17",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 17",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_18",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 18",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_low_postwar_19",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 19",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_00",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 00",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_01",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 01",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_02",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 02",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_03",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 03",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_04",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 04",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_05",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 05",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_06",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 06",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_07",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 07",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_08",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 08",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_09",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 09",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_10",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 10",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_11",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 11",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_12",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 12",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_13",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 13",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_14",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 14",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_15",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 15",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_16",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 16",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_17",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 17",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_18",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 18",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_19",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 19",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_00",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 00",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_01",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 01",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_02",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 02",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_03",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 03",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_04",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 04",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_05",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 05",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_06",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 06",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_07",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 07",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_08",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 08",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_09",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 09",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_10",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 10",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_11",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 11",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_12",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 12",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_13",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 13",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_14",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 14",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_15",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 15",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_16",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 16",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_17",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 17",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_18",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 18",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_19",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 19",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_00",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 00",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_01",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 01",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_02",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 02",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_03",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 03",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_04",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 04",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_05",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 05",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_06",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 06",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_07",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 07",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_08",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 08",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_09",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 09",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_10",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 10",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_11",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 11",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_12",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 12",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_13",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 13",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_14",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 14",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_15",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 15",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_16",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 16",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_17",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 17",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_18",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 18",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_19",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 19",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_00",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 00",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_01",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 01",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_02",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 02",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_03",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 03",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_04",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 04",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_05",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 05",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_06",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 06",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_07",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 07",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_08",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 08",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_09",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 09",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_10",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 10",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_11",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 11",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_12",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 12",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_13",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 13",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_14",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 14",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_15",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 15",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_16",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 16",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_17",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 17",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_18",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 18",
+      "category": "svc",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_19",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 19",
+      "category": "svc",
+      "era": "postwar"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "citymajor",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @citymajor/web dev",
+    "build": "pnpm --filter @citymajor/web build",
+    "start": "pnpm --filter @citymajor/web start",
+    "build:wasm": "bash web/wasm/build-wasm.sh",
+    "dev:wasm": "pnpm build:wasm && pnpm dev",
+    "smoke:precheck": "node scripts/smoke-precheck.mjs",
+    "smoke:all": "pnpm smoke:precheck && pnpm --filter @citymajor/web smoke:all",
+    "smoke:ci": "SMOKE_SKIP_SAVES=1 PLAY_VIEWPORT=1280x720 HEADLESS=1 pnpm smoke:all",
+    "smoke:play": "pnpm --filter @citymajor/web smoke:play",
+    "verify:tech-unlocks": "pnpm --filter @citymajor/web verify:tech-unlocks",
+    "perf:gate": "pnpm --filter @citymajor/web perf:gate",
+    "meshy:batch": "node scripts/meshy/batch-generate.mjs",
+    "meshy:batch:dry": "node scripts/meshy/batch-generate.mjs --dry-run",
+    "meshy:validate": "node scripts/meshy/validate-manifest.mjs",
+    "meshy:batch:mcp": "MESHY_USE_MCP=1 node scripts/meshy/batch-generate.mjs --skip-existing"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.2.1",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=20"
+  }
+}

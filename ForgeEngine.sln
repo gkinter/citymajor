@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forge.Engine.Tests", "tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forge.Game.Tests", "tests\Forge.Game.Tests\Forge.Game.Tests.csproj", "{B1B2C3D4-1111-2222-3333-444455550000}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forge.SimCore", "src\Forge.SimCore\Forge.SimCore.csproj", "{C1C2C3D4-1111-2222-3333-444455551111}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forge.SimWasm", "src\Forge.SimWasm\Forge.SimWasm.csproj", "{D1D2D3D4-1111-2222-3333-444455552222}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,5 +43,13 @@ Global
 		{B1B2C3D4-1111-2222-3333-444455550000}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1B2C3D4-1111-2222-3333-444455550000}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1B2C3D4-1111-2222-3333-444455550000}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1C2C3D4-1111-2222-3333-444455551111}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1C2C3D4-1111-2222-3333-444455551111}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1C2C3D4-1111-2222-3333-444455551111}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1C2C3D4-1111-2222-3333-444455551111}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1D2D3D4-1111-2222-3333-444455552222}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1D2D3D4-1111-2222-3333-444455552222}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1D2D3D4-1111-2222-3333-444455552222}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1D2D3D4-1111-2222-3333-444455552222}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

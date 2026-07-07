@@ -1,0 +1,20 @@
+{
+  "key": "hero_future_eco_tower",
+  "brief": {
+    "prompt": "Mid-fidelity game asset, 2040s sustainable eco civic tower, white curved facade with integrated vertical gardens, cyan solar glass panels, green roof terrace, soft organic geometry mixed with clean tech lines, holographic accent bands without readable text, isolated building on flat pad, city builder future era landmark, PBR game-ready",
+    "target_polycount": 6500,
+    "ai_model": "meshy-5"
+  },
+  "preview_task_id": "019f313e-4dda-7cfe-89d4-c57aeff9a0bf",
+  "refine_task_id": "019f3140-69c5-7d4d-8cb1-9ae49e7a2f09",
+  "model_urls": {
+    "glb": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3140-69c5-7d4d-8cb1-9ae49e7a2f09/output/model.glb?Expires=4936809600&Signature=O-EdXCcoxZWTbxTvQlI3Jap0eit7CIycCJzcdKji7eFNSvVwjFXJui-zbUUsHkXOU9wmiaku8C49CcBtk6BjPr2yWK12snYk5bKYIxVokbjxqDlFRvZfktSmoOG3MHkG~CfP471yufYa9dvabPoqCbUTdLpHjhTILAUToXESXcCNMylnlrHUqWI2tMXkKHz-QZViLl4VJswsRjskGm5ClKPlEKuzU6ikqz5tDRlcCwe5KnQ0py4pTA4fuWTkBXaEj3Y9PkGR90mhpA9OoPwfVryoba9pR1pJKULEE7uj0V2s4FSFarcs~Afv~GskBkAxuKnHqh2pEqsGiB7PTNzgvw__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "fbx": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3140-69c5-7d4d-8cb1-9ae49e7a2f09/output/model.fbx?Expires=4936809600&Signature=FjQ7mG9Gz3iKxAcuFhdY4vlR2RFWA-8iOuTOAz2EyAMio5TizCc8exEGkSTPHjWPbj7GT4S3oABdtRZ4hLQNYIJ3yLGZPmHfn2H6BaK9bnvRinEPGUkOXedTcHcKt9uz6LZS9zCd-WFe-1QRn0NX3eh-PLl89S4d6SIO6hfRI2OKrirDzrrWIsVDdkIj1nLFPH92NTJ~8P6xCd7WHWVa6~pr-Kj7ofY4UKfb2T36c1VbwH0B7pWy~MgodK8slBQ59gP-t1mP0KBzISY-lsG40Q2h4laCSRTTyFkZYr8GW0um25oqyB-5btw~fb0ofz79bgYkC~8budD97pWBkfj0gw__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "usdz": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3140-69c5-7d4d-8cb1-9ae49e7a2f09/output/model.usdz?Expires=4936809600&Signature=gb53breCNokXd2TLjWOyPITgLMw8XkTQgok1TVYJwOmdr4vywONxRh~ebBtxKidLxq70U69YI5ZEqdkBbIaz54CsZzP5AFC1xOGKVpNYL2Q~0LlCBqF1vjkjSx1OEZMiPhQK1J5c09dI~VKXNyWcs1twttLCmmJEfGlHwJJhLYdbcI4y2krxMuDjqlVhMGLdeqxN7ms1JZTfbk6QXoPV4THPoxN9p~wizbOK4K4iRvsJgNb8raARjlxUisVe23~U4~KXkxPGVWgDlGF9P-9Qh2ZhvQA7gto1jXuLrg5sqwAwzQXQslg60pT9U~ElDjU9Y3k0rXCLBhSQcA7HHjSwnQ__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "obj": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3140-69c5-7d4d-8cb1-9ae49e7a2f09/output/model.obj?Expires=4936809600&Signature=BZwiw8YsrQRrdauA-w6gJVveXR6bMuIhZ8kTC63C7Pju-MbIRaURaIMsdqsMclj0FdMCuzOagGZ8-3f0lMob~cFPY~gMdimOC-hEkFW2tdFCnko~5XD5TnGlRwPsjHidMbvrGyelwNNCLiHEINS38IVh2UdC9TCfT~gF9GsykHczNWmfW~Z1HBCbzNtEU4O5D~d4IWjtVlSq2ifEq2bNuEBYsWPIpu2IgNSxN8Og5awZAEHmhybzjLZtInYBtXTOBjS-hFSG9C~SNPyuUyeujOeKTLf44~p1ccpishfwxzijKjxJQIOk8nCEgmnmH9Csu6LHCO73kGiOiafQNz-Jeg__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "mtl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3140-69c5-7d4d-8cb1-9ae49e7a2f09/output/model.mtl?Expires=4936809600&Signature=gnoIzP9RKiMJQel~9~9GLSr4WrcJS~5hlYZRVUbyw8iGk~dn~akM~zN1jxTle-WDn6hN7HBKb04tmgXVBwCugu6fn-ts-gmVxW9jt8lHiAGgZSaGtkswOgkL~bBTBkTQQUpEFsVgwXWWeAT-ac7QOEOWxgFIx8iiv9RI54YSoVhb4p4Ctje6xsfrK-EYKfGo350JrStYGOGppTsU-ZLD0ZhACv92odQvxfi7lGHa2BYvu63Q~jis5OpbI2OmOIuTv3350-Z2hFbYckpuQVCnBUXqcgj4GK-ku3KB9khinZEPmnmcdkPcoxt1~Tf1IzYzSYkIRCxxcottCRgcQ2-LZQ__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "stl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3140-69c5-7d4d-8cb1-9ae49e7a2f09/output/model.stl?Expires=4936809600&Signature=SxEUq7vZfeg~STBdgHQCGvDVm5zYyy5FqnGZlirE~AtKaCSoCFMwNKJ7VYNj6R2OeHgOK--KdEXO~CH4GJqh~rrfvd-zI0Au3KrdDbD19FUI7jNwb8lHepfAkN20HHO6KW-CmPH9uVgqTB2oSWXCKTr4yrfP-RG4QgM1QBfK0MTZdW~nm7RwrZMq77xrYoJFZmbrxlTSwKgl5iyT8gxXloBOvBZeZQ4P1pbTyeiVZPsH~ghqrkZ6xGw5EATPVG58kpvEOCK1z3HkOEaymEcqkAFOzDmR3O9gb3iNKEdiMnfoWVDVYF0tXeR~-SaDcfrybu4TX5eRFjBG2s~llaxx7Q__&Key-Pair-Id=K1VGYTHIYLM9UM"
+  },
+  "generated_at": "2026-07-05T07:50:54.016Z",
+  "output_bytes": 10166820
+}

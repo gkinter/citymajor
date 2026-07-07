@@ -538,6 +538,25 @@ public sealed class EventSystem
         _activeEvents.Clear();
     }
 
+    /// <summary>
+    /// Player chose a Herald council response — taper the event into Waning so effects decay.
+    /// </summary>
+    public bool ResolvePlayerResponse(int eventId, WorldState state)
+    {
+        for (int i = 0; i < _activeEvents.Count; i++)
+        {
+            if (_activeEvents[i].EventId != eventId) continue;
+
+            var evt = _activeEvents[i];
+            evt.Phase = EventPhase.Waning;
+            evt.ElapsedDays = Math.Max(evt.ElapsedDays, (int)(evt.DurationDays * 0.65f));
+            _activeEvents[i] = evt;
+            return true;
+        }
+
+        return false;
+    }
+
     // =========================================================================
     // Internal logic
     // =========================================================================

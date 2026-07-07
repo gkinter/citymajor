@@ -1,0 +1,609 @@
+{
+  "pipeline_version": "1.0",
+  "batch_id": "future",
+  "meshy_model": "meshy-6",
+  "export_format": "glb",
+  "linear_issue": "SB-3746",
+  "jobs": [
+    {
+      "key": "res_low_future_00",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 00",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_01",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 01",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_02",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 02",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_03",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 03",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_04",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 04",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_05",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 05",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_06",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 06",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_07",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 07",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_08",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 08",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_09",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 09",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_10",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 10",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_11",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 11",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_12",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 12",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_13",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 13",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_14",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 14",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_15",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 15",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_16",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 16",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_17",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 17",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_18",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 18",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_low_future_19",
+      "prompt": "A single-story sci-fi eco house, futuristic architecture, solar panels, sleek design, peaked roof, low poly, stylized, silhouette variant 19",
+      "category": "res_low",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_00",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 00",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_01",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 01",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_02",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 02",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_03",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 03",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_04",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 04",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_05",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 05",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_06",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 06",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_07",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 07",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_08",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 08",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_09",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 09",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_10",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 10",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_11",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 11",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_12",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 12",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_13",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 13",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_14",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 14",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_15",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 15",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_16",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 16",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_17",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 17",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_18",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 18",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "res_high_future_19",
+      "prompt": "A futuristic residential tower block, sleek panels, flat roof with lip, low poly, stylized game asset, silhouette variant 19",
+      "category": "res_high",
+      "era": "future"
+    },
+    {
+      "key": "com_future_00",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 00",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_01",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 01",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_02",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 02",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_03",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 03",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_04",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 04",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_05",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 05",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_06",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 06",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_07",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 07",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_08",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 08",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_09",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 09",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_10",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 10",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_11",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 11",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_12",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 12",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_13",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 13",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_14",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 14",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_15",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 15",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_16",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 16",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_17",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 17",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_18",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 18",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "com_future_19",
+      "prompt": "A futuristic commercial pod, neon signs, curved glass, flat roof with lip, low poly, stylized game asset, silhouette variant 19",
+      "category": "com",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_00",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 00",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_01",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 01",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_02",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 02",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_03",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 03",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_04",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 04",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_05",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 05",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_06",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 06",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_07",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 07",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_08",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 08",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_09",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 09",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_10",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 10",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_11",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 11",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_12",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 12",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_13",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 13",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_14",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 14",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_15",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 15",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_16",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 16",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_17",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 17",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_18",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 18",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "ind_future_19",
+      "prompt": "A futuristic automated manufacturing plant, neon accents, sawtooth roof, metal panels, low poly, stylized, silhouette variant 19",
+      "category": "ind",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_00",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 00",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_01",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 01",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_02",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 02",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_03",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 03",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_04",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 04",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_05",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 05",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_06",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 06",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_07",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 07",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_08",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 08",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_09",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 09",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_10",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 10",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_11",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 11",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_12",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 12",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_13",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 13",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_14",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 14",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_15",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 15",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_16",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 16",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_17",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 17",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_18",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 18",
+      "category": "svc",
+      "era": "future"
+    },
+    {
+      "key": "svc_future_19",
+      "prompt": "A futuristic civic service hub, clean tech lines, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 19",
+      "category": "svc",
+      "era": "future"
+    }
+  ]
+}

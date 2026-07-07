@@ -1,0 +1,29 @@
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/coverage
+# .git is intentionally included so the builder stage can run `git lfs pull`
+# and smudge LFS-tracked GLBs (web/public/assets/gltf/**/*.glb). Without this,
+# Coolify clones that don't fetch LFS ship ~130-byte pointer stubs to the
+# runner image and R3F loaders fail at runtime.
+**/.github
+**/.vscode
+**/.idea
+**/.DS_Store
+**/Thumbs.db
+**/.env
+**/.env.*
+!**/.env.example
+**/test-results
+**/playwright-report
+
+# C# build artefacts (WASM stage rebuilds from source)
+**/bin
+**/obj
+
+# Desktop / server game targets — not needed for web Docker build
+src/Forge.Server
+
+# Local dev caches
+**/.pnpm-store

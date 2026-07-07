@@ -1,5 +1,7 @@
 # IRON & OAK: Tech Stack Research & Recommendation
 
+> **Historical — pre-web pivot.** See [WEB_V1_SCOPE.md](WEB_V1_SCOPE.md) and [CLAUDE.md](../../CLAUDE.md).
+
 ## Deep Analysis for Building a Realistic City & Economic Builder
 
 ---

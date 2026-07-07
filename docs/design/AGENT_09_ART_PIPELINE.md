@@ -1,5 +1,7 @@
 # AGENT 09: ART & SHADER PIPELINE
 
+> **Historical — pre-web pivot.** See [WEB_V1_SCOPE.md](WEB_V1_SCOPE.md) and [CLAUDE.md](../../CLAUDE.md).
+
 ## Role
 Generate all visual assets: pixel art sprites (930+), tile sets, building sprites, vehicle sprites, citizen sprites, UI textures, shaders (day/night, seasons, aging, weather), particle effects, and animations.
 

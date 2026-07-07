@@ -1,0 +1,129 @@
+{
+  "pipeline_version": "1.0",
+  "batch_id": "svc-modern",
+  "meshy_model": "meshy-6",
+  "export_format": "glb",
+  "linear_issue": "SB-3745",
+  "jobs": [
+    {
+      "key": "svc_modern_00",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 00",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_01",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 01",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_02",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 02",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_03",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 03",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_04",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 04",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_05",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 05",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_06",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 06",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_07",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 07",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_08",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 08",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_09",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 09",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_10",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 10",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_11",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 11",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_12",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 12",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_13",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 13",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_14",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 14",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_15",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 15",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_16",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 16",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_17",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 17",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_18",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 18",
+      "category": "svc",
+      "era": "modern"
+    },
+    {
+      "key": "svc_modern_19",
+      "prompt": "A modern city service building, police or fire station style, flat roof with accent stripe, concrete, low poly, stylized game asset, silhouette variant 19",
+      "category": "svc",
+      "era": "modern"
+    }
+  ]
+}

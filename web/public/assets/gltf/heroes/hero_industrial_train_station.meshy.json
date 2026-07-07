@@ -1,0 +1,20 @@
+{
+  "key": "hero_industrial_train_station",
+  "brief": {
+    "prompt": "Mid-fidelity game asset, Victorian era grand train station 1905, red brick and sandstone facade, clock tower, arched windows, iron and glass canopy over platform entrance, Edwardian civic architecture, symmetrical front elevation, no train tracks or locomotive, isolated building on flat ground, city builder game landmark, PBR game-ready",
+    "target_polycount": 6000,
+    "ai_model": "meshy-5"
+  },
+  "preview_task_id": "019f3127-b67f-78ea-8f3b-e574750eca2f",
+  "refine_task_id": "019f3129-1e72-792c-9203-8c665da7c441",
+  "model_urls": {
+    "glb": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3129-1e72-792c-9203-8c665da7c441/output/model.glb?Expires=4936809600&Signature=nxRJIwVrKOzWlsSurulQZBG6aVVtnghful5BBMBDXC-WL~EzAFb-rKzD3M95-xCszYgn0zLPmzo~YJgy9O2QQN4meFVYJOoMiHtbIz8Bc0aGQG3zwrPwNH4UGrEjyv8xTHYBgE4fg4IUEsN1RGf0SuXVTz2InAmHQCiBk8SoMeT3HbYUg~Aas5rPZ7bUakaNGO13BT9GFtU0NAtRQw2NH9YuR5hGBIMQSa7JYI5wQ5uvfdR~rgVL7jaYKRp6t9yLaqsA4CptZLd0w7CIkob~~H7ATvq1nea9UYxje0C6C6Bn9JhixJUXRuMooatn~4AL5AuzXRdXuB~EW6uY9tQh5g__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "fbx": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3129-1e72-792c-9203-8c665da7c441/output/model.fbx?Expires=4936809600&Signature=dEJyfLcCStm4fuFhDgHyK2i8-M90Fez8HZwYAB~PZqpWKyrpI0QH3osjogM~V17IpxdR3A0VkM1K-0dvrUS73GWdisM30edZPBICGCwNuu7iz--o36PQ0kBpBpHp9b2YiDHAeSOJVuNhU7nIjbc8wW~M-vYsygm37NitDuc1AXWBwRfrTkozxryHiUpFJMd6kfEC4SmYhNDtHYikaVOx4A38KdKj6rUEbd12AWkP0AcNsITQ-4GBcnnI8usOw9JdNl1UULR7cdEyf1iTLipKVjGXdmvnOQiNyRo3qnIkRW3t5DGI-kEuMWuX1b1c96myo7aC6XLbWkVsVuf1qkvCew__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "usdz": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3129-1e72-792c-9203-8c665da7c441/output/model.usdz?Expires=4936809600&Signature=Lsw6-srGnPC4hOdVgcZFzdNkPKm1fg8SraeOXMwr~71dWMHNlje5vab98V5nM4IzDcvuCMbSb0aCL5XCaLnpjAMce4~s6sr3K7-MNxJx0pFANF~ZY8dph49V3redQlxhNsGNPellSwfClEFT8iGeZwwZyylFsKB-AxIWlFNGDYjQAfWzpGrzOnIUB0Lm-edRdQ0OFH0ajsWnTZJMr5VO~lcS0fQTyyt61GQMPSwKaNUWNZJUGR75N-KW8kOj0i~SXpnjCuNMTfSfq4On7alGLLvg~WwvQJqIzClgXH6HrTOuojIKqbSCUcTjq5mFTmltJR8SB9nq6dTLc6Qh1OLCcA__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "obj": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3129-1e72-792c-9203-8c665da7c441/output/model.obj?Expires=4936809600&Signature=YkJvc9jHm3DJDAcF6Is2Y5UBm3GgQGaVvyZuAn3AzgRBcT0~ON9rbmLLpNG6bnHZUQmstnq4Hvafiesv9haNsROyMTbUtNk1OyBQYQIci1K1lmN4yblymLlj-ZJOgKPzp27RTvOFvlAzc7dWXJQHcd-KXM-X7cBe0n2-Bnd-xGW2ATY0xwDhHlJJ9kQfM5KQ5BRIsyFCjuudwx-6w8Ho~k4bK5dzFPKTjlHWWcnXRnZtw6Liv7w4SKGEAtl4IsWCCI4EG6rgjhObaqjh5FNFWyufNa82Kq4b92gLZ4mtB6MXjk2Fc5Xk6j01uhpeg1gjXYGPcpG1H3k82v6U~ZjkDQ__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "mtl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3129-1e72-792c-9203-8c665da7c441/output/model.mtl?Expires=4936809600&Signature=EgTEPejI3cBAaRFT2OHvs2jQioekJaJzaxWFp2mxQGgjNjc~uxc-ehkJbQh0l4lntntChySRklS2IKXvLxXUfYTyt~A8r3hTOc6PsnjnWWRefuktW5vrzuXm6kp26JLlWaLiCN73fS5hDRn8bgRskC4hxhiCtEPoIkJgs4NcnI3QtvbO67nVZzYjL0xOnuctucIh3xslMgnaSpf6tUdCerA~mdwPETWH0TY8AuN2yY04I43lbWL35qhcrDhiid2H4-fwD-fb55yWt1ygRrV3dZAtd0L0UmMt9rXMMztFFta5OgyFguonNAv-qZE-45pnwjk1M3x6DWepDsF88q0aeQ__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "stl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3129-1e72-792c-9203-8c665da7c441/output/model.stl?Expires=4936809600&Signature=LKfszRg-qKBuA7MENh8YxhPAnz2MJ0uZ0Bio88NrcgEUPAElMcdbtfDDyFHzBZKpnjQrS0zC-7mziXsKnOAVnuDyc9z2d8MwFDp29I8druHxSwJ1hcuRoqq-V~Lhkg9YqT8a1ZpkOA-VIaH6EcMLUtcCW8nW2SDrRZbXjDClFRKmPJYNcwUQWITowJbL32QYy2DdM2be~fUKHAcDliFNQXwPnOp1j~T51kO39WAO1ptAtOFT4fLgAImN49tKpp2grzPwS7dpQYyzpKgG7McILH00BI4zOJ-~sOdWcaPEXTWRBnRrBD-aNS2r-NCb23mz1zuzMG9tj-6zXApunSGCZQ__&Key-Pair-Id=K1VGYTHIYLM9UM"
+  },
+  "generated_at": "2026-07-05T07:25:23.019Z",
+  "output_bytes": 10433596
+}

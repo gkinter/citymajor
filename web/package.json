@@ -1,0 +1,40 @@
+{
+  "name": "@citymajor/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "pnpm build:wasm && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "build:wasm": "bash ./wasm/build-wasm.sh",
+    "dev:wasm": "pnpm build:wasm && pnpm dev",
+    "smoke:play": "node ./scripts/smoke-play.mjs",
+    "smoke:all": "node ./scripts/smoke-all.mjs",
+    "verify:tech-unlocks": "node --experimental-strip-types ./scripts/verify-tech-unlocks.mts",
+    "verify:build-catalog": "node --experimental-strip-types ./scripts/verify-build-catalog.mts",
+    "perf:gate": "node ./scripts/perf-gate.mjs",
+    "generate:gltf-placeholders": "node ./scripts/generate-placeholder-gltf.mjs"
+  },
+  "dependencies": {
+    "@citymajor/sim-types": "workspace:*",
+    "@react-three/drei": "^10.0.7",
+    "@react-three/fiber": "^9.1.2",
+    "@react-three/postprocessing": "^3.0.4",
+    "next": "^16.2.9",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "stripe": "^19.3.0",
+    "three": "^0.175.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.2.1",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@types/three": "^0.175.0",
+    "playwright": "^1.51.1",
+    "typescript": "^5.8.3"
+  }
+}

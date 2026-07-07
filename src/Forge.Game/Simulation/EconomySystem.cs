@@ -94,6 +94,9 @@ public sealed class EconomySystem
         }
     }
 
+    /// <summary>Per-good imbalance row for WASM / web HUD export.</summary>
+    public readonly record struct GoodImbalanceEntry(string Name, float Magnitude);
+
     /// <summary>
     /// Result of a "what-if" building placement prediction.
     /// </summary>
@@ -334,6 +337,48 @@ public sealed class EconomySystem
         for (int z = 0; z < ActiveZoneCount; z++)
             sum += _zones[z].Prices[(int)good];
         return sum / ActiveZoneCount;
+    }
+
+    /// <summary>
+    /// City-wide supply/demand imbalance per good for HUD export.
+    /// Shortages rank by demand − supply; surpluses by supply − demand.
+    /// </summary>
+    public (GoodImbalanceEntry[] Shortages, GoodImbalanceEntry[] Surpluses) GetTopImbalances(int topN = 5)
+    {
+        const float MinActivity = 0.01f;
+        const float MinDelta = 0.01f;
+        topN = Math.Clamp(topN, 1, GoodCount);
+
+        var shortages = new List<GoodImbalanceEntry>(topN);
+        var surpluses = new List<GoodImbalanceEntry>(topN);
+
+        for (int g = 0; g < GoodCount; g++)
+        {
+            float totalSupply = 0f;
+            float totalDemand = 0f;
+            for (int z = 0; z < ActiveZoneCount; z++)
+            {
+                totalSupply += _zones[z].Supply[g];
+                totalDemand += _zones[z].Demand[g];
+            }
+
+            if (totalSupply + totalDemand < MinActivity) continue;
+
+            float delta = totalDemand - totalSupply;
+            var good = (Good)g;
+            if (delta > MinDelta)
+                shortages.Add(new GoodImbalanceEntry(good.ToString(), delta));
+            else if (delta < -MinDelta)
+                surpluses.Add(new GoodImbalanceEntry(good.ToString(), -delta));
+        }
+
+        shortages.Sort((a, b) => b.Magnitude.CompareTo(a.Magnitude));
+        surpluses.Sort((a, b) => b.Magnitude.CompareTo(a.Magnitude));
+
+        if (shortages.Count > topN) shortages.RemoveRange(topN, shortages.Count - topN);
+        if (surpluses.Count > topN) surpluses.RemoveRange(topN, surpluses.Count - topN);
+
+        return (shortages.ToArray(), surpluses.ToArray());
     }
 
     // =========================================================================

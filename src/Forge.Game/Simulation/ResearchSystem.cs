@@ -33,15 +33,14 @@ public sealed class ResearchSystem
     public const float RpPerEducatedCitizen = 0.01f;
     public const float RpPerHeavyIndustry = 2f;
 
-    // Era thresholds
+    // Era thresholds — aligned with WASM visual eras (Frontier → Future, indices 0–4).
     public static readonly EraRequirement[] EraRequirements = new EraRequirement[]
     {
-        new() { Era = 0, Name = "Ancient",     MinPopulation = 0,      RequiredTechCount = 0 },
-        new() { Era = 1, Name = "Medieval",    MinPopulation = 500,    RequiredTechCount = 5 },
-        new() { Era = 2, Name = "Colonial",    MinPopulation = 2000,   RequiredTechCount = 15 },
-        new() { Era = 3, Name = "Industrial",  MinPopulation = 10000,  RequiredTechCount = 30 },
-        new() { Era = 4, Name = "Modern",      MinPopulation = 50000,  RequiredTechCount = 60 },
-        new() { Era = 5, Name = "Future",      MinPopulation = 200000, RequiredTechCount = 100 },
+        new() { Era = 0, Name = "Frontier",   MinPopulation = 0,      RequiredTechCount = 0 },
+        new() { Era = 1, Name = "Industrial", MinPopulation = 400,    RequiredTechCount = 5 },
+        new() { Era = 2, Name = "Postwar",    MinPopulation = 2_000,   RequiredTechCount = 15 },
+        new() { Era = 3, Name = "Modern",     MinPopulation = 10_000,  RequiredTechCount = 30 },
+        new() { Era = 4, Name = "Future",     MinPopulation = 50_000,  RequiredTechCount = 60 },
     };
 
     // =========================================================================

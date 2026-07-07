@@ -1,0 +1,39 @@
+{
+  "pipeline_version": "1.0",
+  "batch_id": "postwar_00_spike",
+  "meshy_model": "meshy-6",
+  "export_format": "glb",
+  "linear_issue": "SB-3743",
+  "jobs": [
+    {
+      "key": "res_low_postwar_00",
+      "prompt": "A single-story 1950s suburban house, postwar architecture, simple peaked roof, clean stylized, low poly, silhouette variant 00",
+      "category": "res_low",
+      "era": "postwar"
+    },
+    {
+      "key": "res_high_postwar_00",
+      "prompt": "A 1960s concrete apartment building block, postwar, flat roof with lip, low poly, stylized game asset, silhouette variant 00",
+      "category": "res_high",
+      "era": "postwar"
+    },
+    {
+      "key": "com_postwar_00",
+      "prompt": "A postwar strip mall storefront, concrete and glass, flat roof with lip, low poly, stylized game asset, silhouette variant 00",
+      "category": "com",
+      "era": "postwar"
+    },
+    {
+      "key": "ind_postwar_00",
+      "prompt": "A postwar factory building, sawtooth roof, brick and metal, loading docks, low poly, stylized game asset, silhouette variant 00",
+      "category": "ind",
+      "era": "postwar"
+    },
+    {
+      "key": "svc_postwar_00",
+      "prompt": "A postwar institutional service building, concrete, flat roof with accent stripe, low poly, stylized game asset, silhouette variant 00",
+      "category": "svc",
+      "era": "postwar"
+    }
+  ]
+}

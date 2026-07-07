@@ -1,5 +1,7 @@
 # AGENT 01: CORE ENGINE (Research-Informed v2)
 
+> **Historical — pre-web pivot.** See [WEB_V1_SCOPE.md](WEB_V1_SCOPE.md) and [CLAUDE.md](../../CLAUDE.md).
+
 ## Role
 Build the Godot 4 project scaffold, engine-agnostic simulation core, chunked isometric grid, camera controller, time/era manager, save/load system (FlatBuffers + Zstd), and the data bridge between pure C# simulation and Godot rendering.
 

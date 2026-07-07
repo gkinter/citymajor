@@ -671,7 +671,8 @@
     "unlocks": [
       "brick_building",
       "brickworks",
-      "stone_quarry"
+      "stone_quarry",
+      "residential_high_zone"
     ],
     "effects": {
       "max_building_height": 6,
@@ -1107,7 +1108,8 @@
     "cost_rp": 15,
     "prerequisites": [],
     "unlocks": [
-      "improved_farmland"
+      "improved_farmland",
+      "agricultural_zone"
     ],
     "effects": {
       "farm_yield_multiplier": 1.5,
@@ -1549,6 +1551,7 @@
     "cost_rp": 30,
     "prerequisites": [],
     "unlocks": [
+      "doctors_office",
       "outhouse",
       "well"
     ],
@@ -2010,7 +2013,9 @@
     "cost_rp": 50,
     "prerequisites": [],
     "unlocks": [
-      "zoning_office"
+      "zoning_office",
+      "city_hall",
+      "mixed_use_zone"
     ],
     "effects": {
       "city_organization": 1.5,
@@ -3163,7 +3168,8 @@
       "T133"
     ],
     "unlocks": [
-      "stock_exchange"
+      "stock_exchange",
+      "office_zone"
     ],
     "effects": {
       "investment_rate": 0.3,
@@ -3415,7 +3421,9 @@
     "unlocks": [
       "city_wall",
       "watchtower",
-      "fort"
+      "fort",
+      "volunteer_fire_brigade",
+      "sheriffs_office"
     ],
     "effects": {
       "defense_strength": 0.3,

@@ -1,0 +1,20 @@
+{
+  "key": "hero_frontier_church",
+  "brief": {
+    "prompt": "Mid-fidelity game asset, 1860s frontier wooden church, white painted clapboard walls, steep gabled roof, simple steeple with cross, arched double doors, tall narrow windows, small cemetery-free isolated building, warm timber and white palette, clean silhouette for city builder game, PBR game-ready, no landscape",
+    "target_polycount": 3000,
+    "ai_model": "meshy-5"
+  },
+  "preview_task_id": "019f30e6-c0bc-70af-8ed0-086dc7b69636",
+  "refine_task_id": "019f30e8-3d20-70c8-9f85-755ca42f3cc6",
+  "model_urls": {
+    "glb": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f30e8-3d20-70c8-9f85-755ca42f3cc6/output/model.glb?Expires=4936809600&Signature=Pat6PYbdNoMhhYF-1F2OsyzdQtdjOCGMkBdOYfsYUaBRFpLUOo8hAF6ejxUDsan-lqyFJNbPrUbEd8ZJLHC51xIfTypM0E3sIrf-kK81tqnUXhdKhibaw08GHhc8P-QyCeW-OBWtaicTnpF-gQdBf~rnBWg6B1xj0V1FzKuIP~H0DDTFQyuE-A8kkP1x2ZVowbZJPMwIKSoUGBRl09YTq2a5VKpQkfDnwMWAkaqo-ad7tCqa2EMUHVm1eCKBN2BVDcM3tuMayIMwNf5rECxSFxR8lbrJ2Qe9q4OYJ7yyVwWEYGkgkh6xqzZIo5rb-D2UhS-Dv5hD9jx7cDqNhNcaPQ__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "fbx": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f30e8-3d20-70c8-9f85-755ca42f3cc6/output/model.fbx?Expires=4936809600&Signature=oEjIC~TN33cajSr~aGwqkUIpHPR92FY8hVp3aGQ2WHpfbOLeSiRc5LC9ue1bQ91weW8UuZgQB79sCBL8GDeCQcKlBVIhsN2VbpDHz0~6gD2u0qo3koGr1RH2wi3~Sg~hzteJK7Deu-2zQzsA4phSqTX4U1qXa5zLb-Q0S8j74cGgj1xAUUy7FNOIGdDRxXfM99~cMVfQMqynAMooBTbtEZC1oXDbHl5cjnYqvcppIIKSPi9B9pE17dOIbw8Lz6i3GDsln4f~FFkehfkT7AlliTEYRhOsDGB9cnO2u-K8jq80mpwE7cPLh60-5nWkUsbHQ7Wo2o~AO9sOyETG6~Cg-g__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "usdz": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f30e8-3d20-70c8-9f85-755ca42f3cc6/output/model.usdz?Expires=4936809600&Signature=D8TFFiFTOMjUQnJeiFgqQAaNSNZgrN6USau-zpViRRP3Ny-Xd4KMb3hFpCfPh44DL46l4B1JwJv5phu4NjgqpcTI2YgtxSkx8EnbHPeAQYaeFF1QMGtQqbZB-uJOF6djFMdB-WojF08GSJqd-3bSObG~~G4rTaYoXEup-kqH7jDI2VjnI2d2UEND69SMNY2SNHWQpRkknYZDnFTtEBdUo8wlt72z2e69fh1G0rOGPUwx7C4fQwkT9YQ5q3HxIa~6a1fPaHJV3nAcWpZtWKr0cWlZg5RMy4isfEuKZmAyALw3tCzxR7U3IpqVdO2B7z6uF0FBmcKnki3WO4uqAaL~qg__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "obj": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f30e8-3d20-70c8-9f85-755ca42f3cc6/output/model.obj?Expires=4936809600&Signature=B~BJi1BSeCmAqTdxp04LBjEV6Nbut6cmJwxokqzRT-8w7Q32V-pQEVF5vd6u9ebE74Ob7bglIb7CokmpZOp4eM7JAzltZhjUtdjhselKrjC3hXqEVT5Ca8KVe4bfdVahLck8E1eEDKJDcyhPTnvbZYHF3TaWzbILYOdFBNkrKoycR5P~y4h1JGSsru5Oe4ap1TJfRPe87xH6uGKGsJiQCHRI5Me-vgcWTMzraqOPicyyqNccLjxhwpbetmnOZaPFJpPFyJMH8z0r2Uk3A4zo-L5WCEISA8c8gcXYff7QbLKejeQLSWN~SAWlnf9TUgHaigvXixWg6w9LabJ2dykSpA__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "mtl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f30e8-3d20-70c8-9f85-755ca42f3cc6/output/model.mtl?Expires=4936809600&Signature=WQElziDYV4b1AJZK21~kaJvJ3v6~fPaO-TYy~YvoPjQjpGOagvuYOZZeql~VVO5v6vyBoHRX5Iaat-VTiawdyOPCw6nHTDkyah~0~gvgNP~kwabj6-D4DPZxyUTA8r9L4sZvXaUeNmffU5p1xKamln98M3Sy9ntfZYlX1N1SljQF2i0lfIJPnyUqro0zecI1tu6jxTqghr0hpU~mLI8ndTSNDdRrvrc3WUOIjN7SguvuIn87NVrQXuezsuIqigi1KCApTwc7dJTLx4FqamFgztoPdnOxfBoEVs7iGWjyounGCrBsBv~Rs~ckAtRR9QYu6KlyKZs1EZTEeg6Lnr2j7A__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "stl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f30e8-3d20-70c8-9f85-755ca42f3cc6/output/model.stl?Expires=4936809600&Signature=DgWx6EkO6rYgJd93ff9xbdJ83xCZJvYkC4JBYFvJjRqln1nfmbMqpAribUMtzaWgZ87pgSL5zTvMMJlUCpPfJtUIeWAzDT3Ec8Ez7EyvtqK6NFINsq8Dkzx1JrPZYKNWFkBgdIpiZckCSlF5mlyOcZ16rAXiNvTv3Lxg-sUB9Dwmx3Jt33RSz~4uLhFI39DOallG6Vv8J1Z0SLKiPS6ctePuNoRMmUVl0deDB9~PmCQgJFvbXKfATSAYolGngc2gh9OXm00T97q40KdLvGs9cYj755Fr7sY~B2wi-QfonaUYuDjvas3oF8HOK3ntxh3o6Ayykjf9eN3ymUyu8JdtVw__&Key-Pair-Id=K1VGYTHIYLM9UM"
+  },
+  "generated_at": "2026-07-05T06:14:22.753Z",
+  "output_bytes": 8960704
+}

@@ -1,0 +1,20 @@
+{
+  "key": "hero_modern_glass_tower",
+  "brief": {
+    "prompt": "Mid-fidelity game asset, 1980s modern glass office civic tower, blue reflective curtain wall, steel mullions, flat roof with mechanical bulkhead, square footprint skyscraper proportion, lobby glass at base, no surrounding plaza furniture, isolated tower on flat ground, city builder landmark, PBR game-ready, readable window grid",
+    "target_polycount": 4500,
+    "ai_model": "meshy-5"
+  },
+  "preview_task_id": "019f312e-3d23-7a1b-8eaf-dbcb87f7e692",
+  "refine_task_id": "019f312e-e106-79c3-87d8-73440696eb78",
+  "model_urls": {
+    "glb": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312e-e106-79c3-87d8-73440696eb78/output/model.glb?Expires=4936809600&Signature=G5DBPMvbhS4vHcm1JSsxcWAKOBv3UIIU1FBPWxYHi8RY2p2929~NcdROM3wTC0~u9LW~2ocNkfyRkIPNalWRNGcN9j7c0VPeFS9ZbtFCqmxbp49yeh0UsLDuoIP4x2OjEPCQRgN7KSMXeNiWbsaUHneEWQKS3~Ti5sXiM43pJjayl-0sWt5jUDn1ZwgCD08aoQd8CwEmw7kzSguHUmFxXA73BVkssXRxXkoOP6gCWiycE3SncWpxRetmr~lAB4jXc3gJ8j5vfc5wm61EjN7GgCsK0MFcTor1JL1O4BRWklDjGfyzcZlMdED7ruPs6zyDkb-FEzXOlvgvMlfeuwUBLg__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "fbx": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312e-e106-79c3-87d8-73440696eb78/output/model.fbx?Expires=4936809600&Signature=C73t2oAiaAL58KXyz-5MZsD-TAkLvFP~C5jnhJi1ZOSYQR7Dp-rjwR5k8UIRZ0OasknLt6zfBbAYnyyuQEEZTN-ynLaiLvX5O3~-I5ift25UBoAhZNxV4jUEieKE027qqV98S2j3iwzJW4L-WOMMftjJCyk8oyGcy1Qer5hbmtSE5~5mNOGEeBxbRprOohNUuAQ5FCHDpoTHQTF0kY4011hmr1kiU~5gEtgYzSnQbi4sOU-zJwkxYICKqAt20No5uVOef22K9Z6eoNJdv-oo8obX2B9Qo~hXRXKdWmx9khNQ5dsRCNCGrK0joUHuF~7F8FDXG7gR2wa6VK61lWikwA__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "usdz": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312e-e106-79c3-87d8-73440696eb78/output/model.usdz?Expires=4936809600&Signature=hC77FV0fA4ARpKLFoPvtOkEUgG-aXm0039Y-Tb32sNL62MSCdS3ep9w5mN4ij8GwtzNigcTA~JAqyr7TPkb7OAN1lwLAzm679VWOP8~9FzwnYji9nUWrb1nnQZoaLxPNDNHR69PL-7L5qm4EG2V5VRV8kEuEUkO9zQ3a3NUEHlGvp-vgxDpbZCIelGvmv-MJkGY8YTpYRQ1Lo3vSM-GXWl7YOJwxE3N0D703otQ0mqj3HaN6wyKcV0L8QbQNb5wGPviJ5HWThfMdwD3Jy55is42zdekpSBGMGcBXkd~MuzquJX2vJ2Zmg4jMl7BmKDhmQr9-EPWEmctvAgKWlqJ2dg__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "obj": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312e-e106-79c3-87d8-73440696eb78/output/model.obj?Expires=4936809600&Signature=GsXEjeGvtsTuhyKiIvxqhCmvmlOKbIpFKhYugRXPrt7-pWPivDNUICTcNwUllGcz1JHdxD2-1LE0c8NK4BjT~L7gnmt69wTN9wGIKZWciFw4i3CdQmPFDlgnWA6hnKB5riQ~KP4b~B3vZjjhBplNE0XmP~I0-lQBLdYRQASgJDFOyCLa3R9HTeWuftX6kNtJjUxro36ldyzri9UrXcii2V4liNJabj-uu3yssdLAV2uVYz5M4XRRfWaEgKPlLDBhlD~jLtq3Y84VTUpoJf-P8izTg6WrvNSd7OOIT7tk8W~ewgUnpnaf3fO5~eors1gwVb1fj7uELVXBxqMYRq6BGg__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "mtl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312e-e106-79c3-87d8-73440696eb78/output/model.mtl?Expires=4936809600&Signature=LcMp8xQhe9r~Cp0tcpKL3L3dkEBs~zTHluh1a67KlmKuKh-2ur8pytFnaWwdP73uubIg1vhCCfDYK~QHHgVxbu62-aqXSyUWxT7iOxik~r262aD1GrkrmeC9lppmSUGV93n-opfPAEpQgW6Ve3DcJRBs7xj44iWQoph5apSbzTInSkFIww7EJ5Lyi88ik9kLY1YCcAI6YYt-xJ~1Lnv-cMbWh4xYKErNSyYxA93JqkuFgnRPVFQVwW2EnidHOj~Ko4A60yTCCm8AwuJcth3yVdO7DRe6Ul5CphZIv1X0uqI3XY0RAB-gU13iH-smoiSG5L8B4yrjiynpCBYzPF-0cA__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "stl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f312e-e106-79c3-87d8-73440696eb78/output/model.stl?Expires=4936809600&Signature=RSE9sFHaLBE9xa3fDHYS2I7XC99zA1KMWo8gOPvT2Uw~RWJEmzVeb9LwWtTTy2nbQwiJhhOKAThDJlx1eslWPKsVzdZTIKAfiW7ZcvfNd-TJuZ5IYPDGg0MujAKXTe6ft1mZKlT5Z-tInCIwitKPtkG7WeasgAyMtfl0JPYknFDbMqe-RLv3sOR8nyeJhlbTapO0CO~HiiVqsbNNNDXcoWoehf9eTYJvzdmd9nd8DZekHLu-Nxcm9hrOA7y2JniqQBHzd-bBJ72BwlYBudWjHwjVC2Ur0qE~Vz0EEvfbj2srVx3rcV~66ZwSqycW6hlCZrWut5H3sC45eu9eXNEvjQ__&Key-Pair-Id=K1VGYTHIYLM9UM"
+  },
+  "generated_at": "2026-07-05T07:30:52.483Z",
+  "output_bytes": 8862252
+}

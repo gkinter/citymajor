@@ -1,0 +1,20 @@
+{
+  "key": "hero_postwar_civic_hall",
+  "brief": {
+    "prompt": "Mid-fidelity game asset, 1930s Art Deco city hall, stepped ziggurat crown, limestone and cream concrete facade, vertical chrome fins, tall central tower, geometric relief patterns, flat roof sections, civic government building, no flags with text, isolated on flat pad, city builder landmark, PBR game-ready, clean 3/4 view silhouette",
+    "target_polycount": 5500,
+    "ai_model": "meshy-5"
+  },
+  "preview_task_id": "019f3119-0f96-7656-935d-5ffd14876d11",
+  "refine_task_id": "019f3125-cca4-78df-86b7-2932c1127f7c",
+  "model_urls": {
+    "glb": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3125-cca4-78df-86b7-2932c1127f7c/output/model.glb?Expires=4936809600&Signature=IpTMFeQrdawfC0GL56LYcxdJhfHF~dpLf4MZYEN~XTVdaPQASeZMovcLNZfIzv71QwubNTzcg~T7dEZvoUgQ89B5WtpaHhDK-qpItKXXdNrAGG5oIerISNbj4bi8tjx~OsxWApS7H6GOoXJagqB3JCOEKho-Xm4biCGezi5LzKS~wCx80d6zHzPTy9Gk7kvFOXXTjtTXi5benEzubw-iKCE5fBHyZve84NzZ97z8SdcjUVgMW1xAesoGP7tt2v0xYWJBnoZBUQz9vcv75J2j4FcutNhi8hOCnWNqAwUVePDDzRloFR1ZnJaulPep06~GORtkEDzoz2n58Df6xWg1MQ__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "fbx": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3125-cca4-78df-86b7-2932c1127f7c/output/model.fbx?Expires=4936809600&Signature=mHedG0FBKP2QOTfvSQwt4IacAAPdJNgR94I0NN4DlIDGcqL40-6EEJXBi~tlJgjhdNH46nFiramya6F~h10WLdrPmypEnUKe6uzlGgHH-IFjJA4uSKp4foM5E1dGPGwakEpC6WS~M75lCJQhwSQKTYyKP9Oziq1zQCUsMhqmmIDeaoeAda3AMcWgJL4Bn4Jeb3Rhx3q9T43mf3irf3cOoZSgOWPDkcihZ1sacFlFsYessykenNhGupmypi8gi5244Sp4cOuGxlQiz6Ln8C5sWSV2GXhUcu88qRlZ1RUyXdwegWYcrh89kx8T-H5vSRIzykWcfvkvabe1RS5Tg~1vNQ__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "usdz": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3125-cca4-78df-86b7-2932c1127f7c/output/model.usdz?Expires=4936809600&Signature=UVNuSlLDG7hZEp~6KlAYQqsxa~eAw3W63n-3YbyV49z7lyQz1bKRB46tCp3zalaBDVEPZOUezDLWUe2arfIZo1mS4pmEN2j6tnY6Gz3uyzodLZMMw1V03r8uqZuIlj0gXyhbRTWLEdqwc7v~LsNs7GMBbEPUrG5qBNg183S1e8mQcMDTNEiWQPONd-7R0ibZsGB5pdn~bEpH5ZIje9QZZroxr3uWvS9NUKjGoKua0a7AAVZF0YWbV2c8jsN98Fq8H-7o8novSi4wpGQjxMbv2cUP248iR5wFR09YKtV~zLXhFqehYWjn8LoL90MQ4bi2fhILAgOE6dnkaqouv-Tx-g__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "obj": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3125-cca4-78df-86b7-2932c1127f7c/output/model.obj?Expires=4936809600&Signature=IfqnFn5~8wGIjY6r5sKkMadYb0AOrK5-gTmbKoQzl82-8IvncIyck3qhgBelMWGUFXJtqfArUmOb41eBjCzCywmydfa8zxyiukxRudhLRfNLaJcViioCHBlOpnAo0xO7FeY4l-EP4mXqSan~n7S-dy8YKs2FmYVh7HCGcJDs2Z87JoSuXTw6CAVCJUvJdsgasACiopvkIcp65pdlPakFiLrjvbNMqUzZfMaA1~O~gDEiLNNgeTTr5gmPzQk9WLWDKkFcBd8hLLlI583mgs8JMrvCCNd3XpEIND0paRhIh4IOSHZeaYLYvVokM6M~aFo7z8cZzPTHX~yRzCKrEza4AQ__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "mtl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3125-cca4-78df-86b7-2932c1127f7c/output/model.mtl?Expires=4936809600&Signature=blNK2npNeY7~WU1agnJivg8u9Wp7AXCqAFDzFMpKEJwABnzVCMZqFigXR~raAMZhjHmOJt4NwOS7a9KM7zcHvLluIrOUvNvf8jdTPF24tXXRLrkmr1FfZCkBoepsUvd3L50p15XiaGshR5rzWCm~~BTG1IEuDAjVUMbMwzpAXtNMv1rSFgF3fLZ-buMn6XSz~ZeU3AGIfe91YwqC~xEjbWNjWgxt08T8uKbfo17KUqaXSpQZ2j0GtxtcTOiIWURKygBf8rpcuQz~ws4Wuv~s20h0rnVW1HLRoFGx7DPHzBLVHDLhGnazVKda6o4lqbrqgoBneXGlQCvjVgrGCwXZNw__&Key-Pair-Id=K1VGYTHIYLM9UM",
+    "stl": "https://assets.meshy.ai/93a8cd96-d3ed-4a2b-a9d1-2d5a9a2ab4cd/tasks/019f3125-cca4-78df-86b7-2932c1127f7c/output/model.stl?Expires=4936809600&Signature=dlY84RJInu~rQ6ft-Vx2EDRBa0tPkux02HdB8UHsQJnym0IdRovxaLnVIhd9na8rDuZKcjwQHpBZpOIrs91CIL-AdIvyZ-ZrxwflqsvvVUAadO8bifhaFX2TbgtYAWrkQY8Ki~2b8rU7F~dlHGnAE23gZV~LI-fdD1MRhOgHDecas4OgMiNp1slqAd~UxhDAAap1E91EPM5M6x9cuxQVBXbb14TAO~Fw5Weccxiy0otkUYqHzPFwiz417Dncda2wugdXpn-FqKlVDgmdCGYew93q2Zrx7JSE20w5P5pl2xx6U4acyCFrWMmVmAUX1rg~VUl1iMZATPFFdA~kuj7JrA__&Key-Pair-Id=K1VGYTHIYLM9UM"
+  },
+  "generated_at": "2026-07-05T07:21:51.883Z",
+  "output_bytes": 8541356
+}

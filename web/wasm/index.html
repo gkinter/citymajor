@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CityMajor WASM Sim Spike</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        color: #e8eef5;
+        background: #0f1419;
+      }
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        max-width: 960px;
+      }
+      h1 { font-size: 1.25rem; margin-top: 0; }
+      pre {
+        background: #1a2332;
+        border: 1px solid #2a3a52;
+        border-radius: 8px;
+        padding: 1rem;
+        overflow: auto;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      .ok { color: #6ee7a0; }
+      .warn { color: #fbbf24; }
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        margin-right: 0.5rem;
+      }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+  </head>
+  <body>
+    <h1>CityMajor Phase 0 — C# WASM simulation spike</h1>
+    <p>Runs <code>Forge.SimWasm</code> in a Web Worker (~12 ticks/sec) for 1000 ticks.</p>
+    <div>
+      <button id="run">Run 1000 ticks</button>
+      <button id="stop" disabled>Stop</button>
+    </div>
+    <pre id="log">Waiting…</pre>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

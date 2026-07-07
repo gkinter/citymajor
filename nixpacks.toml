@@ -1,0 +1,21 @@
+# Nixpacks fallback when Coolify is not using the root Dockerfile.
+# Ensures Forge.SimWasm publishes before Next build (populationL2, CMJR, trade exports).
+[phases.setup]
+nixPkgs = ["nodejs_20", "dotnet-sdk_8", "python3"]
+
+[phases.install]
+cmds = [
+  "corepack enable",
+  "corepack prepare pnpm@10.12.1 --activate",
+  "pnpm install --frozen-lockfile",
+]
+
+[phases.build]
+cmds = [
+  "if [ \"${BUILD_WASM:-1}\" = \"1\" ]; then pnpm build:wasm && test -f web/public/dotnet/_framework/blazor.boot.json || { echo 'ERROR: BUILD_WASM=1 but WASM bundle missing' >&2; exit 1; }; else echo 'BUILD_WASM=0 — skip WASM publish'; fi",
+  "export SKIP_WASM_BUILD=1",
+  "pnpm --filter @citymajor/web exec next build",
+]
+
+[start]
+cmd = "pnpm --filter @citymajor/web start"

@@ -10,6 +10,8 @@ obj/
 ## NuGet
 **/[Pp]ackages/*
 !**/[Pp]ackages/build/
+!web/packages/
+!web/packages/**
 *.nupkg
 **/packages/repositories.config
 project.lock.json
@@ -47,13 +49,31 @@ Thumbs.db
 ## dotnet tool
 .dotnet/
 
+## Node
+node_modules/
+
 ## Test results
 TestResults/
 coverage/
 
-## Saves
-saves/
+## Saves (game data, not API routes)
+/saves/
 *.sav
+web/.data/
+web/test-results/
 
 ## Build artifacts
 publish/
+
+## Node / Next.js
+node_modules/
+.next/
+out/
+web/.next/
+web/out/
+web/public/dotnet/
+!web/public/dotnet/.gitkeep
+web/wasm/public/dotnet/
+*.tsbuildinfo
+next-env.d.ts
+.env*.local

@@ -100,6 +100,10 @@ namespace CityMajor.Core
             tickerUi.transform.SetParent(root.transform, false);
             tickerUi.AddComponent<EventTickerController>().Configure(sim);
 
+            var timeUi = new GameObject("CityMajor_TimeUi");
+            timeUi.transform.SetParent(root.transform, false);
+            timeUi.AddComponent<TimeControlsController>().Configure(sim);
+
             var saveUi = new GameObject("CityMajor_SaveLoadUi");
             saveUi.transform.SetParent(root.transform, false);
             saveUi.AddComponent<SaveLoadPanelController>().Configure(sim);

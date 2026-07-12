@@ -30,6 +30,9 @@ namespace CityMajor.Sim
         public SimSnapshot LatestSnapshot { get; private set; }
         public ServiceCoverageDto[] LatestServiceCoverage { get; private set; } = Array.Empty<ServiceCoverageDto>();
 
+        public bool Paused { get; set; }
+        public float TimeScale { get; set; } = 1f;
+
         int _mapSize;
         float _accumulator;
         ZoneGrid _grid;
@@ -115,7 +118,10 @@ namespace CityMajor.Sim
 
         void Update()
         {
-            _accumulator += Time.deltaTime;
+            if (Paused)
+                return;
+
+            _accumulator += Time.deltaTime * Mathf.Max(0.25f, TimeScale);
             while (_accumulator >= SimTickSeconds)
             {
                 _accumulator -= SimTickSeconds;

@@ -77,3 +77,19 @@ web/wasm/public/dotnet/
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+## Unity
+unity/**/[Ll]ibrary/
+unity/**/[Tt]emp/
+unity/**/[Oo]bj/
+unity/**/[Bb]uild/
+unity/**/[Bb]uilds/
+unity/**/[Ll]ogs/
+unity/**/[Uu]ser[Ss]ettings/
+unity/**/*.csproj
+unity/**/*.sln
+*.pidb
+*.pdb
+*.mdb
+*.opendb
+*.VC.db

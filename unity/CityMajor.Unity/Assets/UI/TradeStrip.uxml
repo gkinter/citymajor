@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="trade-root" class="panel-root panel-root--trade" style="display: none;">
+        <ui:VisualElement class="panel-header">
+            <ui:VisualElement>
+                <ui:Label name="trade-title" class="panel-title" text="Trade routes" />
+                <ui:Label name="trade-subtitle" class="panel-subtitle" text="Read-only preview · v2" />
+            </ui:VisualElement>
+            <ui:Button name="trade-close" class="panel-close" text="✕" />
+        </ui:VisualElement>
+        <ui:ScrollView name="trade-scroll" class="panel-body">
+            <ui:Label name="trade-status" class="panel-note" text="No bilateral routes yet. Global market auto-trade runs in sim." />
+            <ui:Label name="trade-balance" class="panel-note" text="" />
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

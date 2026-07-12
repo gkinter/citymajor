@@ -105,6 +105,8 @@ Meshy exports center the bounding box. The script wraps scene geometry in a tran
 
 Implemented with `@gltf-transform/core` in `scripts/meshy/batch-generate.mjs`.
 
+**Optional Blender polish:** After Meshy, use [Blender MCP](./BLENDER_MCP_SETUP.md) to decimate, fix pivot/scale, and re-export. Helper: `scripts/blender/citymajor_export_conventions.py`.
+
 ---
 
 ## Replacing with Meshy output

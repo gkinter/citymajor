@@ -168,7 +168,7 @@ public sealed class CulturalDNASystem
     public void YearlyTick(WorldState state)
     {
         // Population inertia: larger cities resist cultural change
-        float inertia = 1.0f / MathF.Log2(state.Population / 1000f + 1f + 1f);
+        float inertia = 1.0f / ((float)Math.Log(state.Population / 1000f + 1f + 1f, 2));
         // The extra +1 prevents division by zero at pop=0 and ensures log2 >= ~1
 
         float[] drifts = new float[DimensionCount];

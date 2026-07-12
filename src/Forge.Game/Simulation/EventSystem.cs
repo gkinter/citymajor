@@ -698,7 +698,7 @@ public sealed class EventSystem
         // Population density modifier -- larger cities have more events
         if (state.Population > 1000)
         {
-            float popMod = 1.0f + MathF.Log2(state.Population / 1000f) * 0.1f;
+            float popMod = 1.0f + (float)Math.Log(state.Population / 1000f, 2) * 0.1f;
             prob *= popMod;
         }
 

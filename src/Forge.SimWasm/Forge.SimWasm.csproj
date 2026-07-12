@@ -15,6 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="WasmConfig.cs" />
+    <Compile Remove="WasmTrafficLite.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="..\..\base\data\events\events.json" LogicalName="events.json" />
     <EmbeddedResource Include="..\..\base\data\tech\technologies.json" LogicalName="technologies.json" />
     <EmbeddedResource Include="..\..\base\data\laws\laws.json" LogicalName="laws.json" />

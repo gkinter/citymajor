@@ -1,15 +1,15 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
+using Forge.SimWasm;
 
-namespace Forge.SimWasm;
+namespace Forge.SimCore;
 
 /// <summary>
 /// CMJR save envelope per SAVE_FORMAT_WEB.md §3.
 /// v1 interim: chunk 0x01 carries UTF-8 SimSnapshotDto JSON until full SoA chunks land.
 /// </summary>
-internal static class CmjrSave
+public static class CmjrSave
 {
     public const uint Magic = 0x434D4A52; // "CMJR"
     public const uint FormatVersion = 1;
@@ -22,11 +22,11 @@ internal static class CmjrSave
 
     private const int HeaderBytes = 256;
 
-    public static byte[] Export(WasmSimHost host, string cityName = "City")
+    public static byte[] Export(SimHost host, string cityName = "City")
     {
         if (!host.IsInitialized) return [];
 
-        var jsonBytes = Encoding.UTF8.GetBytes(host.GetRenderSnapshotJson());
+        var jsonBytes = Encoding.UTF8.GetBytes(host.GetSnapshotJson());
 
         using var chunkStream = new MemoryStream();
         WriteChunk(chunkStream, ChunkSnapshotJson, jsonBytes);
@@ -39,7 +39,7 @@ internal static class CmjrSave
         return file;
     }
 
-    public static bool Load(WasmSimHost host, ReadOnlySpan<byte> data)
+    public static bool Load(SimHost host, ReadOnlySpan<byte> data)
     {
         if (data.Length < HeaderBytes) return false;
 
@@ -92,12 +92,13 @@ internal static class CmjrSave
         if (!body.IsEmpty) stream.Write(body);
     }
 
-    private static void WriteHeader(byte[] dest, WasmSimHost host, string cityName, byte[] payload)
+    private static void WriteHeader(byte[] dest, SimHost host, string cityName, byte[] payload)
     {
         var checksum = Crc32(payload);
-        var contentHash = SHA256.HashData(payload);
+        var contentHash = SHA256.Create().ComputeHash(payload);
         var now = (ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var worldSize = (ushort)(host.WorldSize > 0 ? host.WorldSize : WasmConfig.DefaultWorldSize);
+        var state = host.State;
 
         BinaryPrimitives.WriteUInt32LittleEndian(dest.AsSpan(0, 4), Magic);
         BinaryPrimitives.WriteUInt32LittleEndian(dest.AsSpan(4, 4), FormatVersion);
@@ -110,9 +111,9 @@ internal static class CmjrSave
         BinaryPrimitives.WriteUInt16LittleEndian(dest.AsSpan(25, 2), 0);
         BinaryPrimitives.WriteUInt64LittleEndian(dest.AsSpan(27, 8), now);
         BinaryPrimitives.WriteUInt32LittleEndian(dest.AsSpan(35, 4), (uint)Math.Min(host.TickCount, uint.MaxValue));
-        BinaryPrimitives.WriteUInt32LittleEndian(dest.AsSpan(39, 4), (uint)Math.Max(host.Population, 0));
-        BinaryPrimitives.WriteInt32LittleEndian(dest.AsSpan(43, 4), (int)Math.Clamp(host.CityFunds, int.MinValue, int.MaxValue));
-        dest[47] = (byte)Math.Clamp(host.Era, 0, 255);
+        BinaryPrimitives.WriteUInt32LittleEndian(dest.AsSpan(39, 4), (uint)Math.Max(state?.Population ?? 0, 0));
+        BinaryPrimitives.WriteInt32LittleEndian(dest.AsSpan(43, 4), (int)Math.Clamp(state?.CityFunds ?? 0, int.MinValue, int.MaxValue));
+        dest[47] = (byte)Math.Clamp(state?.Era ?? 0, 0, 255);
 
         var nameBytes = Encoding.UTF8.GetBytes(cityName);
         var nameLen = Math.Min(nameBytes.Length, 63);

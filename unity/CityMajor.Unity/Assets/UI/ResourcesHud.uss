@@ -1,0 +1,95 @@
+.hud-root {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 280px;
+    padding: 10px 14px;
+    background-color: rgba(12, 16, 24, 0.88);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+}
+
+.hud-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(230, 235, 245);
+    margin-bottom: 8px;
+}
+
+.hud-stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.hud-stat {
+    flex-direction: row;
+    align-items: center;
+    margin-right: 16px;
+    margin-bottom: 4px;
+}
+
+.hud-label {
+    font-size: 11px;
+    color: rgba(200, 210, 225, 0.7);
+    margin-right: 6px;
+    min-width: 36px;
+}
+
+.hud-value {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: rgb(240, 244, 252);
+}
+
+.hud-demand {
+    flex-direction: column;
+}
+
+.demand-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.demand-label {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgba(200, 210, 225, 0.85);
+    width: 14px;
+    margin-right: 4px;
+}
+
+.demand-text {
+    font-size: 11px;
+    color: rgba(200, 210, 225, 0.9);
+    width: 44px;
+    margin-right: 6px;
+}
+
+.demand-bar-track {
+    flex-grow: 1;
+    height: 10px;
+    background-color: rgba(30, 35, 48, 0.95);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.demand-bar-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+}
+
+.demand-bar-fill--r {
+    background-color: rgb(77, 217, 115);
+}
+
+.demand-bar-fill--c {
+    background-color: rgb(89, 153, 255);
+}
+
+.demand-bar-fill--i {
+    background-color: rgb(242, 204, 64);
+}

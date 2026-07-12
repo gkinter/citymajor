@@ -1,0 +1,41 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="budget-root" class="panel-root panel-root--budget" picking-mode="Ignore">
+        <ui:Label class="panel-title" text="Budget" />
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Treasury" />
+            <ui:Label name="treasury-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Cashflow" />
+            <ui:Label name="cashflow-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:Label name="cashflow-detail" class="panel-label" text="" />
+        <ui:Label class="panel-section-title" text="Tax rates" />
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Residential" />
+            <ui:Label name="tax-res-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Commercial" />
+            <ui:Label name="tax-com-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Industrial" />
+            <ui:Label name="tax-ind-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:Label class="panel-section-title" text="City health" />
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Approval" />
+            <ui:Label name="approval-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Happiness" />
+            <ui:Label name="happiness-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Loan" />
+            <ui:Label name="loan-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

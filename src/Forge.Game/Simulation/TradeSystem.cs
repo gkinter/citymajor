@@ -316,7 +316,7 @@ public sealed class TradeSystem
         // Small random walk: each good drifts -2% to +2% per month
         for (int g = 0; g < EconomySystem.GoodCount; g++)
         {
-            float drift = (_rng.NextSingle() - 0.5f) * 0.04f; // -2% to +2%
+            float drift = ((float)_rng.NextDouble() - 0.5f) * 0.04f; // -2% to +2%
             GlobalPrices[g] *= (1f + drift);
 
             // Mean-revert toward base price: 5% pull per month

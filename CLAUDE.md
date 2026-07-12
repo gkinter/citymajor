@@ -1,49 +1,55 @@
 # CityMajor
 
-Deep city-builder simulation — web-only mesh 3D (Cities: Skylines lite). Linear: [SB-3704](https://linear.app/softblaze/issue/SB-3704).
+Deep city-builder simulation — **Unity 6 desktop** mesh 3D (Cities: Skylines lite). Linear: [SB-3704](https://linear.app/softblaze/issue/SB-3704).
 
 ## Stack
 
 | Layer | Technology |
 |-------|------------|
-| **Shell / UI** | Next.js 16 + React 19 + TypeScript (App Router), Tailwind + shadcn/ui |
-| **3D renderer** | React Three Fiber + Three.js (`@react-three/drei`, `@react-three/postprocessing`) |
-| **Simulation** | C# → .NET 8 WASM (reuse ~9.4k LOC); Web Workers + SharedArrayBuffer for ticks |
-| **Backend** | API (saves, entitlements), LLM proxy with template fallback, Stripe; Solana phase 2 |
-| **Assets** | Modular GLTF kits per era, CDN-hosted; `InstancedMesh` per archetype |
+| **Platform** | **Unity 6 + URP**, Steam desktop (macOS / Windows / Linux) |
+| **Shell / UI** | UI Toolkit HUD panels |
+| **3D renderer** | URP + GPU instancing (chunked LOD) |
+| **Simulation** | **Forge.SimCore** native in-process (~9.4k LOC C#); dedicated sim thread |
+| **Backend** | API (saves, entitlements), LLM proxy with template fallback, Steam; Solana phase 2 |
+| **Assets** | Modular GLTF kits — **modern era** (`web/public/assets/gltf/modern/`) |
 
-**Platform:** Browser only. Forge Engine (native OpenGL) is reference for sim wiring — not shipped.
+**Web client (`web/`):** Maintenance mode only — Next.js 16 + R3F + WASM. No new v1 features.
 
-## Web v1 scope (locked)
+**Legacy:** Forge Engine (SDL2 + OpenGL) is reference only — not shipped.
 
-**Full charter:** [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) — canonical locked v1 scope; supersedes conflicting rows in other design docs.
+**Unity port:** [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md) · [`docs/design/UNITY_PORT_MEGA_PLAN.md`](docs/design/UNITY_PORT_MEGA_PLAN.md) · MCP: [`docs/UNITY_MCP_SETUP.md`](docs/UNITY_MCP_SETUP.md) · [`unity/README.md`](unity/README.md)
+
+## Unity v1 scope (locked)
+
+**Full charter:** [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md) — canonical locked v1 scope; supersedes [WEB_V1_SCOPE.md](docs/design/WEB_V1_SCOPE.md) for platform decisions.
 
 | Parameter | Value |
 |-----------|-------|
 | Map | **256×256** tiles (64 chunks @ 32×32) |
-| Buildings | ~**5,000** max instanced (40–60 archetypes/era, not unique meshes) |
+| Buildings | ~**5,000** max instanced (modern archetypes) |
 | Households | ~**10,000** |
-| Eras | 1 arc (**Frontier → Industrial** only) |
+| Era | **Modern only** (`svc_modern`, `com_modern`, `ind_modern`, `res_*_modern`) |
 | Multiplayer | **None** in v1 |
 | FPS target | ≥30 integrated GPU, ≥60 discrete GPU with LOD active |
 
 ## Monetization
 
-**Free core** + **Founder Pass ($24.99)** + Stripe cosmetic shop (sim-neutral facade skins). Solana holder perks phase 2. No pay-to-win.
+**Steam base game** + **Founder Pass equivalent (TBD)** + cosmetic DLC (sim-neutral facade skins). Solana holder perks phase 2. No pay-to-win.
 
 ## Key directories
 
 ```
-app/              → Next.js pages, HUD overlays (HTML over canvas)
-components/       → React + R3F scene components
-lib/              → WASM bridge, sim snapshots, utilities
-docs/design/      → Game design (WEB_V1_SCOPE, MASTER_GAME_CONCEPT, BUILDING_ARCHETYPE_3D, MESHY_*)
-src/Forge.*       → Legacy C# sim + Forge renderer (sim → WASM; renderer obsolete)
-.claude/          → Claude Code configuration (kit-managed)
+unity/            → Unity 6 desktop client (URP, UI Toolkit, Steam)
+src/Forge.*       → C# sim (Forge.SimCore — Unity native; Forge.SimWasm — web maintenance)
+base/data/        → Shared JSON content (tech tree, events, laws)
+web/              → Web client (maintenance mode — R3F + WASM)
+docs/design/      → Game design (UNITY_V1_SCOPE, MASTER_GAME_CONCEPT, BUILDING_ARCHETYPE_3D, MESHY_*)
+.cursor/mcp.json  → unity-mcp server config for Cursor
 ```
 
 ## Architecture notes
 
-- Sim snapshots → `InstancedMesh` matrices in `useFrame` — **not** React state per building.
+- Sim snapshots → GPU instanced meshes on render thread — **not** per-building GameObjects.
 - LOD tiers: full GLTF (street) → simplified mesh → instanced boxes → heatmap blocks.
 - LLM: backend API at launch (free 10 events/day; Founder unlimited); templates always available.
+- **Do not fork sim logic.** One PR to `src/Forge.SimCore` is the single source of truth.

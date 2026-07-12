@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="ResourcesHud.uss" />
+    <ui:VisualElement name="hud-root" class="hud-root" picking-mode="Ignore">
+        <ui:Label name="title" class="hud-title" text="CityMajor" />
+        <ui:VisualElement class="hud-stats">
+            <ui:VisualElement class="hud-stat">
+                <ui:Label class="hud-label" text="Pop" />
+                <ui:Label name="pop-value" class="hud-value" text="—" />
+            </ui:VisualElement>
+            <ui:VisualElement class="hud-stat">
+                <ui:Label class="hud-label" text="Funds" />
+                <ui:Label name="funds-value" class="hud-value" text="—" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="hud-demand">
+            <ui:VisualElement class="demand-row">
+                <ui:Label class="demand-label" text="R" />
+                <ui:Label name="r-demand-text" class="demand-text" text="0.00" />
+                <ui:VisualElement class="demand-bar-track">
+                    <ui:VisualElement name="r-demand-fill" class="demand-bar-fill demand-bar-fill--r" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="demand-row">
+                <ui:Label class="demand-label" text="C" />
+                <ui:Label name="c-demand-text" class="demand-text" text="0.00" />
+                <ui:VisualElement class="demand-bar-track">
+                    <ui:VisualElement name="c-demand-fill" class="demand-bar-fill demand-bar-fill--c" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="demand-row">
+                <ui:Label class="demand-label" text="I" />
+                <ui:Label name="i-demand-text" class="demand-text" text="0.00" />
+                <ui:VisualElement class="demand-bar-track">
+                    <ui:VisualElement name="i-demand-fill" class="demand-bar-fill demand-bar-fill--i" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

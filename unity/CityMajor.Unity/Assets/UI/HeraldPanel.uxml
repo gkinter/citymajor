@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="herald-root" class="panel-root panel-root--herald" style="display: none;">
+        <ui:VisualElement class="panel-header">
+            <ui:VisualElement>
+                <ui:Label name="herald-title" class="panel-title" text="The Daily Herald" />
+                <ui:Label name="herald-subtitle" class="panel-subtitle" text="narrative remaining today: …" />
+            </ui:VisualElement>
+            <ui:Button name="herald-close" class="panel-close" text="✕" />
+        </ui:VisualElement>
+        <ui:ScrollView name="herald-scroll" class="herald-body">
+            <ui:Label name="herald-status" class="herald-status" text="" />
+            <ui:Label name="herald-bucket" class="herald-bucket" text="" style="display: none;" />
+            <ui:Label name="herald-reason" class="herald-reason" text="" style="display: none;" />
+            <ui:Label name="herald-headline" class="herald-headline" text="" style="display: none;" />
+            <ui:Label name="herald-story" class="herald-story" text="" style="display: none;" />
+            <ui:VisualElement name="herald-options" class="herald-options" style="display: none;">
+                <ui:Label class="herald-options-heading" text="Council options" />
+            </ui:VisualElement>
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

@@ -213,7 +213,7 @@ public sealed class WasmTrafficLite
     private void BuildLiteOdMatrix(WorldState state)
     {
         if (_odMatrix == null) return;
-        Array.Clear(_odMatrix);
+        Array.Clear(_odMatrix, 0, _odMatrix.Length);
 
         var zonePop = new float[_totalZones];
         var zoneJobs = new float[_totalZones];
@@ -264,7 +264,7 @@ public sealed class WasmTrafficLite
             _odMatrix == null || _zoneCentroidNode == null)
             return;
 
-        Array.Clear(_edgeVolume);
+        Array.Clear(_edgeVolume, 0, _edgeVolume.Length);
         var auxVolume = new float[_edgeCount];
         int maxIter = WasmConfig.TrafficLiteFrankWolfeIterations;
 
@@ -273,11 +273,11 @@ public sealed class WasmTrafficLite
             var currentTimes = new float[_edgeCount];
             for (int e = 0; e < _edgeCount; e++)
             {
-                currentTimes[e] = TrafficSystem.CalculateBprTravelTime(
+                currentTimes[e] = CalculateBprTravelTime(
                     _edgeFreeFlow[e], _edgeVolume[e], _edgeCapacity[e]);
             }
 
-            Array.Clear(auxVolume);
+            Array.Clear(auxVolume, 0, auxVolume.Length);
             AssignAllOrNothing(state, auxVolume, currentTimes);
 
             float lambda = 2f / (iteration + 2);
@@ -409,7 +409,7 @@ public sealed class WasmTrafficLite
 
     private void UpdateTileTraffic(WorldState state)
     {
-        Array.Clear(state.Tiles.Traffic);
+        Array.Clear(state.Tiles.Traffic, 0, state.Tiles.Traffic.Length);
         if (_edgeCount == 0) return;
 
         int edgeIdx = 0;
@@ -470,7 +470,7 @@ public sealed class WasmTrafficLite
     private void ComputeZoneDistances(WorldState state)
     {
         if (_zoneDistanceCache == null || _zoneCentroidNode == null) return;
-        Array.Clear(_zoneDistanceCache);
+        Array.Clear(_zoneDistanceCache, 0, _zoneDistanceCache.Length);
 
         for (int o = 0; o < _totalZones; o++)
         {
@@ -504,5 +504,16 @@ public sealed class WasmTrafficLite
                 _zoneDistanceCache[o * _totalZones + d] = Math.Max(1f, dist);
             }
         }
+    }
+
+    private const float BprAlpha = 0.15f;
+
+    private static float CalculateBprTravelTime(float freeFlowTime, float volume, float capacity)
+    {
+        if (capacity <= 0f) return freeFlowTime * 10f;
+        float vc = volume / capacity;
+        float vc2 = vc * vc;
+        float vc4 = vc2 * vc2;
+        return freeFlowTime * (1f + BprAlpha * vc4);
     }
 }

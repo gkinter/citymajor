@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="save-load-root" class="panel-root panel-root--save-load">
+        <ui:VisualElement class="save-load-row">
+            <ui:Button name="save-btn" class="save-load-btn" text="Save" />
+            <ui:Button name="load-btn" class="save-load-btn" text="Load" />
+        </ui:VisualElement>
+        <ui:Label name="save-load-status" class="save-load-status" text="CMJR v1 · local file" />
+    </ui:VisualElement>
+</ui:UXML>

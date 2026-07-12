@@ -1,0 +1,34 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="research-root" class="panel-root panel-root--research" style="display: none;">
+        <ui:VisualElement class="panel-header">
+            <ui:VisualElement>
+                <ui:Label class="panel-title" text="Research" />
+                <ui:Label name="research-subtitle" class="panel-subtitle" text="0 / 0 unlocked" />
+            </ui:VisualElement>
+            <ui:Button name="research-close" class="panel-close" text="✕" />
+        </ui:VisualElement>
+        <ui:VisualElement class="research-stats">
+            <ui:VisualElement class="research-stat">
+                <ui:Label class="panel-label" text="RP " />
+                <ui:Label name="rp-value" class="panel-value" text="—" />
+            </ui:VisualElement>
+            <ui:VisualElement class="research-stat">
+                <ui:Label class="panel-label" text="Rate " />
+                <ui:Label name="rp-rate-value" class="panel-value" text="—" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="active-research" class="research-active" style="display: none;">
+            <ui:VisualElement class="panel-row">
+                <ui:Label name="active-tech-name" class="panel-value" text="" />
+                <ui:Label name="active-tech-pct" class="panel-label" text="0%" />
+            </ui:VisualElement>
+            <ui:VisualElement class="research-progress-track">
+                <ui:VisualElement name="active-progress-fill" class="research-progress-fill" />
+            </ui:VisualElement>
+            <ui:Label name="active-tech-eta" class="panel-label" text="" />
+        </ui:VisualElement>
+        <ui:Label class="research-list-heading" text="Technologies" />
+        <ui:ScrollView name="research-scroll" class="research-list" style="max-height: 420px;" />
+    </ui:VisualElement>
+</ui:UXML>

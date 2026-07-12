@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Forge.Engine</RootNamespace>
     <AssemblyName>Forge.SimCore</AssemblyName>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <!-- Engine-agnostic core: no SDL / OpenGL / ImGui packages -->
@@ -13,6 +14,7 @@
     <Compile Include="..\Forge.Engine\Core\Config.cs" Link="Core\Config.cs" />
     <Compile Include="..\Forge.Engine\Core\EventBus.cs" Link="Core\EventBus.cs" />
     <Compile Include="..\Forge.Engine\Data\*.cs" Link="Data\%(Filename)%(Extension)" />
+    <Compile Remove="..\Forge.Engine\Data\SpatialHash.cs" />
     <Compile Include="..\Forge.Engine\Math\Pathfinding.cs" Link="Math\Pathfinding.cs" />
     <Compile Include="..\Forge.Engine\Math\SimplexNoise.cs" Link="Math\SimplexNoise.cs" />
     <Compile Include="..\Forge.Engine\Simulation\CommandQueue.cs" Link="Simulation\CommandQueue.cs" />
@@ -20,5 +22,19 @@
     <Compile Include="..\Forge.Engine\Simulation\SimSnapshot.cs" Link="Simulation\SimSnapshot.cs" />
     <Compile Include="..\Forge.Engine\Simulation\WorldState.cs" Link="Simulation\WorldState.cs" />
     <Compile Include="..\Forge.Game\Simulation\*.cs" Link="Game\Simulation\%(Filename)%(Extension)" />
+    <Compile Remove="..\Forge.Game\Simulation\TrafficSystem.cs" />
+    <Compile Include="..\Forge.SimWasm\WasmConfig.cs" Link="Wasm\WasmConfig.cs" />
+    <Compile Include="..\Forge.SimWasm\WasmTrafficLite.cs" Link="Wasm\WasmTrafficLite.cs" />
+    <Compile Include="..\Forge.SimWasm\SimSnapshotDto.cs" Link="Snapshot\SimSnapshotDto.cs" />
+    <Compile Include="..\Forge.SimWasm\LifeSimMath.cs" Link="Wasm\LifeSimMath.cs" />
+    <Compile Include="..\Forge.SimWasm\ServiceCoverageExport.cs" Link="Wasm\ServiceCoverageExport.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="Polyfill" Version="5.1.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>

@@ -1,6 +1,8 @@
 # CityMajor — Web v1 Scope Charter (Locked)
 
-**Status:** Locked  
+> **⚠ SUPERSEDED for platform decisions:** CityMajor's **primary v1 platform is Unity 6 desktop (Steam)**. See **[UNITY_V1_SCOPE.md](./UNITY_V1_SCOPE.md)** for the canonical scope charter. This document remains for **web maintenance-mode** reference only (R3F + WASM client at `web/`).
+
+**Status:** Locked (historical — web maintenance only)  
 **Date:** 2026-07-04  
 **Linear:** [SB-3704](https://linear.app/softblaze/issue/SB-3704)  
 **Supersedes:** Conflicting scale/platform rows in `MASTER_GAME_CONCEPT.md` §1–2, `CITY_BUILDER_GDD.md`, `SIMULATION_ARCHITECTURE.md`, and agent briefs that assume Godot/Steam/pixel art.

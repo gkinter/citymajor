@@ -1,0 +1,1297 @@
+{
+  "schemaVersion": 1,
+  "scope": "unity-v1-modern-only",
+  "description": "Playable modern-era content manifest for CityMajor Unity v1. Filtered from base/data/tech/technologies.json and base/data/buildings/buildings.json.",
+  "defaultEra": "modern",
+  "defaultEraIndex": 3,
+  "startingYear": 2026,
+  "allowedEraTags": [
+    "modern"
+  ],
+  "deferredEras": [
+    "frontier",
+    "industrial",
+    "postwar",
+    "future"
+  ],
+  "typeIdRanges": {
+    "res_low_modern": {
+      "min": 160,
+      "max": 179,
+      "archetypePrefix": "res_low_modern"
+    },
+    "res_high_modern": {
+      "min": 260,
+      "max": 279,
+      "archetypePrefix": "res_high_modern"
+    },
+    "com_modern": {
+      "min": 360,
+      "max": 379,
+      "archetypePrefix": "com_modern"
+    },
+    "ind_modern": {
+      "min": 460,
+      "max": 479,
+      "archetypePrefix": "ind_modern"
+    },
+    "svc_modern": {
+      "min": 500,
+      "max": 599,
+      "note": "Service TypeIds encode era; mesh keys always svc_modern_XX per buildingArchetypes.ts"
+    },
+    "svc_modern_json_band": {
+      "min": 560,
+      "max": 579,
+      "note": "Modern-era service slugs from buildings.json (era index 3)"
+    },
+    "hero_infra_special": {
+      "min": 600,
+      "max": 699,
+      "note": "Per-slug hero GLTFs under /assets/gltf/heroes/"
+    }
+  },
+  "sourceCounts": {
+    "technologiesTotal": 156,
+    "technologiesModern": 38,
+    "buildingsTotal": 199,
+    "buildingsModernEra": 55,
+    "zoneBuildingsModern": 39,
+    "heroBuildingsModern": 16
+  },
+  "technologies": [
+    {
+      "id": "T011",
+      "name": "Metro/Subway System",
+      "category": "transport",
+      "era": "modern",
+      "costRp": 200,
+      "prerequisites": [
+        "T010",
+        "T031"
+      ],
+      "unlocks": [
+        "metro_line",
+        "metro_station"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T012",
+      "name": "High-Speed Rail",
+      "category": "transport",
+      "era": "modern",
+      "costRp": 250,
+      "prerequisites": [
+        "T006",
+        "T031"
+      ],
+      "unlocks": [
+        "hsr_line",
+        "hsr_terminal"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T023",
+      "name": "Solar Power",
+      "category": "energy",
+      "era": "modern",
+      "costRp": 160,
+      "prerequisites": [
+        "T020"
+      ],
+      "unlocks": [
+        "solar_farm",
+        "rooftop_solar"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T024",
+      "name": "Wind Power",
+      "category": "energy",
+      "era": "modern",
+      "costRp": 150,
+      "prerequisites": [
+        "T020"
+      ],
+      "unlocks": [
+        "wind_farm",
+        "offshore_wind_turbine"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T025",
+      "name": "Smart Grid",
+      "category": "energy",
+      "era": "modern",
+      "costRp": 200,
+      "prerequisites": [
+        "T020",
+        "T044"
+      ],
+      "unlocks": [
+        "smart_meter",
+        "grid_battery_storage",
+        "demand_response_system"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T034",
+      "name": "Glass and Curtain Wall",
+      "category": "construction",
+      "era": "modern",
+      "costRp": 140,
+      "prerequisites": [
+        "T030"
+      ],
+      "unlocks": [
+        "glass_tower",
+        "curtain_wall_office"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T035",
+      "name": "Green Building Standards",
+      "category": "construction",
+      "era": "modern",
+      "costRp": 160,
+      "prerequisites": [
+        "T031",
+        "T023"
+      ],
+      "unlocks": [
+        "green_certified_building",
+        "living_wall",
+        "rainwater_system"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T043",
+      "name": "Mobile Telecommunications",
+      "category": "communication",
+      "era": "modern",
+      "costRp": 170,
+      "prerequisites": [
+        "T039",
+        "T042"
+      ],
+      "unlocks": [
+        "cell_tower",
+        "mobile_network"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T044",
+      "name": "Internet Infrastructure",
+      "category": "communication",
+      "era": "modern",
+      "costRp": 200,
+      "prerequisites": [
+        "T042",
+        "T043"
+      ],
+      "unlocks": [
+        "data_center",
+        "fiber_optic_network",
+        "isp"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T052",
+      "name": "Genetically Modified Crops",
+      "category": "agriculture",
+      "era": "modern",
+      "costRp": 180,
+      "prerequisites": [
+        "T050"
+      ],
+      "unlocks": [
+        "gmo_research_lab",
+        "biotech_farm"
+      ],
+      "branchGroup": "agriculture_philosophy",
+      "branchExclusive": true
+    },
+    {
+      "id": "T053",
+      "name": "Organic Farming Standards",
+      "category": "agriculture",
+      "era": "modern",
+      "costRp": 160,
+      "prerequisites": [
+        "T050"
+      ],
+      "unlocks": [
+        "organic_certification",
+        "farmers_market",
+        "composting_facility"
+      ],
+      "branchGroup": "agriculture_philosophy",
+      "branchExclusive": true
+    },
+    {
+      "id": "T061",
+      "name": "Industrial Robotics",
+      "category": "industrial",
+      "era": "modern",
+      "costRp": 200,
+      "prerequisites": [
+        "T060"
+      ],
+      "unlocks": [
+        "robotic_assembly_plant"
+      ],
+      "branchGroup": "industrial_philosophy",
+      "branchExclusive": true
+    },
+    {
+      "id": "T062",
+      "name": "Lean Manufacturing",
+      "category": "industrial",
+      "era": "modern",
+      "costRp": 200,
+      "prerequisites": [
+        "T060"
+      ],
+      "unlocks": [
+        "lean_factory"
+      ],
+      "branchGroup": "industrial_philosophy",
+      "branchExclusive": true
+    },
+    {
+      "id": "T063",
+      "name": "Clean Industry Standards",
+      "category": "industrial",
+      "era": "modern",
+      "costRp": 180,
+      "prerequisites": [
+        "T060",
+        "T078"
+      ],
+      "unlocks": [
+        "clean_factory"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T072",
+      "name": "Advanced Diagnostics",
+      "category": "medical",
+      "era": "modern",
+      "costRp": 180,
+      "prerequisites": [
+        "T070",
+        "T060"
+      ],
+      "unlocks": [
+        "diagnostic_center"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T073",
+      "name": "Specialized Medicine",
+      "category": "medical",
+      "era": "modern",
+      "costRp": 200,
+      "prerequisites": [
+        "T072"
+      ],
+      "unlocks": [
+        "research_hospital",
+        "specialist_clinic"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T077",
+      "name": "Biotechnology",
+      "category": "environmental",
+      "era": "modern",
+      "costRp": 180,
+      "prerequisites": [
+        "T070",
+        "T076"
+      ],
+      "unlocks": [
+        "biotech_lab"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T080",
+      "name": "Recycling Programs",
+      "category": "environmental",
+      "era": "modern",
+      "costRp": 140,
+      "prerequisites": [
+        "T079"
+      ],
+      "unlocks": [
+        "recycling_center"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T082",
+      "name": "Urban Green Space Planning",
+      "category": "environmental",
+      "era": "modern",
+      "costRp": 120,
+      "prerequisites": [
+        "T091"
+      ],
+      "unlocks": [
+        "city_park",
+        "greenway",
+        "botanical_garden"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T092",
+      "name": "Internet Infrastructure",
+      "category": "social",
+      "era": "modern",
+      "costRp": 160,
+      "prerequisites": [
+        "T060",
+        "T090"
+      ],
+      "unlocks": [
+        "data_center",
+        "fiber_network"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T093",
+      "name": "Public Welfare System",
+      "category": "social",
+      "era": "modern",
+      "costRp": 150,
+      "prerequisites": [
+        "T090",
+        "T091"
+      ],
+      "unlocks": [
+        "welfare_office",
+        "public_housing"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T095b",
+      "name": "Personal Computing",
+      "category": "computing",
+      "era": "modern",
+      "costRp": 150,
+      "prerequisites": [
+        "T095a"
+      ],
+      "unlocks": [
+        "tech_office",
+        "internet_cafe"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T095",
+      "name": "Artificial Intelligence",
+      "category": "computing",
+      "era": "modern",
+      "costRp": 220,
+      "prerequisites": [
+        "T095b",
+        "T090"
+      ],
+      "unlocks": [
+        "ai_research_lab"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T097",
+      "name": "Digital Governance",
+      "category": "computing",
+      "era": "modern",
+      "costRp": 170,
+      "prerequisites": [
+        "T095b",
+        "T092"
+      ],
+      "unlocks": [
+        "e_government_portal"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T098",
+      "name": "Cybersecurity Infrastructure",
+      "category": "computing",
+      "era": "modern",
+      "costRp": 160,
+      "prerequisites": [
+        "T092",
+        "T095b"
+      ],
+      "unlocks": [
+        "security_operations_center"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T107",
+      "name": "Desalination",
+      "category": "water_sanitation",
+      "era": "modern",
+      "costRp": 140,
+      "prerequisites": [
+        "T105",
+        "T106"
+      ],
+      "unlocks": [
+        "desalination_plant"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T108",
+      "name": "Greywater Recycling",
+      "category": "water_sanitation",
+      "era": "modern",
+      "costRp": 120,
+      "prerequisites": [
+        "T105"
+      ],
+      "unlocks": [
+        "greywater_facility"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T109",
+      "name": "Smart Water Meters",
+      "category": "water_sanitation",
+      "era": "modern",
+      "costRp": 100,
+      "prerequisites": [
+        "T108"
+      ],
+      "unlocks": [
+        "smart_water_grid"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T117",
+      "name": "Urban Greenways",
+      "category": "urban_design",
+      "era": "modern",
+      "costRp": 110,
+      "prerequisites": [
+        "T112",
+        "T116"
+      ],
+      "unlocks": [
+        "greenway_corridor",
+        "bike_lane_network"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T118",
+      "name": "Smart City Sensors",
+      "category": "urban_design",
+      "era": "modern",
+      "costRp": 150,
+      "prerequisites": [
+        "T115",
+        "T117"
+      ],
+      "unlocks": [
+        "sensor_grid",
+        "city_dashboard"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T123",
+      "name": "Aquaculture",
+      "category": "food_cuisine",
+      "era": "modern",
+      "costRp": 110,
+      "prerequisites": [
+        "T122"
+      ],
+      "unlocks": [
+        "fish_farm",
+        "kelp_farm"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T131",
+      "name": "Video Game Industry",
+      "category": "entertainment",
+      "era": "modern",
+      "costRp": 120,
+      "prerequisites": [
+        "T130"
+      ],
+      "unlocks": [
+        "game_studio",
+        "arcade"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T132",
+      "name": "Esports Infrastructure",
+      "category": "entertainment",
+      "era": "modern",
+      "costRp": 140,
+      "prerequisites": [
+        "T129",
+        "T131"
+      ],
+      "unlocks": [
+        "esports_arena",
+        "streaming_hub"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T137",
+      "name": "Microfinance",
+      "category": "finance",
+      "era": "modern",
+      "costRp": 100,
+      "prerequisites": [
+        "T135",
+        "T136"
+      ],
+      "unlocks": [
+        "microfinance_institution"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T138",
+      "name": "Cryptocurrency",
+      "category": "finance",
+      "era": "modern",
+      "costRp": 160,
+      "prerequisites": [
+        "T136"
+      ],
+      "unlocks": [
+        "crypto_exchange",
+        "blockchain_datacenter"
+      ],
+      "branchGroup": "financial_system",
+      "branchExclusive": true
+    },
+    {
+      "id": "T143",
+      "name": "Medical Tourism",
+      "category": "tourism",
+      "era": "modern",
+      "costRp": 130,
+      "prerequisites": [
+        "T141",
+        "T142"
+      ],
+      "unlocks": [
+        "medical_tourism_clinic"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T148",
+      "name": "Cybersecurity Defense",
+      "category": "military",
+      "era": "modern",
+      "costRp": 140,
+      "prerequisites": [
+        "T147",
+        "T118"
+      ],
+      "unlocks": [
+        "cyber_operations_center"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    },
+    {
+      "id": "T153",
+      "name": "Rare Earth Processing",
+      "category": "mining",
+      "era": "modern",
+      "costRp": 150,
+      "prerequisites": [
+        "T151"
+      ],
+      "unlocks": [
+        "rare_earth_refinery"
+      ],
+      "branchGroup": null,
+      "branchExclusive": false
+    }
+  ],
+  "zoneBuildings": [
+    {
+      "id": "res_modern_studio_apt",
+      "name": "Studio Apartment Block",
+      "category": "residential",
+      "zone": "residential",
+      "density": 1,
+      "era": 3,
+      "typeId": 166,
+      "archetypeKey": "res_low_modern_06",
+      "gltfPath": "/assets/gltf/modern/res_low_modern_06.glb"
+    },
+    {
+      "id": "res_modern_garden_apt",
+      "name": "Garden Apartment",
+      "category": "residential",
+      "zone": "residential",
+      "density": 1,
+      "era": 3,
+      "typeId": 161,
+      "archetypeKey": "res_low_modern_01",
+      "gltfPath": "/assets/gltf/modern/res_low_modern_01.glb"
+    },
+    {
+      "id": "res_modern_midrise_apt",
+      "name": "Mid-Rise Apartment",
+      "category": "residential",
+      "zone": "residential",
+      "density": 1,
+      "era": 3,
+      "typeId": 163,
+      "archetypeKey": "res_low_modern_03",
+      "gltfPath": "/assets/gltf/modern/res_low_modern_03.glb"
+    },
+    {
+      "id": "res_modern_highrise_apt",
+      "name": "High-Rise Apartment",
+      "category": "residential",
+      "zone": "residential",
+      "density": 2,
+      "era": 3,
+      "typeId": 260,
+      "archetypeKey": "res_high_modern_00",
+      "gltfPath": "/assets/gltf/modern/res_high_modern_00.glb"
+    },
+    {
+      "id": "res_modern_luxury_condo",
+      "name": "Luxury Condominium",
+      "category": "residential",
+      "zone": "residential",
+      "density": 2,
+      "era": 3,
+      "typeId": 261,
+      "archetypeKey": "res_high_modern_01",
+      "gltfPath": "/assets/gltf/modern/res_high_modern_01.glb"
+    },
+    {
+      "id": "res_modern_penthouse_tower",
+      "name": "Penthouse Tower",
+      "category": "residential",
+      "zone": "residential",
+      "density": 2,
+      "era": 3,
+      "typeId": 262,
+      "archetypeKey": "res_high_modern_02",
+      "gltfPath": "/assets/gltf/modern/res_high_modern_02.glb"
+    },
+    {
+      "id": "res_modern_subsidized_housing",
+      "name": "Subsidized Housing",
+      "category": "residential",
+      "zone": "residential",
+      "density": 1,
+      "era": 3,
+      "typeId": 167,
+      "archetypeKey": "res_low_modern_07",
+      "gltfPath": "/assets/gltf/modern/res_low_modern_07.glb"
+    },
+    {
+      "id": "res_modern_townhouse_row",
+      "name": "Modern Townhouse Row",
+      "category": "residential",
+      "zone": "residential",
+      "density": 0,
+      "era": 3,
+      "typeId": 168,
+      "archetypeKey": "res_low_modern_08",
+      "gltfPath": "/assets/gltf/modern/res_low_modern_08.glb"
+    },
+    {
+      "id": "res_modern_gated_community",
+      "name": "Gated Community",
+      "category": "residential",
+      "zone": "residential",
+      "density": 0,
+      "era": 3,
+      "typeId": 162,
+      "archetypeKey": "res_low_modern_02",
+      "gltfPath": "/assets/gltf/modern/res_low_modern_02.glb"
+    },
+    {
+      "id": "res_modern_senior_living",
+      "name": "Senior Living Complex",
+      "category": "residential",
+      "zone": "residential",
+      "density": 1,
+      "era": 3,
+      "typeId": 164,
+      "archetypeKey": "res_low_modern_04",
+      "gltfPath": "/assets/gltf/modern/res_low_modern_04.glb"
+    },
+    {
+      "id": "res_modern_student_dorm",
+      "name": "Student Dormitory",
+      "category": "residential",
+      "zone": "residential",
+      "density": 1,
+      "era": 3,
+      "typeId": 165,
+      "archetypeKey": "res_low_modern_05",
+      "gltfPath": "/assets/gltf/modern/res_low_modern_05.glb"
+    },
+    {
+      "id": "res_modern_duplex",
+      "name": "Modern Duplex",
+      "category": "residential",
+      "zone": "residential",
+      "density": 0,
+      "era": 3,
+      "typeId": 160,
+      "archetypeKey": "res_low_modern_00",
+      "gltfPath": "/assets/gltf/modern/res_low_modern_00.glb"
+    },
+    {
+      "id": "com_modern_shopping_mall",
+      "name": "Shopping Mall",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 2,
+      "era": 3,
+      "typeId": 369,
+      "archetypeKey": "com_modern_09",
+      "gltfPath": "/assets/gltf/modern/com_modern_09.glb"
+    },
+    {
+      "id": "com_modern_big_box_store",
+      "name": "Big Box Store",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 1,
+      "era": 3,
+      "typeId": 360,
+      "archetypeKey": "com_modern_00",
+      "gltfPath": "/assets/gltf/modern/com_modern_00.glb"
+    },
+    {
+      "id": "com_modern_tech_office",
+      "name": "Tech Office Campus",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 1,
+      "era": 3,
+      "typeId": 370,
+      "archetypeKey": "com_modern_10",
+      "gltfPath": "/assets/gltf/modern/com_modern_10.glb"
+    },
+    {
+      "id": "com_modern_coworking",
+      "name": "Coworking Space",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 1,
+      "era": 3,
+      "typeId": 366,
+      "archetypeKey": "com_modern_06",
+      "gltfPath": "/assets/gltf/modern/com_modern_06.glb"
+    },
+    {
+      "id": "com_modern_fast_food",
+      "name": "Fast Food Restaurant",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 0,
+      "era": 3,
+      "typeId": 367,
+      "archetypeKey": "com_modern_07",
+      "gltfPath": "/assets/gltf/modern/com_modern_07.glb"
+    },
+    {
+      "id": "com_modern_coffee_chain",
+      "name": "Coffee Chain",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 0,
+      "era": 3,
+      "typeId": 364,
+      "archetypeKey": "com_modern_04",
+      "gltfPath": "/assets/gltf/modern/com_modern_04.glb"
+    },
+    {
+      "id": "com_modern_boutique_hotel",
+      "name": "Boutique Hotel",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 1,
+      "era": 3,
+      "typeId": 361,
+      "archetypeKey": "com_modern_01",
+      "gltfPath": "/assets/gltf/modern/com_modern_01.glb"
+    },
+    {
+      "id": "com_modern_convention_center",
+      "name": "Convention Center",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 2,
+      "era": 3,
+      "typeId": 365,
+      "archetypeKey": "com_modern_05",
+      "gltfPath": "/assets/gltf/modern/com_modern_05.glb"
+    },
+    {
+      "id": "com_modern_cinema_complex",
+      "name": "Multiplex Cinema",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 1,
+      "era": 3,
+      "typeId": 363,
+      "archetypeKey": "com_modern_03",
+      "gltfPath": "/assets/gltf/modern/com_modern_03.glb"
+    },
+    {
+      "id": "com_modern_car_dealership",
+      "name": "Car Dealership",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 0,
+      "era": 3,
+      "typeId": 362,
+      "archetypeKey": "com_modern_02",
+      "gltfPath": "/assets/gltf/modern/com_modern_02.glb"
+    },
+    {
+      "id": "com_modern_fitness_center",
+      "name": "Fitness Center",
+      "category": "commercial",
+      "zone": "commercial",
+      "density": 0,
+      "era": 3,
+      "typeId": 368,
+      "archetypeKey": "com_modern_08",
+      "gltfPath": "/assets/gltf/modern/com_modern_08.glb"
+    },
+    {
+      "id": "ind_modern_electronics_factory",
+      "name": "Electronics Factory",
+      "category": "industrial",
+      "zone": "industrial",
+      "density": 1,
+      "era": 3,
+      "typeId": 462,
+      "archetypeKey": "ind_modern_02",
+      "gltfPath": "/assets/gltf/modern/ind_modern_02.glb"
+    },
+    {
+      "id": "ind_modern_auto_plant",
+      "name": "Automobile Plant",
+      "category": "industrial",
+      "zone": "industrial",
+      "density": 2,
+      "era": 3,
+      "typeId": 460,
+      "archetypeKey": "ind_modern_00",
+      "gltfPath": "/assets/gltf/modern/ind_modern_00.glb"
+    },
+    {
+      "id": "ind_modern_data_center",
+      "name": "Data Center",
+      "category": "industrial",
+      "zone": "industrial",
+      "density": 1,
+      "era": 3,
+      "typeId": 461,
+      "archetypeKey": "ind_modern_01",
+      "gltfPath": "/assets/gltf/modern/ind_modern_01.glb"
+    },
+    {
+      "id": "ind_modern_pharma_lab",
+      "name": "Pharmaceutical Lab",
+      "category": "industrial",
+      "zone": "industrial",
+      "density": 0,
+      "era": 3,
+      "typeId": 465,
+      "archetypeKey": "ind_modern_05",
+      "gltfPath": "/assets/gltf/modern/ind_modern_05.glb"
+    },
+    {
+      "id": "ind_modern_recycling_center",
+      "name": "Recycling Center",
+      "category": "industrial",
+      "zone": "industrial",
+      "density": 0,
+      "era": 3,
+      "typeId": 466,
+      "archetypeKey": "ind_modern_06",
+      "gltfPath": "/assets/gltf/modern/ind_modern_06.glb"
+    },
+    {
+      "id": "ind_modern_solar_factory",
+      "name": "Solar Panel Factory",
+      "category": "industrial",
+      "zone": "industrial",
+      "density": 1,
+      "era": 3,
+      "typeId": 467,
+      "archetypeKey": "ind_modern_07",
+      "gltfPath": "/assets/gltf/modern/ind_modern_07.glb"
+    },
+    {
+      "id": "ind_modern_food_processing",
+      "name": "Food Processing Plant",
+      "category": "industrial",
+      "zone": "industrial",
+      "density": 1,
+      "era": 3,
+      "typeId": 463,
+      "archetypeKey": "ind_modern_03",
+      "gltfPath": "/assets/gltf/modern/ind_modern_03.glb"
+    },
+    {
+      "id": "ind_modern_logistics_hub",
+      "name": "Logistics Hub",
+      "category": "industrial",
+      "zone": "industrial",
+      "density": 2,
+      "era": 3,
+      "typeId": 464,
+      "archetypeKey": "ind_modern_04",
+      "gltfPath": "/assets/gltf/modern/ind_modern_04.glb"
+    },
+    {
+      "id": "svc_modern_hospital",
+      "name": "Modern Hospital",
+      "category": "service",
+      "zone": "none",
+      "density": 2,
+      "era": 3,
+      "typeId": 563,
+      "archetypeKey": "svc_modern_03",
+      "gltfPath": "/assets/gltf/modern/svc_modern_03.glb"
+    },
+    {
+      "id": "svc_modern_university",
+      "name": "University Campus",
+      "category": "service",
+      "zone": "none",
+      "density": 1,
+      "era": 3,
+      "typeId": 567,
+      "archetypeKey": "svc_modern_07",
+      "gltfPath": "/assets/gltf/modern/svc_modern_07.glb"
+    },
+    {
+      "id": "svc_modern_police_hq",
+      "name": "Police Headquarters",
+      "category": "service",
+      "zone": "none",
+      "density": 1,
+      "era": 3,
+      "typeId": 564,
+      "archetypeKey": "svc_modern_04",
+      "gltfPath": "/assets/gltf/modern/svc_modern_04.glb"
+    },
+    {
+      "id": "svc_modern_fire_station",
+      "name": "Modern Fire Station",
+      "category": "service",
+      "zone": "none",
+      "density": 0,
+      "era": 3,
+      "typeId": 562,
+      "archetypeKey": "svc_modern_02",
+      "gltfPath": "/assets/gltf/modern/svc_modern_02.glb"
+    },
+    {
+      "id": "svc_modern_community_college",
+      "name": "Community College",
+      "category": "service",
+      "zone": "none",
+      "density": 0,
+      "era": 3,
+      "typeId": 560,
+      "archetypeKey": "svc_modern_00",
+      "gltfPath": "/assets/gltf/modern/svc_modern_00.glb"
+    },
+    {
+      "id": "svc_modern_daycare",
+      "name": "Daycare Center",
+      "category": "service",
+      "zone": "none",
+      "density": 0,
+      "era": 3,
+      "typeId": 561,
+      "archetypeKey": "svc_modern_01",
+      "gltfPath": "/assets/gltf/modern/svc_modern_01.glb"
+    },
+    {
+      "id": "svc_modern_senior_center",
+      "name": "Senior Center",
+      "category": "service",
+      "zone": "none",
+      "density": 0,
+      "era": 3,
+      "typeId": 566,
+      "archetypeKey": "svc_modern_06",
+      "gltfPath": "/assets/gltf/modern/svc_modern_06.glb"
+    },
+    {
+      "id": "svc_modern_public_library",
+      "name": "Public Library",
+      "category": "service",
+      "zone": "none",
+      "density": 0,
+      "era": 3,
+      "typeId": 565,
+      "archetypeKey": "svc_modern_05",
+      "gltfPath": "/assets/gltf/modern/svc_modern_05.glb"
+    }
+  ],
+  "heroBuildings": [
+    {
+      "id": "inf_modern_nuclear_plant",
+      "name": "Nuclear Power Plant",
+      "category": "infrastructure",
+      "era": 3,
+      "typeId": 615,
+      "gltfPath": "/assets/gltf/heroes/inf_modern_nuclear_plant.glb"
+    },
+    {
+      "id": "inf_modern_solar_farm",
+      "name": "Solar Farm",
+      "category": "infrastructure",
+      "era": 3,
+      "typeId": 618,
+      "gltfPath": "/assets/gltf/heroes/inf_modern_solar_farm.glb"
+    },
+    {
+      "id": "inf_modern_wind_farm",
+      "name": "Wind Farm",
+      "category": "infrastructure",
+      "era": 3,
+      "typeId": 620,
+      "gltfPath": "/assets/gltf/heroes/inf_modern_wind_farm.glb"
+    },
+    {
+      "id": "inf_modern_fiber_hub",
+      "name": "Fiber Optic Hub",
+      "category": "infrastructure",
+      "era": 3,
+      "typeId": 614,
+      "gltfPath": "/assets/gltf/heroes/inf_modern_fiber_hub.glb"
+    },
+    {
+      "id": "inf_modern_water_treatment",
+      "name": "Advanced Water Treatment",
+      "category": "infrastructure",
+      "era": 3,
+      "typeId": 619,
+      "gltfPath": "/assets/gltf/heroes/inf_modern_water_treatment.glb"
+    },
+    {
+      "id": "inf_modern_5g_tower",
+      "name": "5G Cell Tower",
+      "category": "infrastructure",
+      "era": 3,
+      "typeId": 613,
+      "gltfPath": "/assets/gltf/heroes/inf_modern_5g_tower.glb"
+    },
+    {
+      "id": "inf_modern_smart_grid",
+      "name": "Smart Grid Station",
+      "category": "infrastructure",
+      "era": 3,
+      "typeId": 617,
+      "gltfPath": "/assets/gltf/heroes/inf_modern_smart_grid.glb"
+    },
+    {
+      "id": "inf_modern_sewage_plant",
+      "name": "Sewage Treatment Plant",
+      "category": "infrastructure",
+      "era": 3,
+      "typeId": 616,
+      "gltfPath": "/assets/gltf/heroes/inf_modern_sewage_plant.glb"
+    },
+    {
+      "id": "spc_modern_sports_stadium",
+      "name": "Sports Stadium",
+      "category": "special",
+      "era": 3,
+      "typeId": 642,
+      "gltfPath": "/assets/gltf/heroes/spc_modern_sports_stadium.glb"
+    },
+    {
+      "id": "spc_modern_concert_arena",
+      "name": "Concert Arena",
+      "category": "special",
+      "era": 3,
+      "typeId": 639,
+      "gltfPath": "/assets/gltf/heroes/spc_modern_concert_arena.glb"
+    },
+    {
+      "id": "spc_modern_theme_park",
+      "name": "Theme Park",
+      "category": "special",
+      "era": 3,
+      "typeId": 644,
+      "gltfPath": "/assets/gltf/heroes/spc_modern_theme_park.glb"
+    },
+    {
+      "id": "spc_modern_science_museum",
+      "name": "Science Museum",
+      "category": "special",
+      "era": 3,
+      "typeId": 640,
+      "gltfPath": "/assets/gltf/heroes/spc_modern_science_museum.glb"
+    },
+    {
+      "id": "spc_modern_tech_incubator",
+      "name": "Tech Incubator",
+      "category": "special",
+      "era": 3,
+      "typeId": 643,
+      "gltfPath": "/assets/gltf/heroes/spc_modern_tech_incubator.glb"
+    },
+    {
+      "id": "spc_modern_botanical_garden",
+      "name": "Botanical Garden",
+      "category": "special",
+      "era": 3,
+      "typeId": 638,
+      "gltfPath": "/assets/gltf/heroes/spc_modern_botanical_garden.glb"
+    },
+    {
+      "id": "spc_modern_skate_park",
+      "name": "Skate Park",
+      "category": "special",
+      "era": 3,
+      "typeId": 641,
+      "gltfPath": "/assets/gltf/heroes/spc_modern_skate_park.glb"
+    },
+    {
+      "id": "spc_modern_art_gallery",
+      "name": "Modern Art Gallery",
+      "category": "special",
+      "era": 3,
+      "typeId": 637,
+      "gltfPath": "/assets/gltf/heroes/spc_modern_art_gallery.glb"
+    }
+  ],
+  "shippedGltfCatalog": [
+    {
+      "archetypeKey": "res_low_modern_00",
+      "gltfPath": "/assets/gltf/modern/res_low_modern_00.glb"
+    },
+    {
+      "archetypeKey": "res_high_modern_00",
+      "gltfPath": "/assets/gltf/modern/res_high_modern_00.glb"
+    },
+    {
+      "archetypeKey": "com_modern_00",
+      "gltfPath": "/assets/gltf/modern/com_modern_00.glb"
+    },
+    {
+      "archetypeKey": "ind_modern_00",
+      "gltfPath": "/assets/gltf/modern/ind_modern_00.glb"
+    },
+    {
+      "archetypeKey": "svc_modern_00",
+      "gltfPath": "/assets/gltf/modern/svc_modern_00.glb"
+    },
+    {
+      "archetypeKey": "svc_modern_01",
+      "gltfPath": "/assets/gltf/modern/svc_modern_01.glb"
+    },
+    {
+      "archetypeKey": "svc_modern_02",
+      "gltfPath": "/assets/gltf/modern/svc_modern_02.glb"
+    },
+    {
+      "archetypeKey": "svc_modern_03",
+      "gltfPath": "/assets/gltf/modern/svc_modern_03.glb"
+    },
+    {
+      "archetypeKey": "svc_modern_04",
+      "gltfPath": "/assets/gltf/modern/svc_modern_04.glb"
+    },
+    {
+      "archetypeKey": "svc_modern_05",
+      "gltfPath": "/assets/gltf/modern/svc_modern_05.glb"
+    },
+    {
+      "archetypeKey": "svc_modern_06",
+      "gltfPath": "/assets/gltf/modern/svc_modern_06.glb"
+    },
+    {
+      "archetypeKey": "svc_modern_07",
+      "gltfPath": "/assets/gltf/modern/svc_modern_07.glb"
+    }
+  ],
+  "heroLandmark": {
+    "archetypeKey": "hero_modern_glass_tower",
+    "gltfPath": "/assets/gltf/heroes/hero_modern_glass_tower.glb"
+  }
+}

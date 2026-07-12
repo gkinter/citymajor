@@ -467,7 +467,7 @@ public sealed class PopulationSystem
         float taxMod = GetTaxAttractivenessModifier(state);
 
         // Scale base with city size (log scale)
-        float sizeScale = 1f + MathF.Log2(Math.Max(1, state.Population / 1000f));
+        float sizeScale = 1f + (float)Math.Log(Math.Max(1, state.Population / 1000f), 2);
         float rawRate = BaseImmigrationPerMonth * sizeScale *
                         jobAvailability * housingAvailability * reputation * taxMod;
 

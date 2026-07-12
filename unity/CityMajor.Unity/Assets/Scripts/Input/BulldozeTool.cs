@@ -4,21 +4,18 @@ using UnityEngine;
 namespace CityMajor.Input
 {
     /// <summary>
-    /// Paint roads into Forge.SimCore via CitySimBridge. Key 4 toggles road brush.
+    /// Bulldoze zones via SimHost.Bulldoze. Toggle with X. Defers zone/road/build tools while active.
     /// </summary>
-    public sealed class RoadPaintTool : MonoBehaviour
+    public sealed class BulldozeTool : MonoBehaviour
     {
-        [SerializeField] int brushRadius = 1;
-        [SerializeField] bool roadMode;
+        [SerializeField] int brushRadius = 2;
 
         Camera _camera;
         ZoneGrid _grid;
         CitySimBridge _sim;
         bool _painting;
 
-        public bool RoadModeActive => roadMode;
-
-        public void SetRoadMode(bool active) => roadMode = active;
+        public bool BulldozeModeActive { get; private set; }
 
         public void Configure(Camera cityCamera, ZoneGrid grid, CitySimBridge sim)
         {
@@ -27,31 +24,26 @@ namespace CityMajor.Input
             _sim = sim;
         }
 
+        public void SetBulldozeMode(bool active)
+        {
+            BulldozeModeActive = active;
+            if (!active)
+                _painting = false;
+        }
+
         void Update()
         {
-            if (_camera == null || _grid == null || _sim == null)
+            if (_camera == null || _grid == null)
                 return;
 
-            var bulldoze = GetComponent<BulldozeTool>();
-            if (bulldoze != null && bulldoze.BulldozeModeActive)
+            if (UnityEngine.Input.GetKeyDown(KeyCode.X))
             {
-                roadMode = false;
-                _painting = false;
-                return;
+                SetBulldozeMode(!BulldozeModeActive);
+                if (BulldozeModeActive)
+                    DeferSiblingTools();
             }
 
-            if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha4))
-                roadMode = !roadMode;
-
-            var buildTool = GetComponent<BuildPlopTool>();
-            if (buildTool != null && buildTool.BuildModeActive)
-            {
-                roadMode = false;
-                _painting = false;
-                return;
-            }
-
-            if (!roadMode)
+            if (!BulldozeModeActive)
             {
                 _painting = false;
                 return;
@@ -63,10 +55,20 @@ namespace CityMajor.Input
                 _painting = false;
 
             if (_painting || UnityEngine.Input.GetMouseButtonDown(0))
-                PaintAtMouse();
+                BulldozeAtMouse();
         }
 
-        void PaintAtMouse()
+        void DeferSiblingTools()
+        {
+            var road = GetComponent<RoadPaintTool>();
+            if (road != null)
+                road.SetRoadMode(false);
+
+            var build = GetComponent<BuildPlopTool>();
+            build?.SetBuildMode(false);
+        }
+
+        void BulldozeAtMouse()
         {
             var ray = _camera.ScreenPointToRay(UnityEngine.Input.mousePosition);
             if (!Physics.Raycast(ray, out var hit, 5000f))
@@ -78,7 +80,11 @@ namespace CityMajor.Input
             {
                 if (dx * dx + dy * dy > brushRadius * brushRadius)
                     continue;
-                _sim.PlaceRoad(center.x + dx, center.y + dy);
+
+                var x = center.x + dx;
+                var y = center.y + dy;
+                _grid.SetZone(x, y, ZonePaintTool.ZoneKind.None);
+                _sim?.Bulldoze(x, y);
             }
         }
     }

@@ -1,0 +1,77 @@
+.rci-overlay-root {
+    position: absolute;
+    bottom: 96px;
+    left: 50%;
+    margin-left: -110px;
+    width: 220px;
+    flex-direction: column;
+    padding: 6px 12px;
+    background-color: rgba(12, 16, 24, 0.88);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    width: 220px;
+}
+
+.rci-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 3px;
+    width: 100%;
+}
+
+.rci-label {
+    font-size: 11px;
+    -unity-font-style: bold;
+    width: 14px;
+    margin-right: 6px;
+}
+
+.rci-label--r {
+    color: rgb(77, 217, 115);
+}
+
+.rci-label--c {
+    color: rgb(89, 153, 255);
+}
+
+.rci-label--i {
+    color: rgb(242, 204, 64);
+}
+
+.rci-track {
+    flex-grow: 1;
+    height: 10px;
+    background-color: rgba(30, 35, 48, 0.95);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.rci-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    border-radius: 2px;
+}
+
+.rci-fill--r {
+    background-color: rgb(77, 217, 115);
+}
+
+.rci-fill--c {
+    background-color: rgb(89, 153, 255);
+}
+
+.rci-fill--i {
+    background-color: rgb(242, 204, 64);
+}
+
+.rci-value {
+    font-size: 11px;
+    color: rgba(200, 210, 225, 0.9);
+    width: 32px;
+    margin-left: 6px;
+    -unity-text-align: middle-right;
+}

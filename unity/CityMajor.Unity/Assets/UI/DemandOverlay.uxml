@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="DemandOverlay.uss" />
+    <ui:VisualElement name="rci-root" class="rci-overlay-root" picking-mode="Ignore">
+        <ui:VisualElement class="rci-row">
+            <ui:Label class="rci-label rci-label--r" text="R" />
+            <ui:VisualElement class="rci-track">
+                <ui:VisualElement name="r-fill" class="rci-fill rci-fill--r" />
+            </ui:VisualElement>
+            <ui:Label name="r-value" class="rci-value" text="0" />
+        </ui:VisualElement>
+        <ui:VisualElement class="rci-row">
+            <ui:Label class="rci-label rci-label--c" text="C" />
+            <ui:VisualElement class="rci-track">
+                <ui:VisualElement name="c-fill" class="rci-fill rci-fill--c" />
+            </ui:VisualElement>
+            <ui:Label name="c-value" class="rci-value" text="0" />
+        </ui:VisualElement>
+        <ui:VisualElement class="rci-row">
+            <ui:Label class="rci-label rci-label--i" text="I" />
+            <ui:VisualElement class="rci-track">
+                <ui:VisualElement name="i-fill" class="rci-fill rci-fill--i" />
+            </ui:VisualElement>
+            <ui:Label name="i-value" class="rci-value" text="0" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

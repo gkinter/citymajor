@@ -33,6 +33,13 @@ namespace CityMajor.Input
       if (_camera == null || _grid == null)
         return;
 
+      var bulldoze = GetComponent<BulldozeTool>();
+      if (bulldoze != null && bulldoze.BulldozeModeActive)
+      {
+        _painting = false;
+        return;
+      }
+
       var roadTool = GetComponent<RoadPaintTool>();
       if (roadTool != null && roadTool.RoadModeActive)
       {

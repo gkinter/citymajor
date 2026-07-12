@@ -57,6 +57,9 @@ namespace CityMajor.Core
             var roads = root.AddComponent<RoadPaintTool>();
             roads.Configure(cam, grid, sim);
 
+            var bulldoze = root.AddComponent<BulldozeTool>();
+            bulldoze.Configure(cam, grid, sim);
+
             var buildPlop = root.AddComponent<BuildPlopTool>();
             buildPlop.Configure(cam, grid, sim);
 
@@ -77,6 +80,10 @@ namespace CityMajor.Core
 
             var hud = root.AddComponent<ResourcesHudController>();
             hud.Configure(sim);
+
+            var demandUi = new GameObject("CityMajor_DemandOverlay");
+            demandUi.transform.SetParent(root.transform, false);
+            demandUi.AddComponent<DemandOverlayController>().Configure(sim);
 
             var budgetUi = new GameObject("CityMajor_BudgetUi");
             budgetUi.transform.SetParent(root.transform, false);

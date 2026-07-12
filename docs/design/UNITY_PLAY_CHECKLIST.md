@@ -20,6 +20,7 @@
 - [ ] Enter **Play** — no console errors (red)
 - [ ] Console shows `[CityMajor]` sim init, not placeholder-only mode
 - [ ] **Pop / Funds** HUD updates when painting zones (not static sine placeholder)
+- [ ] **Bottom-center R/C/I** demand meters move with sim economy
 - [ ] **Hour** line shows `HH:MM ×rush` and changes over time
 
 ---
@@ -28,6 +29,7 @@
 
 - [ ] `1` / `2` / `3` — R / C / I zone paint on LMB drag
 - [ ] `0` — erase zones
+- [ ] `X` — bulldoze mode (clears zones via SimHost)
 - [ ] `4` — road mode; roads appear in overlay + traffic tint after sim ticks
 - [ ] MMB — camera pan
 

@@ -89,6 +89,23 @@ namespace CityMajor.Sim
             PublishFromSimHost();
         }
 
+        /// <summary>Clears zone density on tile. Full road/building removal awaits SimHost API parity.</summary>
+        public void Bulldoze(int tileX, int tileY)
+        {
+            if (_grid != null)
+                _grid.SetZone(tileX, tileY, ZonePaintTool.ZoneKind.None);
+
+            if (!_simCoreReady)
+            {
+                if (_grid != null)
+                    NotifyZonesChanged();
+                return;
+            }
+
+            _simHost.Bulldoze(tileX, tileY);
+            PublishFromSimHost();
+        }
+
         public void NotifyZonesChanged()
         {
             if (_simCoreReady)

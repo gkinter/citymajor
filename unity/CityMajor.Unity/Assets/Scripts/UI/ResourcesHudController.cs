@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 namespace CityMajor.UI
 {
     /// <summary>
-    /// RCI + mayor HUD (UI Toolkit). Mirrors web ResourcesHud.tsx layout (Pop, Funds, R/C/I bars).
+    /// Pop / funds / hour HUD (top-left). RCI demand lives in <see cref="DemandOverlayController"/>.
     /// </summary>
     public sealed class ResourcesHudController : MonoBehaviour
     {
@@ -16,12 +16,6 @@ namespace CityMajor.UI
         Label _popValue;
         Label _fundsValue;
         Label _timeValue;
-        Label _rDemandText;
-        Label _cDemandText;
-        Label _iDemandText;
-        VisualElement _rDemandFill;
-        VisualElement _cDemandFill;
-        VisualElement _iDemandFill;
 
         public void Configure(CitySimBridge sim)
         {
@@ -74,12 +68,6 @@ namespace CityMajor.UI
             _popValue = root.Q<Label>("pop-value");
             _fundsValue = root.Q<Label>("funds-value");
             _timeValue = root.Q<Label>("time-value");
-            _rDemandText = root.Q<Label>("r-demand-text");
-            _cDemandText = root.Q<Label>("c-demand-text");
-            _iDemandText = root.Q<Label>("i-demand-text");
-            _rDemandFill = root.Q<VisualElement>("r-demand-fill");
-            _cDemandFill = root.Q<VisualElement>("c-demand-fill");
-            _iDemandFill = root.Q<VisualElement>("i-demand-fill");
         }
 
         void OnStateChanged(CitySimState state) => ApplyState(state);
@@ -100,18 +88,6 @@ namespace CityMajor.UI
                 var min = Mathf.FloorToInt((state.TimeOfDay % 1f) * 60f);
                 _timeValue.text = $"{hour:D2}:{min:D2} ×{state.RushMultiplier:F1}";
             }
-            SetDemandRow(_rDemandText, _rDemandFill, state.DemandResidential);
-            SetDemandRow(_cDemandText, _cDemandFill, state.DemandCommercial);
-            SetDemandRow(_iDemandText, _iDemandFill, state.DemandIndustrial);
-        }
-
-        static void SetDemandRow(Label text, VisualElement fill, float demand)
-        {
-            if (text == null || fill == null)
-                return;
-
-            text.text = demand.ToString("+0.00;-0.00;0.00");
-            fill.style.width = Length.Percent(Mathf.Clamp01(Mathf.Abs(demand)) * 100f);
         }
 
         static string FormatFunds(int cityFunds)

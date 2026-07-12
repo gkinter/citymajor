@@ -47,6 +47,14 @@ namespace CityMajor.Input
             if (_camera == null || _grid == null || _sim == null)
                 return;
 
+            var bulldoze = GetComponent<BulldozeTool>();
+            if (bulldoze != null && bulldoze.BulldozeModeActive)
+            {
+                SetBuildMode(false);
+                _painting = false;
+                return;
+            }
+
             if (UnityEngine.Input.GetKeyDown(KeyCode.B))
             {
                 if (BuildModeActive)

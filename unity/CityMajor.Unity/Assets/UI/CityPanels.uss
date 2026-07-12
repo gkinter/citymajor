@@ -149,6 +149,39 @@
     border-color: rgba(255, 255, 255, 0.1);
 }
 
+.happiness-meter {
+    position: absolute;
+    top: 120px;
+    left: 12px;
+    width: 160px;
+    padding: 8px 12px;
+    background-color: rgba(12, 16, 24, 0.88);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+}
+
+.happiness-value {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(240, 244, 252);
+    margin-bottom: 6px;
+}
+
+.happiness-track {
+    height: 6px;
+    background-color: rgba(8, 12, 24, 0.55);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.happiness-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 3px;
+    background-color: rgb(125, 255, 178);
+}
+
 .time-controls {
     position: absolute;
     bottom: 12px;

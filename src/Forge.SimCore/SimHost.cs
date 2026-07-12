@@ -36,6 +36,7 @@ public sealed partial class SimHost
     private double _monthAccumulator;
     private int _populationStaggerBucket;
     private int _lastCulturalDnaYear;
+    private bool _roadsNeedRebuild;
 
     private SimHostInitOptions _initOptions = new();
 
@@ -110,6 +111,12 @@ public sealed partial class SimHost
     public void Tick(double dt)
     {
         if (!IsInitialized) return;
+
+        if (_roadsNeedRebuild)
+        {
+            RebuildRoadGraphFromTiles();
+            _roadsNeedRebuild = false;
+        }
 
         _state.TickCount++;
 
@@ -188,8 +195,26 @@ public sealed partial class SimHost
         if (!IsInitialized || !_state.Tiles.InBounds(x, y)) return;
 
         int idx = _state.Tiles.Index(x, y);
+        bool hadRoad = _state.Tiles.RoadFlags[idx] != 0;
+
+        ushort buildingId = _state.Tiles.BuildingId[idx];
+        if (buildingId != 0 && buildingId < _state.Buildings.Capacity
+            && _state.Buildings.IsActive(buildingId))
+        {
+            _state.Buildings.Free(buildingId);
+        }
+
+        _state.Tiles.BuildingId[idx] = 0;
         _state.Tiles.ZoneType[idx] = 0;
         _state.Tiles.ZoneDensity[idx] = 0;
+
+        if (hadRoad)
+        {
+            _state.Tiles.RoadFlags[idx] = 0;
+            _state.Tiles.Traffic[idx] = 0;
+            ClearNeighborRoadConnections(x, y);
+            _roadsNeedRebuild = true;
+        }
     }
 
     public void PlaceRoad(int x, int y)
@@ -201,7 +226,7 @@ public sealed partial class SimHost
         if (terrain == (byte)TerrainId.Water || terrain == (byte)TerrainId.Rock) return;
 
         _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y);
-        _state.Roads.AddNode(x, y);
+        _roadsNeedRebuild = true;
 
         RefreshRoadFlagsAt(x - 1, y);
         RefreshRoadFlagsAt(x + 1, y);
@@ -552,14 +577,12 @@ public sealed partial class SimHost
         {
             if (!_state.Tiles.InBounds(x, cy)) continue;
             _state.Tiles.RoadFlags[_state.Tiles.Index(x, cy)] = 1;
-            _state.Roads.AddNode(x, cy);
         }
 
         for (int y = cy - roadHalf; y <= cy + roadHalf; y++)
         {
             if (!_state.Tiles.InBounds(cx, y)) continue;
             _state.Tiles.RoadFlags[_state.Tiles.Index(cx, y)] = 1;
-            _state.Roads.AddNode(cx, y);
         }
 
         int ringRadius = size / 3;
@@ -572,7 +595,6 @@ public sealed partial class SimHost
             byte terrain = _state.Tiles.TerrainType[_state.Tiles.Index(x, y)];
             if (terrain == (byte)TerrainId.Water) continue;
             _state.Tiles.RoadFlags[_state.Tiles.Index(x, y)] = 1;
-            _state.Roads.AddNode(x, y);
         }
 
         int commercialCore = size / 32;
@@ -637,6 +659,8 @@ public sealed partial class SimHost
             _state.Buildings.MaxOccupants[slot] = 48;
             placed++;
         }
+
+        RebuildRoadGraphFromTiles();
     }
 
     private void SeedStartingPopulation()
@@ -833,6 +857,67 @@ public sealed partial class SimHost
         int idx = _state.Tiles.Index(x, y);
         if (_state.Tiles.RoadFlags[idx] == 0) return;
         _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y);
+    }
+
+    private void ClearNeighborRoadConnections(int cx, int cy)
+    {
+        (int nx, int ny, byte clearBit)[] neighbors =
+        [
+            (cx, cy - 1, 0x04),
+            (cx + 1, cy, 0x08),
+            (cx, cy + 1, 0x01),
+            (cx - 1, cy, 0x02),
+        ];
+
+        foreach (var (nx, ny, bit) in neighbors)
+        {
+            if (!_state.Tiles.InBounds(nx, ny)) continue;
+            int nidx = _state.Tiles.Index(nx, ny);
+            if ((_state.Tiles.RoadFlags[nidx] & 0x0F) != 0)
+                _state.Tiles.RoadFlags[nidx] &= (byte)~bit;
+        }
+    }
+
+    /// <summary>Rebuild CSR road graph from tile RoadFlags (after bulldoze / bulk load).</summary>
+    private void RebuildRoadGraphFromTiles()
+    {
+        var tiles = _state.Tiles;
+        int size = tiles.Size;
+        _state.Roads.Clear();
+
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++)
+        {
+            if (tiles.RoadFlags[tiles.Index(x, y)] != 0)
+                _state.Roads.AddNode(x, y);
+        }
+
+        var edges = new List<(int from, int to, float cost, byte level)>();
+        ReadOnlySpan<(int dx, int dy)> dirs = [(0, -1), (1, 0), (0, 1), (-1, 0)];
+
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++)
+        {
+            if (tiles.RoadFlags[tiles.Index(x, y)] == 0) continue;
+
+            int from = _state.Roads.GetNodeAt(x, y);
+            if (from < 0) continue;
+
+            foreach (var (dx, dy) in dirs)
+            {
+                int nx = x + dx;
+                int ny = y + dy;
+                if (!tiles.InBounds(nx, ny)) continue;
+                if (tiles.RoadFlags[tiles.Index(nx, ny)] == 0) continue;
+
+                int to = _state.Roads.GetNodeAt(nx, ny);
+                if (to < 0) continue;
+
+                edges.Add((from, to, 1f, 1));
+            }
+        }
+
+        _state.Roads.BuildFromEdgeList(edges);
     }
 
     private static int NextPowerOfTwo(int value)

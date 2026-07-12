@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="happiness-root" class="happiness-meter" picking-mode="Ignore">
+        <ui:Label class="panel-section-title" text="Happiness" />
+        <ui:Label name="happiness-value" class="happiness-value" text="—" />
+        <ui:VisualElement class="happiness-track">
+            <ui:VisualElement name="happiness-fill" class="happiness-fill" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -58,8 +58,9 @@ public sealed partial class SimHost
             if (!_state.Tiles.InBounds(road.TileX, road.TileZ)) continue;
             int idx = _state.Tiles.Index(road.TileX, road.TileZ);
             _state.Tiles.RoadFlags[idx] = road.RoadFlags != 0 ? road.RoadFlags : (byte)0x01;
-            _state.Roads.AddNode(road.TileX, road.TileZ);
         }
+
+        RebuildRoadGraphFromTiles();
 
         Array.Clear(_state.Tiles.Traffic, 0, _state.Tiles.Traffic.Length);
         foreach (var tile in dto.Traffic)

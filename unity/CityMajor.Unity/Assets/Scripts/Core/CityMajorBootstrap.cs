@@ -85,6 +85,10 @@ namespace CityMajor.Core
             demandUi.transform.SetParent(root.transform, false);
             demandUi.AddComponent<DemandOverlayController>().Configure(sim);
 
+            var happinessUi = new GameObject("CityMajor_HappinessUi");
+            happinessUi.transform.SetParent(root.transform, false);
+            happinessUi.AddComponent<HappinessMeterController>().Configure(sim);
+
             var budgetUi = new GameObject("CityMajor_BudgetUi");
             budgetUi.transform.SetParent(root.transform, false);
             budgetUi.AddComponent<BudgetPanelController>().Configure(sim);

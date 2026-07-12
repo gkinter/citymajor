@@ -9,7 +9,7 @@
 ## Prerequisites
 
 - [ ] Unity **6000.5+** with **URP** project opened at `unity/CityMajor.Unity`
-- [ ] `./scripts/build-simcore-for-unity.sh` run after any `SimHost` change
+- [ ] `./scripts/build-simcore-for-unity.sh` run after any `SimHost` change (**required this commit — bulldoze + road graph rebuild**)
 - [ ] `Assets/Art/Gltf/modern` symlink valid → `web/public/assets/gltf/modern` (12 GLBs)
 - [ ] Domain reload after script/DLL changes (restart Editor if MCP/console wedged)
 
@@ -21,6 +21,7 @@
 - [ ] Console shows `[CityMajor]` sim init, not placeholder-only mode
 - [ ] **Pop / Funds** HUD updates when painting zones (not static sine placeholder)
 - [ ] **Bottom-center R/C/I** demand meters move with sim economy
+- [ ] **Happiness** meter (left stack) tracks sim happiness
 - [ ] **Hour** line shows `HH:MM ×rush` and changes over time
 
 ---
@@ -29,7 +30,7 @@
 
 - [ ] `1` / `2` / `3` — R / C / I zone paint on LMB drag
 - [ ] `0` — erase zones
-- [ ] `X` — bulldoze mode (clears zones via SimHost)
+- [ ] `X` — bulldoze mode (clears zones, buildings, roads on tile)
 - [ ] `4` — road mode; roads appear in overlay + traffic tint after sim ticks
 - [ ] MMB — camera pan
 

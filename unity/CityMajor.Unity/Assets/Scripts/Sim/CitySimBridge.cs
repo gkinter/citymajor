@@ -89,7 +89,7 @@ namespace CityMajor.Sim
             PublishFromSimHost();
         }
 
-        /// <summary>Clears zone density on tile. Full road/building removal awaits SimHost API parity.</summary>
+        /// <summary>Clears zone, buildings, and roads on tile (Forge desktop bulldoze parity).</summary>
         public void Bulldoze(int tileX, int tileY)
         {
             if (_grid != null)

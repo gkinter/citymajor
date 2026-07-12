@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="build-root" class="panel-root panel-root--build" style="display: none;">
+        <ui:VisualElement class="panel-header">
+            <ui:VisualElement>
+                <ui:Label name="build-title" class="panel-title" text="Build" />
+                <ui:Label name="build-subtitle" class="panel-subtitle" text="Plop on zoned tiles · B toggles mode" />
+            </ui:VisualElement>
+            <ui:Button name="build-close" class="panel-close" text="✕" />
+        </ui:VisualElement>
+        <ui:ScrollView name="build-scroll" class="panel-body">
+            <ui:Label name="build-status" class="panel-note" text="" />
+            <ui:VisualElement name="build-list" class="build-list" />
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

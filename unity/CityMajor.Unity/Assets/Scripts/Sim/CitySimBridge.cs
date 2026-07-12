@@ -203,6 +203,8 @@ namespace CityMajor.Sim
             var popL2 = _simHost.GetPopulationL2();
             var households = CopyHouseholds(popL2);
             var timeOfDay = snap.TimeOfDay;
+            var sampleLaw = _simHost.GetSampleLawPreview();
+            var laws = _simHost.Laws;
 
             State = new CitySimState
             {
@@ -221,6 +223,11 @@ namespace CityMajor.Sim
                 RushMultiplier = LifeSimMath.RushHourMultiplier(timeOfDay),
                 HouseholdCount = households.Length,
                 Households = households,
+                LawDefinitionCount = laws?.DefinitionCount ?? 0,
+                ActiveLawCount = laws?.ActiveLawCount ?? 0,
+                SampleLawId = sampleLaw?.Id ?? "",
+                SampleLawName = sampleLaw?.Name ?? "",
+                SampleLawActive = sampleLaw?.Active ?? false,
             };
 
             LatestServiceCoverage = _simHost.GetServiceCoverageSample(step: 8);
@@ -406,6 +413,28 @@ namespace CityMajor.Sim
             PublishFromSimHost();
             OnSaveLoaded?.Invoke();
             return true;
+        }
+
+        public bool PlaceBuilding(int tileX, int tileY, int typeId)
+        {
+            if (!_simCoreReady || typeId <= 0)
+                return false;
+
+            var ok = _simHost.PlaceBuilding(tileX, tileY, typeId);
+            if (ok)
+                PublishFromSimHost();
+            return ok;
+        }
+
+        public bool SetLawActive(string lawId, bool active)
+        {
+            if (!_simCoreReady || string.IsNullOrWhiteSpace(lawId))
+                return false;
+
+            var ok = _simHost.SetLawActive(lawId, active);
+            if (ok)
+                PublishFromSimHost();
+            return ok;
         }
     }
 }

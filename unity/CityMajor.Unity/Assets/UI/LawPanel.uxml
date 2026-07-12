@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="law-root" class="panel-root panel-root--law" style="display: none;">
+        <ui:VisualElement class="panel-header">
+            <ui:VisualElement>
+                <ui:Label name="law-title" class="panel-title" text="Laws" />
+                <ui:Label class="panel-subtitle" text="Policy catalog and active ordinances" />
+            </ui:VisualElement>
+            <ui:Button name="law-close" class="panel-close" text="✕" />
+        </ui:VisualElement>
+        <ui:ScrollView class="panel-body">
+            <ui:Label name="law-fallback" class="panel-note" text="" style="display: none;" />
+            <ui:VisualElement name="law-stats" class="citizen-stats" />
+            <ui:Label class="panel-section-title" text="Ordinances" />
+            <ui:VisualElement name="law-toggles" class="law-list" />
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

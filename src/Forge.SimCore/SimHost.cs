@@ -247,6 +247,20 @@ public sealed partial class SimHost
         return _laws.SetActive(lawId, active);
     }
 
+    public LawPreviewDto? GetSampleLawPreview()
+    {
+        if (!IsInitialized || _laws is null || _laws.DefinitionCount == 0)
+            return null;
+
+        var definition = _laws.Definitions[0];
+        return new LawPreviewDto
+        {
+            Id = definition.Id,
+            Name = definition.Name,
+            Active = _laws.IsActive(0),
+        };
+    }
+
     public void AdjustBudget(long deltaFunds)
     {
         if (!IsInitialized || _state is null || deltaFunds == 0) return;

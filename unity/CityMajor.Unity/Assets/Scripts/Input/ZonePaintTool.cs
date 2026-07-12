@@ -40,6 +40,13 @@ namespace CityMajor.Input
         return;
       }
 
+      var buildTool = GetComponent<BuildPlopTool>();
+      if (buildTool != null && buildTool.BuildModeActive)
+      {
+        _painting = false;
+        return;
+      }
+
       if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha1)) activeZone = ZoneKind.Residential;
       if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha2)) activeZone = ZoneKind.Commercial;
       if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha3)) activeZone = ZoneKind.Industrial;

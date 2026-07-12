@@ -57,6 +57,9 @@ namespace CityMajor.Core
             var roads = root.AddComponent<RoadPaintTool>();
             roads.Configure(cam, grid, sim);
 
+            var buildPlop = root.AddComponent<BuildPlopTool>();
+            buildPlop.Configure(cam, grid, sim);
+
             var roadOverlay = root.AddComponent<RoadOverlayRenderer>();
             roadOverlay.Configure(grid, sim);
 
@@ -95,6 +98,14 @@ namespace CityMajor.Core
             var tradeUi = new GameObject("CityMajor_TradeUi");
             tradeUi.transform.SetParent(root.transform, false);
             tradeUi.AddComponent<TradeStripController>().Configure(sim);
+
+            var buildUi = new GameObject("CityMajor_BuildUi");
+            buildUi.transform.SetParent(root.transform, false);
+            buildUi.AddComponent<BuildPanelController>().Configure(sim, buildPlop);
+
+            var lawUi = new GameObject("CityMajor_LawUi");
+            lawUi.transform.SetParent(root.transform, false);
+            lawUi.AddComponent<LawPanelController>().Configure(sim);
 
             var tickerUi = new GameObject("CityMajor_TickerUi");
             tickerUi.transform.SetParent(root.transform, false);

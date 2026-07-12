@@ -35,5 +35,11 @@ namespace CityMajor.Sim
 
         public int HouseholdCount;
         public HouseholdPreview[] Households;
+
+        public int LawDefinitionCount;
+        public int ActiveLawCount;
+        public string SampleLawId;
+        public string SampleLawName;
+        public bool SampleLawActive;
     }
 }

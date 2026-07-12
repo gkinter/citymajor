@@ -33,6 +33,14 @@ namespace CityMajor.Input
             if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha4))
                 roadMode = !roadMode;
 
+            var buildTool = GetComponent<BuildPlopTool>();
+            if (buildTool != null && buildTool.BuildModeActive)
+            {
+                roadMode = false;
+                _painting = false;
+                return;
+            }
+
             if (!roadMode)
             {
                 _painting = false;

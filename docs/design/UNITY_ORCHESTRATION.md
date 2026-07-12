@@ -130,6 +130,8 @@ Design: [`CITY_ECOSYSTEM_VISION.md`](./CITY_ECOSYSTEM_VISION.md) · v1 ships roa
 | `AmbientLifeController` | — | Day/night ambient + sun tint |
 | `AmbientAudioController` | — | Volume scaffold (clips TBD) |
 | `TradeStripController` | `E` | Read-only global market stub |
+| `BuildPanelController` | `B` | Service plop catalog (Fire/Police/Health…) |
+| `LawPanelController` | `L` | Ordinance catalog + sample toggle |
 | `EventTickerController` | — | Bottom HUD ticker |
 | `CityShareStub` / `BlueprintSlice` | — | v1.5 / v2.5 API stubs (no backend) |
 
@@ -146,7 +148,9 @@ Design: [`CITY_ECOSYSTEM_VISION.md`](./CITY_ECOSYSTEM_VISION.md) · v1 ships roa
 | Herald REST | 🟡 `HeraldPanelController` wired (`H`) — not in last DLL build |
 | CMJR save/load | 🟡 `SaveLoadPanelController` wired — not in last DLL build |
 
-**Controls:** `1`/`2`/`3` zones · `4` road mode · `0` erase · `R` research · `H` herald · `C` citizens · `E` trade stub · `F1` help · `V` service overlay · `T` edge traffic · LMB paint · MMB pan
+**Controls:** `1`/`2`/`3` zones · `4` road · `0` erase · `R` research · `H` herald · `C` citizens · `L` laws · `B` build · `E` trade · `F1` help · `V` services · `T` edges · `Space` pause · `5`/`6`/`7` speed · LMB · MMB pan
+
+**Play gate:** [UNITY_PLAY_CHECKLIST.md](./UNITY_PLAY_CHECKLIST.md) · **CityMajor → Open Play Verification Checklist**
 
 ---
 

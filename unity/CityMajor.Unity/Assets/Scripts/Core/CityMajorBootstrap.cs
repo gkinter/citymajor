@@ -104,6 +104,10 @@ namespace CityMajor.Core
             saveUi.transform.SetParent(root.transform, false);
             saveUi.AddComponent<SaveLoadPanelController>().Configure(sim);
 
+            var helpUi = new GameObject("CityMajor_HelpUi");
+            helpUi.transform.SetParent(root.transform, false);
+            helpUi.AddComponent<HelpPanelController>().Configure(sim);
+
             root.AddComponent<CitizenPickTool>().Configure(cam, pedestrians, citizenPanel);
 
             // Disable template Main Camera if present

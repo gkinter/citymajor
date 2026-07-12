@@ -11,6 +11,10 @@
                 <ui:Label class="hud-label" text="Funds" />
                 <ui:Label name="funds-value" class="hud-value" text="—" />
             </ui:VisualElement>
+            <ui:VisualElement class="hud-stat">
+                <ui:Label class="hud-label" text="Hour" />
+                <ui:Label name="time-value" class="hud-value" text="—" />
+            </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement class="hud-demand">
             <ui:VisualElement class="demand-row">

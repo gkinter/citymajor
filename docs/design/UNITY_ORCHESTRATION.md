@@ -146,7 +146,7 @@ Design: [`CITY_ECOSYSTEM_VISION.md`](./CITY_ECOSYSTEM_VISION.md) · v1 ships roa
 | Herald REST | 🟡 `HeraldPanelController` wired (`H`) — not in last DLL build |
 | CMJR save/load | 🟡 `SaveLoadPanelController` wired — not in last DLL build |
 
-**Controls:** `1`/`2`/`3` zones · `4` road mode · `0` erase · `R` research · `H` herald · `C` citizens · `E` trade stub · `V` service overlay · `T` edge traffic · LMB paint · MMB pan
+**Controls:** `1`/`2`/`3` zones · `4` road mode · `0` erase · `R` research · `H` herald · `C` citizens · `E` trade stub · `F1` help · `V` service overlay · `T` edge traffic · LMB paint · MMB pan
 
 ---
 

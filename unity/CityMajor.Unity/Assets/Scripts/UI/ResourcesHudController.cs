@@ -15,6 +15,7 @@ namespace CityMajor.UI
         UIDocument _document;
         Label _popValue;
         Label _fundsValue;
+        Label _timeValue;
         Label _rDemandText;
         Label _cDemandText;
         Label _iDemandText;
@@ -72,6 +73,7 @@ namespace CityMajor.UI
 
             _popValue = root.Q<Label>("pop-value");
             _fundsValue = root.Q<Label>("funds-value");
+            _timeValue = root.Q<Label>("time-value");
             _rDemandText = root.Q<Label>("r-demand-text");
             _cDemandText = root.Q<Label>("c-demand-text");
             _iDemandText = root.Q<Label>("i-demand-text");
@@ -92,6 +94,12 @@ namespace CityMajor.UI
 
             _popValue.text = state.Population.ToString("N0");
             _fundsValue.text = FormatFunds(state.Funds);
+            if (_timeValue != null)
+            {
+                var hour = Mathf.FloorToInt(state.TimeOfDay % 24f);
+                var min = Mathf.FloorToInt((state.TimeOfDay % 1f) * 60f);
+                _timeValue.text = $"{hour:D2}:{min:D2} ×{state.RushMultiplier:F1}";
+            }
             SetDemandRow(_rDemandText, _rDemandFill, state.DemandResidential);
             SetDemandRow(_cDemandText, _cDemandFill, state.DemandCommercial);
             SetDemandRow(_iDemandText, _iDemandFill, state.DemandIndustrial);

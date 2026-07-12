@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using CityMajor.Net;
 using CityMajor.Sim;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,6 +20,7 @@ namespace CityMajor.UI
         Label _status;
         Button _saveBtn;
         Button _loadBtn;
+        Button _shareBtn;
 
         public void Configure(CitySimBridge sim)
         {
@@ -57,11 +59,14 @@ namespace CityMajor.UI
             _status = root.Q<Label>("save-load-status");
             _saveBtn = root.Q<Button>("save-btn");
             _loadBtn = root.Q<Button>("load-btn");
+            _shareBtn = root.Q<Button>("share-btn");
 
             if (_saveBtn != null)
                 _saveBtn.clicked += OnSaveClicked;
             if (_loadBtn != null)
                 _loadBtn.clicked += OnLoadClicked;
+            if (_shareBtn != null)
+                _shareBtn.clicked += OnShareClicked;
         }
 
         void OnDestroy()
@@ -70,6 +75,33 @@ namespace CityMajor.UI
                 _saveBtn.clicked -= OnSaveClicked;
             if (_loadBtn != null)
                 _loadBtn.clicked -= OnLoadClicked;
+            if (_shareBtn != null)
+                _shareBtn.clicked -= OnShareClicked;
+        }
+
+        void OnShareClicked()
+        {
+            if (_sim == null)
+                return;
+
+            var tick = _sim.LatestSnapshot?.TickCount ?? 0;
+            byte[] preview = null;
+            if (_sim.UsesForgeSimCore)
+            {
+                try
+                {
+                    preview = _sim.ExportSave(DefaultCityName);
+                }
+                catch
+                {
+                    // Spectator link still works without preview hash.
+                }
+            }
+
+            var url = CityShareStub.BuildSpectatorLink(DefaultCityName, tick, preview);
+            GUIUtility.systemCopyBuffer = url;
+            SetStatus("Link copied");
+            Debug.Log($"[CityMajor] Spectator stub URL: {url}");
         }
 
         void OnSaveClicked()

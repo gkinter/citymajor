@@ -4,6 +4,7 @@
         <ui:VisualElement class="save-load-row">
             <ui:Button name="save-btn" class="save-load-btn" text="Save" />
             <ui:Button name="load-btn" class="save-load-btn" text="Load" />
+            <ui:Button name="share-btn" class="save-load-btn" text="Share" />
         </ui:VisualElement>
         <ui:Label name="save-load-status" class="save-load-status" text="CMJR v1 · local file" />
     </ui:VisualElement>

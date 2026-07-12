@@ -26,9 +26,124 @@
     bottom: 12px;
     right: 12px;
     top: auto;
-    min-width: 168px;
-    max-width: 220px;
+    min-width: 200px;
+    max-width: 260px;
     padding: 8px 10px;
+}
+
+.panel-root--citizen,
+.panel-root--trade {
+    top: 12px;
+    left: 12px;
+    width: 340px;
+    max-width: 340px;
+    max-height: 78%;
+}
+
+.panel-root--help {
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: 360px;
+    max-width: 360px;
+    max-height: 70%;
+}
+
+.panel-body {
+    flex-grow: 1;
+}
+
+.panel-note {
+    font-size: 10px;
+    color: rgba(200, 210, 225, 0.7);
+    margin-bottom: 10px;
+    white-space: normal;
+    padding: 8px 10px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.citizen-stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.citizen-stat {
+    flex-direction: column;
+    margin-right: 16px;
+    margin-bottom: 6px;
+}
+
+.citizen-stat Label {
+    font-size: 10px;
+    color: rgba(200, 210, 225, 0.65);
+}
+
+.citizen-stat Label#value {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(235, 240, 250);
+}
+
+.citizen-list {
+    flex-grow: 1;
+}
+
+.citizen-row {
+    margin-bottom: 6px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(20, 24, 34, 0.85);
+    font-size: 10px;
+    color: rgb(225, 232, 245);
+    white-space: normal;
+    align-items: flex-start;
+}
+
+.citizen-row--selected {
+    border-color: rgba(255, 184, 77, 0.55);
+    background-color: rgba(255, 184, 77, 0.1);
+}
+
+.ticker-root {
+    position: absolute;
+    bottom: 48px;
+    left: 12px;
+    right: 240px;
+    padding: 6px 10px;
+    background-color: rgba(12, 16, 24, 0.75);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.ticker-line {
+    font-size: 10px;
+    color: rgba(200, 210, 225, 0.75);
+}
+
+.help-body {
+    max-height: 420px;
+}
+
+.help-section {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: rgba(180, 190, 210, 0.85);
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.help-line {
+    font-size: 10px;
+    color: rgba(210, 218, 230, 0.88);
+    margin-bottom: 3px;
+    white-space: normal;
 }
 
 .save-load-row {

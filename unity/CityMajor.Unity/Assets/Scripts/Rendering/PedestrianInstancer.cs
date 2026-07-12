@@ -18,12 +18,13 @@ namespace CityMajor.Rendering
         ZoneGrid _grid;
         CitySimBridge _sim;
         Mesh _mesh;
-        Material _mat;
+        readonly Material[] _materials = new Material[3];
+        readonly Matrix4x4[][] _matricesByTier = { new Matrix4x4[256], new Matrix4x4[256], new Matrix4x4[256] };
+        readonly int[] _countsByTier = new int[3];
         SimSnapshot _snap;
         CitySimState _state;
 
         readonly List<PedSlot> _slots = new(maxPedestrians);
-        readonly Matrix4x4[] _matrices = new Matrix4x4[256];
         readonly System.Random _rng = new(91);
 
         struct PedSlot
@@ -31,9 +32,23 @@ namespace CityMajor.Rendering
             public Vector3 Position;
             public Vector3 Target;
             public float Speed;
-            public Color Tint;
+            public byte Tier;
             public string HouseholdId;
         }
+
+        static byte TierForHappiness(float happiness)
+        {
+            if (happiness >= 0.65f) return 0;
+            if (happiness >= 0.4f) return 1;
+            return 2;
+        }
+
+        static Color TierColor(byte tier) => tier switch
+        {
+            0 => new Color(0.35f, 0.85f, 0.45f),
+            1 => new Color(0.95f, 0.75f, 0.35f),
+            _ => new Color(0.95f, 0.35f, 0.32f),
+        };
 
         public void Configure(ZoneGrid grid, CitySimBridge sim)
         {
@@ -44,8 +59,14 @@ namespace CityMajor.Rendering
             _mesh = sphere.GetComponent<MeshFilter>().sharedMesh;
             Destroy(sphere);
 
-            _mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            _mat.enableInstancing = true;
+            for (var t = 0; t < 3; t++)
+            {
+                _materials[t] = new Material(Shader.Find("Universal Render Pipeline/Lit"))
+                {
+                    color = TierColor((byte)t),
+                    enableInstancing = true,
+                };
+            }
 
             _sim.OnSnapshotChanged += OnSnapshot;
             _sim.OnStateChanged += OnState;
@@ -93,13 +114,12 @@ namespace CityMajor.Rendering
                         0f,
                         (float)(_rng.NextDouble() - 0.5) * clusterRadius);
                     var pos = center + jitter;
-                    var (r, g, b) = LifeSimMath.HappinessRgb(h.Happiness);
                     _slots.Add(new PedSlot
                     {
                         Position = pos,
                         Target = pos + RandomWalkDelta(),
                         Speed = Mathf.Lerp(0.8f, 2.2f, h.Happiness),
-                        Tint = new Color(r, g, b, 1f),
+                        Tier = TierForHappiness(h.Happiness),
                         HouseholdId = h.Id,
                     });
                 }
@@ -107,7 +127,6 @@ namespace CityMajor.Rendering
                 return;
             }
 
-            // Fallback: cluster near commercial + residential zones.
             var zones = _snap?.TileZoneTypes;
             if (zones == null || zones.Length == 0)
                 return;
@@ -133,13 +152,12 @@ namespace CityMajor.Rendering
                 var center = _grid.TileCenter(pick.x, pick.y);
                 center.y = 0.55f;
                 var happiness = pick.zone == 3 ? 0.62f : 0.55f;
-                var (r, g, b) = LifeSimMath.HappinessRgb(happiness);
                 _slots.Add(new PedSlot
                 {
                     Position = center,
                     Target = center + RandomWalkDelta(),
                     Speed = 1.2f,
-                    Tint = new Color(r, g, b, 1f),
+                    Tier = TierForHappiness(happiness),
                     HouseholdId = $"HH-{pick.x}-{pick.y}",
                 });
             }
@@ -154,12 +172,15 @@ namespace CityMajor.Rendering
 
         void LateUpdate()
         {
-            if (_mesh == null || _mat == null || _slots.Count == 0)
+            if (_mesh == null || _slots.Count == 0)
                 return;
 
+            for (var t = 0; t < 3; t++)
+                _countsByTier[t] = 0;
+
             var dt = Time.deltaTime;
-            var count = Mathf.Min(_slots.Count, _matrices.Length);
-            for (var i = 0; i < count; i++)
+            var scale = new Vector3(0.22f, 0.35f, 0.22f);
+            for (var i = 0; i < _slots.Count; i++)
             {
                 var slot = _slots[i];
                 slot.Position = Vector3.MoveTowards(slot.Position, slot.Target, slot.Speed * dt);
@@ -167,35 +188,21 @@ namespace CityMajor.Rendering
                     slot.Target = slot.Position + RandomWalkDelta();
                 _slots[i] = slot;
 
-                _matrices[i] = Matrix4x4.TRS(slot.Position, Quaternion.identity, new Vector3(0.22f, 0.35f, 0.22f));
+                var tier = Mathf.Clamp(slot.Tier, (byte)0, (byte)2);
+                var idx = _countsByTier[tier]++;
+                if (idx < _matricesByTier[tier].Length)
+                    _matricesByTier[tier][idx] = Matrix4x4.TRS(slot.Position, Quaternion.identity, scale);
             }
 
-            // Per-instance color via MaterialPropertyBlock would be ideal; single tint batch for scaffold.
-            var avg = AverageTint(count);
-            _mat.color = avg;
-            Graphics.DrawMeshInstanced(_mesh, 0, _mat, _matrices, count);
-        }
-
-        Color AverageTint(int count)
-        {
-            if (count <= 0)
-                return Color.white;
-            var r = 0f;
-            var g = 0f;
-            var b = 0f;
-            for (var i = 0; i < count; i++)
+            for (var t = 0; t < 3; t++)
             {
-                var c = _slots[i].Tint;
-                r += c.r;
-                g += c.g;
-                b += c.b;
+                var count = _countsByTier[t];
+                if (count <= 0 || _materials[t] == null)
+                    continue;
+                Graphics.DrawMeshInstanced(_mesh, 0, _materials[t], _matricesByTier[t], count);
             }
-
-            var inv = 1f / count;
-            return new Color(r * inv, g * inv, b * inv, 1f);
         }
 
-        /// <summary>Ray pick for citizen panel — returns household id if within radius.</summary>
         public bool TryPick(Vector3 worldPoint, float radius, out string householdId)
         {
             householdId = "";

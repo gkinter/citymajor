@@ -16,6 +16,14 @@ namespace CityMajor.Input
     [SerializeField] ZoneKind activeZone = ZoneKind.Residential;
     [SerializeField] int brushRadius = 2;
 
+    public string ActiveZoneLabel() => activeZone switch
+    {
+        ZoneKind.Residential => "Zone R (1)",
+        ZoneKind.Commercial => "Zone C (2)",
+        ZoneKind.Industrial => "Zone I (3)",
+        _ => "Erase zone (0)",
+    };
+
     Camera _camera;
     ZoneGrid _grid;
     CitySimBridge _sim;

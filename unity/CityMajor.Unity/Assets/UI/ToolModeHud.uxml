@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:Label name="tool-mode-label" class="tool-mode-hud" text="Tool: Zone R" picking-mode="Ignore" />
+</ui:UXML>

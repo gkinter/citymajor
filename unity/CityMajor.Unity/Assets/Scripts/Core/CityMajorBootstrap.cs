@@ -130,6 +130,10 @@ namespace CityMajor.Core
             helpUi.transform.SetParent(root.transform, false);
             helpUi.AddComponent<HelpPanelController>().Configure(sim);
 
+            var toolHud = new GameObject("CityMajor_ToolModeHud");
+            toolHud.transform.SetParent(root.transform, false);
+            toolHud.AddComponent<ToolModeHudController>().Configure(paint, roads, buildPlop, bulldoze);
+
             root.AddComponent<CitizenPickTool>().Configure(cam, pedestrians, citizenPanel);
 
             // Disable template Main Camera if present

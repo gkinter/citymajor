@@ -15,7 +15,7 @@
             <ui:Label class="help-line" text="LMB — Paint · MMB — Pan camera" />
             <ui:Label class="help-section" text="Panels" />
             <ui:Label class="help-line" text="R — Research · H — Herald · C — Citizens · L — Laws" />
-            <ui:Label class="help-line" text="B — Build / plop · E — Trade stub · F1 — This help" />
+            <ui:Label class="help-line" text="B — Build / plop · P — Blueprint · E — Trade stub · F1 — This help" />
             <ui:Label class="help-section" text="Time" />
             <ui:Label class="help-line" text="Space — Pause · 5/6/7 — 1× / 2× / 4× sim speed" />
             <ui:Label class="help-section" text="Overlays" />

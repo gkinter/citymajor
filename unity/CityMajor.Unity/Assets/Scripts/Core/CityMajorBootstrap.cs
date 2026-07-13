@@ -138,6 +138,10 @@ namespace CityMajor.Core
             lawUi.transform.SetParent(root.transform, false);
             lawUi.AddComponent<LawPanelController>().Configure(sim);
 
+            var blueprintUi = new GameObject("CityMajor_BlueprintUi");
+            blueprintUi.transform.SetParent(root.transform, false);
+            blueprintUi.AddComponent<BlueprintPanelController>().Configure(sim);
+
             var tickerUi = new GameObject("CityMajor_TickerUi");
             tickerUi.transform.SetParent(root.transform, false);
             tickerUi.AddComponent<EventTickerController>().Configure(sim);

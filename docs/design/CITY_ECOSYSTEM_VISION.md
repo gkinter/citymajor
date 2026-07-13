@@ -328,6 +328,9 @@ All cosmetic layers are wired in `CityMajorBootstrap` and sample `SimSnapshot` /
 | `Input/CitizenPickTool.cs` | v1.1 pick → panel |
 | `Net/CityShareStub.cs` | v1.5 spectator URL |
 | `Save/BlueprintSlice.cs` | v2.5 CMJR chunk 0x02 |
+| `Platform/SteamWorkshopStub.cs` | v2.5 Workshop publish/subscribe (log-only) |
+| `UI/BlueprintPanelController.cs` | v2.5 blueprint panel (`P`) |
+| `UI/BlueprintPanel.uxml` | Blueprint panel layout |
 | `Forge.SimWasm/LifeSimMath.cs` | Shared rush + happiness tint |
 | `SimHost.GetPopulationL2()` | L2 export bridge |
 

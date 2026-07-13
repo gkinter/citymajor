@@ -76,12 +76,67 @@
 
 .panel-root--citizen,
 .panel-root--trade,
-.panel-root--law {
+.panel-root--law,
+.panel-root--blueprint {
     top: 12px;
     left: 12px;
     width: 340px;
     max-width: 340px;
     max-height: 78%;
+}
+
+.panel-root--blueprint {
+    top: auto;
+    bottom: 120px;
+    left: 12px;
+    width: 300px;
+    max-width: 300px;
+    max-height: 55%;
+}
+
+.blueprint-dims {
+    margin-bottom: 10px;
+}
+
+.blueprint-dim-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: rgba(20, 24, 34, 0.85);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.blueprint-dim-row Label#label {
+    font-size: 10px;
+    color: rgba(200, 210, 225, 0.7);
+}
+
+.blueprint-dim-row Label#value {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(235, 240, 250);
+}
+
+.blueprint-export-btn {
+    margin-bottom: 8px;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(89, 153, 255, 0.35);
+    background-color: rgba(89, 153, 255, 0.15);
+    color: rgb(225, 232, 245);
+}
+
+.blueprint-workshop-btn {
+    margin-top: 4px;
+    margin-bottom: 6px;
+    font-size: 10px;
+    padding: 4px 10px;
+    opacity: 0.5;
 }
 
 .panel-root--build {

@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="blueprint-root" class="panel-root panel-root--blueprint" style="display: none;">
+        <ui:VisualElement class="panel-header">
+            <ui:VisualElement>
+                <ui:Label name="blueprint-title" class="panel-title" text="Blueprint" />
+                <ui:Label class="panel-subtitle" text="District slice export (CMJR chunk 0x02)" />
+            </ui:VisualElement>
+            <ui:Button name="blueprint-close" class="panel-close" text="✕" />
+        </ui:VisualElement>
+        <ui:ScrollView class="panel-body">
+            <ui:Label class="panel-section-title" text="Slice dimensions (stub)" />
+            <ui:VisualElement name="blueprint-dims" class="blueprint-dims" />
+            <ui:Button name="blueprint-export" class="blueprint-export-btn" text="Export header" />
+            <ui:Label name="blueprint-status" class="panel-note" text="Header-only export — full CMJR slice writer pending v2.5" />
+            <ui:Button name="blueprint-workshop" class="blueprint-workshop-btn" text="Workshop (v2.5)" enabled="false" />
+            <ui:Label class="panel-note" text="Steam UGC publish/subscribe — disabled until v2.5 Steamworks wiring." />
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

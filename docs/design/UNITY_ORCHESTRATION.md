@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `91c83f5` — onboarding overlay + help panel sync + CI 932 tests  
+**Integration tip:** `c81ced6` — SimCore PopulationGrowthTracker + 11 tests (833 total)  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -236,7 +236,8 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `BlueprintPanelController` | `P` | District slice export stub (v2.5 Workshop) |
 | `TradeStripController` | `E` | Read-only global market stub |
 | `SaveLoadPanelController` | — | CMJR save/load + share stub URL |
-| `HelpPanelController` | `F1` | Control reference overlay |
+| `HelpPanelController` | `F1` | Control reference overlay (synced with orchestration doc) |
+| `OnboardingOverlayController` | — | First-run welcome; dismiss via PlayerPrefs `citymajor.onboarding.v1` |
 
 #### Platform (Phase 3)
 
@@ -287,7 +288,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | Achievements catalog + toast | ✅ 12 v1 rows |
 | Cloud saves (CMJR) | 🟡 `SteamCloudSave` when SDK live |
 | Headless Windows build | ✅ `./scripts/build-steam-unity.sh` |
-| CI SimCore gate | ✅ `.github/workflows/unity-simcore.yml` + Engine (822) + Game (110) tests |
+| CI SimCore gate | ✅ `.github/workflows/unity-simcore.yml` + Engine (833) + Game (110) tests |
 | Steamworks.NET install | 🟡 see install doc below |
 | Partner App ID + depots | ⬜ |
 

@@ -1,4 +1,5 @@
 using CityMajor.Sim;
+using Forge.SimCore;
 using Forge.Engine.Simulation;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -125,7 +126,7 @@ namespace CityMajor.UI
             }
 
             _popGrowth.style.display = DisplayStyle.Flex;
-            _popGrowth.text = $"({PopulationGrowthFormat.PerMonth(rate.Value)})";
+            _popGrowth.text = $"({PopulationGrowthFormat.FormatGrowthPerMonth(rate.Value)})";
             _popGrowth.EnableInClassList("hud-sub--good", rate.Value > 0);
             _popGrowth.EnableInClassList("hud-sub--bad", rate.Value < 0);
         }

@@ -4,7 +4,11 @@ using UnityEngine.UIElements;
 
 namespace CityMajor.UI
 {
-    /// <summary>Keyboard + overlay reference. Toggle with F1.</summary>
+    /// <summary>
+    /// Keyboard + overlay reference. Toggle with F1; Esc closes while open.
+    /// Help copy lives in <c>HelpPanel.uxml</c> — keep in sync with
+    /// <c>docs/design/UNITY_ORCHESTRATION.md</c> controls summary.
+    /// </summary>
     public sealed class HelpPanelController : MonoBehaviour
     {
         const string PanelPath = "Assets/UI/HelpPanel.uxml";

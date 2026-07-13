@@ -14,7 +14,7 @@ on:
 jobs:
   simcore:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
@@ -49,8 +49,19 @@ jobs:
           fi
           echo "OK: $DLL ($(du -h "$DLL" | cut -f1))"
 
-      # Forge.Game.Tests does not yet compile against the Unity SimCore layout (missing game host wiring).
-      - name: Run Forge.Engine.Tests
+      # -----------------------------------------------------------------------
+      # dotnet tests
+      # Forge.Engine.Tests (822 tests) and Forge.Game.Tests (110 tests) both
+      # target net8.0 and reference Forge.Engine + Forge.Game.  Neither calls
+      # SDL2/OpenGL at runtime — they exercise pure sim/engine logic — so both
+      # suites are safe on headless ubuntu-latest.
+      # -----------------------------------------------------------------------
+      - name: Test Forge.Engine.Tests
         run: |
           dotnet test tests/Forge.Engine.Tests/Forge.Engine.Tests.csproj \
-            -c Release --verbosity normal
+            -c Release --logger "console;verbosity=minimal"
+
+      - name: Test Forge.Game.Tests
+        run: |
+          dotnet test tests/Forge.Game.Tests/Forge.Game.Tests.csproj \
+            -c Release --logger "console;verbosity=minimal"

@@ -164,6 +164,8 @@ namespace CityMajor.Core
 
             root.AddComponent<CitizenPickTool>().Configure(cam, pedestrians, citizenPanel);
 
+            root.AddComponent<OnboardingOverlayController>().Configure();
+
             // Disable template Main Camera if present
             var main = GameObject.Find("Main Camera");
             if (main != null && main != camGo)

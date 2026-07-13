@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="OnboardingOverlay.uss" />
+    <ui:VisualElement name="onboarding-root" class="onboarding-root" style="display: none;">
+        <ui:VisualElement class="onboarding-card">
+            <ui:Label class="onboarding-title" text="Welcome to CityMajor" />
+            <ui:Label class="onboarding-body" text="Build your frontier town and grow it into an industrial city. Zone residential, commercial, and industrial tiles, lay roads, and watch the demand meters at the bottom." />
+            <ui:Button name="onboarding-dismiss" class="onboarding-btn" text="Got it" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

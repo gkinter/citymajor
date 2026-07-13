@@ -48,3 +48,9 @@ jobs:
             exit 1
           fi
           echo "OK: $DLL ($(du -h "$DLL" | cut -f1))"
+
+      # Forge.Game.Tests does not yet compile against the Unity SimCore layout (missing game host wiring).
+      - name: Run Forge.Engine.Tests
+        run: |
+          dotnet test tests/Forge.Engine.Tests/Forge.Engine.Tests.csproj \
+            -c Release --verbosity normal

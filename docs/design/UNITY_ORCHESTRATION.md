@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `96217ff` — achievements scaffold + Steam headless build  
+**Integration tip:** `wave-2` — pop growth HUD `(+N/mo)` + Forge.Engine.Tests in CI  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -17,7 +17,7 @@
 | Forge.SimCore bridge | SB-4172 | ✅ `SimHost` + `CitySimBridge` @ 8 Hz; bulldoze + road graph rebuild | — |
 | GLTF instancing | SB-4173 | 🟡 gltfast + catalog wired — **reimport GLBs in Unity** | Agent |
 | Zone paint | SB-4174 | ✅ Done + `SimHost.PaintZone` | — |
-| RCI HUD | SB-4175 | ✅ UI Toolkit `ResourcesHud` + `DemandOverlayController` | — |
+| RCI HUD | SB-4175 | ✅ UI Toolkit `ResourcesHud` + `DemandOverlayController` + pop growth `(+N/mo)` | — |
 | Bulldoze tool | — | ✅ `BulldozeTool` + `SimHost.Bulldoze` (`X`) | — |
 | Demand overlay | — | ✅ Bottom-center R/C/I meters | — |
 | Tool mode HUD | — | ✅ `ToolModeHudController` — active paint/road/build/bulldoze | — |
@@ -214,7 +214,8 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 
 | Component | Key / toggle | Notes |
 |-----------|--------------|-------|
-| `ResourcesHudController` | — | Pop, funds, hour, rush multiplier |
+| `ResourcesHudController` | — | Pop, funds, hour, rush multiplier, growth `(+N/mo)` |
+| `EraBadgeController` | — | Era name badge (reads `SimSnapshot.Era`) |
 | `DemandOverlayController` | — | Bottom-center bidirectional R/C/I meters |
 | `HappinessMeterController` | — | Left-stack happiness bar |
 | `BudgetPanelController` | — | Top-right economy strip |
@@ -232,6 +233,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `CitizenPanelController` | `C` | L2 household list |
 | `LawPanelController` | `L` | Ordinance catalog + sample toggle |
 | `BuildPanelController` | `B` | Service plop catalog |
+| `BlueprintPanelController` | `P` | District slice export stub (v2.5 Workshop) |
 | `TradeStripController` | `E` | Read-only global market stub |
 | `SaveLoadPanelController` | — | CMJR save/load + share stub URL |
 | `HelpPanelController` | `F1` | Control reference overlay |
@@ -243,6 +245,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `SteamRichPresenceController` | — | Pop + approval when SDK live |
 | `SteamAchievementTracker` | — | Evaluates `achievements-v1.json` |
 | `AchievementToastController` | — | Top-center unlock queue |
+| `SteamWorkshopStub` | — | Log-only UGC publish stub |
 
 #### Not in bootstrap (library stubs)
 
@@ -251,7 +254,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `CityShareStub` | Spectator URL from save panel |
 | `BlueprintSlice` / `BlueprintSliceWriter` | v2.5 Workshop chunk header stub |
 
-**Controls summary:** `1`/`2`/`3` zones · `4` road · `0` erase · `X` bulldoze · `R` research · `H` herald · `C` citizens · `L` laws · `B` build · `E` trade · `F1` help · `V` services · `T` edges · `Space` pause · `5`/`6`/`7` speed · LMB · MMB pan
+**Controls summary:** `1`/`2`/`3` zones · `4` road · `0` erase · `X` bulldoze · `R` research · `H` herald · `C` citizens · `L` laws · `B` build · `P` blueprint · `E` trade · `F1` help · `V` services · `T` edges · `Space` pause · `5`/`6`/`7` speed · LMB · MMB pan
 
 **Play gate:** [UNITY_PLAY_CHECKLIST.md](./UNITY_PLAY_CHECKLIST.md) · **CityMajor → Open Play Verification Checklist**
 
@@ -284,6 +287,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | Achievements catalog + toast | ✅ 12 v1 rows |
 | Cloud saves (CMJR) | 🟡 `SteamCloudSave` when SDK live |
 | Headless Windows build | ✅ `./scripts/build-steam-unity.sh` |
+| CI SimCore gate | ✅ `.github/workflows/unity-simcore.yml` + Forge.Engine.Tests (822) |
 | Steamworks.NET install | 🟡 see install doc below |
 | Partner App ID + depots | ⬜ |
 

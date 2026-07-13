@@ -6,6 +6,7 @@
             <ui:VisualElement class="hud-stat">
                 <ui:Label class="hud-label" text="Pop" />
                 <ui:Label name="pop-value" class="hud-value" text="—" />
+                <ui:Label name="pop-growth" class="hud-growth" text="" />
             </ui:VisualElement>
             <ui:VisualElement class="hud-stat">
                 <ui:Label class="hud-label" text="Funds" />

@@ -1,4 +1,5 @@
 using CityMajor.Sim;
+using Forge.Engine.Simulation;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -14,13 +15,18 @@ namespace CityMajor.UI
         CitySimBridge _sim;
         UIDocument _document;
         Label _popValue;
+        Label _popGrowth;
         Label _fundsValue;
         Label _timeValue;
+        readonly PopulationGrowthTracker _growthTracker = new();
 
         public void Configure(CitySimBridge sim)
         {
             if (_sim != null)
+            {
                 _sim.OnStateChanged -= OnStateChanged;
+                _sim.OnSnapshotChanged -= OnSnapshot;
+            }
 
             _sim = sim;
             EnsureUiDocument();
@@ -28,14 +34,20 @@ namespace CityMajor.UI
             if (_sim != null)
             {
                 _sim.OnStateChanged += OnStateChanged;
+                _sim.OnSnapshotChanged += OnSnapshot;
                 OnStateChanged(_sim.State);
+                if (_sim.LatestSnapshot != null)
+                    OnSnapshot(_sim.LatestSnapshot);
             }
         }
 
         void OnDestroy()
         {
             if (_sim != null)
+            {
                 _sim.OnStateChanged -= OnStateChanged;
+                _sim.OnSnapshotChanged -= OnSnapshot;
+            }
         }
 
         void EnsureUiDocument()
@@ -66,8 +78,15 @@ namespace CityMajor.UI
                 return;
 
             _popValue = root.Q<Label>("pop-value");
+            _popGrowth = root.Q<Label>("pop-growth");
             _fundsValue = root.Q<Label>("funds-value");
             _timeValue = root.Q<Label>("time-value");
+        }
+
+        void OnSnapshot(SimSnapshot snapshot)
+        {
+            _growthTracker.Push(snapshot.TickCount, snapshot.Population);
+            ApplyGrowthLabel();
         }
 
         void OnStateChanged(CitySimState state) => ApplyState(state);
@@ -88,6 +107,30 @@ namespace CityMajor.UI
                 var min = Mathf.FloorToInt((state.TimeOfDay % 1f) * 60f);
                 _timeValue.text = $"{hour:D2}:{min:D2} ×{state.RushMultiplier:F1}";
             }
+
+            ApplyGrowthLabel();
+        }
+
+        void ApplyGrowthLabel()
+        {
+            if (_popGrowth == null)
+                return;
+
+            var rate = _growthTracker.EstimatePerMonth();
+            if (rate == null)
+            {
+                _popGrowth.text = "";
+                _popGrowth.style.display = DisplayStyle.None;
+                return;
+            }
+
+            _popGrowth.style.display = DisplayStyle.Flex;
+            _popGrowth.text = $"({PopulationGrowthFormat.PerMonth(rate.Value)})";
+            _popGrowth.style.color = rate.Value > 0
+                ? new Color(0.49f, 1f, 0.7f)
+                : rate.Value < 0
+                    ? new Color(1f, 0.44f, 0.44f)
+                    : new Color(0.78f, 0.82f, 0.88f);
         }
 
         static string FormatFunds(int cityFunds)

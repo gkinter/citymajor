@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="EraBadge.uss" />
+    <ui:VisualElement name="era-badge-root" class="era-badge-root" picking-mode="Ignore">
+        <ui:Label name="era-label" class="era-badge-label" text="Modern" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -23,6 +23,7 @@
 - [ ] **Bottom-center R/C/I** demand meters move with sim economy
 - [ ] **Happiness** meter (left stack) tracks sim happiness
 - [ ] **Hour** line shows `HH:MM ×rush` and changes over time
+- [ ] **Era badge** below Pop/Funds HUD shows **Modern** (blue accent) or current sim era
 
 ---
 

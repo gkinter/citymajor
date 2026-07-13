@@ -82,6 +82,10 @@ namespace CityMajor.Core
             var hud = root.AddComponent<ResourcesHudController>();
             hud.Configure(sim);
 
+            var eraBadgeUi = new GameObject("CityMajor_EraBadge");
+            eraBadgeUi.transform.SetParent(root.transform, false);
+            eraBadgeUi.AddComponent<EraBadgeController>().Configure(sim);
+
             var demandUi = new GameObject("CityMajor_DemandOverlay");
             demandUi.transform.SetParent(root.transform, false);
             demandUi.AddComponent<DemandOverlayController>().Configure(sim);

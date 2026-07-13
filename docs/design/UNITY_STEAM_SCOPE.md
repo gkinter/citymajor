@@ -11,7 +11,7 @@
 |------|-----|-------|
 | Steam App ID + depots | ⬜ | Partner site → `SteamAppConfig.AppId` + `steam_appid.txt` |
 | Steamworks.NET init | 🟡 | `SteamNativePlatform` + `STEAMWORKS_NET` define — see [INSTALL_STEAMWORKS_NET.md](../steam/INSTALL_STEAMWORKS_NET.md) |
-| Achievements | ⬜ | Mirror web milestone IDs when defined |
+| Achievements | 🟡 | 12 v1 rows in `StreamingAssets/achievements-v1.json` + toast UI |
 | Cloud saves (CMJR) | 🟡 | `SteamCloudSave` on Save/Load when SDK live |
 | Workshop / blueprints | ⬜ | v2.5 — `BlueprintSlice` chunk ready |
 | Rich presence | 🟡 | `SteamRichPresenceController` — pop + approval |
@@ -63,7 +63,9 @@ Full steps: [docs/steam/INSTALL_STEAMWORKS_NET.md](../steam/INSTALL_STEAMWORKS_N
 | `Assets/Scripts/Platform/SteamBootstrap.cs` | Init/shutdown + callbacks |
 | `Assets/Scripts/Platform/SteamCloudSave.cs` | CMJR Remote Storage |
 | `Assets/Scripts/Platform/SteamRichPresenceController.cs` | Pop + approval presence |
-| `SaveLoadPanelController` | Upload on save, cloud fallback on load |
+| `SteamAchievementTracker` | — | Evaluates catalog → Steam unlock + toast |
+| `AchievementToastController` | — | Top-center popup queue |
+| `CityMajorSteamBuild` | Editor / CI | `build-steam-unity.sh` → `Build/Steam/windows/` |
 | `CityShareStub` | Future: Steam invite / spectator deep link |
 
 ---

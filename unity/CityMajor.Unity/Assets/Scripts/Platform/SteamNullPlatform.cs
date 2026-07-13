@@ -24,5 +24,17 @@ namespace CityMajor.Platform
             data = null;
             return false;
         }
+
+        public bool IsAchievementUnlocked(string apiName)
+        {
+            _ = apiName;
+            return false;
+        }
+
+        public bool TryUnlockAchievement(string apiName)
+        {
+            _ = apiName;
+            return false;
+        }
     }
 }

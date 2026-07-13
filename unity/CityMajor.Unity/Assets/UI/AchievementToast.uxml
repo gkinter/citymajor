@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="achievement-toast-root" class="achievement-toast-root" picking-mode="Ignore" style="display: none;">
+        <ui:Label name="achievement-toast-title" class="achievement-toast-title" text="Achievement" />
+        <ui:Label name="achievement-toast-name" class="achievement-toast-name" text="" />
+        <ui:Label name="achievement-toast-desc" class="achievement-toast-desc" text="" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -131,6 +131,7 @@ namespace CityMajor.UI
                     status += " · cloud";
 
                 SetStatus(status);
+                AchievementProgress.NotifySaved();
                 Debug.Log($"[CityMajor] CMJR save written to {path}");
             }
             catch (Exception ex)

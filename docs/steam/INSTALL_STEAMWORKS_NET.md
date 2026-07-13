@@ -14,6 +14,7 @@ Then in Unity Editor:
 ## Verify
 
 - Console: `[CityMajor] Steam initialized (AppId=480, user=...)`
+- Register matching API names in Steamworks partner (prefix `CM_`). Catalog: `Assets/StreamingAssets/achievements-v1.json`.
 - Rich presence updates when population changes
 - Save writes local CMJR + `· cloud` status when Remote Storage enabled
 

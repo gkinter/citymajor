@@ -20,5 +20,9 @@ namespace CityMajor.Platform
         bool CloudWrite(string fileName, byte[] data);
 
         bool CloudRead(string fileName, out byte[] data);
+
+        bool IsAchievementUnlocked(string apiName);
+
+        bool TryUnlockAchievement(string apiName);
     }
 }

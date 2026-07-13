@@ -101,6 +101,14 @@ namespace CityMajor.Core
             var steamPresence = root.AddComponent<SteamRichPresenceController>();
             steamPresence.Configure(sim);
 
+            var achievements = root.AddComponent<SteamAchievementTracker>();
+            achievements.Configure(sim);
+
+            var achievementToastUi = new GameObject("CityMajor_AchievementToast");
+            achievementToastUi.transform.SetParent(root.transform, false);
+            var toast = achievementToastUi.AddComponent<AchievementToastController>();
+            toast.BindTracker(achievements);
+
             var researchUi = new GameObject("CityMajor_ResearchUi");
             researchUi.transform.SetParent(root.transform, false);
             researchUi.AddComponent<ResearchPanelController>().Configure(sim);

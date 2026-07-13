@@ -26,7 +26,7 @@
 | Life layer v1.1 | — | 🟡 Service overlay (`V`), growth, construction props | Agent |
 | Life layer v1.5 | — | 🟡 Ambient time-of-day + audio scaffold | Agent |
 | Social / trade stubs | SB-4183–4186 | 🟡 `TradeStrip`, `CityShareStub`, `BlueprintSlice` | Agent |
-| Phase 3 Steam | SB-4180–4181 | 🟡 Platform facade + cloud/presence — plugin install pending | Agent |
+| Phase 3 Steam | SB-4180–4181 | 🟡 Facade + achievements + headless build script | Agent |
 
 ---
 

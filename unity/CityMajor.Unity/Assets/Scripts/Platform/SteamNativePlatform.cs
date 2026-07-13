@@ -139,5 +139,38 @@ namespace CityMajor.Platform
             return false;
 #endif
         }
+
+        public bool IsAchievementUnlocked(string apiName)
+        {
+#if STEAMWORKS_NET
+            if (!IsReady || string.IsNullOrEmpty(apiName))
+                return false;
+
+            return SteamUserStats.GetAchievement(apiName, out var achieved) && achieved;
+#else
+            _ = apiName;
+            return false;
+#endif
+        }
+
+        public bool TryUnlockAchievement(string apiName)
+        {
+#if STEAMWORKS_NET
+            if (!IsReady || string.IsNullOrEmpty(apiName))
+                return false;
+
+            if (IsAchievementUnlocked(apiName))
+                return false;
+
+            if (!SteamUserStats.SetAchievement(apiName))
+                return false;
+
+            SteamUserStats.StoreStats();
+            return true;
+#else
+            _ = apiName;
+            return false;
+#endif
+        }
     }
 }

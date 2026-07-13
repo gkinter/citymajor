@@ -1,0 +1,23 @@
+"AppBuild"
+{
+  "appid" "480"
+  "desc" "CityMajor Windows depot (replace appid before ship)"
+  "buildoutput" "./Build/Steam/output/"
+  "contentroot" "./Build/Steam/windows/"
+  "setlive" ""
+  "preview" "0"
+  "local" ""
+
+  "depots"
+  {
+    "4801"
+    {
+      "FileMapping"
+      {
+        "LocalPath" "*"
+        "DepotPath" "."
+        "recursive" "1"
+      }
+    }
+  }
+}

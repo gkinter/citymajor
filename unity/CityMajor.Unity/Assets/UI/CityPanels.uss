@@ -225,6 +225,39 @@
     background-color: rgb(125, 255, 178);
 }
 
+.achievement-toast-root {
+    position: absolute;
+    top: 72px;
+    left: 50%;
+    margin-left: -160px;
+    width: 320px;
+    padding: 10px 14px;
+    background-color: rgba(18, 24, 36, 0.94);
+    border-width: 1px;
+    border-color: rgba(255, 214, 102, 0.45);
+    border-radius: 8px;
+}
+
+.achievement-toast-title {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    -unity-font-style: bold;
+    color: rgba(255, 214, 102, 0.95);
+    margin-bottom: 4px;
+}
+
+.achievement-toast-name {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: rgb(240, 244, 252);
+    margin-bottom: 2px;
+}
+
+.achievement-toast-desc {
+    font-size: 11px;
+    color: rgba(200, 210, 225, 0.85);
+}
+
 .time-controls {
     position: absolute;
     bottom: 12px;

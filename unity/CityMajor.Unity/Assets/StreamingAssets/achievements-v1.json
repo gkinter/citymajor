@@ -1,0 +1,112 @@
+{
+  "achievements": [
+    {
+      "id": "first_zone",
+      "steamApiName": "CM_FIRST_ZONE",
+      "name": "First Stake",
+      "description": "Zone your first tile.",
+      "conditionType": "zoned_tiles_gte",
+      "conditionValue": 1,
+      "hidden": false
+    },
+    {
+      "id": "first_road",
+      "steamApiName": "CM_FIRST_ROAD",
+      "name": "Pavement",
+      "description": "Lay your first road tile.",
+      "conditionType": "road_tiles_gte",
+      "conditionValue": 1,
+      "hidden": false
+    },
+    {
+      "id": "pop_1k",
+      "steamApiName": "CM_POP_1000",
+      "name": "Growing Town",
+      "description": "Reach 1,000 population.",
+      "conditionType": "population_gte",
+      "conditionValue": 1000,
+      "hidden": false
+    },
+    {
+      "id": "pop_10k",
+      "steamApiName": "CM_POP_10000",
+      "name": "Metro Rising",
+      "description": "Reach 10,000 population.",
+      "conditionType": "population_gte",
+      "conditionValue": 10000,
+      "hidden": false
+    },
+    {
+      "id": "beloved",
+      "steamApiName": "CM_BELOVED",
+      "name": "Beloved Mayor",
+      "description": "Hold 70% approval.",
+      "conditionType": "approval_gte",
+      "conditionValue": 70,
+      "hidden": false
+    },
+    {
+      "id": "happy_city",
+      "steamApiName": "CM_HAPPY_CITY",
+      "name": "Smiles All Around",
+      "description": "City happiness above 70%.",
+      "conditionType": "happiness_gte",
+      "conditionValue": 70,
+      "hidden": false
+    },
+    {
+      "id": "first_research",
+      "steamApiName": "CM_RESEARCH",
+      "name": "Bright Ideas",
+      "description": "Unlock a technology.",
+      "conditionType": "unlocked_techs_gte",
+      "conditionValue": 1,
+      "hidden": false
+    },
+    {
+      "id": "first_law",
+      "steamApiName": "CM_FIRST_LAW",
+      "name": "By Decree",
+      "description": "Enact an ordinance.",
+      "conditionType": "active_laws_gte",
+      "conditionValue": 1,
+      "hidden": false
+    },
+    {
+      "id": "saved",
+      "steamApiName": "CM_SAVE",
+      "name": "City on Disk",
+      "description": "Save your city to CMJR.",
+      "conditionType": "saved_once",
+      "conditionValue": 1,
+      "hidden": false
+    },
+    {
+      "id": "funds_100k",
+      "steamApiName": "CM_FUNDS_100K",
+      "name": "Healthy Treasury",
+      "description": "Hold $100,000 in city funds.",
+      "conditionType": "funds_gte",
+      "conditionValue": 100000,
+      "hidden": false
+    },
+    {
+      "id": "households_50",
+      "steamApiName": "CM_HOUSEHOLDS_50",
+      "name": "Neighborhoods",
+      "description": "Track 50 households.",
+      "conditionType": "households_gte",
+      "conditionValue": 50,
+      "hidden": false
+    },
+    {
+      "id": "buildings_25",
+      "steamApiName": "CM_BUILDINGS_25",
+      "name": "Skyline",
+      "description": "Grow 25 buildings.",
+      "conditionType": "building_count_gte",
+      "conditionValue": 25,
+      "hidden": false
+    }
+  ]
+}

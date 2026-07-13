@@ -323,7 +323,8 @@ All cosmetic layers are wired in `CityMajorBootstrap` and sample `SimSnapshot` /
 | `UI/HappinessMeterController.cs` | v1 happiness left stack |
 | `Input/BulldozeTool.cs` | v1 bulldoze (`X`) — zones + buildings + roads |
 | `Platform/SteamBootstrap.cs` | Phase 3 Steam init + cloud/presence |
-| `UI/ApprovalMeterController.cs` | v1 mayor approval HUD |
+| `Platform/SteamAchievementTracker.cs` | v1 achievement unlock + toast |
+| `UI/AchievementToastController.cs` | Top-center unlock popup |
 | `Input/CitizenPickTool.cs` | v1.1 pick → panel |
 | `Net/CityShareStub.cs` | v1.5 spectator URL |
 | `Save/BlueprintSlice.cs` | v2.5 CMJR chunk 0x02 |

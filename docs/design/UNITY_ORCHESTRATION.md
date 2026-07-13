@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `9fd4dc0` — pop growth HUD `(+N/mo)` + Forge.Engine.Tests in CI  
+**Integration tip:** `39aca18` — CI Engine+Game tests (932) + pop growth HUD  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -287,7 +287,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | Achievements catalog + toast | ✅ 12 v1 rows |
 | Cloud saves (CMJR) | 🟡 `SteamCloudSave` when SDK live |
 | Headless Windows build | ✅ `./scripts/build-steam-unity.sh` |
-| CI SimCore gate | ✅ `.github/workflows/unity-simcore.yml` + Forge.Engine.Tests (822) |
+| CI SimCore gate | ✅ `.github/workflows/unity-simcore.yml` + Engine (822) + Game (110) tests |
 | Steamworks.NET install | 🟡 see install doc below |
 | Partner App ID + depots | ⬜ |
 

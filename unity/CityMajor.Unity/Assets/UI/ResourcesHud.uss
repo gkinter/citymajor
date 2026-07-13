@@ -49,6 +49,20 @@
     color: rgba(200, 210, 225, 0.85);
 }
 
+.hud-sub {
+    font-size: 10px;
+    margin-left: 4px;
+    color: rgba(200, 210, 225, 0.85);
+}
+
+.hud-sub--good {
+    color: rgb(125, 255, 178);
+}
+
+.hud-sub--bad {
+    color: rgb(255, 112, 112);
+}
+
 .hud-demand {
     flex-direction: column;
 }

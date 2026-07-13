@@ -126,11 +126,8 @@ namespace CityMajor.UI
 
             _popGrowth.style.display = DisplayStyle.Flex;
             _popGrowth.text = $"({PopulationGrowthFormat.PerMonth(rate.Value)})";
-            _popGrowth.style.color = rate.Value > 0
-                ? new Color(0.49f, 1f, 0.7f)
-                : rate.Value < 0
-                    ? new Color(1f, 0.44f, 0.44f)
-                    : new Color(0.78f, 0.82f, 0.88f);
+            _popGrowth.EnableInClassList("hud-sub--good", rate.Value > 0);
+            _popGrowth.EnableInClassList("hud-sub--bad", rate.Value < 0);
         }
 
         static string FormatFunds(int cityFunds)

@@ -1,0 +1,53 @@
+.onboarding-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.55);
+    align-items: center;
+    justify-content: center;
+}
+
+.onboarding-card {
+    width: 360px;
+    max-width: 90%;
+    padding: 20px 24px;
+    background-color: rgba(12, 16, 24, 0.96);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    flex-direction: column;
+}
+
+.onboarding-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(230, 236, 245);
+    margin-bottom: 10px;
+}
+
+.onboarding-body {
+    font-size: 13px;
+    color: rgba(200, 210, 225, 0.9);
+    white-space: normal;
+    margin-bottom: 16px;
+}
+
+.onboarding-btn {
+    align-self: flex-end;
+    min-width: 88px;
+    height: 32px;
+    padding-left: 14px;
+    padding-right: 14px;
+    background-color: rgb(89, 153, 255);
+    border-width: 0;
+    border-radius: 4px;
+    color: white;
+    font-size: 13px;
+    -unity-font-style: bold;
+}
+
+.onboarding-btn:hover {
+    background-color: rgb(110, 170, 255);
+}

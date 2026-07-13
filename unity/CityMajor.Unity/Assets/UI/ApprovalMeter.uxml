@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="approval-root" class="panel-root panel-root--approval" picking-mode="Ignore">
+        <ui:Label class="panel-section-title" text="Approval" />
+        <ui:VisualElement class="approval-headline">
+            <ui:Label name="approval-value" class="approval-value" text="—" />
+            <ui:Label name="approval-status" class="approval-status" text="" />
+        </ui:VisualElement>
+        <ui:VisualElement class="approval-track">
+            <ui:VisualElement name="approval-fill" class="approval-fill" />
+        </ui:VisualElement>
+        <ui:Label name="approval-happiness" class="approval-sub" text="" />
+    </ui:VisualElement>
+</ui:UXML>

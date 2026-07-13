@@ -3,60 +3,85 @@ using UnityEngine;
 namespace CityMajor.Platform
 {
     /// <summary>
-    /// Phase 3 Steam init stub (SB-4180). Replace body with Steamworks.NET when package is added.
+    /// Phase 3 Steam init (SB-4180). Uses Steamworks.NET when STEAMWORKS_NET is defined.
     /// </summary>
     public sealed class SteamBootstrap : MonoBehaviour
     {
         [SerializeField] bool enableInEditor;
+        [SerializeField] bool preferNativeBackend = true;
 
-        static bool _initialized;
+        static SteamBootstrap _instance;
 
-        public static bool IsSteamReady => _initialized;
+        public static bool IsSteamReady => SteamRuntime.IsReady;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void AutoCreate()
         {
-            if (FindAnyObjectByType<SteamBootstrap>() != null)
+            if (_instance != null)
                 return;
 
             var go = new GameObject(nameof(SteamBootstrap));
-            go.AddComponent<SteamBootstrap>();
+            _instance = go.AddComponent<SteamBootstrap>();
             DontDestroyOnLoad(go);
         }
 
         void Awake()
         {
-            if (_initialized)
+            if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
 
+            _instance = this;
+
 #if UNITY_EDITOR
             if (!enableInEditor)
             {
-                Debug.Log("[CityMajor] Steam bootstrap skipped in Editor (enableInEditor to test).");
+                SteamRuntime.SetBackend(new SteamNullPlatform());
+                Debug.Log("[CityMajor] Steam skipped in Editor (enable enableInEditor on SteamBootstrap to test).");
                 return;
             }
 #endif
 
-            TryInitSteamStub();
+            TryInit();
         }
 
-        void TryInitSteamStub()
+        void TryInit()
         {
-            // TODO(SB-4180): Steamworks.NET — SteamAPI.Init(), callbacks, overlay.
-            Debug.Log($"[CityMajor] Steam stub ready (AppId={SteamAppConfig.AppId}). Add Steamworks.NET for live SDK.");
-            _initialized = true;
+            ISteamPlatform backend = preferNativeBackend
+                ? new SteamNativePlatform()
+                : new SteamNullPlatform();
+
+            if (backend.TryInit(SteamAppConfig.AppId))
+            {
+                SteamRuntime.SetBackend(backend);
+                return;
+            }
+
+            backend.Shutdown();
+            SteamRuntime.SetBackend(new SteamNullPlatform());
+            Debug.Log($"[CityMajor] Steam offline — stub mode (AppId={SteamAppConfig.AppId}). Run setup-steamworks-unity.sh + STEAMWORKS_NET define for live SDK.");
         }
+
+        void Update() => SteamRuntime.Backend.RunCallbacks();
+
+        void OnApplicationQuit() => Shutdown();
 
         void OnDestroy()
         {
-            if (!_initialized)
+            if (_instance == this)
+                Shutdown();
+        }
+
+        void Shutdown()
+        {
+            if (!SteamRuntime.IsReady)
                 return;
 
-            // TODO(SB-4180): SteamAPI.Shutdown();
-            _initialized = false;
+            SteamRuntime.Backend.ClearRichPresence();
+            SteamRuntime.Backend.Shutdown();
+            SteamRuntime.SetBackend(new SteamNullPlatform());
         }
     }
 }

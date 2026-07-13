@@ -65,6 +65,7 @@
 - [ ] **Save** writes `citymajor.cmjr` to persistentDataPath
 - [ ] **Load** restores zones/buildings/funds
 - [ ] **Share** copies spectator URL to clipboard
+- [ ] **Approval** meter (top-right, below budget) tracks mayor approval
 
 ---
 

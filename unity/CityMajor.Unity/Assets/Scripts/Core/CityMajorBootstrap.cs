@@ -1,5 +1,6 @@
 using CityMajor.Audio;
 using CityMajor.Input;
+using CityMajor.Platform;
 using CityMajor.Rendering;
 using CityMajor.Sim;
 using CityMajor.UI;
@@ -92,6 +93,13 @@ namespace CityMajor.Core
             var budgetUi = new GameObject("CityMajor_BudgetUi");
             budgetUi.transform.SetParent(root.transform, false);
             budgetUi.AddComponent<BudgetPanelController>().Configure(sim);
+
+            var approvalUi = new GameObject("CityMajor_ApprovalUi");
+            approvalUi.transform.SetParent(root.transform, false);
+            approvalUi.AddComponent<ApprovalMeterController>().Configure(sim);
+
+            var steamPresence = root.AddComponent<SteamRichPresenceController>();
+            steamPresence.Configure(sim);
 
             var researchUi = new GameObject("CityMajor_ResearchUi");
             researchUi.transform.SetParent(root.transform, false);

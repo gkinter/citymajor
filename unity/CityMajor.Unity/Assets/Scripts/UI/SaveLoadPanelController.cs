@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using CityMajor.Net;
+using CityMajor.Platform;
 using CityMajor.Sim;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -124,7 +125,12 @@ namespace CityMajor.UI
                 var path = _sim.SaveFilePath;
                 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
                 File.WriteAllBytes(path, bytes);
-                SetStatus($"Saved {bytes.Length / 1024} KB");
+
+                var status = $"Saved {bytes.Length / 1024} KB";
+                if (SteamCloudSave.TryUpload(bytes))
+                    status += " · cloud";
+
+                SetStatus(status);
                 Debug.Log($"[CityMajor] CMJR save written to {path}");
             }
             catch (Exception ex)
@@ -143,7 +149,27 @@ namespace CityMajor.UI
             }
 
             var path = _sim.SaveFilePath;
-            if (!File.Exists(path))
+            byte[] bytes = null;
+
+            if (File.Exists(path))
+            {
+                try
+                {
+                    bytes = File.ReadAllBytes(path);
+                }
+                catch (Exception ex)
+                {
+                    SetStatus("Load error");
+                    Debug.LogWarning($"[CityMajor] Local load failed: {ex.Message}");
+                    return;
+                }
+            }
+            else if (SteamCloudSave.TryDownload(out var cloudBytes))
+            {
+                bytes = cloudBytes;
+                Debug.Log("[CityMajor] CMJR loaded from Steam Cloud.");
+            }
+            else
             {
                 SetStatus("No save file");
                 return;
@@ -151,15 +177,15 @@ namespace CityMajor.UI
 
             try
             {
-                var bytes = File.ReadAllBytes(path);
                 if (!_sim.LoadSave(bytes))
                 {
                     SetStatus("Invalid CMJR");
                     return;
                 }
 
-                SetStatus("Loaded");
-                Debug.Log($"[CityMajor] CMJR save loaded from {path}");
+                SetStatus(File.Exists(path) ? "Loaded" : "Loaded (cloud)");
+                if (File.Exists(path))
+                    Debug.Log($"[CityMajor] CMJR save loaded from {path}");
             }
             catch (Exception ex)
             {

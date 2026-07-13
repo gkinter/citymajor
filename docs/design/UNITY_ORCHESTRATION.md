@@ -26,7 +26,7 @@
 | Life layer v1.1 | — | 🟡 Service overlay (`V`), growth, construction props | Agent |
 | Life layer v1.5 | — | 🟡 Ambient time-of-day + audio scaffold | Agent |
 | Social / trade stubs | SB-4183–4186 | 🟡 `TradeStrip`, `CityShareStub`, `BlueprintSlice` | Agent |
-| Phase 3 Steam | SB-4180–4181 | 🟡 `SteamBootstrap` stub + scope doc | Agent |
+| Phase 3 Steam | SB-4180–4181 | 🟡 Platform facade + cloud/presence — plugin install pending | Agent |
 
 ---
 
@@ -137,6 +137,8 @@ Design: [`CITY_ECOSYSTEM_VISION.md`](./CITY_ECOSYSTEM_VISION.md) · v1 ships roa
 | `LawPanelController` | `L` | Ordinance catalog + sample toggle |
 | `DemandOverlayController` | — | Bottom-center bidirectional R/C/I meters |
 | `HappinessMeterController` | — | Left-stack happiness bar |
+| `ApprovalMeterController` | — | Top-right mayor approval |
+| `SteamRichPresenceController` | — | Steam presence when SDK live |
 | `BulldozeTool` | `X` | Zone/building/road clear via `SimHost.Bulldoze` |
 | `EventTickerController` | — | Bottom HUD ticker |
 | `CityShareStub` / `BlueprintSlice` | — | v1.5 / v2.5 API stubs (no backend) |

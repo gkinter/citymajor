@@ -322,7 +322,8 @@ All cosmetic layers are wired in `CityMajorBootstrap` and sample `SimSnapshot` /
 | `UI/DemandOverlayController.cs` | v1 RCI demand (bottom-center) |
 | `UI/HappinessMeterController.cs` | v1 happiness left stack |
 | `Input/BulldozeTool.cs` | v1 bulldoze (`X`) — zones + buildings + roads |
-| `Platform/SteamBootstrap.cs` | Phase 3 Steam stub |
+| `Platform/SteamBootstrap.cs` | Phase 3 Steam init + cloud/presence |
+| `UI/ApprovalMeterController.cs` | v1 mayor approval HUD |
 | `Input/CitizenPickTool.cs` | v1.1 pick → panel |
 | `Net/CityShareStub.cs` | v1.5 spectator URL |
 | `Save/BlueprintSlice.cs` | v2.5 CMJR chunk 0x02 |

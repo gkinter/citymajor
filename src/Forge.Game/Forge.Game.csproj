@@ -10,6 +10,9 @@
     <ProjectReference Include="..\Forge.Engine\Forge.Engine.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Forge.SimCore\PopulationGrowthTracker.cs" Link="SimCore\PopulationGrowthTracker.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="Data\production_chains.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

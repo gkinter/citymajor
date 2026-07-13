@@ -1,0 +1,50 @@
+# Builds Forge.SimCore for both netstandard2.1 (Unity) and net8.0, then runs the
+# Unity plugin copy script and asserts the DLL landed in its expected location.
+# This gate runs on every PR and feat/* push — no Unity license required.
+
+name: Unity SimCore build
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "feat/**"
+  workflow_dispatch:
+
+jobs:
+  simcore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build SimCore (netstandard2.1 — Unity target)
+        run: |
+          dotnet build src/Forge.SimCore/Forge.SimCore.csproj \
+            -c Release -f netstandard2.1 --no-incremental
+
+      - name: Build SimCore (net8.0 — server / WASM target)
+        run: |
+          dotnet build src/Forge.SimCore/Forge.SimCore.csproj \
+            -c Release -f net8.0 --no-incremental
+
+      - name: Copy SimCore DLL into Unity plugin folder
+        run: |
+          chmod +x scripts/build-simcore-for-unity.sh
+          ./scripts/build-simcore-for-unity.sh
+
+      - name: Verify DLL present in Unity Plugins
+        run: |
+          DLL="unity/CityMajor.Unity/Assets/Plugins/Forge/Forge.SimCore.dll"
+          if [ ! -f "$DLL" ]; then
+            echo "ERROR: $DLL not found after build-simcore-for-unity.sh"
+            exit 1
+          fi
+          echo "OK: $DLL ($(du -h "$DLL" | cut -f1))"

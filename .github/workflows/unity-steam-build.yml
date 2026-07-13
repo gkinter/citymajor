@@ -1,0 +1,118 @@
+# Unity + Steam player build — manual trigger only.
+#
+# Full Unity builds require a licensed Unity installation on the runner.
+# Two options:
+#   A) Self-hosted Mac runner — set UNITY_PATH env var to the Unity binary, e.g.
+#      UNITY_PATH=/Applications/Unity/Hub/Editor/6000.0.x/Unity.app/Contents/MacOS/Unity
+#      Register the runner at: Settings → Actions → Runners → New self-hosted runner
+#   B) game-ci/unity-builder (GitHub-hosted, bring your own license serial)
+#      See: https://game.ci/docs/github/builder
+#
+# Job 1 (simcore) always runs — it validates the managed DLL before any Unity step.
+# Job 2 (unity-player) is a placeholder that prints setup instructions; it does NOT
+# fail when Unity is unavailable, so the workflow stays green while CI is being wired.
+
+name: Unity Steam build (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_platform:
+        description: "Build target (StandaloneWindows64 | StandaloneOSX | StandaloneLinux64)"
+        required: false
+        default: StandaloneWindows64
+
+jobs:
+  simcore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build SimCore (netstandard2.1 — Unity target)
+        run: |
+          dotnet build src/Forge.SimCore/Forge.SimCore.csproj \
+            -c Release -f netstandard2.1 --no-incremental
+
+      - name: Copy SimCore DLL into Unity plugin folder
+        run: |
+          chmod +x scripts/build-simcore-for-unity.sh
+          ./scripts/build-simcore-for-unity.sh
+
+      - name: Verify DLL present in Unity Plugins
+        run: |
+          DLL="unity/CityMajor.Unity/Assets/Plugins/Forge/Forge.SimCore.dll"
+          if [ ! -f "$DLL" ]; then
+            echo "ERROR: $DLL not found after build-simcore-for-unity.sh"
+            exit 1
+          fi
+          echo "OK: $DLL ($(du -h "$DLL" | cut -f1))"
+
+  unity-player:
+    runs-on: ubuntu-latest
+    needs: simcore
+    # Continue even when Unity is not installed — this job is a stub until a
+    # licensed self-hosted runner or game-ci is wired up.
+    continue-on-error: true
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Check for Unity installation
+        id: unity-check
+        run: |
+          if [ -n "${UNITY_PATH:-}" ] && [ -x "${UNITY_PATH}" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "Unity found at: $UNITY_PATH"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Unity not found (UNITY_PATH unset or not executable)."
+            echo ""
+            echo "=========================================================="
+            echo " CityMajor Unity player build — setup instructions"
+            echo "=========================================================="
+            echo ""
+            echo "To enable full headless builds, choose one of:"
+            echo ""
+            echo "Option A — Self-hosted Mac runner (recommended for Steam):"
+            echo "  1. Install Unity $( cat unity/CityMajor.Unity/ProjectSettings/ProjectVersion.txt 2>/dev/null | grep m_EditorVersion | awk '{print $2}' || echo '6000.0.x' )"
+            echo "     via Unity Hub on a Mac CI machine."
+            echo "  2. Register the machine as a self-hosted runner in GitHub:"
+            echo "     Repo → Settings → Actions → Runners → New self-hosted runner"
+            echo "  3. Set UNITY_PATH as a repo/org secret or runner env var:"
+            echo "     e.g. /Applications/Unity/Hub/Editor/6000.0.x/Unity.app/Contents/MacOS/Unity"
+            echo "  4. Change 'runs-on: ubuntu-latest' above to 'runs-on: self-hosted'"
+            echo ""
+            echo "Option B — game-ci/unity-builder (GitHub-hosted):"
+            echo "  See https://game.ci/docs/github/builder"
+            echo "  Requires UNITY_LICENSE / UNITY_EMAIL / UNITY_PASSWORD secrets."
+            echo ""
+            echo "Once Unity is available, the actual build step runs:"
+            echo "  chmod +x scripts/build-steam-unity.sh"
+            echo "  TARGET=${{ github.event.inputs.target_platform }} ./scripts/build-steam-unity.sh"
+            echo "=========================================================="
+          fi
+
+      - name: Build Unity player (self-hosted only)
+        if: steps.unity-check.outputs.found == 'true'
+        run: |
+          chmod +x scripts/build-steam-unity.sh
+          TARGET="${{ github.event.inputs.target_platform }}" ./scripts/build-steam-unity.sh
+
+      - name: Upload build artifact
+        if: steps.unity-check.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: citymajor-${{ github.event.inputs.target_platform }}-${{ github.sha }}
+          path: Build/Steam/
+          retention-days: 7

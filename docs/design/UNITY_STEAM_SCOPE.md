@@ -18,6 +18,17 @@
 
 ---
 
+## CI workflows
+
+| Workflow | Trigger | Needs Unity? |
+|----------|---------|--------------|
+| `.github/workflows/unity-simcore.yml` | PR, `feat/**` push, manual | No — dotnet only |
+| `.github/workflows/unity-steam-build.yml` | Manual (`workflow_dispatch`) | Job 1 no; Job 2 yes (self-hosted Mac or game-ci) |
+
+`unity-simcore` is the mandatory gate: it builds `Forge.SimCore` for both `netstandard2.1` and `net8.0`, runs `scripts/build-simcore-for-unity.sh`, and asserts the DLL exists at `unity/CityMajor.Unity/Assets/Plugins/Forge/Forge.SimCore.dll`. The Steam player job runs only when `UNITY_PATH` points to a licensed installation; it prints setup instructions otherwise and does not block the workflow.
+
+---
+
 ## Build pipeline (target)
 
 ```bash

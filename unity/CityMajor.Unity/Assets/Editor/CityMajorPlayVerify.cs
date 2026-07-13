@@ -9,15 +9,21 @@ namespace CityMajor.Editor
     public static class CityMajorPlayVerify
     {
         const string ChecklistRelative = "docs/design/UNITY_PLAY_CHECKLIST.md";
+        const string DispatchRelative = "docs/design/UNITY_AGENT_DISPATCH.md";
 
         [MenuItem("CityMajor/Open Play Verification Checklist (SB-4176)")]
-        public static void OpenChecklist()
+        public static void OpenChecklist() => OpenRepoDoc(ChecklistRelative, "Play Verification Checklist");
+
+        [MenuItem("CityMajor/Open Agent Dispatch Doc")]
+        public static void OpenAgentDispatch() => OpenRepoDoc(DispatchRelative, "Agent Dispatch Doc");
+
+        static void OpenRepoDoc(string relativePath, string label)
         {
             var repoRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", ".."));
-            var path = Path.Combine(repoRoot, ChecklistRelative);
+            var path = Path.Combine(repoRoot, relativePath);
             if (!File.Exists(path))
             {
-                EditorUtility.DisplayDialog("CityMajor", $"Checklist not found:\n{path}", "OK");
+                EditorUtility.DisplayDialog("CityMajor", $"{label} not found:\n{path}", "OK");
                 return;
             }
 

@@ -77,9 +77,32 @@
 
 ---
 
+## Automation (CI vs human Play gate)
+
+Unity v1 quality is **not** fully automated in CI today. Use this split so agents do not treat web smoke as a Unity substitute.
+
+| Check | Automated? | Where | Notes |
+|-------|------------|-------|-------|
+| `Forge.SimCore` compile | ✅ | Local / future GHA | `dotnet build src/Forge.SimCore/Forge.SimCore.csproj` |
+| SimCore → Unity DLL copy | ✅ | Script | `./scripts/build-simcore-for-unity.sh` — **run after every SimHost change** |
+| Windows headless player build | ✅ | Script | `./scripts/build-steam-unity.sh` — needs `UNITY_PATH`; produces `Build/Steam/windows/CityMajor.exe` |
+| Web routes + WebGL smoke | ✅ | `.github/workflows/ci-smoke.yml` | **Web maintenance only** — does not load Unity `Play.unity` |
+| Web perf gate (≥30 FPS) | ⚠️ Manual dispatch | `.github/workflows/perf-gate.yml` | R3F `/play`; software renderer often skips — not Unity |
+| Unity script compile | ❌ | Unity Editor | Domain reload; MCP `read_console` for errors |
+| Panel toggles + control feel | ❌ | **This checklist** | Human or MCP-assisted Play mode |
+| Bulldoze / road graph / save round-trip | ❌ | **This checklist** | Requires live sim + UI |
+| Steam SDK init + achievements | ❌ | **This checklist** + [INSTALL_STEAMWORKS_NET.md](../steam/INSTALL_STEAMWORKS_NET.md) | Needs Steam client + define |
+| SB-4176 sign-off | ❌ | **Human** | Blocks Phase 3 depot upload |
+
+**Agent rule:** lane merge gates ([UNITY_AGENT_DISPATCH.md](./UNITY_AGENT_DISPATCH.md)) are necessary but **not sufficient** — orchestrator still requests human Play verification before cherry-picking the next batch to `feat/unity-port-plan-2026-07-12`.
+
+---
+
 ## Editor menu
 
 **CityMajor → Open Play Verification Checklist** — opens this doc in the OS default viewer.
+
+**CityMajor → Open Agent Dispatch Doc** — opens parallel-agent playbook for orchestrator.
 
 **CityMajor → Setup Play Scene** — adds `CityMajorBootstrap` if missing.
 

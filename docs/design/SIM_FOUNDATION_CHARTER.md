@@ -71,8 +71,8 @@ Unity HUD / Steam / CI are **consumers** of this foundation — not the foundati
 
 ### WP-D — Characterization & perf
 
-- ✅ `Forge.SimCore.Tests` — 11 tests (foundation + goods + laws + traffic options)
-- ⬜ Tick budget doc at 10K HH / 5K buildings @ 8 Hz
+- ✅ `Forge.SimCore.Tests` — 14 tests (foundation + goods + laws + traffic + tick budget)
+- ✅ Tick budget doc + CI gate @ 8 Hz — [`SIM_TICK_BUDGET.md`](./SIM_TICK_BUDGET.md); local target ≤10 ms (SB-3685), CI &lt;25 ms
 
 ### WP-E — Spec stretch (cathedral, opt-in)
 
@@ -111,4 +111,4 @@ One worktree per WP. Merge gate: `dotnet test tests/Forge.Engine.Tests` + `./scr
 |------|-----|------|
 | 2026-07-16 | charter | Program opened; WP-A/B started (rush OD + employment/trade on snapshot) |
 | 2026-07-16 | `bbffa11`+fix | Goods imbalance export · law→budget/traffic · full TrafficSystem option + Unity 128-zone lite · netstd2.1 Array.Clear fix |
-| 2026-07-16 | wave | Herald←shortage · multi-day construction+law growth · tick budget benchmark |
+| 2026-07-16 | tick-budget | `TickBudgetTests` + `SIM_TICK_BUDGET.md` — CI gate &lt;25 ms @ 8 Hz; starter-city characterization |

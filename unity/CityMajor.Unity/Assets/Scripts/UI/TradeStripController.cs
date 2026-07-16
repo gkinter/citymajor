@@ -12,7 +12,10 @@ namespace CityMajor.UI
         CitySimBridge _sim;
         UIDocument _document;
         VisualElement _root;
+        Label _income;
+        Label _expense;
         Label _balance;
+        Label _demand;
         Button _closeBtn;
         bool _open;
 
@@ -59,7 +62,10 @@ namespace CityMajor.UI
             _document.sortingOrder = 111;
             var docRoot = _document.rootVisualElement;
             _root = docRoot?.Q<VisualElement>("trade-root");
+            _income = docRoot?.Q<Label>("trade-income");
+            _expense = docRoot?.Q<Label>("trade-expense");
             _balance = docRoot?.Q<Label>("trade-balance");
+            _demand = docRoot?.Q<Label>("trade-demand");
             _closeBtn = docRoot?.Q<Button>("trade-close");
             _closeBtn?.RegisterCallback<ClickEvent>(_ => SetOpen(false));
         }
@@ -79,7 +85,23 @@ namespace CityMajor.UI
                 return;
 
             var net = state.MonthlyIncome - state.MonthlyExpense;
-            _balance.text = $"Monthly net: {net:N0} · Global market only (SB-3728 routes pending)";
+            if (_income != null)
+                _income.text = $"Income: +{state.MonthlyIncome:N0}/mo";
+            if (_expense != null)
+                _expense.text = $"Expenses: −{state.MonthlyExpense:N0}/mo";
+            _balance.text = $"Net treasury flow: {(net >= 0 ? "+" : "")}{net:N0}/mo";
+            if (_demand != null)
+            {
+                _demand.text =
+                    $"RCI demand (export proxy): R {FormatDemand(state.DemandResidential)} · " +
+                    $"C {FormatDemand(state.DemandCommercial)} · I {FormatDemand(state.DemandIndustrial)}";
+            }
+        }
+
+        static string FormatDemand(float demand)
+        {
+            var pct = Mathf.RoundToInt(demand * 100f);
+            return pct >= 0 ? $"+{pct}%" : $"{pct}%";
         }
     }
 }

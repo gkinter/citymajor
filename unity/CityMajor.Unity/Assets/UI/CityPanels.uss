@@ -172,6 +172,11 @@
     border-color: rgba(255, 255, 255, 0.08);
 }
 
+.panel-note--emphasis {
+    -unity-font-style: bold;
+    color: rgb(230, 235, 245);
+}
+
 .citizen-stats {
     flex-direction: row;
     flex-wrap: wrap;

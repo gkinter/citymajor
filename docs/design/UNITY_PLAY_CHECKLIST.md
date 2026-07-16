@@ -20,6 +20,7 @@
 - [ ] Enter **Play** — no console errors (red)
 - [ ] Console shows `[CityMajor]` sim init, not placeholder-only mode
 - [ ] **Pop / Funds** HUD updates when painting zones (not static sine placeholder)
+- [ ] Pop line shows growth subline `(+N/mo)` after ~8 sim ticks
 - [ ] **Bottom-center R/C/I** demand meters move with sim economy
 - [ ] **Happiness** meter (left stack) tracks sim happiness
 - [ ] **Hour** line shows `HH:MM ×rush` and changes over time
@@ -44,8 +45,17 @@
 - [ ] `C` — Citizen panel shows household L2 rows after population grows
 - [ ] `L` — Laws panel shows definition count; toggle **Speed Limits** if loaded
 - [ ] `B` — Build panel; select Fire/Police/Hospital; plop on **zoned** tile
-- [ ] `E` — Trade stub shows monthly net
+- [ ] `P` — Blueprint panel exports CMJR chunk 0x02 header stub
+- [ ] `E` — Trade strip shows income/expense/net + RCI demand proxy
 - [ ] `F1` — Help overlay lists controls
+- [ ] First Play shows onboarding overlay; **Got it** dismisses and does not return
+
+---
+
+## Onboarding & first-run
+
+- [ ] Fresh PlayerPrefs (or delete `citymajor.onboarding.v1`) → welcome overlay appears
+- [ ] **Got it** hides overlay; second Play session skips it
 
 ---
 
@@ -84,7 +94,8 @@ Unity v1 quality is **not** fully automated in CI today. Use this split so agent
 
 | Check | Automated? | Where | Notes |
 |-------|------------|-------|-------|
-| `Forge.SimCore` compile | ✅ | Local / future GHA | `dotnet build src/Forge.SimCore/Forge.SimCore.csproj` |
+| `Forge.Engine.Tests` + `Forge.Game.Tests` | ✅ | `.github/workflows/unity-simcore.yml` | 833 + 110 tests on `ubuntu-latest` |
+| Modern GLTF catalog on disk | 🟡 | `scripts/verify-unity-gltf-catalog.sh` (incoming) | 12 keys under `Assets/Art/Gltf/modern` |
 | SimCore → Unity DLL copy | ✅ | Script | `./scripts/build-simcore-for-unity.sh` — **run after every SimHost change** |
 | Windows headless player build | ✅ | Script | `./scripts/build-steam-unity.sh` — needs `UNITY_PATH`; produces `Build/Steam/windows/CityMajor.exe` |
 | Web routes + WebGL smoke | ✅ | `.github/workflows/ci-smoke.yml` | **Web maintenance only** — does not load Unity `Play.unity` |

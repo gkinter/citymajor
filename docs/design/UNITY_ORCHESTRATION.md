@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `c81ced6` — SimCore PopulationGrowthTracker + 11 tests (833 total)  
+**Integration tip:** `3fcee7c` — wave 3 complete; wave 4 in flight (trade polish, GLTF CI, cloud UX)  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -33,7 +33,7 @@
 | Phase 2 rush curve | SB-4189 | ✅ `LifeSimMath.RushHourMultiplier` in SimCore + Unity | — |
 | Life layer v1.1 | — | ✅ Service overlay (`V`), growth, construction props | — |
 | Life layer v1.5 | — | ✅ Ambient time-of-day + audio scaffold | — |
-| Social / trade stubs | SB-4183–4186 | 🟡 `TradeStrip`, `CityShareStub` (save panel), `BlueprintSlice` stub | Agent |
+| Social / trade stubs | SB-4183–4186 | 🟡 `TradeStrip` income/expense/RCI readout, `CityShareStub`, `BlueprintSlice` stub | Agent |
 | Phase 3 Steam facade | SB-4180 | ✅ `SteamNativePlatform` + rich presence + cloud save hooks | — |
 | Phase 3 achievements | SB-4181 | ✅ Catalog + toast + headless Windows build script | — |
 | Phase 3 Steam depot | SB-4180 | ⬜ Partner App ID, depots, live SDK on CI | Agent |

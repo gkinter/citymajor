@@ -18,6 +18,7 @@ namespace CityMajor.Net
             TrafficCongestion,
             BudgetCrisis,
             HousingShortage,
+            EconomyShortage,
             CrimeRising,
             HappinessLow,
             ProsperityHigh,
@@ -41,6 +42,7 @@ namespace CityMajor.Net
         }
 
         const float RciExtremeDemand = 0.65f;
+        const float GoodsShortageThreshold = 0.35f;
         const float LowHappinessApproval = 45f;
         const float ProsperityApproval = 70f;
         const long ProsperityFunds = 500_000;
@@ -52,6 +54,7 @@ namespace CityMajor.Net
             SimStateBucket.TrafficCongestion => "traffic_congestion",
             SimStateBucket.BudgetCrisis => "budget_crisis",
             SimStateBucket.HousingShortage => "housing_shortage",
+            SimStateBucket.EconomyShortage => "economy_shortage",
             SimStateBucket.CrimeRising => "crime_rising",
             SimStateBucket.HappinessLow => "happiness_low",
             SimStateBucket.ProsperityHigh => "prosperity_high",
@@ -65,6 +68,7 @@ namespace CityMajor.Net
             "traffic_congestion" => SimStateBucket.TrafficCongestion,
             "budget_crisis" => SimStateBucket.BudgetCrisis,
             "housing_shortage" => SimStateBucket.HousingShortage,
+            "economy_shortage" => SimStateBucket.EconomyShortage,
             "crime_rising" => SimStateBucket.CrimeRising,
             "happiness_low" => SimStateBucket.HappinessLow,
             "prosperity_high" => SimStateBucket.ProsperityHigh,
@@ -77,10 +81,22 @@ namespace CityMajor.Net
             long cityFunds,
             float residentialDemand,
             float commercialDemand,
-            float industrialDemand)
+            float industrialDemand,
+            float goodsShortageIndex,
+            float goodsSurplusIndex = 0f)
         {
+            _ = goodsSurplusIndex;
+
             if (cityFunds < 0)
                 return SimStateBucket.BudgetCrisis;
+
+            if (goodsShortageIndex >= GoodsShortageThreshold)
+            {
+                if (residentialDemand >= RciExtremeDemand)
+                    return SimStateBucket.HousingShortage;
+
+                return SimStateBucket.EconomyShortage;
+            }
 
             if (approvalPercent < LowHappinessApproval)
                 return SimStateBucket.HappinessLow;
@@ -105,7 +121,8 @@ namespace CityMajor.Net
         public static string ExplainBucket(
             SimStateBucket bucket,
             float approvalPercent,
-            long cityFunds)
+            long cityFunds,
+            float goodsShortageIndex = 0f)
         {
             return bucket switch
             {
@@ -113,12 +130,19 @@ namespace CityMajor.Net
                     $"Treasury {FormatFundsShort(cityFunds)} — deficit stories take priority in the Herald",
                 SimStateBucket.HappinessLow =>
                     $"Approval {approvalPercent:0}% — unrest coverage in the Herald",
+                SimStateBucket.HousingShortage when goodsShortageIndex >= GoodsShortageThreshold =>
+                    $"Goods shortage {goodsShortageIndex * 100f:0}% and residential demand extreme — housing pressure edition",
                 SimStateBucket.HousingShortage => "Residential demand is extreme — housing shortage edition",
+                SimStateBucket.EconomyShortage =>
+                    $"Goods shortage index {goodsShortageIndex * 100f:0}% — supply-chain coverage in the Herald",
                 SimStateBucket.HealthcareLow => "Healthcare coverage is low — clinic petition edition",
                 SimStateBucket.ProsperityHigh => "Strong approval and treasury — investor expansion edition",
                 _ => "Balanced city pulse — general Herald coverage",
             };
         }
+
+        public static string FormatGoodsShortageLine(float goodsShortageIndex) =>
+            $"Goods shortage index: {goodsShortageIndex * 100f:0}%";
 
         public static NarrativeEvent FromBucket(SimStateBucket bucket)
         {
@@ -137,13 +161,18 @@ namespace CityMajor.Net
         {
             var healthcare = EstimateHealthcareCoverage(snap);
             var approvalPct = snap.ApprovalRating * 100f;
+            var goodsShortage = snap.GoodsShortageIndex;
+            var goodsSurplus = snap.GoodsSurplusIndex;
+
             var bucket = DeriveBucket(
                 healthcare,
                 approvalPct,
                 snap.CityFunds,
                 state.DemandResidential,
                 state.DemandCommercial,
-                state.DemandIndustrial);
+                state.DemandIndustrial,
+                goodsShortage,
+                goodsSurplus);
 
             return FromBucket(bucket);
         }
@@ -251,6 +280,17 @@ namespace CityMajor.Net
                     new NarrativeOption { Id = "inclusionary_zoning", Label = "Mandate 15% affordable units in new builds", Tradeoff = "Developer pushback, gradual rent relief" },
                     new NarrativeOption { Id = "public_housing", Label = "Break ground on public housing blocks", Tradeoff = "−$5M capital, +1,200 affordable units over 18 months" },
                     new NarrativeOption { Id = "rent_subsidy", Label = "Launch a temporary rent subsidy", Tradeoff = "−$900K/mo OPEX, fast relief, no new supply" },
+                },
+            },
+            [SimStateBucket.EconomyShortage] = new()
+            {
+                Headline = "Store shelves thin as supply chains strain",
+                Body = "Wholesale buyers report persistent stockouts across the city. Shopkeepers blame freight delays and weak industrial throughput; households are paying more for basics.",
+                Options = new[]
+                {
+                    new NarrativeOption { Id = "industrial_incentives", Label = "Offer tax breaks for new industrial capacity", Tradeoff = "−$1.2M revenue, gradual goods relief" },
+                    new NarrativeOption { Id = "import_subsidy", Label = "Subsidize emergency freight imports", Tradeoff = "−$800K/quarter, faster shelf recovery" },
+                    new NarrativeOption { Id = "rationing_review", Label = "Study rationing for essential goods", Tradeoff = "Stabilizes prices, unpopular with retailers" },
                 },
             },
             [SimStateBucket.CrimeRising] = new()

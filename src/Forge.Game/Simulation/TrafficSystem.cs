@@ -164,6 +164,7 @@ public sealed class TrafficSystem
 
         // 5. Update tile-level traffic overlay
         UpdateTileTraffic(state);
+        UpdateMeanTrafficDensity(state);
 
         // 6. Calculate summary statistics
         CalculateStatistics(state);
@@ -743,6 +744,22 @@ public sealed class TrafficSystem
                 edgeIdx++;
             }
         }
+    }
+
+    private static void UpdateMeanTrafficDensity(WorldState state)
+    {
+        var traffic = state.Tiles.Traffic;
+        var roads = state.Tiles.RoadFlags;
+        double sum = 0;
+        int count = 0;
+        for (int i = 0; i < traffic.Length; i++)
+        {
+            if (roads[i] == 0) continue;
+            sum += traffic[i];
+            count++;
+        }
+
+        state.MeanTrafficDensity = count == 0 ? 0f : (float)(sum / count);
     }
 
     // =========================================================================

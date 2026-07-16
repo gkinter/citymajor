@@ -173,6 +173,7 @@ namespace CityMajor.Sim
                 {
                     UnityModernProfile = true,
                     SkipStarterCity = true,
+                    TrafficLiteZoneCount = WasmConfig.TrafficLiteZoneCountUnity,
                     DataPaths = dataPaths,
                 });
                 PublishFromSimHost();

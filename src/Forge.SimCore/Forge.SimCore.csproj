@@ -22,7 +22,6 @@
     <Compile Include="..\Forge.Engine\Simulation\SimSnapshot.cs" Link="Simulation\SimSnapshot.cs" />
     <Compile Include="..\Forge.Engine\Simulation\WorldState.cs" Link="Simulation\WorldState.cs" />
     <Compile Include="..\Forge.Game\Simulation\*.cs" Link="Game\Simulation\%(Filename)%(Extension)" />
-    <Compile Remove="..\Forge.Game\Simulation\TrafficSystem.cs" />
     <Compile Include="..\Forge.SimWasm\WasmConfig.cs" Link="Wasm\WasmConfig.cs" />
     <Compile Include="..\Forge.SimWasm\WasmTrafficLite.cs" Link="Wasm\WasmTrafficLite.cs" />
     <Compile Include="..\Forge.SimWasm\SimSnapshotDto.cs" Link="Snapshot\SimSnapshotDto.cs" />

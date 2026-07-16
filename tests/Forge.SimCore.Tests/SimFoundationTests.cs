@@ -82,4 +82,31 @@ public sealed class SimFoundationTests
         Assert.NotNull(rate);
         Assert.Equal(300, rate.Value);
     }
+
+    [Fact]
+    public void Init_UseFullTraffic_DoesNotThrow_MeanTrafficFinite()
+    {
+        var host = new SimHost();
+        host.Init(128, new SimHostInitOptions { UseFullTraffic = true });
+
+        for (int i = 0; i < 20; i++)
+            host.Tick(WasmConfig.TrafficLiteInterval);
+
+        float mean = host.State.MeanTrafficDensity;
+        Assert.False(float.IsNaN(mean));
+        Assert.False(float.IsInfinity(mean));
+    }
+
+    [Fact]
+    public void Init_TrafficLiteZoneCount128_Initializes()
+    {
+        var host = new SimHost();
+        host.Init(128, new SimHostInitOptions { TrafficLiteZoneCount = 128 });
+
+        for (int i = 0; i < 10; i++)
+            host.Tick(WasmConfig.TrafficLiteInterval);
+
+        Assert.True(host.IsInitialized);
+        Assert.False(float.IsNaN(host.State.MeanTrafficDensity));
+    }
 }

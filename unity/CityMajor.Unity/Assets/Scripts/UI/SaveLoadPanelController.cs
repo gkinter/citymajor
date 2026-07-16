@@ -19,6 +19,7 @@ namespace CityMajor.UI
         CitySimBridge _sim;
         UIDocument _document;
         Label _status;
+        Label _cloudStatus;
         Button _saveBtn;
         Button _loadBtn;
         Button _shareBtn;
@@ -28,6 +29,7 @@ namespace CityMajor.UI
             _sim = sim;
             EnsureUi();
             SetStatus($"→ {Path.GetFileName(_sim?.SaveFilePath ?? CitySimBridge.DefaultSaveFileName)}");
+            RefreshCloudStatus();
         }
 
         void EnsureUi()
@@ -58,9 +60,12 @@ namespace CityMajor.UI
                 return;
 
             _status = root.Q<Label>("save-load-status");
+            _cloudStatus = root.Q<Label>("save-load-cloud-status");
             _saveBtn = root.Q<Button>("save-btn");
             _loadBtn = root.Q<Button>("load-btn");
             _shareBtn = root.Q<Button>("share-btn");
+
+            RefreshCloudStatus();
 
             if (_saveBtn != null)
                 _saveBtn.clicked += OnSaveClicked;
@@ -126,11 +131,15 @@ namespace CityMajor.UI
                 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
                 File.WriteAllBytes(path, bytes);
 
-                var status = $"Saved {bytes.Length / 1024} KB";
-                if (SteamCloudSave.TryUpload(bytes))
-                    status += " · cloud";
+                SetStatus($"Saved {bytes.Length / 1024} KB");
 
-                SetStatus(status);
+                if (SteamRuntime.IsReady)
+                {
+                    var uploaded = SteamCloudSave.TryUpload(bytes);
+                    SetCloudStatus(uploaded ? "Cloud: uploaded" : "Cloud: upload failed");
+                }
+                else
+                    RefreshCloudStatus();
                 AchievementProgress.NotifySaved();
                 Debug.Log($"[CityMajor] CMJR save written to {path}");
             }
@@ -185,6 +194,7 @@ namespace CityMajor.UI
                 }
 
                 SetStatus(File.Exists(path) ? "Loaded" : "Loaded (cloud)");
+                RefreshCloudStatus();
                 if (File.Exists(path))
                     Debug.Log($"[CityMajor] CMJR save loaded from {path}");
             }
@@ -199,6 +209,23 @@ namespace CityMajor.UI
         {
             if (_status != null)
                 _status.text = message;
+        }
+
+        void SetCloudStatus(string message)
+        {
+            if (_cloudStatus != null)
+                _cloudStatus.text = message;
+        }
+
+        void RefreshCloudStatus()
+        {
+            if (!SteamRuntime.IsReady)
+            {
+                SetCloudStatus("Cloud: Steam offline");
+                return;
+            }
+
+            SetCloudStatus(SteamCloudSave.HasCloudSave() ? "Cloud: uploaded" : "Cloud: ready");
         }
     }
 }

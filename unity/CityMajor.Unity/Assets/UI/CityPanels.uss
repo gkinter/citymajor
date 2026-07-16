@@ -417,6 +417,10 @@
     -unity-text-align: middle-right;
 }
 
+.save-load-cloud-status {
+    margin-top: 2px;
+}
+
 .panel-root--herald {
     top: 12px;
     right: 12px;

@@ -20,6 +20,8 @@ public sealed partial class SimHost
     private EconomySystem _economy = null!;
     private PopulationSystem _population = null!;
     private WasmTrafficLite _traffic = null!;
+    private TrafficSystem? _fullTraffic;
+    private bool _useFullTraffic;
     private ServiceSystem _services = null!;
     private ZoneGrowthSystem _zoneGrowth = null!;
     private BudgetSystem _budget = null!;
@@ -47,6 +49,7 @@ public sealed partial class SimHost
     public EconomySystem Economy => _economy;
     public PopulationSystem Population => _population;
     public WasmTrafficLite Traffic => _traffic;
+    public TrafficSystem? FullTraffic => _fullTraffic;
     public ServiceSystem Services => _services;
     public EventSystem Events => _events;
     public LawSystem Laws => _laws;
@@ -68,7 +71,17 @@ public sealed partial class SimHost
 
         _economy = new EconomySystem();
         _population = new PopulationSystem();
-        _traffic = new WasmTrafficLite();
+        _useFullTraffic = _initOptions.UseFullTraffic;
+        if (_useFullTraffic)
+        {
+            _fullTraffic = new TrafficSystem();
+            _traffic = new WasmTrafficLite();
+        }
+        else
+        {
+            _traffic = new WasmTrafficLite();
+            _traffic.Configure(ResolveTrafficLiteZoneCount());
+        }
         _services = new ServiceSystem(worldSize);
         _zoneGrowth = new ZoneGrowthSystem(worldSize);
         _budget = new BudgetSystem();
@@ -127,14 +140,20 @@ public sealed partial class SimHost
         while (_trafficLiteAccumulator >= WasmConfig.TrafficLiteInterval)
         {
             _trafficLiteAccumulator -= WasmConfig.TrafficLiteInterval;
-            _traffic.Tick(_state, WasmConfig.TrafficLiteInterval);
+            if (_useFullTraffic && _fullTraffic is not null)
+                _fullTraffic.Tick(_state, WasmConfig.TrafficLiteInterval);
+            else
+                _traffic.Tick(_state, WasmConfig.TrafficLiteInterval);
         }
 
-        _trafficEdgeBatchAccumulator += dt;
-        while (_trafficEdgeBatchAccumulator >= WasmConfig.TrafficLiteEdgeBatchInterval)
+        if (!_useFullTraffic)
         {
-            _trafficEdgeBatchAccumulator -= WasmConfig.TrafficLiteEdgeBatchInterval;
-            _traffic.TickEdgeBatch(_state, WasmConfig.TrafficLiteEdgeBatchInterval);
+            _trafficEdgeBatchAccumulator += dt;
+            while (_trafficEdgeBatchAccumulator >= WasmConfig.TrafficLiteEdgeBatchInterval)
+            {
+                _trafficEdgeBatchAccumulator -= WasmConfig.TrafficLiteEdgeBatchInterval;
+                _traffic.TickEdgeBatch(_state, WasmConfig.TrafficLiteEdgeBatchInterval);
+            }
         }
 
         _dayAccumulator += dt;
@@ -944,5 +963,14 @@ public sealed partial class SimHost
         int p = 1;
         while (p < value) p <<= 1;
         return p;
+    }
+
+    private int ResolveTrafficLiteZoneCount()
+    {
+        if (_initOptions.TrafficLiteZoneCount is int overrideCount)
+            return Math.Max(1, overrideCount);
+        if (_initOptions.UnityModernProfile)
+            return WasmConfig.TrafficLiteZoneCountUnity;
+        return WasmConfig.TrafficLiteZoneCount;
     }
 }

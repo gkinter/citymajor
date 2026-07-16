@@ -22,8 +22,11 @@ public static class WasmConfig
     /// </summary>
     public const double TrafficLiteInterval = 5.0;
 
-    /// <summary>Zone count for lite O-D matrix (8×8 on 256×256 world).</summary>
+    /// <summary>Zone count for lite O-D matrix (8×8 on 256×256 browser WASM world).</summary>
     public const int TrafficLiteZoneCount = 64;
+
+    /// <summary>Zone count for Unity / desktop lite traffic (11×11 on 128×128, 16×16 on 256×256).</summary>
+    public const int TrafficLiteZoneCountUnity = 128;
 
     /// <summary>Max Frank-Wolfe iterations per lite traffic tick.</summary>
     public const int TrafficLiteFrankWolfeIterations = 4;

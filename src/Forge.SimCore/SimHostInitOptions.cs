@@ -10,6 +10,18 @@ public sealed class SimHostInitOptions
   /// </summary>
   public bool UnityModernProfile { get; init; }
 
+  /// <summary>
+  /// Use full <see cref="Forge.Game.Simulation.TrafficSystem"/> (MNL + Frank-Wolfe) instead of
+  /// browser-oriented <see cref="Forge.SimWasm.WasmTrafficLite"/>. Default false for WASM / Unity.
+  /// </summary>
+  public bool UseFullTraffic { get; init; }
+
+  /// <summary>
+  /// Override lite traffic zone count. When null, WASM uses <see cref="WasmConfig.TrafficLiteZoneCount"/>;
+  /// Unity modern profile uses <see cref="WasmConfig.TrafficLiteZoneCountUnity"/>.
+  /// </summary>
+  public int? TrafficLiteZoneCount { get; init; }
+
   /// <summary>Load JSON from disk (Unity editor / standalone).</summary>
   public SimDataPaths? DataPaths { get; init; }
 

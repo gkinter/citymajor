@@ -28,6 +28,7 @@ public sealed class WasmTrafficLite
     private int _edgeCount;
     private int _cachedNodeCount;
     private int _edgeBatchCursor;
+    private int _targetZoneCount = WasmConfig.TrafficLiteZoneCount;
 
     /// <summary>
     /// Cached node → first-outgoing-edge offset. Invalidated only when
@@ -38,6 +39,15 @@ public sealed class WasmTrafficLite
     private int[]? _nodeEdgeStart;
 
     public float[] EdgeCongestion { get; private set; } = Array.Empty<float>();
+
+    /// <summary>Set O-D zone grid resolution; invalidates cached zone layout when changed.</summary>
+    public void Configure(int zoneCount)
+    {
+        zoneCount = Math.Max(1, zoneCount);
+        if (zoneCount == _targetZoneCount) return;
+        _targetZoneCount = zoneCount;
+        _initialized = false;
+    }
 
     public void Tick(WorldState state, double dt)
     {
@@ -92,8 +102,7 @@ public sealed class WasmTrafficLite
     private void Initialize(WorldState state)
     {
         _worldSize = state.Tiles.Size;
-        int targetZones = WasmConfig.TrafficLiteZoneCount;
-        _zoneSize = Math.Max(1, _worldSize / (int)MathF.Ceiling(MathF.Sqrt(targetZones)));
+        _zoneSize = Math.Max(1, _worldSize / (int)MathF.Ceiling(MathF.Sqrt(_targetZoneCount)));
         _zonesPerAxis = (_worldSize + _zoneSize - 1) / _zoneSize;
         _totalZones = _zonesPerAxis * _zonesPerAxis;
 

@@ -51,36 +51,28 @@ Unity HUD / Steam / CI are **consumers** of this foundation — not the foundati
 
 ## 3. Work packages (ordered)
 
-### WP-A — Traffic fidelity (in progress)
+### WP-A — Traffic fidelity ✅ (v1 deepen)
 
-- Apply `LifeSimMath.RushHourMultiplier` to lite O-D volume (morning/evening peaks).
-- Raise Unity-native lite zone count via config (optional path toward 128–256 zones).
-- Longer term: compile `TrafficSystem` into SimCore behind `SimHostInitOptions.UseFullTraffic` for desktop Unity (keep lite for WASM).
+- ✅ `LifeSimMath.RushHourMultiplier` on lite O-D
+- ✅ Unity lite zones **128** (`TrafficLiteZoneCountUnity`); WASM stays 64
+- ✅ `SimHostInitOptions.UseFullTraffic` compiles full `TrafficSystem` into SimCore (default off)
+- Longer term: tune full-FW cost; utility L0 still deferred
 
-**Exit:** Congestion heat rises at rush on arterials between R and C/I; characterization test asserts peak > off-peak mean tile traffic.
+### WP-B — Economy & trade observability ✅ (partial)
 
-### WP-B — Economy & trade observability
+- ✅ Employment + trade balance on snapshot
+- ✅ Goods shortage/surplus top-5 + indices on `WorldState`/`SimSnapshot` → Unity scalars
+- ⬜ Herald buckets consume shortage index (client)
 
-- Persist `EmploymentRate`, `UnemploymentRate`, `TradeBalance`, `MonthlyExportValue`, `MonthlyImportCost` on `WorldState` / `SimSnapshot`.
-- Wire politics `ServiceScore` / `SafetyScore` from real `ServiceSystem` coverage (replace constants).
-- Export top goods shortage/surplus indices for HUD/Herald.
+### WP-C — City-building closed loop ✅ (laws partial)
 
-**Exit:** Snapshot carries employment + trade; tests assert monthly trade changes city funds.
-
-### WP-C — City-building closed loop
-
-- Construction progress states surfaced in snapshot (`State`, condition).
-- Service coverage scores feed zone growth / abandonment.
-- Law toggles apply measurable budget/approval/traffic modifiers.
-
-**Exit:** Paint R → buildings grow → jobs → traffic → approval moves without UI hacks.
+- ✅ Law aggregate effects → monthly budget + `LawTrafficCapacityMult`
+- ⬜ Construction progress UX; more law→zone-growth hooks
 
 ### WP-D — Characterization & perf
 
-- Golden tests: seed city → N months → assert RCI, employment, traffic, funds within bands.
-- Tick budget doc at 10K HH / 5K buildings @ 8 Hz (native).
-
-**Exit:** CI fails on economy/traffic regressions.
+- ✅ `Forge.SimCore.Tests` — 11 tests (foundation + goods + laws + traffic options)
+- ⬜ Tick budget doc at 10K HH / 5K buildings @ 8 Hz
 
 ### WP-E — Spec stretch (cathedral, opt-in)
 
@@ -118,4 +110,4 @@ One worktree per WP. Merge gate: `dotnet test tests/Forge.Engine.Tests` + `./scr
 | Date | Tip | Note |
 |------|-----|------|
 | 2026-07-16 | charter | Program opened; WP-A/B started (rush OD + employment/trade on snapshot) |
-| 2026-07-16 | wave | Parallel lanes: full TrafficSystem option, law→budget/traffic effects, goods imbalance export |
+| 2026-07-16 | `bbffa11`+fix | Goods imbalance export · law→budget/traffic · full TrafficSystem option + Unity 128-zone lite · netstd2.1 Array.Clear fix |

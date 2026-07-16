@@ -300,7 +300,7 @@ public sealed class TrafficSystem
     private void BuildOdMatrix(WorldState state)
     {
         if (_odMatrix == null) return;
-        Array.Clear(_odMatrix);
+        Array.Clear(_odMatrix, 0, _odMatrix.Length);
 
         var hh = state.Households;
         var buildings = state.Buildings;
@@ -519,7 +519,7 @@ public sealed class TrafficSystem
             return;
 
         // Initialize volumes to zero
-        Array.Clear(_edgeVolume);
+        Array.Clear(_edgeVolume, 0, _edgeVolume.Length);
 
         // Auxiliary volume array for Frank-Wolfe direction
         var auxVolume = new float[_edgeCount];
@@ -534,7 +534,7 @@ public sealed class TrafficSystem
             }
 
             // All-or-nothing assignment based on current times
-            Array.Clear(auxVolume);
+            Array.Clear(auxVolume, 0, auxVolume.Length);
             AssignAllOrNothing(state, auxVolume, currentTimes);
 
             // Frank-Wolfe step size: lambda = 2 / (iteration + 2)
@@ -709,7 +709,7 @@ public sealed class TrafficSystem
     private void UpdateTileTraffic(WorldState state)
     {
         // Clear existing traffic data
-        Array.Clear(state.Tiles.Traffic);
+        Array.Clear(state.Tiles.Traffic, 0, state.Tiles.Traffic.Length);
 
         if (_edgeCount == 0) return;
 
@@ -827,7 +827,7 @@ public sealed class TrafficSystem
     {
         if (_zoneDistanceCache == null || _zoneCentroidNode == null) return;
 
-        Array.Clear(_zoneDistanceCache);
+        Array.Clear(_zoneDistanceCache, 0, _zoneDistanceCache.Length);
 
         for (int o = 0; o < _totalZones; o++)
         {

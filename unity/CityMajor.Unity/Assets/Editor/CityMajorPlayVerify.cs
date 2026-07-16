@@ -73,11 +73,77 @@ namespace CityMajor.Editor
             Debug.LogError($"[CityMajor] GLTF catalog verify: FAIL ({failures.Count} issue(s))");
         }
 
+        [MenuItem("CityMajor/Verify Achievements Catalog")]
+        public static void VerifyAchievementsCatalog()
+        {
+            const int minEntries = 10;
+            var failures = new List<string>();
+            var catalogPath = Path.Combine(Application.streamingAssetsPath, "achievements-v1.json");
+
+            if (!File.Exists(catalogPath))
+            {
+                Debug.LogError($"[CityMajor] Achievements catalog verify: missing {catalogPath}");
+                return;
+            }
+
+            try
+            {
+                var json = File.ReadAllText(catalogPath);
+                var file = JsonUtility.FromJson<AchievementCatalogFile>(json);
+                var achievements = file?.achievements;
+
+                if (achievements == null || achievements.Length == 0)
+                {
+                    failures.Add("achievements array is missing or empty");
+                }
+                else
+                {
+                    if (achievements.Length < minEntries)
+                        failures.Add($"expected at least {minEntries} entries, found {achievements.Length}");
+
+                    var seenApiNames = new HashSet<string>(StringComparer.Ordinal);
+                    for (var i = 0; i < achievements.Length; i++)
+                    {
+                        var entry = achievements[i];
+                        var prefix = $"achievements[{i}]";
+
+                        if (string.IsNullOrWhiteSpace(entry.steamApiName))
+                            failures.Add($"{prefix}: missing steamApiName (apiName)");
+                        else if (!entry.steamApiName.StartsWith("CM_", StringComparison.Ordinal))
+                            failures.Add($"{prefix}: steamApiName must start with CM_ (got '{entry.steamApiName}')");
+                        else if (!seenApiNames.Add(entry.steamApiName))
+                            failures.Add($"{prefix}: duplicate steamApiName '{entry.steamApiName}'");
+
+                        if (string.IsNullOrWhiteSpace(entry.name))
+                            failures.Add($"{prefix}: missing name (displayName)");
+
+                        if (string.IsNullOrWhiteSpace(entry.description))
+                            failures.Add($"{prefix}: missing description");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                failures.Add($"invalid JSON or parse error: {ex.Message}");
+            }
+
+            if (failures.Count == 0)
+            {
+                var count = JsonUtility.FromJson<AchievementCatalogFile>(File.ReadAllText(catalogPath)).achievements.Length;
+                Debug.Log($"[CityMajor] Achievements catalog verify: PASS ({count} entries, no duplicate steamApiName)");
+                return;
+            }
+
+            foreach (var failure in failures)
+                Debug.LogError($"[CityMajor] Achievements catalog verify: {failure}");
+
+            Debug.LogError($"[CityMajor] Achievements catalog verify: FAIL ({failures.Count} issue(s))");
+        }
+
         [MenuItem("CityMajor/Run Preflight Checks")]
         public static void RunPreflightChecks()
         {
             var issues = 0;
-            var repoRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", ".."));
             var simCoreDll = Path.Combine(
                 Application.dataPath, "Plugins", "Forge", "Forge.SimCore.dll");
 
@@ -94,18 +160,27 @@ namespace CityMajor.Editor
                     $"[CityMajor] Preflight: Forge.SimCore.dll OK ({new FileInfo(simCoreDll).Length / 1024} KB, age {age.TotalHours:F1}h)");
             }
 
-            var verifyScript = Path.Combine(repoRoot, "scripts", "verify-unity-gltf-catalog.sh");
-            if (File.Exists(verifyScript))
-                Debug.Log("[CityMajor] Preflight: GLTF shell verify available (CityMajor → Verify GLTF Catalog)");
-            else
-                Debug.LogWarning("[CityMajor] Preflight: scripts/verify-unity-gltf-catalog.sh not found");
-
             VerifyGltfCatalog();
+            VerifyAchievementsCatalog();
 
             if (issues == 0)
                 Debug.Log("[CityMajor] Preflight: complete — enter Play and run SB-4176 checklist");
             else
                 Debug.LogError($"[CityMajor] Preflight: {issues} blocking issue(s) before Play");
+        }
+
+        [Serializable]
+        sealed class AchievementCatalogFile
+        {
+            public AchievementCatalogEntry[] achievements;
+        }
+
+        [Serializable]
+        sealed class AchievementCatalogEntry
+        {
+            public string steamApiName;
+            public string name;
+            public string description;
         }
 
         static bool IsSymlink(string path)

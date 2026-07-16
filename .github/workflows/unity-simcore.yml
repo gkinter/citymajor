@@ -54,6 +54,11 @@ jobs:
           chmod +x scripts/verify-unity-gltf-catalog.sh
           ./scripts/verify-unity-gltf-catalog.sh
 
+      - name: Verify achievements catalog
+        run: |
+          chmod +x scripts/verify-achievements-catalog.sh
+          ./scripts/verify-achievements-catalog.sh
+
       # -----------------------------------------------------------------------
       # dotnet tests
       # Forge.Engine.Tests (822 tests) and Forge.Game.Tests (110 tests) both

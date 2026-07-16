@@ -7,5 +7,6 @@
             <ui:Button name="share-btn" class="save-load-btn" text="Share" />
         </ui:VisualElement>
         <ui:Label name="save-load-status" class="save-load-status" text="CMJR v1 · local file" />
+        <ui:Label name="save-load-cloud-status" class="save-load-status save-load-cloud-status" text="Cloud: Steam offline" />
     </ui:VisualElement>
 </ui:UXML>

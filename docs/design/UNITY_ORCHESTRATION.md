@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `931933e` — share URL preview + preflight; depot + achievements CI subagents in flight  
+**Integration tip:** `35a5bca` — Steam depot runbook; achievements CI subagent in flight  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -36,7 +36,7 @@
 | Social / trade stubs | SB-4183–4186 | 🟡 `TradeStrip` income/expense/RCI readout, `CityShareStub`, `BlueprintSlice` stub | Agent |
 | Phase 3 Steam facade | SB-4180 | ✅ `SteamNativePlatform` + rich presence + cloud save hooks | — |
 | Phase 3 achievements | SB-4181 | ✅ Catalog + toast + headless Windows build script | — |
-| Phase 3 Steam depot | SB-4180 | ⬜ Partner App ID, depots, live SDK on CI | Agent |
+| Phase 3 Steam depot | SB-4180 | 🟡 Runbook: [DEPOT_UPLOAD_RUNBOOK.md](../steam/DEPOT_UPLOAD_RUNBOOK.md) — partner AppId + live upload pending | Agent |
 
 ---
 
@@ -290,7 +290,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | Headless Windows build | ✅ `./scripts/build-steam-unity.sh` |
 | CI SimCore gate | ✅ `.github/workflows/unity-simcore.yml` + Engine (833) + Game (110) tests |
 | Steamworks.NET install | 🟡 see install doc below |
-| Partner App ID + depots | ⬜ |
+| Partner App ID + depots | 🟡 | [DEPOT_UPLOAD_RUNBOOK.md](../steam/DEPOT_UPLOAD_RUNBOOK.md) | Human + partner site |
 
 ### Steam install (required for live SDK)
 

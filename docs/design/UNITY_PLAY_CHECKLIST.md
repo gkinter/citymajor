@@ -76,6 +76,7 @@
 - [ ] **Save** writes `citymajor.cmjr` to persistentDataPath
 - [ ] **Load** restores zones/buildings/funds
 - [ ] **Share** copies spectator URL to clipboard
+- [ ] Save panel shows **Cloud:** offline / ready / uploaded (Steam stub vs live)
 - [ ] Save → **City on Disk** achievement toast appears
 - [ ] **Approval** meter (top-right, below budget) tracks mayor approval
 

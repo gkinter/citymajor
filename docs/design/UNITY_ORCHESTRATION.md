@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `104c0e3` — trade strip polish; wave 4 subagents (GLTF CI, cloud UX) in flight  
+**Integration tip:** `e80288b` — save panel cloud status; GLTF CI verify in flight  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -286,7 +286,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | Platform facade (`ISteamPlatform`) | ✅ null + native backends |
 | Rich presence | ✅ wired — needs live Steam client |
 | Achievements catalog + toast | ✅ 12 v1 rows |
-| Cloud saves (CMJR) | 🟡 `SteamCloudSave` when SDK live |
+| Cloud saves (CMJR) | 🟡 `SteamCloudSave` + save panel status line when SDK live |
 | Headless Windows build | ✅ `./scripts/build-steam-unity.sh` |
 | CI SimCore gate | ✅ `.github/workflows/unity-simcore.yml` + Engine (833) + Game (110) tests |
 | Steamworks.NET install | 🟡 see install doc below |

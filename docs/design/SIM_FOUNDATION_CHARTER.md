@@ -62,16 +62,17 @@ Unity HUD / Steam / CI are **consumers** of this foundation — not the foundati
 
 - ✅ Employment + trade balance on snapshot
 - ✅ Goods shortage/surplus top-5 + indices on `WorldState`/`SimSnapshot` → Unity scalars
-- ⬜ Herald buckets consume shortage index (client)
+- ✅ Herald buckets consume shortage index (`EconomyShortage` / block prosperity)
 
-### WP-C — City-building closed loop ✅ (laws partial)
+### WP-C — City-building closed loop ✅
 
 - ✅ Law aggregate effects → monthly budget + `LawTrafficCapacityMult`
-- ⬜ Construction progress UX; more law→zone-growth hooks
+- ✅ Multi-day construction (Condition progress) + law spawn/speed multipliers
+- ✅ `ConstructingBuildingCount` on snapshot
 
-### WP-D — Characterization & perf
+### WP-D — Characterization & perf ✅
 
-- ✅ `Forge.SimCore.Tests` — 14 tests (foundation + goods + laws + traffic + tick budget)
+- ✅ `Forge.SimCore.Tests` — foundation + goods + laws + traffic + construction + tick budget
 - ✅ Tick budget doc + CI gate @ 8 Hz — [`SIM_TICK_BUDGET.md`](./SIM_TICK_BUDGET.md); local target ≤10 ms (SB-3685), CI &lt;25 ms
 
 ### WP-E — Spec stretch (cathedral, opt-in)
@@ -112,3 +113,4 @@ One worktree per WP. Merge gate: `dotnet test tests/Forge.Engine.Tests` + `./scr
 | 2026-07-16 | charter | Program opened; WP-A/B started (rush OD + employment/trade on snapshot) |
 | 2026-07-16 | `bbffa11`+fix | Goods imbalance export · law→budget/traffic · full TrafficSystem option + Unity 128-zone lite · netstd2.1 Array.Clear fix |
 | 2026-07-16 | tick-budget | `TickBudgetTests` + `SIM_TICK_BUDGET.md` — CI gate &lt;25 ms @ 8 Hz; starter-city characterization |
+| 2026-07-16 | wave-2 | Herald←shortage · multi-day construction+law growth · tick budget — merged |

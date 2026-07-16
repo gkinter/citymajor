@@ -111,3 +111,4 @@ One worktree per WP. Merge gate: `dotnet test tests/Forge.Engine.Tests` + `./scr
 |------|-----|------|
 | 2026-07-16 | charter | Program opened; WP-A/B started (rush OD + employment/trade on snapshot) |
 | 2026-07-16 | `bbffa11`+fix | Goods imbalance export · law→budget/traffic · full TrafficSystem option + Unity 128-zone lite · netstd2.1 Array.Clear fix |
+| 2026-07-16 | wave | Herald←shortage · multi-day construction+law growth · tick budget benchmark |

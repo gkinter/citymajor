@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `e80288b` — save panel cloud status; GLTF CI verify in flight  
+**Integration tip:** `96b17dd` — wave 4 complete (trade, cloud UX, GLTF CI verify)  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -15,7 +15,7 @@
 |-------|--------|--------|-------|
 | Phase 1 scaffold + MCP | SB-4171 | ✅ Done | — |
 | Forge.SimCore bridge | SB-4172 | ✅ `SimHost` + `CitySimBridge` @ 8 Hz; bulldoze + road graph rebuild | — |
-| GLTF instancing | SB-4173 | 🟡 gltfast + catalog wired — **reimport GLBs in Unity** | Agent |
+| GLTF instancing | SB-4173 | 🟡 gltfast + catalog wired — CI verifies 12 GLBs; **reimport in Unity Editor** | Agent |
 | Zone paint | SB-4174 | ✅ Done + `SimHost.PaintZone` | — |
 | RCI HUD | SB-4175 | ✅ UI Toolkit `ResourcesHud` + `DemandOverlayController` + pop growth `(+N/mo)` | — |
 | Bulldoze tool | — | ✅ `BulldozeTool` + `SimHost.Bulldoze` (`X`) | — |

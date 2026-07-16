@@ -96,7 +96,7 @@ Unity v1 quality is **not** fully automated in CI today. Use this split so agent
 | Check | Automated? | Where | Notes |
 |-------|------------|-------|-------|
 | `Forge.Engine.Tests` + `Forge.Game.Tests` | ✅ | `.github/workflows/unity-simcore.yml` | 833 + 110 tests on `ubuntu-latest` |
-| Modern GLTF catalog on disk | 🟡 | `scripts/verify-unity-gltf-catalog.sh` (incoming) | 12 keys under `Assets/Art/Gltf/modern` |
+| Modern GLTF catalog on disk | ✅ | `scripts/verify-unity-gltf-catalog.sh` + GHA | 12 keys; Editor: **CityMajor → Verify GLTF Catalog** |
 | SimCore → Unity DLL copy | ✅ | Script | `./scripts/build-simcore-for-unity.sh` — **run after every SimHost change** |
 | Windows headless player build | ✅ | Script | `./scripts/build-steam-unity.sh` — needs `UNITY_PATH`; produces `Build/Steam/windows/CityMajor.exe` |
 | Web routes + WebGL smoke | ✅ | `.github/workflows/ci-smoke.yml` | **Web maintenance only** — does not load Unity `Play.unity` |
@@ -116,6 +116,8 @@ Unity v1 quality is **not** fully automated in CI today. Use this split so agent
 **CityMajor → Open Play Verification Checklist** — opens this doc in the OS default viewer.
 
 **CityMajor → Open Agent Dispatch Doc** — opens parallel-agent playbook for orchestrator.
+
+**CityMajor → Verify GLTF Catalog** — asserts modern symlink + 12 shipped GLBs.
 
 **CityMajor → Setup Play Scene** — adds `CityMajorBootstrap` if missing.
 

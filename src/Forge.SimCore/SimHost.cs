@@ -105,6 +105,7 @@ public sealed partial class SimHost
             BootstrapServiceCoverage();
         }
 
+        RecomputeLawEffects();
         IsInitialized = true;
     }
 
@@ -269,7 +270,9 @@ public sealed partial class SimHost
     public bool SetLawActive(string lawId, bool active)
     {
         if (!IsInitialized || _laws is null || string.IsNullOrWhiteSpace(lawId)) return false;
-        return _laws.SetActive(lawId, active);
+        if (!_laws.SetActive(lawId, active)) return false;
+        RecomputeLawEffects();
+        return true;
     }
 
     public LawPreviewDto? GetSampleLawPreview()
@@ -523,6 +526,7 @@ public sealed partial class SimHost
         _zoneGrowth.RecalculateLandValue(_state);
         _zoneGrowth.CheckUpgrades(_state);
         _budget.CalculateMonthlyBudget(_state, _economy);
+        _budget.ApplyLawModifiers(_state, _laws);
         _politics.MonthlyTick(_state, WasmConfig.GameDayInterval);
         _research.MonthlyTick(_state, WasmConfig.GameDayInterval);
 
@@ -853,6 +857,17 @@ public sealed partial class SimHost
         float police = ComputeAverageCoverage(_services.PoliceCoverage);
         float fire = ComputeAverageCoverage(_services.FireCoverage);
         return Math.Clamp((police + fire) * 0.5f, 0f, 1f);
+    }
+
+    private void RecomputeLawEffects()
+    {
+        if (_state is null || _laws is null) return;
+
+        _state.ActiveLawCount = _laws.ActiveLawCount;
+
+        float roadCapacity = _laws.GetAggregateEffect(LawEffectKeys.RoadCapacity);
+        float trafficCapacity = _laws.GetAggregateEffect(LawEffectKeys.TrafficCapacity);
+        _state.LawTrafficCapacityMult = Math.Clamp(1f + roadCapacity + trafficCapacity, 0.1f, 3f);
     }
 
     private byte ComputeRoadFlags(int x, int y)

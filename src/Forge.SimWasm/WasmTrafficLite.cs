@@ -195,7 +195,10 @@ public sealed class WasmTrafficLite
                     2 => 4f,
                     _ => 2f,
                 };
-                _edgeCapacity[edgeIdx] = BaseLaneCapacity * lanes;
+                float lawCapacityMult = state.LawTrafficCapacityMult > 0f
+                    ? state.LawTrafficCapacityMult
+                    : 1f;
+                _edgeCapacity[edgeIdx] = BaseLaneCapacity * lanes * lawCapacityMult;
                 _edgeFreeFlow[edgeIdx] = cost;
                 edgeIdx++;
             }

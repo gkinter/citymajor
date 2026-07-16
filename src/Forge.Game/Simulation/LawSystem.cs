@@ -4,9 +4,33 @@ using System.Text.Json.Serialization;
 namespace Forge.Game.Simulation;
 
 /// <summary>
+/// Known effect keys from base/data/laws/laws.json (partial catalog).
+/// Values are additive deltas summed across active ordinances via
+/// <see cref="LawSystem.GetAggregateEffect"/>.
+/// </summary>
+public static class LawEffectKeys
+{
+    // Budget / treasury
+    public const string TaxRevenue = "tax_revenue";
+    public const string CityRevenue = "city_revenue";
+    public const string TaxIncomeMult = "tax_income_mult";
+    public const string BudgetExpenseMult = "budget_expense_mult";
+
+    // Traffic capacity (road_capacity is the canonical catalog key; traffic_capacity is an alias)
+    public const string RoadCapacity = "road_capacity";
+    public const string TrafficCapacity = "traffic_capacity";
+    public const string TrafficCongestion = "traffic_congestion";
+
+    // Citizen sentiment (applied on day tick when wired)
+    public const string Happiness = "happiness";
+    public const string CitizenHappiness = "citizen_happiness";
+    public const string Approval = "approval";
+}
+
+/// <summary>
 /// City ordinance catalog loaded from base/data/laws/laws.json.
 /// Tracks which ordinances are currently active and their slider values.
-/// Effect application and council voting land in follow-up work.
+/// Aggregate effects are summed via <see cref="GetAggregateEffect"/> and applied by SimHost.
 /// </summary>
 public sealed class LawSystem
 {
@@ -164,6 +188,42 @@ public sealed class LawSystem
         _active[index] = active;
         ActiveLawCount += active ? 1 : -1;
         return true;
+    }
+
+    /// <summary>
+    /// Sum the <paramref name="effectKey"/> modifier across all active ordinances.
+    /// Missing keys return 0 (safe default).
+    /// </summary>
+    public float GetAggregateEffect(string effectKey)
+    {
+        if (string.IsNullOrWhiteSpace(effectKey)) return 0f;
+
+        float total = 0f;
+        for (int i = 0; i < _definitions.Count; i++)
+        {
+            if (!_active[i]) continue;
+
+            var effects = _definitions[i].Effects;
+            if (effects is null || effects.Count == 0) continue;
+
+            if (effects.TryGetValue(effectKey, out float value))
+                total += value;
+        }
+
+        return total;
+    }
+
+    /// <summary>Total monthly operating cost (cost_monthly) for all active ordinances.</summary>
+    public int GetActiveMonthlyOperatingCost()
+    {
+        int total = 0;
+        for (int i = 0; i < _definitions.Count; i++)
+        {
+            if (!_active[i]) continue;
+            total += _definitions[i].CostMonthly;
+        }
+
+        return total;
     }
 
     /// <summary>Current slider value for a parameter on an active ordinance.</summary>

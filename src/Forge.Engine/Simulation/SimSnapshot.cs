@@ -142,6 +142,12 @@ public sealed class SimSnapshot
     /// <summary>Number of currently active events.</summary>
     public int ActiveEventCount { get; init; }
 
+    /// <summary>Player-enabled ordinances (mirrors LawSystem.ActiveLawCount).</summary>
+    public int ActiveLawCount { get; init; }
+
+    /// <summary>Traffic edge capacity multiplier from active traffic ordinances.</summary>
+    public float LawTrafficCapacityMult { get; init; } = 1f;
+
     public readonly record struct BuildingSnapshot(
         int GridX, int GridY, ushort TypeId, byte Level,
         byte State, ushort Occupants, ushort MaxOccupants, byte Condition);
@@ -279,6 +285,9 @@ public sealed class SimSnapshot
             CulturalDna = (float[])state.CulturalDna.Clone(),
             // Events
             ActiveEventCount = state.ActiveEventCount,
+            // Laws
+            ActiveLawCount = state.ActiveLawCount,
+            LawTrafficCapacityMult = state.LawTrafficCapacityMult,
         };
     }
 }

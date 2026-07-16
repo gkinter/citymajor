@@ -58,6 +58,33 @@ public sealed class WorldState
     /// <summary>Average city happiness (0.0 = riot, 1.0 = utopia).</summary>
     public float Happiness { get; set; } = 0.5f;
 
+    /// <summary>Share of working-age households with a workplace (0–1).</summary>
+    public float EmploymentRate { get; set; } = 0.5f;
+
+    /// <summary>1 − <see cref="EmploymentRate"/>.</summary>
+    public float UnemploymentRate
+    {
+        get
+        {
+            float u = 1f - EmploymentRate;
+            if (u < 0f) return 0f;
+            if (u > 1f) return 1f;
+            return u;
+        }
+    }
+
+    /// <summary>Net trade balance last month (exports − imports).</summary>
+    public float TradeBalance { get; set; }
+
+    /// <summary>Export value last month.</summary>
+    public float MonthlyExportValue { get; set; }
+
+    /// <summary>Import cost last month.</summary>
+    public float MonthlyImportCost { get; set; }
+
+    /// <summary>Mean road-tile traffic density (0–1+), for tests / overlays.</summary>
+    public float MeanTrafficDensity { get; set; }
+
     // =========================================================================
     // Budget state
     // =========================================================================

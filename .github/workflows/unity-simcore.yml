@@ -75,3 +75,8 @@ jobs:
         run: |
           dotnet test tests/Forge.Game.Tests/Forge.Game.Tests.csproj \
             -c Release --logger "console;verbosity=minimal"
+
+      - name: Test Forge.SimCore.Tests
+        run: |
+          dotnet test tests/Forge.SimCore.Tests/Forge.SimCore.Tests.csproj \
+            -c Release --logger "console;verbosity=minimal"

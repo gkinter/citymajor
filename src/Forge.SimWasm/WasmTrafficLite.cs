@@ -52,8 +52,10 @@ public sealed class WasmTrafficLite
             return;
 
         BuildLiteOdMatrix(state);
+        ApplyRushHourToOd(state);
         RunFrankWolfeAssignment(state);
         UpdateTileTraffic(state);
+        UpdateMeanTrafficDensity(state);
     }
 
     /// <summary>
@@ -256,6 +258,37 @@ public sealed class WasmTrafficLite
                 _odMatrix[dest * _totalZones + origin] += trips * 0.5f;
             }
         }
+    }
+
+    /// <summary>
+    /// Scale gravity O-D by time-of-day rush curve so arterials peak morning/evening.
+    /// </summary>
+    private void ApplyRushHourToOd(WorldState state)
+    {
+        if (_odMatrix == null) return;
+
+        float timeOfDay = (state.TickCount % 1440) / 60f;
+        float rush = LifeSimMath.RushHourMultiplier(timeOfDay);
+        if (MathF.Abs(rush - 1f) < 0.01f) return;
+
+        for (int i = 0; i < _odMatrix.Length; i++)
+            _odMatrix[i] *= rush;
+    }
+
+    private static void UpdateMeanTrafficDensity(WorldState state)
+    {
+        var traffic = state.Tiles.Traffic;
+        var roads = state.Tiles.RoadFlags;
+        double sum = 0;
+        int count = 0;
+        for (int i = 0; i < traffic.Length; i++)
+        {
+            if (roads[i] == 0) continue;
+            sum += traffic[i];
+            count++;
+        }
+
+        state.MeanTrafficDensity = count == 0 ? 0f : (float)(sum / count);
     }
 
     private void RunFrankWolfeAssignment(WorldState state)

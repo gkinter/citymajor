@@ -77,6 +77,21 @@ public sealed class SimSnapshot
     /// <summary>Outstanding loan balance.</summary>
     public long LoanBalance { get; init; }
 
+    /// <summary>Working-age employment rate (0–1).</summary>
+    public float EmploymentRate { get; init; }
+
+    /// <summary>Net trade balance last month (exports − imports).</summary>
+    public float TradeBalance { get; init; }
+
+    /// <summary>Export value last month.</summary>
+    public float MonthlyExportValue { get; init; }
+
+    /// <summary>Import cost last month.</summary>
+    public float MonthlyImportCost { get; init; }
+
+    /// <summary>Mean tile traffic density snapshot.</summary>
+    public float MeanTrafficDensity { get; init; }
+
     // --- Research / Technology data ---
 
     /// <summary>Accumulated research points.</summary>
@@ -211,6 +226,11 @@ public sealed class SimSnapshot
             CommercialTaxRate = state.CommercialTaxRate,
             IndustrialTaxRate = state.IndustrialTaxRate,
             LoanBalance = state.LoanBalance,
+            EmploymentRate = state.EmploymentRate,
+            TradeBalance = state.TradeBalance,
+            MonthlyExportValue = state.MonthlyExportValue,
+            MonthlyImportCost = state.MonthlyImportCost,
+            MeanTrafficDensity = state.MeanTrafficDensity,
             // Research / Technology
             ResearchPoints = state.ResearchPoints,
             ResearchRate = state.ResearchRate,

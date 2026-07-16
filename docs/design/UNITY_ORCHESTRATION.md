@@ -14,7 +14,7 @@
 | Track | Linear | Status | Owner |
 |-------|--------|--------|-------|
 | Phase 1 scaffold + MCP | SB-4171 | ✅ Done | — |
-| Forge.SimCore bridge | SB-4172 | ✅ `SimHost` + `CitySimBridge` @ 8 Hz; bulldoze + road graph rebuild | — |
+| Forge.SimCore bridge | SB-4172 | ✅ `SimHost` + foundation deepen (employment/trade on snapshot, rush OD) — see [SIM_FOUNDATION_CHARTER.md](./SIM_FOUNDATION_CHARTER.md) | — |
 | GLTF instancing | SB-4173 | 🟡 gltfast + catalog wired — CI verifies 12 GLBs; **reimport in Unity Editor** | Agent |
 | Zone paint | SB-4174 | ✅ Done + `SimHost.PaintZone` | — |
 | RCI HUD | SB-4175 | ✅ UI Toolkit `ResourcesHud` + `DemandOverlayController` + pop growth `(+N/mo)` | — |

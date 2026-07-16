@@ -769,15 +769,19 @@ public sealed partial class SimHost
         }
 
         _trade.ProcessTrade(_state, _economy);
+        _state.TradeBalance = _trade.TradeBalance;
+        _state.MonthlyExportValue = _trade.MonthlyExportValue;
+        _state.MonthlyImportCost = _trade.MonthlyImportCost;
     }
 
     private void FeedCrossSystemData()
     {
         float fundsRatio = Math.Clamp(_state.CityFunds / 100_000f, 0f, 1f);
         float employmentRate = CalculateEmploymentRate();
+        _state.EmploymentRate = employmentRate;
         _politics.EconomyScore = fundsRatio * 0.5f + employmentRate * 0.5f;
-        _politics.ServiceScore = 0.5f;
-        _politics.SafetyScore = 0.6f;
+        _politics.ServiceScore = EstimateServiceScore();
+        _politics.SafetyScore = EstimateSafetyScore();
 
         int libraryCount = 0, universityCount = 0, heavyIndustryCount = 0;
         var buildings = _state.Buildings;
@@ -833,6 +837,21 @@ public sealed partial class SimHost
         }
 
         return workingAge > 0 ? employed / (float)workingAge : 0.5f;
+    }
+
+    private float EstimateServiceScore()
+    {
+        // Blend health + education coverage as a 0–1 politics input.
+        float health = ComputeAverageCoverage(_services.HealthCoverage);
+        float education = ComputeAverageCoverage(_services.EducationCoverage);
+        return Math.Clamp((health + education) * 0.5f, 0f, 1f);
+    }
+
+    private float EstimateSafetyScore()
+    {
+        float police = ComputeAverageCoverage(_services.PoliceCoverage);
+        float fire = ComputeAverageCoverage(_services.FireCoverage);
+        return Math.Clamp((police + fire) * 0.5f, 0f, 1f);
     }
 
     private byte ComputeRoadFlags(int x, int y)

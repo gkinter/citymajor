@@ -134,9 +134,17 @@ namespace CityMajor.UI
             }
 
             var snap = _sim?.LatestSnapshot;
+            var state = _sim?.State ?? default;
             var bucket = result.Event.Bucket;
+            var goodsShortage = snap != null
+                ? snap.GoodsShortageIndex
+                : state.GoodsShortageIndex;
             var reason = snap != null
-                ? NarrativeTemplates.ExplainBucket(bucket, snap.ApprovalRating * 100f, snap.CityFunds)
+                ? NarrativeTemplates.ExplainBucket(
+                    bucket,
+                    snap.ApprovalRating * 100f,
+                    snap.CityFunds,
+                    goodsShortage)
                 : "";
 
             if (_title != null)
@@ -147,7 +155,10 @@ namespace CityMajor.UI
                 if (result.QuotaRemaining.HasValue)
                     _subtitle.text = $"narrative remaining today: {result.QuotaRemaining.Value}";
                 else if (result.UsedFallback)
-                    _subtitle.text = "offline template edition";
+                {
+                    var shortageLine = NarrativeTemplates.FormatGoodsShortageLine(goodsShortage);
+                    _subtitle.text = $"offline template edition · {shortageLine}";
+                }
                 else
                     _subtitle.text = "narrative remaining today: …";
             }

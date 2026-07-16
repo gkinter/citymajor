@@ -9,7 +9,7 @@
 
 | Item | v1 | Notes |
 |------|-----|-------|
-| Steam App ID + depots | ⬜ | Partner site → `SteamAppConfig.AppId` + `steam_appid.txt` |
+| Steam App ID + depots | ⬜ | Partner site → `SteamAppConfig.AppId` + `steam_appid.txt`; upload steps: [DEPOT_UPLOAD_RUNBOOK.md](../steam/DEPOT_UPLOAD_RUNBOOK.md) |
 | Steamworks.NET init | 🟡 | `SteamNativePlatform` + `STEAMWORKS_NET` define — see [INSTALL_STEAMWORKS_NET.md](../steam/INSTALL_STEAMWORKS_NET.md) |
 | Achievements | 🟡 | 12 v1 rows in `StreamingAssets/achievements-v1.json` + toast UI |
 | Cloud saves (CMJR) | 🟡 | `SteamCloudSave` on Save/Load when SDK live |
@@ -42,8 +42,7 @@
 ./scripts/build-steam-unity.sh
 
 # 4. steamcmd app build (manual until CI wired)
-#    Content root: Build/Steam/windows/
-#    VDF templates: docs/steam/ (TBD)
+#    Full checklist: docs/steam/DEPOT_UPLOAD_RUNBOOK.md
 ```
 
 ---

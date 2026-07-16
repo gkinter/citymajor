@@ -85,6 +85,15 @@ public sealed class WorldState
     /// <summary>Mean road-tile traffic density (0–1+), for tests / overlays.</summary>
     public float MeanTrafficDensity { get; set; }
 
+    /// <summary>
+    /// Multiplier on road edge capacity from active traffic ordinances (1.0 = neutral).
+    /// Written by SimHost when laws toggle; read by WasmTrafficLite.
+    /// </summary>
+    public float LawTrafficCapacityMult { get; set; } = 1f;
+
+    /// <summary>Count of player-enabled ordinances (mirrors LawSystem.ActiveLawCount).</summary>
+    public int ActiveLawCount { get; set; }
+
     // =========================================================================
     // Budget state
     // =========================================================================

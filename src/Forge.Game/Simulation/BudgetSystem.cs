@@ -210,6 +210,39 @@ public sealed class BudgetSystem
         _eventBus?.Publish(new BudgetChangedEvent { NewBalance = state.CityFunds });
     }
 
+    /// <summary>
+    /// Apply ordinance revenue/expense deltas after the base monthly budget.
+    /// Scales income/expense totals by aggregate law modifiers and deducts ordinance operating costs.
+    /// </summary>
+    public void ApplyLawModifiers(WorldState state, LawSystem laws)
+    {
+        float incomeMult = 1f
+            + laws.GetAggregateEffect(LawEffectKeys.TaxRevenue)
+            + laws.GetAggregateEffect(LawEffectKeys.CityRevenue)
+            + laws.GetAggregateEffect(LawEffectKeys.TaxIncomeMult);
+
+        float expenseMult = 1f + laws.GetAggregateEffect(LawEffectKeys.BudgetExpenseMult);
+
+        float revenueBonus = TotalRevenue * Math.Max(-0.95f, incomeMult - 1f);
+        float expensePenalty = TotalExpenses * Math.Max(-0.95f, expenseMult - 1f);
+        int lawOperatingCost = laws.GetActiveMonthlyOperatingCost();
+
+        float netAdjustment = revenueBonus - expensePenalty - lawOperatingCost;
+        if (Math.Abs(netAdjustment) < 0.01f && lawOperatingCost == 0)
+            return;
+
+        state.CityFunds += (long)netAdjustment;
+
+        if (revenueBonus > 0f)
+            state.Income.ServiceFees += (long)revenueBonus;
+
+        long extraExpense = (long)(expensePenalty + lawOperatingCost);
+        if (extraExpense > 0)
+            state.Expenses.Miscellaneous += extraExpense;
+
+        _eventBus?.Publish(new BudgetChangedEvent { NewBalance = state.CityFunds });
+    }
+
     // =========================================================================
     // Revenue calculation
     // =========================================================================

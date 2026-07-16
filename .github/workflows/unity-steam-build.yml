@@ -55,6 +55,11 @@ jobs:
           fi
           echo "OK: $DLL ($(du -h "$DLL" | cut -f1))"
 
+      - name: Verify modern GLTF catalog
+        run: |
+          chmod +x scripts/verify-unity-gltf-catalog.sh
+          ./scripts/verify-unity-gltf-catalog.sh
+
   unity-player:
     runs-on: ubuntu-latest
     needs: simcore

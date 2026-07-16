@@ -117,6 +117,8 @@ Unity v1 quality is **not** fully automated in CI today. Use this split so agent
 
 **CityMajor → Open Agent Dispatch Doc** — opens parallel-agent playbook for orchestrator.
 
+**CityMajor → Run Preflight Checks** — SimCore DLL + GLTF catalog before Play.
+
 **CityMajor → Verify GLTF Catalog** — asserts modern symlink + 12 shipped GLBs.
 
 **CityMajor → Setup Play Scene** — adds `CityMajorBootstrap` if missing.

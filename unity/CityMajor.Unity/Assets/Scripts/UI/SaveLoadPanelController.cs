@@ -106,7 +106,7 @@ namespace CityMajor.UI
 
             var url = CityShareStub.BuildSpectatorLink(DefaultCityName, tick, preview);
             GUIUtility.systemCopyBuffer = url;
-            SetStatus("Link copied");
+            SetStatus($"Link copied · {CityShareStub.FormatStatusPreview(url)}");
             Debug.Log($"[CityMajor] Spectator stub URL: {url}");
         }
 

@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -70,6 +71,41 @@ namespace CityMajor.Editor
                 Debug.LogError($"[CityMajor] GLTF catalog verify: {failure}");
 
             Debug.LogError($"[CityMajor] GLTF catalog verify: FAIL ({failures.Count} issue(s))");
+        }
+
+        [MenuItem("CityMajor/Run Preflight Checks")]
+        public static void RunPreflightChecks()
+        {
+            var issues = 0;
+            var repoRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", ".."));
+            var simCoreDll = Path.Combine(
+                Application.dataPath, "Plugins", "Forge", "Forge.SimCore.dll");
+
+            if (!File.Exists(simCoreDll))
+            {
+                Debug.LogError(
+                    "[CityMajor] Preflight: Forge.SimCore.dll missing — run ./scripts/build-simcore-for-unity.sh");
+                issues++;
+            }
+            else
+            {
+                var age = DateTime.UtcNow - File.GetLastWriteTimeUtc(simCoreDll);
+                Debug.Log(
+                    $"[CityMajor] Preflight: Forge.SimCore.dll OK ({new FileInfo(simCoreDll).Length / 1024} KB, age {age.TotalHours:F1}h)");
+            }
+
+            var verifyScript = Path.Combine(repoRoot, "scripts", "verify-unity-gltf-catalog.sh");
+            if (File.Exists(verifyScript))
+                Debug.Log("[CityMajor] Preflight: GLTF shell verify available (CityMajor → Verify GLTF Catalog)");
+            else
+                Debug.LogWarning("[CityMajor] Preflight: scripts/verify-unity-gltf-catalog.sh not found");
+
+            VerifyGltfCatalog();
+
+            if (issues == 0)
+                Debug.Log("[CityMajor] Preflight: complete — enter Play and run SB-4176 checklist");
+            else
+                Debug.LogError($"[CityMajor] Preflight: {issues} blocking issue(s) before Play");
         }
 
         static bool IsSymlink(string path)

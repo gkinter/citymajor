@@ -18,6 +18,18 @@ namespace CityMajor.Net
             return $"{BaseUrl}/{slug}?tick={tick}&h={hash}";
         }
 
+        /// <summary>Short label for save-panel status after copy (keeps bar readable).</summary>
+        public static string FormatStatusPreview(string url, int maxLen = 42)
+        {
+            if (string.IsNullOrEmpty(url))
+                return "…";
+
+            if (url.Length <= maxLen)
+                return url;
+
+            return url.Substring(0, maxLen - 1) + "…";
+        }
+
         static string Slugify(string name)
         {
             if (string.IsNullOrWhiteSpace(name))

@@ -24,6 +24,8 @@ namespace CityMajor.Sim
         public float DemandResidential;
         public float DemandCommercial;
         public float DemandIndustrial;
+        public float GoodsShortageIndex;
+        public float GoodsSurplusIndex;
         public int BuildingCount;
         public int ZonedTiles;
 

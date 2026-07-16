@@ -95,7 +95,7 @@ public sealed class EconomySystem
     }
 
     /// <summary>Per-good imbalance row for WASM / web HUD export.</summary>
-    public readonly record struct GoodImbalanceEntry(string Name, float Magnitude);
+    public readonly record struct GoodImbalanceEntry(byte GoodId, string Name, float Magnitude);
 
     /// <summary>
     /// Result of a "what-if" building placement prediction.
@@ -367,9 +367,9 @@ public sealed class EconomySystem
             float delta = totalDemand - totalSupply;
             var good = (Good)g;
             if (delta > MinDelta)
-                shortages.Add(new GoodImbalanceEntry(good.ToString(), delta));
+                shortages.Add(new GoodImbalanceEntry((byte)good, good.ToString(), delta));
             else if (delta < -MinDelta)
-                surpluses.Add(new GoodImbalanceEntry(good.ToString(), -delta));
+                surpluses.Add(new GoodImbalanceEntry((byte)good, good.ToString(), -delta));
         }
 
         shortages.Sort((a, b) => b.Magnitude.CompareTo(a.Magnitude));
@@ -379,6 +379,108 @@ public sealed class EconomySystem
         if (surpluses.Count > topN) surpluses.RemoveRange(topN, surpluses.Count - topN);
 
         return (shortages.ToArray(), surpluses.ToArray());
+    }
+
+    /// <summary>
+    /// Aggregate shortage pressure across all active goods, normalized 0–1.
+    /// Sum of positive (demand − supply) divided by total market activity.
+    /// </summary>
+    public float ComputeShortageIndex()
+    {
+        const float MinActivity = 0.01f;
+        float totalShortage = 0f;
+        float totalActivity = 0f;
+
+        for (int g = 0; g < GoodCount; g++)
+        {
+            float totalSupply = 0f;
+            float totalDemand = 0f;
+            for (int z = 0; z < ActiveZoneCount; z++)
+            {
+                totalSupply += _zones[z].Supply[g];
+                totalDemand += _zones[z].Demand[g];
+            }
+
+            float activity = totalSupply + totalDemand;
+            if (activity < MinActivity) continue;
+
+            totalActivity += activity;
+            float delta = totalDemand - totalSupply;
+            if (delta > 0f) totalShortage += delta;
+        }
+
+        if (totalActivity < MinActivity) return 0f;
+        return Math.Clamp(totalShortage / totalActivity, 0f, 1f);
+    }
+
+    /// <summary>
+    /// Aggregate surplus pressure across all active goods, normalized 0–1.
+    /// Sum of positive (supply − demand) divided by total market activity.
+    /// </summary>
+    public float ComputeSurplusIndex()
+    {
+        const float MinActivity = 0.01f;
+        float totalSurplus = 0f;
+        float totalActivity = 0f;
+
+        for (int g = 0; g < GoodCount; g++)
+        {
+            float totalSupply = 0f;
+            float totalDemand = 0f;
+            for (int z = 0; z < ActiveZoneCount; z++)
+            {
+                totalSupply += _zones[z].Supply[g];
+                totalDemand += _zones[z].Demand[g];
+            }
+
+            float activity = totalSupply + totalDemand;
+            if (activity < MinActivity) continue;
+
+            totalActivity += activity;
+            float delta = totalSupply - totalDemand;
+            if (delta > 0f) totalSurplus += delta;
+        }
+
+        if (totalActivity < MinActivity) return 0f;
+        return Math.Clamp(totalSurplus / totalActivity, 0f, 1f);
+    }
+
+    /// <summary>
+    /// Persist top imbalances and scalar indices onto world state after a daily economy tick.
+    /// </summary>
+    public void PublishImbalancesTo(WorldState state, int topN = WorldState.MaxTopGoodImbalances)
+    {
+        topN = Math.Clamp(topN, 1, WorldState.MaxTopGoodImbalances);
+        var (shortages, surpluses) = GetTopImbalances(topN);
+
+        state.TopShortageCount = shortages.Length;
+        for (int i = 0; i < shortages.Length; i++)
+        {
+            state.TopShortageGoodIds[i] = shortages[i].GoodId;
+            state.TopShortageScores[i] = shortages[i].Magnitude;
+        }
+
+        for (int i = shortages.Length; i < WorldState.MaxTopGoodImbalances; i++)
+        {
+            state.TopShortageGoodIds[i] = 0;
+            state.TopShortageScores[i] = 0f;
+        }
+
+        state.TopSurplusCount = surpluses.Length;
+        for (int i = 0; i < surpluses.Length; i++)
+        {
+            state.TopSurplusGoodIds[i] = surpluses[i].GoodId;
+            state.TopSurplusScores[i] = surpluses[i].Magnitude;
+        }
+
+        for (int i = surpluses.Length; i < WorldState.MaxTopGoodImbalances; i++)
+        {
+            state.TopSurplusGoodIds[i] = 0;
+            state.TopSurplusScores[i] = 0f;
+        }
+
+        state.GoodsShortageIndex = ComputeShortageIndex();
+        state.GoodsSurplusIndex = ComputeSurplusIndex();
     }
 
     // =========================================================================

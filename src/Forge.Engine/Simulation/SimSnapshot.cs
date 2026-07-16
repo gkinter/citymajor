@@ -92,6 +92,18 @@ public sealed class SimSnapshot
     /// <summary>Mean tile traffic density snapshot.</summary>
     public float MeanTrafficDensity { get; init; }
 
+    /// <summary>Top shortage goods (good id + demand−supply score), up to 5.</summary>
+    public GoodImbalanceSnapshot[] ShortageGoods { get; init; } = [];
+
+    /// <summary>Top surplus goods (good id + supply−demand score), up to 5.</summary>
+    public GoodImbalanceSnapshot[] SurplusGoods { get; init; } = [];
+
+    /// <summary>City-wide shortage pressure (0–1).</summary>
+    public float GoodsShortageIndex { get; init; }
+
+    /// <summary>City-wide surplus pressure (0–1).</summary>
+    public float GoodsSurplusIndex { get; init; }
+
     // --- Research / Technology data ---
 
     /// <summary>Accumulated research points.</summary>
@@ -137,6 +149,8 @@ public sealed class SimSnapshot
     public readonly record struct VehicleSnapshot(
         float WorldX, float WorldY, ushort TypeId, float Heading,
         float Speed, float MaxSpeed, byte Flags);
+
+    public readonly record struct GoodImbalanceSnapshot(byte GoodId, float Score);
 
     /// <summary>
     /// Create a snapshot from the current world state. Called on the simulation thread.
@@ -197,6 +211,22 @@ public sealed class SimSnapshot
         // assume 1 tick = 1 game-minute; 1440 ticks/day)
         float timeOfDay = (state.TickCount % 1440) / 60f;
 
+        var shortageGoods = new GoodImbalanceSnapshot[state.TopShortageCount];
+        for (int i = 0; i < state.TopShortageCount; i++)
+        {
+            shortageGoods[i] = new GoodImbalanceSnapshot(
+                state.TopShortageGoodIds[i],
+                state.TopShortageScores[i]);
+        }
+
+        var surplusGoods = new GoodImbalanceSnapshot[state.TopSurplusCount];
+        for (int i = 0; i < state.TopSurplusCount; i++)
+        {
+            surplusGoods[i] = new GoodImbalanceSnapshot(
+                state.TopSurplusGoodIds[i],
+                state.TopSurplusScores[i]);
+        }
+
         return new SimSnapshot
         {
             TileTerrainTypes = terrainCopy,
@@ -231,6 +261,10 @@ public sealed class SimSnapshot
             MonthlyExportValue = state.MonthlyExportValue,
             MonthlyImportCost = state.MonthlyImportCost,
             MeanTrafficDensity = state.MeanTrafficDensity,
+            ShortageGoods = shortageGoods,
+            SurplusGoods = surplusGoods,
+            GoodsShortageIndex = state.GoodsShortageIndex,
+            GoodsSurplusIndex = state.GoodsSurplusIndex,
             // Research / Technology
             ResearchPoints = state.ResearchPoints,
             ResearchRate = state.ResearchRate,

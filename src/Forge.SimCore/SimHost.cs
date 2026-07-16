@@ -484,6 +484,7 @@ public sealed partial class SimHost
     private void RunDayTick()
     {
         _economy.DailyTick(_state, WasmConfig.GameDayInterval);
+        _economy.PublishImbalancesTo(_state);
         _services.DailyTick(_state, WasmConfig.GameDayInterval);
         _zoneGrowth.Tick(_state, _economy);
         _events.DailyTick(_state);

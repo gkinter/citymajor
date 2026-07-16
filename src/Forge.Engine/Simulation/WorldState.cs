@@ -86,6 +86,34 @@ public sealed class WorldState
     public float MeanTrafficDensity { get; set; }
 
     // =========================================================================
+    // Goods economy imbalance (persisted after daily economy tick)
+    // =========================================================================
+
+    public const int MaxTopGoodImbalances = 5;
+
+    /// <summary>Top shortage good IDs (Good enum byte), dense prefix of length <see cref="TopShortageCount"/>.</summary>
+    public byte[] TopShortageGoodIds { get; } = new byte[MaxTopGoodImbalances];
+
+    /// <summary>Demand − supply magnitude per top shortage good.</summary>
+    public float[] TopShortageScores { get; } = new float[MaxTopGoodImbalances];
+
+    /// <summary>Top surplus good IDs (Good enum byte), dense prefix of length <see cref="TopSurplusCount"/>.</summary>
+    public byte[] TopSurplusGoodIds { get; } = new byte[MaxTopGoodImbalances];
+
+    /// <summary>Supply − demand magnitude per top surplus good.</summary>
+    public float[] TopSurplusScores { get; } = new float[MaxTopGoodImbalances];
+
+    public int TopShortageCount { get; set; }
+
+    public int TopSurplusCount { get; set; }
+
+    /// <summary>City-wide shortage pressure (0–1) for Herald / HUD buckets.</summary>
+    public float GoodsShortageIndex { get; set; }
+
+    /// <summary>City-wide surplus pressure (0–1) for Herald / HUD buckets.</summary>
+    public float GoodsSurplusIndex { get; set; }
+
+    // =========================================================================
     // Budget state
     // =========================================================================
 

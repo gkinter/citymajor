@@ -234,6 +234,8 @@ namespace CityMajor.Sim
                 DemandResidential = economy?.ResidentialDemand ?? 0f,
                 DemandCommercial = economy?.CommercialDemand ?? 0f,
                 DemandIndustrial = economy?.IndustrialDemand ?? 0f,
+                GoodsShortageIndex = snap.GoodsShortageIndex,
+                GoodsSurplusIndex = snap.GoodsSurplusIndex,
                 BuildingCount = snap.BuildingCount,
                 ZonedTiles = zoned,
                 TimeOfDay = timeOfDay,

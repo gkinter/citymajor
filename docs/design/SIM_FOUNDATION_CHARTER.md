@@ -118,3 +118,4 @@ One worktree per WP. Merge gate: `dotnet test tests/Forge.Engine.Tests` + `./scr
 | Date | Tip | Note |
 |------|-----|------|
 | 2026-07-16 | charter | Program opened; WP-A/B started (rush OD + employment/trade on snapshot) |
+| 2026-07-16 | wave | Parallel lanes: full TrafficSystem option, law→budget/traffic effects, goods imbalance export |

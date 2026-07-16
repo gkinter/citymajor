@@ -82,6 +82,7 @@ public sealed class SimSnapshotDto
     public float[] QueueProgress { get; init; } = [];
     public Dictionary<int, float> EurekaBonuses { get; init; } = new();
     public Dictionary<int, int> BranchingChoices { get; init; } = new();
+    public int ConstructingBuildingCount { get; init; }
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
@@ -128,6 +129,7 @@ public sealed class SimSnapshotDto
             QueueProgress = research is null ? [] : (float[])research.QueueProgress.Clone(),
             EurekaBonuses = research is null ? new() : new Dictionary<int, float>(research.EurekaBonuses),
             BranchingChoices = research is null ? new() : new Dictionary<int, int>(research.BranchingChoices),
+            ConstructingBuildingCount = state.ConstructingBuildingCount,
         };
     }
 

@@ -148,6 +148,15 @@ public sealed class SimSnapshot
     /// <summary>Traffic edge capacity multiplier from active traffic ordinances.</summary>
     public float LawTrafficCapacityMult { get; init; } = 1f;
 
+    /// <summary>Construction duration multiplier from active ordinances.</summary>
+    public float LawConstructionSpeedMult { get; init; } = 1f;
+
+    /// <summary>Baseline spawn demand multiplier from construction_cost ordinances.</summary>
+    public float LawSpawnDemandMult { get; init; } = 1f;
+
+    /// <summary>Buildings currently under construction.</summary>
+    public int ConstructingBuildingCount { get; init; }
+
     public readonly record struct BuildingSnapshot(
         int GridX, int GridY, ushort TypeId, byte Level,
         byte State, ushort Occupants, ushort MaxOccupants, byte Condition);
@@ -288,6 +297,9 @@ public sealed class SimSnapshot
             // Laws
             ActiveLawCount = state.ActiveLawCount,
             LawTrafficCapacityMult = state.LawTrafficCapacityMult,
+            LawConstructionSpeedMult = state.LawConstructionSpeedMult,
+            LawSpawnDemandMult = state.LawSpawnDemandMult,
+            ConstructingBuildingCount = state.ConstructingBuildingCount,
         };
     }
 }

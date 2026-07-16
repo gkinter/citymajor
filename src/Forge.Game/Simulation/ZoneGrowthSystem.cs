@@ -74,6 +74,19 @@ public sealed class ZoneGrowthSystem
     /// <summary>Months of abandonment before auto-demolition.</summary>
     internal const int AbandonmentMonthsBeforeDemolition = 24;
 
+    /// <summary>Condition value (0–255) at which construction completes.</summary>
+    internal const int ConstructionCompleteCondition = 255;
+
+    // =========================================================================
+    // Construction duration (game days, before law speed mult)
+    // =========================================================================
+
+    internal const int ConstructionDaysResidentialLow = 3;
+    internal const int ConstructionDaysResidentialHigh = 5;
+    internal const int ConstructionDaysCommercial = 4;
+    internal const int ConstructionDaysIndustrial = 7;
+    internal const int ConstructionDaysDefault = 4;
+
     // =========================================================================
     // Demand formula weights
     // =========================================================================
@@ -175,7 +188,8 @@ public sealed class ZoneGrowthSystem
 
                     float growthChance = demand * desirability * (1f + services * ServiceWeight)
                                         * (roadAccess * RoadAccessWeight + (1f - RoadAccessWeight))
-                                        * GrowthBaseMultiplier;
+                                        * GrowthBaseMultiplier
+                                        * GetZoneLawSpawnMult(state, zone);
 
                     growthChance = Math.Clamp(growthChance, 0f, 1f);
 
@@ -190,6 +204,7 @@ public sealed class ZoneGrowthSystem
                     if (buildingId >= buildings.Capacity) continue;
                     if (!buildings.IsActive(buildingId)) continue;
                     if (buildings.State[buildingId] == StateAbandoned) continue;
+                    if (buildings.State[buildingId] == StateConstructing) continue;
 
                     float demand = GetDemandForZone(zone, resDemand, comDemand, indDemand);
                     float pollution = tiles.Pollution[idx];
@@ -212,6 +227,10 @@ public sealed class ZoneGrowthSystem
 
         // Process auto-demolition of long-abandoned buildings
         ProcessAbandonedBuildings(state);
+
+        // Advance in-progress construction and publish HUD count
+        ProcessConstruction(state);
+        state.ConstructingBuildingCount = CountConstructingBuildings(state);
     }
 
     // =========================================================================
@@ -667,16 +686,97 @@ public sealed class ZoneGrowthSystem
         buildings.TypeId[slot] = typeId;
         buildings.Level[slot] = 1;
         buildings.State[slot] = StateConstructing;
-        buildings.Condition[slot] = 255;
+        buildings.Condition[slot] = 0;
 
         // Set max occupants based on zone and density
         buildings.MaxOccupants[slot] = CalculateMaxOccupants(zoneType, density);
 
         // Mark tile as occupied
         state.Tiles.BuildingId[state.Tiles.Index(tileX, tileY)] = (ushort)slot;
+    }
 
-        // Construction completes quickly (for now, instant)
-        buildings.State[slot] = StateOperational;
+    /// <summary>
+    /// Advance constructing buildings toward operational. Uses Condition as 0–255 progress
+    /// (matches BuildingRenderer construction visuals).
+    /// </summary>
+    private static void ProcessConstruction(WorldState state)
+    {
+        var buildings = state.Buildings;
+        var tiles = state.Tiles;
+        float speedMult = Math.Max(0.25f, state.LawConstructionSpeedMult);
+
+        for (int i = 0; i < buildings.Capacity; i++)
+        {
+            if (!buildings.IsActive(i)) continue;
+            if (buildings.State[i] != StateConstructing) continue;
+
+            int bx = buildings.GridX[i];
+            int by = buildings.GridY[i];
+            if (!tiles.InBounds(bx, by)) continue;
+
+            byte zone = tiles.ZoneType[tiles.Index(bx, by)];
+            int days = GetConstructionDays(zone, buildings.Level[i], speedMult);
+            int increment = Math.Max(1, ConstructionCompleteCondition / days);
+            int newCondition = Math.Min(ConstructionCompleteCondition, buildings.Condition[i] + increment);
+            buildings.Condition[i] = (byte)newCondition;
+
+            if (newCondition >= ConstructionCompleteCondition)
+            {
+                buildings.State[i] = StateOperational;
+                buildings.Condition[i] = (byte)ConstructionCompleteCondition;
+            }
+        }
+    }
+
+    /// <summary>Base construction duration in game days for a zone/level (before law speed mult).</summary>
+    internal static int GetBaseConstructionDays(byte zoneType, byte level)
+    {
+        int baseDays = zoneType switch
+        {
+            ZoneResidentialLow => ConstructionDaysResidentialLow,
+            ZoneResidentialHigh => ConstructionDaysResidentialHigh,
+            ZoneCommercial or ZoneOffice => ConstructionDaysCommercial,
+            ZoneIndustrial => ConstructionDaysIndustrial,
+            ZoneMixedUse => ConstructionDaysResidentialHigh,
+            ZoneAgricultural => ConstructionDaysResidentialLow,
+            _ => ConstructionDaysDefault,
+        };
+
+        return baseDays + Math.Max(0, level - 1);
+    }
+
+    /// <summary>Effective construction days after law speed multiplier.</summary>
+    internal static int GetConstructionDays(byte zoneType, byte level, float lawSpeedMult)
+    {
+        float adjusted = GetBaseConstructionDays(zoneType, level) / Math.Max(0.25f, lawSpeedMult);
+        return Math.Clamp((int)Math.Ceiling(adjusted), 1, 30);
+    }
+
+    private static float GetZoneLawSpawnMult(WorldState state, byte zoneType)
+    {
+        float zoneMult = zoneType switch
+        {
+            ZoneResidentialLow or ZoneResidentialHigh or ZoneMixedUse or ZoneAgricultural
+                => state.LawResidentialSpawnMult,
+            ZoneIndustrial => state.LawIndustrialSpawnMult,
+            ZoneCommercial or ZoneOffice => state.LawCommercialSpawnMult,
+            _ => state.LawSpawnDemandMult,
+        };
+
+        return state.LawSpawnDemandMult * zoneMult;
+    }
+
+    private static int CountConstructingBuildings(WorldState state)
+    {
+        int count = 0;
+        var buildings = state.Buildings;
+        for (int i = 0; i < buildings.Capacity; i++)
+        {
+            if (!buildings.IsActive(i)) continue;
+            if (buildings.State[i] == StateConstructing) count++;
+        }
+
+        return count;
     }
 
     /// <summary>

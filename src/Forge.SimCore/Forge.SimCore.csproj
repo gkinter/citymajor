@@ -9,6 +9,10 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Forge.SimCore.Tests" />
+  </ItemGroup>
+
   <!-- Engine-agnostic core: no SDL / OpenGL / ImGui packages -->
   <ItemGroup>
     <Compile Include="..\Forge.Engine\Core\Config.cs" Link="Core\Config.cs" />

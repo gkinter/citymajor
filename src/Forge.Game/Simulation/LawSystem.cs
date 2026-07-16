@@ -25,6 +25,13 @@ public static class LawEffectKeys
     public const string Happiness = "happiness";
     public const string CitizenHappiness = "citizen_happiness";
     public const string Approval = "approval";
+
+    // Zone growth / construction (from laws.json)
+    public const string ConstructionCost = "construction_cost";
+    public const string ConstructionSpeed = "construction_speed";
+    public const string HousingSupply = "housing_supply";
+    public const string IndustrialOutput = "industrial_output";
+    public const string HousingDensity = "housing_density";
 }
 
 /// <summary>

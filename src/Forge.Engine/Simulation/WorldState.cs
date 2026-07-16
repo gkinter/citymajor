@@ -94,6 +94,24 @@ public sealed class WorldState
     /// <summary>Count of player-enabled ordinances (mirrors LawSystem.ActiveLawCount).</summary>
     public int ActiveLawCount { get; set; }
 
+    /// <summary>Construction duration multiplier from active laws (1.0 = neutral).</summary>
+    public float LawConstructionSpeedMult { get; set; } = 1f;
+
+    /// <summary>Baseline zone spawn demand multiplier from construction_cost ordinances.</summary>
+    public float LawSpawnDemandMult { get; set; } = 1f;
+
+    /// <summary>Residential zone spawn multiplier (housing_supply / housing_density).</summary>
+    public float LawResidentialSpawnMult { get; set; } = 1f;
+
+    /// <summary>Industrial zone spawn multiplier (industrial_output).</summary>
+    public float LawIndustrialSpawnMult { get; set; } = 1f;
+
+    /// <summary>Commercial / office zone spawn multiplier.</summary>
+    public float LawCommercialSpawnMult { get; set; } = 1f;
+
+    /// <summary>Buildings currently in constructing state (updated each zone growth tick).</summary>
+    public int ConstructingBuildingCount { get; set; }
+
     // =========================================================================
     // Goods economy imbalance (persisted after daily economy tick)
     // =========================================================================

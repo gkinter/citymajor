@@ -887,6 +887,21 @@ public sealed partial class SimHost
         float roadCapacity = _laws.GetAggregateEffect(LawEffectKeys.RoadCapacity);
         float trafficCapacity = _laws.GetAggregateEffect(LawEffectKeys.TrafficCapacity);
         _state.LawTrafficCapacityMult = Math.Clamp(1f + roadCapacity + trafficCapacity, 0.1f, 3f);
+
+        float constructionCost = _laws.GetAggregateEffect(LawEffectKeys.ConstructionCost);
+        float constructionSpeed = _laws.GetAggregateEffect(LawEffectKeys.ConstructionSpeed);
+        float housingSupply = _laws.GetAggregateEffect(LawEffectKeys.HousingSupply);
+        float housingDensity = _laws.GetAggregateEffect(LawEffectKeys.HousingDensity);
+        float industrialOutput = _laws.GetAggregateEffect(LawEffectKeys.IndustrialOutput);
+
+        _state.LawConstructionSpeedMult = Math.Clamp(1f + constructionSpeed, 0.25f, 3f);
+        _state.LawSpawnDemandMult = Math.Clamp(1f - constructionCost * 0.5f, 0.25f, 3f);
+        _state.LawResidentialSpawnMult = Math.Clamp(
+            1f + housingSupply + housingDensity * 0.5f - constructionCost * 0.3f, 0.25f, 3f);
+        _state.LawIndustrialSpawnMult = Math.Clamp(
+            1f + industrialOutput - constructionCost * 0.3f, 0.25f, 3f);
+        _state.LawCommercialSpawnMult = Math.Clamp(
+            1f - constructionCost * 0.2f, 0.25f, 3f);
     }
 
     private byte ComputeRoadFlags(int x, int y)

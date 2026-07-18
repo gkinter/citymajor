@@ -12,9 +12,12 @@ namespace CityMajor.UI
         CitySimBridge _sim;
         UIDocument _document;
         VisualElement _root;
+        Label _employment;
         Label _income;
         Label _expense;
         Label _balance;
+        Label _flow;
+        Label _interzone;
         Label _demand;
         Button _closeBtn;
         bool _open;
@@ -62,9 +65,12 @@ namespace CityMajor.UI
             _document.sortingOrder = 111;
             var docRoot = _document.rootVisualElement;
             _root = docRoot?.Q<VisualElement>("trade-root");
+            _employment = docRoot?.Q<Label>("trade-employment");
             _income = docRoot?.Q<Label>("trade-income");
             _expense = docRoot?.Q<Label>("trade-expense");
             _balance = docRoot?.Q<Label>("trade-balance");
+            _flow = docRoot?.Q<Label>("trade-flow");
+            _interzone = docRoot?.Q<Label>("trade-interzone");
             _demand = docRoot?.Q<Label>("trade-demand");
             _closeBtn = docRoot?.Q<Button>("trade-close");
             _closeBtn?.RegisterCallback<ClickEvent>(_ => SetOpen(false));
@@ -85,11 +91,33 @@ namespace CityMajor.UI
                 return;
 
             var net = state.MonthlyIncome - state.MonthlyExpense;
+            if (_employment != null)
+            {
+                var empPct = Mathf.RoundToInt(state.EmploymentRate * 100f);
+                _employment.text = $"Employment: {empPct}%";
+            }
+
             if (_income != null)
                 _income.text = $"Income: +{state.MonthlyIncome:N0}/mo";
             if (_expense != null)
                 _expense.text = $"Expenses: −{state.MonthlyExpense:N0}/mo";
             _balance.text = $"Net treasury flow: {(net >= 0 ? "+" : "")}{net:N0}/mo";
+
+            if (_flow != null)
+            {
+                var tradeSign = state.TradeBalance >= 0 ? "+" : "";
+                _flow.text =
+                    $"Trade balance: {tradeSign}{state.TradeBalance:N0}/mo · " +
+                    $"Exports +{state.MonthlyExportValue:N0} · Imports −{state.MonthlyImportCost:N0}";
+            }
+
+            if (_interzone != null)
+            {
+                _interzone.text =
+                    $"Inter-zone volume: {state.InterZoneTradeVolume:N0}/day · " +
+                    $"Friction ×{state.MeanInterZoneFriction:F2}";
+            }
+
             if (_demand != null)
             {
                 _demand.text =

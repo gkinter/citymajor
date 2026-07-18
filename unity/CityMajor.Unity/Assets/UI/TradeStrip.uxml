@@ -10,9 +10,12 @@
         </ui:VisualElement>
         <ui:ScrollView name="trade-scroll" class="panel-body">
             <ui:Label name="trade-status" class="panel-note" text="No bilateral routes yet. Sim auto-trades via global market." />
+            <ui:Label name="trade-employment" class="panel-note" text="" />
             <ui:Label name="trade-income" class="panel-note" text="" />
             <ui:Label name="trade-expense" class="panel-note" text="" />
             <ui:Label name="trade-balance" class="panel-note panel-note--emphasis" text="" />
+            <ui:Label name="trade-flow" class="panel-note" text="" />
+            <ui:Label name="trade-interzone" class="panel-note" text="" />
             <ui:Label name="trade-demand" class="panel-note" text="" />
         </ui:ScrollView>
     </ui:VisualElement>

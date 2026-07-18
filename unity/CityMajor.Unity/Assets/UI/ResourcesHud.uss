@@ -113,3 +113,48 @@
 .demand-bar-fill--i {
     background-color: rgb(242, 204, 64);
 }
+
+.hud-utilities-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    background-color: rgba(20, 24, 34, 0.65);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.hud-utilities-value {
+    flex-grow: 1;
+}
+
+.hud-utilities-row--ok {
+    border-color: rgba(125, 255, 178, 0.35);
+}
+
+.hud-utilities-row--warn {
+    border-color: rgba(242, 204, 64, 0.45);
+}
+
+.hud-utilities-row--stress {
+    border-color: rgba(255, 112, 112, 0.5);
+}
+
+.hud-utilities-value--ok {
+    color: rgb(125, 255, 178);
+}
+
+.hud-utilities-value--warn {
+    color: rgb(242, 204, 64);
+}
+
+.hud-utilities-value--stress {
+    color: rgb(255, 112, 112);
+}
+
+.hud-cranes {
+    margin-top: 4px;
+    -unity-font-style: bold;
+    color: rgb(242, 204, 64);
+}

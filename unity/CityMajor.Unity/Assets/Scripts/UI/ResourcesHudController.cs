@@ -19,6 +19,9 @@ namespace CityMajor.UI
         Label _popGrowth;
         Label _fundsValue;
         Label _timeValue;
+        VisualElement _utilitiesRow;
+        Label _utilitiesValue;
+        Label _cranesLabel;
         readonly PopulationGrowthTracker _growthTracker = new();
 
         public void Configure(CitySimBridge sim)
@@ -82,6 +85,9 @@ namespace CityMajor.UI
             _popGrowth = root.Q<Label>("pop-growth");
             _fundsValue = root.Q<Label>("funds-value");
             _timeValue = root.Q<Label>("time-value");
+            _utilitiesRow = root.Q<VisualElement>("utilities-row");
+            _utilitiesValue = root.Q<Label>("utilities-value");
+            _cranesLabel = root.Q<Label>("cranes-label");
         }
 
         void OnSnapshot(SimSnapshot snapshot)
@@ -110,6 +116,56 @@ namespace CityMajor.UI
             }
 
             ApplyGrowthLabel();
+            ApplyUtilities(state);
+            ApplyCranes(state);
+        }
+
+        void ApplyUtilities(CitySimState state)
+        {
+            if (_utilitiesValue == null)
+                return;
+
+            var powerPct = Mathf.RoundToInt(state.PowerCoverageFraction * 100f);
+            var waterPct = Mathf.RoundToInt(state.WaterCoverageFraction * 100f);
+            _utilitiesValue.text = $"⚡ {powerPct}% · 💧 {waterPct}%";
+
+            var stressClass = UtilityStressClass(state.UtilityStressIndex);
+            _utilitiesValue.EnableInClassList("hud-utilities-value--ok", stressClass == "ok");
+            _utilitiesValue.EnableInClassList("hud-utilities-value--warn", stressClass == "warn");
+            _utilitiesValue.EnableInClassList("hud-utilities-value--stress", stressClass == "stress");
+
+            if (_utilitiesRow != null)
+            {
+                _utilitiesRow.EnableInClassList("hud-utilities-row--ok", stressClass == "ok");
+                _utilitiesRow.EnableInClassList("hud-utilities-row--warn", stressClass == "warn");
+                _utilitiesRow.EnableInClassList("hud-utilities-row--stress", stressClass == "stress");
+            }
+        }
+
+        void ApplyCranes(CitySimState state)
+        {
+            if (_cranesLabel == null)
+                return;
+
+            if (state.ConstructingBuildingCount <= 0)
+            {
+                _cranesLabel.style.display = DisplayStyle.None;
+                _cranesLabel.text = "";
+                return;
+            }
+
+            _cranesLabel.style.display = DisplayStyle.Flex;
+            var noun = state.ConstructingBuildingCount == 1 ? "building" : "buildings";
+            _cranesLabel.text = $"🚧 {state.ConstructingBuildingCount} {noun}";
+        }
+
+        static string UtilityStressClass(float stress)
+        {
+            if (stress < 0.2f)
+                return "ok";
+            if (stress <= 0.5f)
+                return "warn";
+            return "stress";
         }
 
         void ApplyGrowthLabel()

@@ -74,10 +74,11 @@ Unity HUD / Steam / CI are **consumers** of this foundation — not the foundati
 
 - ✅ `Forge.SimCore.Tests` — foundation + goods + laws + traffic + construction + tick budget
 - ✅ Tick budget doc + CI gate @ 8 Hz — [`SIM_TICK_BUDGET.md`](./SIM_TICK_BUDGET.md); local target ≤10 ms (SB-3685), CI &lt;25 ms
+- ✅ V1-scale tick characterization (8.2K HH / 3.2K buildings on 256×256) via `SimHost.SeedV1ScaleCity()` — `TickBudgetTests.V1Scale_256x256_NearFullPools_MedianFrameTick_UnderCiBudget`
 
 ### WP-E — Spec stretch (cathedral, opt-in)
 
-Only after A–D are green:
+Only after A–D are green. V1-scale pool characterization (WP-D) establishes baseline tick cost before opt-in cathedral traffic:
 
 - Full Frank-Wolfe 500 zones + MNL in SimCore.
 - ✅ Inter-zone trade friction matrix (`SIMULATION_ARCHITECTURE` §5) — `TradeCoefficients` 16×16, price-aware greedy matching, `InterZoneTradeVolume` / `MeanInterZoneFriction` on snapshot.

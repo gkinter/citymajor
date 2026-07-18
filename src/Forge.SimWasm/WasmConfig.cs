@@ -13,6 +13,15 @@ public static class WasmConfig
     /// <summary>Starter buildings at init — scaled from world area, capped for pool limits.</summary>
     public const int TargetStarterBuildings = 220;
 
+    /// <summary>WP-E / v1-scale tick budget: households to seed (pool cap 10,240).</summary>
+    public const int V1ScaleTargetHouseholds = 8_200;
+
+    /// <summary>WP-E / v1-scale tick budget: buildings to seed (pool cap 5,120).</summary>
+    public const int V1ScaleTargetBuildings = 3_200;
+
+    /// <summary>WP-E / v1-scale tick budget: total population for RestoreHouseholds (~3 members/HH).</summary>
+    public const int V1ScaleTargetPopulation = 24_600;
+
     /// <summary>Legacy stub interval — superseded by <see cref="TrafficLiteInterval"/>.</summary>
     public const double TrafficStubInterval = 2.0;
 

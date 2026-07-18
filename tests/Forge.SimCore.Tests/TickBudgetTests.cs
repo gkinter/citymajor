@@ -19,6 +19,12 @@ public sealed class TickBudgetTests
     /// <summary>Generous CI ceiling on shared ubuntu-latest runners.</summary>
     private const double CiMedianTickMsLimit = 25.0;
 
+    /// <summary>Local dev target (SB-3685) — logged for comparison, not asserted in CI.</summary>
+    private const double LocalMedianTickMsTarget = 10.0;
+
+    private const int V1ScaleMinHouseholds = 8_000;
+    private const int V1ScaleMinBuildings = 3_000;
+
     private readonly ITestOutputHelper _output;
 
     public TickBudgetTests(ITestOutputHelper output) => _output = output;
@@ -65,6 +71,37 @@ public sealed class TickBudgetTests
         Assert.True(snap.Population > 0);
         Assert.True(medianMs < CiMedianTickMsLimit,
             $"median frame tick {medianMs:F2} ms exceeds CI budget {CiMedianTickMsLimit} ms");
+    }
+
+    /// <summary>
+    /// V1 charter scale: near-full pools (8K+ HH, 3K+ buildings) on 256×256 via
+    /// <see cref="SimHost.SeedV1ScaleCity"/> — CI gate &lt;25 ms; local dev target ≤10 ms.
+    /// </summary>
+    [Fact]
+    public void V1Scale_256x256_NearFullPools_MedianFrameTick_UnderCiBudget()
+    {
+        var host = new SimHost();
+        host.Init(256, new SimHostInitOptions { SkipStarterCity = true });
+        host.SeedV1ScaleCity();
+
+        var snap = host.GetSnapshot();
+        int households = host.State.Households.Count;
+
+        Assert.True(households >= V1ScaleMinHouseholds,
+            $"expected ≥{V1ScaleMinHouseholds} households, got {households}");
+        Assert.True(snap.BuildingCount >= V1ScaleMinBuildings,
+            $"expected ≥{V1ScaleMinBuildings} buildings, got {snap.BuildingCount}");
+
+        double medianMs = MeasureMedianTickMs(host, WarmupTicks, SampleTicks);
+
+        _output.WriteLine(
+            $"v1-scale: world=256 HH={households} pop={snap.Population} buildings={snap.BuildingCount} " +
+            $"median_tick_ms={medianMs:F2} ci_limit_ms={CiMedianTickMsLimit:F0} " +
+            $"local_target_ms={LocalMedianTickMsTarget:F0}");
+
+        Assert.True(medianMs < CiMedianTickMsLimit,
+            $"median frame tick {medianMs:F2} ms exceeds CI budget {CiMedianTickMsLimit} ms " +
+            $"(v1-scale HH={households} buildings={snap.BuildingCount})");
     }
 
     private void MeasureAndAssert(

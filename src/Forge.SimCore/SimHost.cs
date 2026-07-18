@@ -376,6 +376,40 @@ public sealed partial class SimHost
         }
     }
 
+    /// <summary>
+    /// Test / characterization helper: fills pools near v1 charter scale (≥8K HH, ≥3K buildings)
+    /// without affecting default <see cref="Init"/> / starter seed. Requires 256×256 (or ≥128).
+    /// </summary>
+    public void SeedV1ScaleCity()
+    {
+        if (!IsInitialized)
+            throw new InvalidOperationException("SimHost is not initialized.");
+
+        int size = _config.WorldSize;
+        if (size < 128)
+            throw new InvalidOperationException("V1 scale seed requires world size >= 128.");
+
+        ClearBuildings();
+        ClearHouseholds();
+        ClearZonesAndRoads();
+
+        int cx = size / 2;
+        int cy = size / 2;
+        int zoneHalf = size / 2 - 8;
+        int buildingTarget = Math.Min(
+            WasmConfig.V1ScaleTargetBuildings,
+            _state.Buildings.Capacity - 64);
+
+        SeedV1ScaleRoadGrid(cx, cy, zoneHalf);
+        SeedV1ScaleZones(cx, cy, zoneHalf, size);
+        SeedV1ScaleBuildings(cx, cy, zoneHalf, buildingTarget);
+
+        RebuildRoadGraphFromTiles();
+        RestoreHouseholds(WasmConfig.V1ScaleTargetPopulation, WasmConfig.V1ScaleTargetHouseholds);
+        BootstrapServiceCoverage();
+        _state.Happiness = 0.6f;
+    }
+
     public void RestoreHouseholds(int targetPopulation, int householdCount)
     {
         ClearHouseholds();
@@ -687,6 +721,133 @@ public sealed partial class SimHost
         }
 
         RebuildRoadGraphFromTiles();
+    }
+
+    private void SeedV1ScaleRoadGrid(int cx, int cy, int zoneHalf)
+    {
+        const int roadStep = 16;
+        for (int x = cx - zoneHalf; x <= cx + zoneHalf; x += roadStep)
+        {
+            for (int y = cy - zoneHalf; y <= cy + zoneHalf; y++)
+            {
+                if (!_state.Tiles.InBounds(x, y)) continue;
+                byte terrain = _state.Tiles.TerrainType[_state.Tiles.Index(x, y)];
+                if (terrain == (byte)TerrainId.Water || terrain == (byte)TerrainId.Rock) continue;
+                _state.Tiles.RoadFlags[_state.Tiles.Index(x, y)] = 1;
+            }
+        }
+
+        for (int y = cy - zoneHalf; y <= cy + zoneHalf; y += roadStep)
+        {
+            for (int x = cx - zoneHalf; x <= cx + zoneHalf; x++)
+            {
+                if (!_state.Tiles.InBounds(x, y)) continue;
+                byte terrain = _state.Tiles.TerrainType[_state.Tiles.Index(x, y)];
+                if (terrain == (byte)TerrainId.Water || terrain == (byte)TerrainId.Rock) continue;
+                _state.Tiles.RoadFlags[_state.Tiles.Index(x, y)] = 1;
+            }
+        }
+
+        int roadHalf = Math.Max(16, _config.WorldSize / 4);
+        for (int x = cx - roadHalf; x <= cx + roadHalf; x++)
+        {
+            if (!_state.Tiles.InBounds(x, cy)) continue;
+            _state.Tiles.RoadFlags[_state.Tiles.Index(x, cy)] = 1;
+        }
+
+        for (int y = cy - roadHalf; y <= cy + roadHalf; y++)
+        {
+            if (!_state.Tiles.InBounds(cx, y)) continue;
+            _state.Tiles.RoadFlags[_state.Tiles.Index(cx, y)] = 1;
+        }
+    }
+
+    private void SeedV1ScaleZones(int cx, int cy, int zoneHalf, int size)
+    {
+        int commercialCore = size / 16;
+        int residentialRing = size / 8;
+        int commercialMid = size / 5;
+
+        for (int y = cy - zoneHalf; y <= cy + zoneHalf; y++)
+        for (int x = cx - zoneHalf; x <= cx + zoneHalf; x++)
+        {
+            if (!_state.Tiles.InBounds(x, y)) continue;
+            int idx = _state.Tiles.Index(x, y);
+            byte terrain = _state.Tiles.TerrainType[idx];
+            if (terrain == (byte)TerrainId.Water || terrain == (byte)TerrainId.Rock) continue;
+            if (_state.Tiles.RoadFlags[idx] != 0) continue;
+
+            int dist = Math.Abs(x - cx) + Math.Abs(y - cy);
+            byte zone = dist switch
+            {
+                _ when dist < commercialCore => (byte)3,
+                _ when dist < residentialRing => (byte)1,
+                _ when dist < commercialMid => (byte)2,
+                _ => (byte)4,
+            };
+            _state.Tiles.ZoneType[idx] = zone;
+            _state.Tiles.ZoneDensity[idx] = 3;
+        }
+    }
+
+    private void SeedV1ScaleBuildings(int cx, int cy, int zoneHalf, int buildingTarget)
+    {
+        var rng = new Random(17);
+        int placed = 0;
+
+        for (int y = cy - zoneHalf + 1; y < cy + zoneHalf && placed < buildingTarget; y += 2)
+        for (int x = cx - zoneHalf + 1; x < cx + zoneHalf && placed < buildingTarget; x += 2)
+        {
+            if (TryPlaceSeedBuilding(x, y, rng))
+                placed++;
+        }
+
+        int attempts = 0;
+        int maxAttempts = (buildingTarget - placed) * 12;
+        int spawnHalf = zoneHalf - 2;
+        while (placed < buildingTarget && attempts < maxAttempts)
+        {
+            attempts++;
+            int x = cx + rng.Next(-spawnHalf, spawnHalf + 1);
+            int y = cy + rng.Next(-spawnHalf, spawnHalf + 1);
+            if (TryPlaceSeedBuilding(x, y, rng))
+                placed++;
+        }
+    }
+
+    private bool TryPlaceSeedBuilding(int x, int y, Random rng)
+    {
+        if (!_state.Tiles.InBounds(x, y)) return false;
+
+        int idx = _state.Tiles.Index(x, y);
+        byte terrain = _state.Tiles.TerrainType[idx];
+        if (terrain == (byte)TerrainId.Water || terrain == (byte)TerrainId.Rock) return false;
+        if (_state.Tiles.ZoneType[idx] == 0) return false;
+        if (_state.Tiles.BuildingId[idx] != 0) return false;
+
+        int slot = _state.Buildings.Allocate();
+        if (slot < 0) return false;
+
+        byte tileZone = _state.Tiles.ZoneType[idx];
+        ushort typeBase = tileZone switch
+        {
+            3 or 2 => (ushort)300,
+            4 => (ushort)400,
+            _ => (ushort)100,
+        };
+
+        _state.Buildings.GridX[slot] = x;
+        _state.Buildings.GridY[slot] = y;
+        _state.Buildings.Width[slot] = 1;
+        _state.Buildings.Height[slot] = 1;
+        _state.Buildings.TypeId[slot] = (ushort)(typeBase + rng.Next(0, 20));
+        _state.Buildings.Level[slot] = (byte)rng.Next(1, 5);
+        _state.Buildings.State[slot] = 1;
+        _state.Buildings.Condition[slot] = 255;
+        _state.Buildings.Occupants[slot] = (ushort)rng.Next(1, 30);
+        _state.Buildings.MaxOccupants[slot] = 48;
+        _state.Tiles.BuildingId[idx] = (ushort)slot;
+        return true;
     }
 
     private void SeedStartingPopulation()

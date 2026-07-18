@@ -8,7 +8,7 @@ Characterization of native `Forge.SimCore.SimHost` wall-clock cost per 8 Hz fram
 |---------|-------------------|-------|
 | **Local dev** (SB-3685) | ≤ **10 ms** | Discrete GPU / M-series Mac; 256×256, traffic lite 64 zones |
 | **CI gate** (`TickBudgetTests`) | < **25 ms** | Shared `ubuntu-latest`; generous headroom for runner variance |
-| **Scale target** (v1 charter) | ≤ 10 ms @ 8 Hz | 10K households, 5K buildings — not yet characterized in CI |
+| **Scale target** (v1 charter) | ≤ 10 ms @ 8 Hz | 10K households, 5K buildings — v1-scale characterization in CI (8.2K HH / 3.2K buildings) |
 
 Measurement: `Stopwatch` around `SimHost.Tick(0.125)` after warmup; median of 100 samples.
 
@@ -21,8 +21,12 @@ Measurement: `Stopwatch` around `SimHost.Tick(0.125)` after warmup; median of 10
 | Mac arm64 (local dev) | 256 | 128 | 218 | **0.03** | lite 64 | 2026-07-16 |
 | Mac arm64 (local dev) | 128 | 64 | 54 | **0.01** | lite 64 | 2026-07-16 |
 | Mac arm64 (local dev) | 256 after 200 warm ticks | 150 | 218 | **0.02** | lite 64 | 2026-07-16 |
+| CI `ubuntu-latest` | 256 | 8,200 | 3,200 | *(from CI log)* | lite 64 | 2026-07-18 |
+| Mac arm64 (local dev) | 256 | 8,200 | 3,200 | **3.53** | lite 64 | 2026-07-18 |
 
-> **Starter city:** `SimHost.Init` seeds ~220 buildings and starting population via `SeedStarterCity` / `SeedStartingPopulation`. Tests do not yet force 10K HH — see `TickBudgetTests.StarterCity_AfterWarmSim_ReportsPopulationAndTickBudget` for post-warm counts.
+> **Starter city:** `SimHost.Init` seeds ~220 buildings and starting population via `SeedStarterCity` / `SeedStartingPopulation`.
+>
+> **V1-scale city:** `SimHost.SeedV1ScaleCity()` (test/characterization only) fills ≥8K households and ≥3K buildings using `RestoreHouseholds` and the same placement patterns as starter seed. Invoked by `TickBudgetTests.V1Scale_256x256_NearFullPools_MedianFrameTick_UnderCiBudget`.
 
 ## Traffic modes
 

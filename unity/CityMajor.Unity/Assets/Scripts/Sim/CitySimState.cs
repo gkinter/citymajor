@@ -26,8 +26,21 @@ namespace CityMajor.Sim
         public float DemandIndustrial;
         public float GoodsShortageIndex;
         public float GoodsSurplusIndex;
+        public float EmploymentRate;
+        public float TradeBalance;
+        public float MonthlyExportValue;
+        public float MonthlyImportCost;
+        public float MeanTrafficDensity;
+        public float InterZoneTradeVolume;
+        public float MeanInterZoneFriction;
         public int BuildingCount;
+        public int ConstructingBuildingCount;
         public int ZonedTiles;
+        public float PowerCoverageFraction;
+        public float WaterCoverageFraction;
+        public float UtilityStressIndex;
+        public float BlackoutFraction;
+        public float WaterShortageFraction;
 
         /// <summary>Sim hour 0–24 (from SimSnapshot.TimeOfDay).</summary>
         public float TimeOfDay;

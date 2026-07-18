@@ -27,6 +27,7 @@ public sealed class ServiceSystem
     private readonly InfluenceMap _crimeMap;
 
     private readonly int _worldSize;
+    private readonly UtilityPartitionBalance _utilityBalance;
 
     // =========================================================================
     // Building type classification constants
@@ -99,9 +100,13 @@ public sealed class ServiceSystem
     private const byte GridNone = 0;
     private const byte GridConnected = 1;
 
-    public ServiceSystem(int worldSize)
+    public ServiceSystem(int worldSize, int? utilityPartitionSize = null)
     {
         _worldSize = worldSize;
+        int partitionSize = UtilityPartitionBalance.ResolvePartitionSize(
+            worldSize,
+            utilityPartitionSize);
+        _utilityBalance = new UtilityPartitionBalance(worldSize, partitionSize);
         _fireCoverage = new InfluenceMap(worldSize, worldSize);
         _policeCoverage = new InfluenceMap(worldSize, worldSize);
         _healthCoverage = new InfluenceMap(worldSize, worldSize);
@@ -122,6 +127,22 @@ public sealed class ServiceSystem
     public InfluenceMap PollutionMap => _pollutionMap;
     public InfluenceMap NoiseMap => _noiseMap;
     public InfluenceMap CrimeMap => _crimeMap;
+
+    /// <summary>L0 partition utility balance (power/water supply vs demand).</summary>
+    public UtilityPartitionBalance UtilityBalance => _utilityBalance;
+
+    // =========================================================================
+    // L0 tick — partition-level utility balance (cheap, every sim frame)
+    // =========================================================================
+
+    /// <summary>
+    /// Lightweight L0 utility balance tick. Does not run tile BFS — see
+    /// <see cref="RecalculatePowerGrid"/> / <see cref="RecalculateWaterGrid"/> on daily/monthly tick.
+    /// </summary>
+    public void L0Tick(WorldState state, float dt)
+    {
+        _utilityBalance.Tick(state, dt);
+    }
 
     // =========================================================================
     // Event handlers: recalculate when buildings change

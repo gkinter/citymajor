@@ -56,7 +56,7 @@ Unity HUD / Steam / CI are **consumers** of this foundation — not the foundati
 - ✅ `LifeSimMath.RushHourMultiplier` on lite O-D
 - ✅ Unity lite zones **128** (`TrafficLiteZoneCountUnity`); WASM stays 64
 - ✅ `SimHostInitOptions.UseFullTraffic` compiles full `TrafficSystem` into SimCore (default off)
-- Longer term: tune full-FW cost; utility L0 still deferred
+- Longer term: tune full-FW cost
 
 ### WP-B — Economy & trade observability ✅ (partial)
 
@@ -81,7 +81,8 @@ Only after A–D are green:
 
 - Full Frank-Wolfe 500 zones + MNL in SimCore.
 - ✅ Inter-zone trade friction matrix (`SIMULATION_ARCHITECTURE` §5) — `TradeCoefficients` 16×16, price-aware greedy matching, `InterZoneTradeVolume` / `MeanInterZoneFriction` on snapshot.
-- L0 utility grid balance (power/water partitions).
+- ✅ L0 utility grid balance (power/water partitions) — `UtilityPartitionBalance`, `ServiceSystem.L0Tick`, snapshot export.
+- ✅ v1-scale tick characterization (10K HH / 5K buildings) — `SeedV1ScaleCity` + `TickBudgetTests`.
 - Economic Control Spectrum slider ([SB-3729](https://linear.app/softblaze/issue/SB-3729)) — **v2**.
 
 ---
@@ -114,4 +115,4 @@ One worktree per WP. Merge gate: `dotnet test tests/Forge.Engine.Tests` + `./scr
 | 2026-07-16 | `bbffa11`+fix | Goods imbalance export · law→budget/traffic · full TrafficSystem option + Unity 128-zone lite · netstd2.1 Array.Clear fix |
 | 2026-07-16 | tick-budget | `TickBudgetTests` + `SIM_TICK_BUDGET.md` — CI gate &lt;25 ms @ 8 Hz; starter-city characterization |
 | 2026-07-16 | wave-2 | Herald←shortage · multi-day construction+law growth · tick budget — merged |
-| 2026-07-18 | interzone-trade | WP-E inter-zone trade friction matrix + snapshot export (`InterZoneTradeTests`) |
+| 2026-07-18 | wave-3 | Inter-zone trade friction · L0 utility balance · v1-scale tick budget — merged |

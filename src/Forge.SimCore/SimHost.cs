@@ -134,6 +134,8 @@ public sealed partial class SimHost
 
         _state.TickCount++;
 
+        _services.L0Tick(_state, (float)dt);
+
         _population.Tick(_state, _populationStaggerBucket);
         _populationStaggerBucket = (_populationStaggerBucket + 1) % 30;
 

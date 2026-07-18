@@ -163,6 +163,21 @@ public sealed class SimSnapshot
     /// <summary>Buildings currently under construction.</summary>
     public int ConstructingBuildingCount { get; init; }
 
+    /// <summary>Fraction of partitions with power supply ≥ demand (0–1).</summary>
+    public float PowerCoverageFraction { get; init; } = 1f;
+
+    /// <summary>Fraction of partitions with water supply ≥ demand (0–1).</summary>
+    public float WaterCoverageFraction { get; init; } = 1f;
+
+    /// <summary>Rolling fraction of partitions in power deficit (0–1).</summary>
+    public float BlackoutFraction { get; init; }
+
+    /// <summary>Rolling fraction of partitions in water deficit (0–1).</summary>
+    public float WaterShortageFraction { get; init; }
+
+    /// <summary>Composite utility stress (0 = healthy, 1 = severe shortage).</summary>
+    public float UtilityStressIndex { get; init; }
+
     public readonly record struct BuildingSnapshot(
         int GridX, int GridY, ushort TypeId, byte Level,
         byte State, ushort Occupants, ushort MaxOccupants, byte Condition);
@@ -308,6 +323,11 @@ public sealed class SimSnapshot
             LawConstructionSpeedMult = state.LawConstructionSpeedMult,
             LawSpawnDemandMult = state.LawSpawnDemandMult,
             ConstructingBuildingCount = state.ConstructingBuildingCount,
+            PowerCoverageFraction = state.PowerCoverageFraction,
+            WaterCoverageFraction = state.WaterCoverageFraction,
+            BlackoutFraction = state.BlackoutFraction,
+            WaterShortageFraction = state.WaterShortageFraction,
+            UtilityStressIndex = state.UtilityStressIndex,
         };
     }
 }

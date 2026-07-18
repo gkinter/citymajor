@@ -113,6 +113,25 @@ public sealed class WorldState
     public int ConstructingBuildingCount { get; set; }
 
     // =========================================================================
+    // L0 utility partition balance (updated each sim tick)
+    // =========================================================================
+
+    /// <summary>Fraction of partitions with power supply ≥ demand (0–1).</summary>
+    public float PowerCoverageFraction { get; set; } = 1f;
+
+    /// <summary>Fraction of partitions with water supply ≥ demand (0–1).</summary>
+    public float WaterCoverageFraction { get; set; } = 1f;
+
+    /// <summary>Rolling fraction of partitions in power deficit (0–1).</summary>
+    public float BlackoutFraction { get; set; }
+
+    /// <summary>Rolling fraction of partitions in water deficit (0–1).</summary>
+    public float WaterShortageFraction { get; set; }
+
+    /// <summary>Composite utility stress (0 = healthy, 1 = severe shortage).</summary>
+    public float UtilityStressIndex { get; set; }
+
+    // =========================================================================
     // Goods economy imbalance (persisted after daily economy tick)
     // =========================================================================
 

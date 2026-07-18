@@ -45,6 +45,63 @@ public sealed class EconomySystem
     public const int GoodCount = (int)Good.COUNT;
     public const int MaxMarketZones = 16;
 
+    /// <summary>Base transport cost as a fraction of source-zone price (5%).</summary>
+    private const float BaseTransportCostFraction = 0.05f;
+
+    /// <summary>Quantity lost in transit (5%).</summary>
+    private const float TransportQuantityLoss = 0.05f;
+
+    /// <summary>
+    /// Precomputed zone-pair trade friction for a 4×4 market grid (16 zones).
+    /// Same zone = 1.0; orthogonal neighbor ≈ 1.05; diagonal ≈ 1.15; farther pairs higher.
+    /// </summary>
+    public static readonly float[,] TradeCoefficients = BuildTradeCoefficients();
+
+    private static float[,] BuildTradeCoefficients()
+    {
+        const int grid = 4;
+        var matrix = new float[MaxMarketZones, MaxMarketZones];
+        for (int za = 0; za < MaxMarketZones; za++)
+        {
+            int ax = za % grid;
+            int ay = za / grid;
+            for (int zb = 0; zb < MaxMarketZones; zb++)
+            {
+                int bx = zb % grid;
+                int by = zb / grid;
+                matrix[za, zb] = FrictionFromOffsets(Math.Abs(ax - bx), Math.Abs(ay - by));
+            }
+        }
+
+        return matrix;
+    }
+
+    private static float FrictionFromOffsets(int dx, int dy)
+    {
+        if (dx == 0 && dy == 0) return 1.0f;
+        int manhattan = dx + dy;
+        if (manhattan == 1) return 1.05f;
+        if (dx == 1 && dy == 1) return 1.15f;
+        return 1.15f + 0.08f * (manhattan - 2);
+    }
+
+    /// <summary>Trade friction between two zones on the active sqrt(N)×sqrt(N) grid.</summary>
+    public static float GetTradeFriction(int zoneA, int zoneB, int divisions)
+    {
+        if (zoneA == zoneB) return 1.0f;
+        if (zoneA < 0 || zoneA >= MaxMarketZones || zoneB < 0 || zoneB >= MaxMarketZones)
+            return TradeCoefficients[0, 1];
+
+        if (divisions == 4)
+            return TradeCoefficients[zoneA, zoneB];
+
+        int ax = zoneA % divisions;
+        int ay = zoneA / divisions;
+        int bx = zoneB % divisions;
+        int by = zoneB / divisions;
+        return FrictionFromOffsets(Math.Abs(ax - bx), Math.Abs(ay - by));
+    }
+
     // =========================================================================
     // Orders
     // =========================================================================
@@ -261,6 +318,12 @@ public sealed class EconomySystem
 
     /// <summary>Industrial demand signal (-1.0 to +1.0). Positive = need more industry.</summary>
     public float IndustrialDemand { get; private set; }
+
+    /// <summary>Daily inter-zone goods volume from the last economy tick.</summary>
+    public float LastInterZoneTradeVolume { get; private set; }
+
+    /// <summary>Weighted mean friction for inter-zone transfers in the last economy tick.</summary>
+    public float LastMeanInterZoneFriction { get; private set; } = 1.0f;
 
     // =========================================================================
     // Constructor
@@ -481,6 +544,8 @@ public sealed class EconomySystem
 
         state.GoodsShortageIndex = ComputeShortageIndex();
         state.GoodsSurplusIndex = ComputeSurplusIndex();
+        state.InterZoneTradeVolume = LastInterZoneTradeVolume;
+        state.MeanInterZoneFriction = LastMeanInterZoneFriction;
     }
 
     // =========================================================================
@@ -684,8 +749,7 @@ public sealed class EconomySystem
             _zones[zoneId].Demand[(int)order.GoodType] += order.Quantity;
         }
 
-        // Cross-zone trade: goods flow between adjacent zones, equalizing supply
-        // Each zone shares 20% of excess supply with neighbors per tick
+        // Cross-zone trade: price-aware greedy matching before local price solve
         if (ActiveZoneCount > 1)
         {
             CrossZoneTrade();
@@ -695,54 +759,102 @@ public sealed class EconomySystem
     private void CrossZoneTrade()
     {
         int divisions = (int)MathF.Ceiling(MathF.Sqrt(ActiveZoneCount));
+        float totalVolume = 0f;
+        float frictionWeightedSum = 0f;
 
-        // Temporary buffer for supply adjustments
         var deltas = new float[ActiveZoneCount][];
         for (int z = 0; z < ActiveZoneCount; z++)
             deltas[z] = new float[GoodCount];
 
-        for (int z = 0; z < ActiveZoneCount; z++)
+        var surplusZones = new List<int>(ActiveZoneCount);
+        var deficitZones = new List<int>(ActiveZoneCount);
+        var surplusAmounts = new float[ActiveZoneCount];
+        var deficitAmounts = new float[ActiveZoneCount];
+        var tradePairs = new List<(int surplusZone, int deficitZone, float margin)>(ActiveZoneCount * ActiveZoneCount);
+
+        for (int g = 0; g < GoodCount; g++)
         {
-            int zy = z / divisions;
-            int zx = z % divisions;
+            surplusZones.Clear();
+            deficitZones.Clear();
+            tradePairs.Clear();
+            Array.Clear(surplusAmounts, 0, ActiveZoneCount);
+            Array.Clear(deficitAmounts, 0, ActiveZoneCount);
 
-            for (int g = 0; g < GoodCount; g++)
+            for (int z = 0; z < ActiveZoneCount; z++)
             {
-                float excess = _zones[z].Supply[g] - _zones[z].Demand[g];
-                if (excess <= 0f) continue;
-
-                // Share 20% of excess with each neighbor (transport cost = 5% of value)
-                float sharePerNeighbor = excess * 0.20f;
-                int[] neighbors = GetNeighborZones(zx, zy, divisions);
-
-                foreach (int nz in neighbors)
+                float imbalance = _zones[z].Supply[g] - _zones[z].Demand[g];
+                if (imbalance > 0.001f)
                 {
-                    if (nz < 0 || nz >= ActiveZoneCount) continue;
-                    float transported = sharePerNeighbor * 0.95f; // 5% transport loss
-                    deltas[z][g] -= sharePerNeighbor;
-                    deltas[nz][g] += transported;
+                    surplusZones.Add(z);
+                    surplusAmounts[z] = imbalance;
+                }
+                else if (imbalance < -0.001f)
+                {
+                    deficitZones.Add(z);
+                    deficitAmounts[z] = -imbalance;
                 }
             }
+
+            if (surplusZones.Count == 0 || deficitZones.Count == 0)
+                continue;
+
+            foreach (int deficitZone in deficitZones)
+            {
+                float priceB = _zones[deficitZone].Prices[g];
+                foreach (int surplusZone in surplusZones)
+                {
+                    float priceA = _zones[surplusZone].Prices[g];
+                    float friction = GetTradeFriction(surplusZone, deficitZone, divisions);
+                    float transport = priceA * BaseTransportCostFraction * friction;
+                    float margin = priceB - (priceA + transport);
+                    if (margin > 0f)
+                        tradePairs.Add((surplusZone, deficitZone, margin));
+                }
+            }
+
+            if (tradePairs.Count == 0)
+                continue;
+
+            tradePairs.Sort((a, b) => b.margin.CompareTo(a.margin));
+
+            foreach (var (surplusZone, deficitZone, _) in tradePairs)
+            {
+                float available = surplusAmounts[surplusZone];
+                float needed = deficitAmounts[deficitZone];
+                if (available <= 0.001f || needed <= 0.001f)
+                    continue;
+
+                float priceA = _zones[surplusZone].Prices[g];
+                float priceB = _zones[deficitZone].Prices[g];
+                float friction = GetTradeFriction(surplusZone, deficitZone, divisions);
+                float transport = priceA * BaseTransportCostFraction * friction;
+                if (priceA + transport >= priceB)
+                    continue;
+
+                float qty = MathF.Min(available, needed);
+                float delivered = qty * (1f - TransportQuantityLoss);
+
+                surplusAmounts[surplusZone] -= qty;
+                deficitAmounts[deficitZone] -= qty;
+                deltas[surplusZone][g] -= qty;
+                deltas[deficitZone][g] += delivered;
+
+                totalVolume += qty;
+                frictionWeightedSum += friction * qty;
+            }
         }
 
-        // Apply deltas
         for (int z = 0; z < ActiveZoneCount; z++)
         {
             for (int g = 0; g < GoodCount; g++)
             {
-                _zones[z].Supply[g] = MathF.Max(0f, _zones[z].Supply[g] + deltas[z][g]);
+                if (MathF.Abs(deltas[z][g]) > 0.0001f)
+                    _zones[z].Supply[g] = MathF.Max(0f, _zones[z].Supply[g] + deltas[z][g]);
             }
         }
-    }
 
-    private static int[] GetNeighborZones(int zx, int zy, int divisions)
-    {
-        var neighbors = new List<int>(4);
-        if (zx > 0) neighbors.Add(zy * divisions + (zx - 1));
-        if (zx < divisions - 1) neighbors.Add(zy * divisions + (zx + 1));
-        if (zy > 0) neighbors.Add((zy - 1) * divisions + zx);
-        if (zy < divisions - 1) neighbors.Add((zy + 1) * divisions + zx);
-        return neighbors.ToArray();
+        LastInterZoneTradeVolume = totalVolume;
+        LastMeanInterZoneFriction = totalVolume > 0.001f ? frictionWeightedSum / totalVolume : 1.0f;
     }
 
     // =========================================================================
@@ -1089,6 +1201,23 @@ public sealed class EconomySystem
     // =========================================================================
     // Test/debug helpers
     // =========================================================================
+
+    /// <summary>
+    /// Directly set active market zone count. For tests and deterministic multi-zone setups.
+    /// </summary>
+    internal void SetActiveZoneCount(int count)
+    {
+        ActiveZoneCount = Math.Clamp(count, 1, MaxMarketZones);
+    }
+
+    /// <summary>
+    /// Execute cross-zone trade using current zone supply/demand. For tests only.
+    /// </summary>
+    internal void RunCrossZoneTradeOnly()
+    {
+        if (ActiveZoneCount > 1)
+            CrossZoneTrade();
+    }
 
     /// <summary>
     /// Directly set supply for a good in a zone. For testing only.

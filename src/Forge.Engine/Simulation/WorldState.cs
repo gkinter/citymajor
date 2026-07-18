@@ -140,6 +140,12 @@ public sealed class WorldState
     /// <summary>City-wide surplus pressure (0–1) for Herald / HUD buckets.</summary>
     public float GoodsSurplusIndex { get; set; }
 
+    /// <summary>Daily inter-zone goods volume (units moved across market zones).</summary>
+    public float InterZoneTradeVolume { get; set; }
+
+    /// <summary>Weighted mean trade friction for executed inter-zone transfers (≥1.0).</summary>
+    public float MeanInterZoneFriction { get; set; }
+
     // =========================================================================
     // Budget state
     // =========================================================================

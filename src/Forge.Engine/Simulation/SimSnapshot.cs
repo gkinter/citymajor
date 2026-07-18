@@ -104,6 +104,12 @@ public sealed class SimSnapshot
     /// <summary>City-wide surplus pressure (0–1).</summary>
     public float GoodsSurplusIndex { get; init; }
 
+    /// <summary>Daily inter-zone goods volume (units moved across market zones).</summary>
+    public float InterZoneTradeVolume { get; init; }
+
+    /// <summary>Weighted mean trade friction for executed inter-zone transfers (≥1.0).</summary>
+    public float MeanInterZoneFriction { get; init; }
+
     // --- Research / Technology data ---
 
     /// <summary>Accumulated research points.</summary>
@@ -280,6 +286,8 @@ public sealed class SimSnapshot
             SurplusGoods = surplusGoods,
             GoodsShortageIndex = state.GoodsShortageIndex,
             GoodsSurplusIndex = state.GoodsSurplusIndex,
+            InterZoneTradeVolume = state.InterZoneTradeVolume,
+            MeanInterZoneFriction = state.MeanInterZoneFriction,
             // Research / Technology
             ResearchPoints = state.ResearchPoints,
             ResearchRate = state.ResearchRate,

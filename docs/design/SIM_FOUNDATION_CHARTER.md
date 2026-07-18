@@ -80,7 +80,7 @@ Unity HUD / Steam / CI are **consumers** of this foundation — not the foundati
 Only after A–D are green:
 
 - Full Frank-Wolfe 500 zones + MNL in SimCore.
-- Inter-zone trade friction matrix (`SIMULATION_ARCHITECTURE` §5).
+- ✅ Inter-zone trade friction matrix (`SIMULATION_ARCHITECTURE` §5) — `TradeCoefficients` 16×16, price-aware greedy matching, `InterZoneTradeVolume` / `MeanInterZoneFriction` on snapshot.
 - L0 utility grid balance (power/water partitions).
 - Economic Control Spectrum slider ([SB-3729](https://linear.app/softblaze/issue/SB-3729)) — **v2**.
 
@@ -114,3 +114,4 @@ One worktree per WP. Merge gate: `dotnet test tests/Forge.Engine.Tests` + `./scr
 | 2026-07-16 | `bbffa11`+fix | Goods imbalance export · law→budget/traffic · full TrafficSystem option + Unity 128-zone lite · netstd2.1 Array.Clear fix |
 | 2026-07-16 | tick-budget | `TickBudgetTests` + `SIM_TICK_BUDGET.md` — CI gate &lt;25 ms @ 8 Hz; starter-city characterization |
 | 2026-07-16 | wave-2 | Herald←shortage · multi-day construction+law growth · tick budget — merged |
+| 2026-07-18 | interzone-trade | WP-E inter-zone trade friction matrix + snapshot export (`InterZoneTradeTests`) |

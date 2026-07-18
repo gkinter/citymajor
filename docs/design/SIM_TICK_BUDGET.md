@@ -23,6 +23,8 @@ Measurement: `Stopwatch` around `SimHost.Tick(0.125)` after warmup; median of 10
 | Mac arm64 (local dev) | 256 after 200 warm ticks | 150 | 218 | **0.02** | lite 64 | 2026-07-16 |
 | CI `ubuntu-latest` | 256 | 8,200 | 3,200 | *(from CI log)* | lite 64 | 2026-07-18 |
 | Mac arm64 (local dev) | 256 | 8,200 | 3,200 | **3.53** | lite 64 | 2026-07-18 |
+| CI `ubuntu-latest` | 128 | starter | starter | *(from CI log)* | full FW | 2026-07-18 |
+| Mac arm64 (local dev) | 128 | starter | starter | *(see FullTrafficTests)* | full FW | 2026-07-18 |
 
 > **Starter city:** `SimHost.Init` seeds ~220 buildings and starting population via `SeedStarterCity` / `SeedStartingPopulation`.
 >
@@ -34,7 +36,7 @@ Measurement: `Stopwatch` around `SimHost.Tick(0.125)` after warmup; median of 10
 |------|--------|------|
 | **Lite 64** | Default `WasmConfig.TrafficLiteZoneCount` | Browser WASM 256×256 |
 | **Lite 128** | `SimHostInitOptions.TrafficLiteZoneCount = 128` | Unity modern profile |
-| **Full** | `SimHostInitOptions.UseFullTraffic = true` | Opt-in MNL + Frank-Wolfe; not in default CI budget tests |
+| **Full** | `SimHostInitOptions.UseFullTraffic = true` or Unity env `CITYMAJOR_FULL_TRAFFIC=1` | Desktop opt-in; `FullTrafficTests` in CI |
 
 ## Running locally
 

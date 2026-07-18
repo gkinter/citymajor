@@ -169,10 +169,16 @@ namespace CityMajor.Sim
                 var contentRoot = FindContentRoot();
                 var dataPaths = SimDataPaths.FromContentRoot(contentRoot);
                 _simHost = new SimHost();
+                var useFullTraffic = WasmConfig.UseFullTrafficUnityDefault
+                    || string.Equals(
+                        Environment.GetEnvironmentVariable("CITYMAJOR_FULL_TRAFFIC"),
+                        "1",
+                        StringComparison.Ordinal);
                 _simHost.Init(mapSize, new SimHostInitOptions
                 {
                     UnityModernProfile = true,
                     SkipStarterCity = true,
+                    UseFullTraffic = useFullTraffic,
                     TrafficLiteZoneCount = WasmConfig.TrafficLiteZoneCountUnity,
                     DataPaths = dataPaths,
                 });

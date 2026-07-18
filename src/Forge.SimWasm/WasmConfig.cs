@@ -37,6 +37,12 @@ public static class WasmConfig
     /// <summary>Zone count for Unity / desktop lite traffic (11×11 on 128×128, 16×16 on 256×256).</summary>
     public const int TrafficLiteZoneCountUnity = 128;
 
+    /// <summary>
+    /// When true, Unity uses full <c>TrafficSystem</c> (500-zone FW + MNL) instead of lite.
+    /// Override at runtime with env <c>CITYMAJOR_FULL_TRAFFIC=1</c>.
+    /// </summary>
+    public const bool UseFullTrafficUnityDefault = false;
+
     /// <summary>Max Frank-Wolfe iterations per lite traffic tick.</summary>
     public const int TrafficLiteFrankWolfeIterations = 4;
 

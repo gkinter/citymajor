@@ -80,7 +80,7 @@ Unity HUD / Steam / CI are **consumers** of this foundation — not the foundati
 
 Only after A–D are green. V1-scale pool characterization (WP-D) establishes baseline tick cost before opt-in cathedral traffic:
 
-- Full Frank-Wolfe 500 zones + MNL in SimCore.
+- ✅ Full Frank-Wolfe + MNL opt-in (`UseFullTraffic`, Unity `CITYMAJOR_FULL_TRAFFIC=1`, `FullTrafficTests`) — default remains lite 128.
 - ✅ Inter-zone trade friction matrix (`SIMULATION_ARCHITECTURE` §5) — `TradeCoefficients` 16×16, price-aware greedy matching, `InterZoneTradeVolume` / `MeanInterZoneFriction` on snapshot.
 - ✅ L0 utility grid balance (power/water partitions) — `UtilityPartitionBalance`, `ServiceSystem.L0Tick`, snapshot export.
 - ✅ v1-scale tick characterization (10K HH / 5K buildings) — `SeedV1ScaleCity` + `TickBudgetTests`.
@@ -117,3 +117,4 @@ One worktree per WP. Merge gate: `dotnet test tests/Forge.Engine.Tests` + `./scr
 | 2026-07-16 | tick-budget | `TickBudgetTests` + `SIM_TICK_BUDGET.md` — CI gate &lt;25 ms @ 8 Hz; starter-city characterization |
 | 2026-07-16 | wave-2 | Herald←shortage · multi-day construction+law growth · tick budget — merged |
 | 2026-07-18 | wave-3 | Inter-zone trade friction · L0 utility balance · v1-scale tick budget — merged |
+| 2026-07-18 | wave-4 | CitySimState bridge · foundation HUD · desktop full traffic opt-in — merged |

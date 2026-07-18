@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `0190e4f` — wave 2 complete (tick budget, multi-day construction, Herald shortage)  
+**Integration tip:** `c5b2270` — wave 3 complete (inter-zone trade friction, L0 utilities, v1-scale tick budget)  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 

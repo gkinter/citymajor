@@ -546,6 +546,82 @@
   text-align: right;
 }
 
+.hud-rci__foundation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--hud-font-mono);
+  font-size: 9px;
+  line-height: 1;
+}
+
+.hud-rci__row + .hud-rci__foundation,
+.hud-rci > .hud-rci__foundation:first-child {
+  margin-top: 2px;
+  padding-top: 4px;
+  border-top: 1px solid var(--hud-border-subtle);
+}
+
+.hud-rci__foundation + .hud-rci__foundation {
+  margin-top: 2px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.hud-rci__foundation-label {
+  width: 28px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--hud-text-muted);
+  text-align: left;
+}
+
+.hud-rci__goods-track {
+  position: relative;
+  width: 72px;
+  height: 6px;
+  background: var(--hud-row-bg);
+  border: 1px solid var(--hud-border-subtle);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.hud-rci__goods-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #7a6550, #c99a32);
+  opacity: 0.92;
+}
+
+.hud-rci__goods--warn .hud-rci__goods-fill {
+  background: linear-gradient(90deg, #a85a32, #f2cc40);
+}
+
+.hud-rci__goods--warn .hud-rci__goods-value {
+  color: #f2cc40;
+  font-weight: 600;
+}
+
+.hud-rci__goods-value {
+  width: 28px;
+  font-variant-numeric: tabular-nums;
+  font-size: 9px;
+  color: var(--hud-text-dim);
+  text-align: right;
+}
+
+.hud-rci__foundation.hud-resources__utilities {
+  padding: 2px 4px;
+}
+
+.hud-rci__foundation .hud-resources__utilities-value {
+  font-size: 9px;
+  font-weight: 600;
+}
+
 /* Economy panel — Leontief goods shortages/surpluses */
 .hud-economy-button {
   font-family: var(--hud-font-mono);

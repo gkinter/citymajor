@@ -733,7 +733,13 @@ export function PlayClient() {
         resources={simResources}
         populationGrowthPerMonth={populationGrowthPerMonth}
       />
-      <DemandOverlay rci={resolveRci(simResources)} />
+      <DemandOverlay
+        rci={resolveRci(simResources)}
+        goodsShortageIndex={simResources?.goodsShortageIndex}
+        utilityStressIndex={simResources?.utilityStressIndex}
+        powerCoverageFraction={simResources?.powerCoverageFraction}
+        waterCoverageFraction={simResources?.waterCoverageFraction}
+      />
       <PopulationPanel resources={simResources} />
       <EraProgressPanel resources={simResources} />
       <BudgetPanel resources={simResources} />

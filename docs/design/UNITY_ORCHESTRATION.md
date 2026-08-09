@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `3bd4657` — wave 4 complete (CitySimState bridge, foundation HUD, desktop full traffic opt-in)  
+**Integration tip:** `182f871` — wave 5 complete (web HUD parity, utility overlay, budget deepen)  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -31,9 +31,9 @@
 | Phase 2 vehicles (v1.1) | SB-4188 | ✅ `VehicleInstancer` wired | — |
 | Phase 2 pedestrians (v1.1) | SB-4187 | ✅ `PedestrianInstancer` + citizen panel (`C`) | — |
 | Phase 2 rush curve | SB-4189 | ✅ `LifeSimMath.RushHourMultiplier` in SimCore + Unity | — |
-| Life layer v1.1 | — | ✅ Service overlay (`V`), growth, construction props | — |
+| Life layer v1.1 | — | ✅ Service overlay (`V`), utility stress (`U`), growth, construction props | — |
 | Life layer v1.5 | — | ✅ Ambient time-of-day + audio scaffold | — |
-| Social / trade stubs | SB-4183–4186 | 🟡 `TradeStrip` employment/trade/inter-zone readout + income/expense — toggle `E` | Agent |
+| Social / trade stubs | SB-4183–4186 | ✅ `TradeStrip` + web `ResourcesHud` employment/trade/utilities parity | — |
 | Phase 3 Steam facade | SB-4180 | ✅ `SteamNativePlatform` + rich presence + cloud save hooks | — |
 | Phase 3 achievements | SB-4181 | ✅ Catalog + toast + headless Windows build script | — |
 | Phase 3 Steam depot | SB-4180 | 🟡 Runbook: [DEPOT_UPLOAD_RUNBOOK.md](../steam/DEPOT_UPLOAD_RUNBOOK.md) — partner AppId + live upload pending | Agent |

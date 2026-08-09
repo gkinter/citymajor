@@ -331,6 +331,14 @@ public sealed class ServiceCoverageDto
     public float Education { get; init; }
 }
 
+public sealed class UtilityCoverageDto
+{
+    public int TileX { get; init; }
+    public int TileZ { get; init; }
+    public float Power { get; init; }
+    public float Water { get; init; }
+}
+
 public sealed class ActiveEventDto
 {
     public int EventId { get; init; }
@@ -400,6 +408,8 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(TrafficDto[]))]
 [JsonSerializable(typeof(ServiceCoverageDto))]
 [JsonSerializable(typeof(ServiceCoverageDto[]))]
+[JsonSerializable(typeof(UtilityCoverageDto))]
+[JsonSerializable(typeof(UtilityCoverageDto[]))]
 [JsonSerializable(typeof(ActiveEventDto))]
 [JsonSerializable(typeof(ActiveEventDto[]))]
 [JsonSerializable(typeof(GoodImbalanceDto))]

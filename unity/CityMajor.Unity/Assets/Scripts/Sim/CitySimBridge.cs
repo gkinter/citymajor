@@ -29,6 +29,7 @@ namespace CityMajor.Sim
         public CitySimState State { get; private set; }
         public SimSnapshot LatestSnapshot { get; private set; }
         public ServiceCoverageDto[] LatestServiceCoverage { get; private set; } = Array.Empty<ServiceCoverageDto>();
+        public UtilityCoverageDto[] LatestUtilityCoverage { get; private set; } = Array.Empty<UtilityCoverageDto>();
 
         public bool Paused { get; set; }
         public float TimeScale { get; set; } = 1f;
@@ -283,6 +284,7 @@ namespace CityMajor.Sim
             };
 
             LatestServiceCoverage = _simHost.GetServiceCoverageSample(step: 8);
+            LatestUtilityCoverage = _simHost.GetUtilityCoverageSample(step: 8);
 
             LatestSnapshot = snap;
             SyncGridFromSnapshot(snap);

@@ -200,6 +200,15 @@ public sealed partial class SimHost
         return ServiceCoverageExport.Sample(_state, _services, step);
     }
 
+    /// <summary>Stepped power/water coverage for GL overlays (utility stress).</summary>
+    public UtilityCoverageDto[] GetUtilityCoverageSample(int step = 8)
+    {
+        if (!IsInitialized)
+            return [];
+
+        return UtilityCoverageExport.Sample(_state, step);
+    }
+
     public void PaintZone(int x, int y, byte zoneType)
     {
         if (!IsInitialized || !_state.Tiles.InBounds(x, y)) return;

@@ -37,5 +37,24 @@
             <ui:Label class="panel-label" text="Loan" />
             <ui:Label name="loan-value" class="panel-value" text="—" />
         </ui:VisualElement>
+        <ui:Label class="panel-section-title" text="Economy" />
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Employment" />
+            <ui:Label name="employment-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Trade balance" />
+            <ui:Label name="trade-balance-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:Label name="trade-detail" class="panel-detail" text="" />
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Traffic density" />
+            <ui:Label name="traffic-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Constructing" />
+            <ui:Label name="constructing-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:Label name="goods-shortage-value" class="panel-detail panel-detail--compact" text="" />
     </ui:VisualElement>
 </ui:UXML>

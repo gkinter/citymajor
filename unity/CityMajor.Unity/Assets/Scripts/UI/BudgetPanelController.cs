@@ -24,6 +24,12 @@ namespace CityMajor.UI
         Label _approval;
         Label _happiness;
         Label _loan;
+        Label _employment;
+        Label _tradeBalance;
+        Label _tradeDetail;
+        Label _traffic;
+        Label _constructing;
+        Label _goodsShortage;
 
         public void Configure(CitySimBridge sim)
         {
@@ -92,6 +98,12 @@ namespace CityMajor.UI
             _approval = root.Q<Label>("approval-value");
             _happiness = root.Q<Label>("happiness-value");
             _loan = root.Q<Label>("loan-value");
+            _employment = root.Q<Label>("employment-value");
+            _tradeBalance = root.Q<Label>("trade-balance-value");
+            _tradeDetail = root.Q<Label>("trade-detail");
+            _traffic = root.Q<Label>("traffic-value");
+            _constructing = root.Q<Label>("constructing-value");
+            _goodsShortage = root.Q<Label>("goods-shortage-value");
         }
 
         void OnSnapshot(SimSnapshot snap) => ApplySnapshot(snap);
@@ -126,6 +138,15 @@ namespace CityMajor.UI
             _approval.text = $"{snap.ApprovalRating * 100f:0}%";
             _happiness.text = $"{snap.Happiness * 100f:0}%";
             _loan.text = snap.LoanBalance > 0 ? FormatFunds(snap.LoanBalance) : "—";
+
+            ApplyEconomyMetrics(
+                snap.EmploymentRate,
+                snap.TradeBalance,
+                snap.MonthlyExportValue,
+                snap.MonthlyImportCost,
+                snap.MeanTrafficDensity,
+                snap.ConstructingBuildingCount,
+                snap.GoodsShortageIndex);
         }
 
         void ApplyState(CitySimState state)
@@ -143,6 +164,66 @@ namespace CityMajor.UI
             _approval.text = $"{state.Approval * 100f:0}%";
             _happiness.text = $"{state.Happiness * 100f:0}%";
             _taxRes.text = _taxCom.text = _taxInd.text = _loan.text = "—";
+
+            ApplyEconomyMetrics(
+                state.EmploymentRate,
+                state.TradeBalance,
+                state.MonthlyExportValue,
+                state.MonthlyImportCost,
+                state.MeanTrafficDensity,
+                state.ConstructingBuildingCount,
+                state.GoodsShortageIndex);
+        }
+
+        void ApplyEconomyMetrics(
+            float employmentRate,
+            float tradeBalance,
+            float monthlyExportValue,
+            float monthlyImportCost,
+            float meanTrafficDensity,
+            int constructingBuildingCount,
+            float goodsShortageIndex)
+        {
+            if (_employment != null)
+                _employment.text = $"{Mathf.RoundToInt(employmentRate * 100f)}%";
+
+            if (_tradeBalance != null)
+            {
+                var tradeRounded = Mathf.RoundToInt(tradeBalance);
+                _tradeBalance.text = $"{FormatSignedMoney(tradeRounded)}/mo";
+                _tradeBalance.RemoveFromClassList("panel-value--positive");
+                _tradeBalance.RemoveFromClassList("panel-value--negative");
+                _tradeBalance.AddToClassList(tradeRounded >= 0 ? "panel-value--positive" : "panel-value--negative");
+            }
+
+            if (_tradeDetail != null)
+            {
+                _tradeDetail.text =
+                    $"Exports {FormatSignedMoney(Mathf.RoundToInt(monthlyExportValue))} · " +
+                    $"Imports {FormatSignedMoney(-Mathf.RoundToInt(monthlyImportCost))}";
+            }
+
+            if (_traffic != null)
+                _traffic.text = $"{Mathf.Clamp01(meanTrafficDensity) * 100f:0}%";
+
+            if (_constructing != null)
+                _constructing.text = constructingBuildingCount > 0 ? constructingBuildingCount.ToString("N0") : "—";
+
+            if (_goodsShortage != null)
+            {
+                var shortagePct = Mathf.RoundToInt(Mathf.Clamp01(goodsShortageIndex) * 100f);
+                if (shortagePct <= 0)
+                {
+                    _goodsShortage.text = "";
+                    _goodsShortage.style.display = DisplayStyle.None;
+                }
+                else
+                {
+                    _goodsShortage.style.display = DisplayStyle.Flex;
+                    _goodsShortage.text = $"Goods shortage pressure: {shortagePct}%";
+                    _goodsShortage.EnableInClassList("panel-detail--warn", shortagePct >= 20);
+                }
+            }
         }
 
         static string FormatFunds(long cityFunds)

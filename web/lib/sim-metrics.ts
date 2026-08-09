@@ -10,6 +10,9 @@ import type { CityData } from "./types";
 /** RCI demand at or above this value (-1..+1) counts as an extreme shortage. */
 export const RCI_EXTREME_DEMAND = 0.65;
 
+/** Goods shortage index at or above this value (0..1) triggers economy_shortage Herald bucket. */
+export const GOODS_SHORTAGE_THRESHOLD = 0.35;
+
 /** Mayor approval below this percent maps to the happiness_low Herald bucket. */
 export const LOW_HAPPINESS_APPROVAL = 45;
 
@@ -27,6 +30,7 @@ export type NarrativeMetricsInput = {
     | "residentialDemand"
     | "commercialDemand"
     | "industrialDemand"
+    | "goodsShortageIndex"
   >
 >;
 
@@ -60,10 +64,24 @@ export function deriveNarrativeBucket(
     residentialDemand,
     commercialDemand,
     industrialDemand,
+    goodsShortageIndex,
   } = metrics;
 
   if (cityFunds !== undefined && cityFunds < 0) {
     return "budget_crisis";
+  }
+
+  if (
+    goodsShortageIndex !== undefined &&
+    goodsShortageIndex >= GOODS_SHORTAGE_THRESHOLD
+  ) {
+    if (
+      residentialDemand !== undefined &&
+      residentialDemand >= RCI_EXTREME_DEMAND
+    ) {
+      return "housing_shortage";
+    }
+    return "economy_shortage";
   }
 
   if (approval !== undefined && approval < LOW_HAPPINESS_APPROVAL) {
@@ -220,6 +238,7 @@ export function explainNarrativeBucket(
     residentialDemand,
     commercialDemand,
     industrialDemand,
+    goodsShortageIndex,
   } = metrics;
 
   switch (bucket) {
@@ -240,12 +259,29 @@ export function explainNarrativeBucket(
             : `Approval below ${LOW_HAPPINESS_APPROVAL}% — unrest coverage`,
       };
     case "housing_shortage":
+      if (
+        goodsShortageIndex !== undefined &&
+        goodsShortageIndex >= GOODS_SHORTAGE_THRESHOLD
+      ) {
+        return {
+          bucket,
+          reason: `Goods shortage ${Math.round(goodsShortageIndex * 100)}% and residential demand extreme — housing pressure edition`,
+        };
+      }
       return {
         bucket,
         reason:
           residentialDemand !== undefined
             ? `Residential demand +${Math.round(residentialDemand * 100)} — housing pressure dominates headlines`
             : "Extreme residential demand — housing shortage coverage",
+      };
+    case "economy_shortage":
+      return {
+        bucket,
+        reason:
+          goodsShortageIndex !== undefined
+            ? `Goods shortage index ${Math.round(goodsShortageIndex * 100)}% — supply-chain coverage in the Herald`
+            : "Goods shortage — supply-chain coverage in the Herald",
       };
     case "prosperity_high":
       if (

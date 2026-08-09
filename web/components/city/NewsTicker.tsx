@@ -24,6 +24,7 @@ function narrativeMetricsFromResources(
     residentialDemand: resources?.residentialDemand,
     commercialDemand: resources?.commercialDemand,
     industrialDemand: resources?.industrialDemand,
+    goodsShortageIndex: resources?.goodsShortageIndex,
   };
 }
 

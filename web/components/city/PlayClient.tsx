@@ -296,6 +296,7 @@ export function PlayClient() {
             residentialDemand: resources.residentialDemand,
             commercialDemand: resources.commercialDemand,
             industrialDemand: resources.industrialDemand,
+            goodsShortageIndex: resources.goodsShortageIndex,
           }
         : {}),
     });
@@ -308,6 +309,7 @@ export function PlayClient() {
             residentialDemand: resources.residentialDemand,
             commercialDemand: resources.commercialDemand,
             industrialDemand: resources.industrialDemand,
+            goodsShortageIndex: resources.goodsShortageIndex,
           }
         : {}),
     });

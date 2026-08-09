@@ -7,6 +7,7 @@ export const SimStateBucketSchema = z.enum([
   "traffic_congestion",
   "budget_crisis",
   "housing_shortage",
+  "economy_shortage",
   "crime_rising",
   "happiness_low",
   "prosperity_high",
@@ -114,6 +115,15 @@ const TEMPLATES: Record<SimStateBucket, TemplateEntry> = {
       { id: "inclusionary_zoning", label: "Mandate 15% affordable units in new builds", tradeoff: "Developer pushback, gradual rent relief" },
       { id: "public_housing", label: "Break ground on public housing blocks", tradeoff: "−$5M capital, +1,200 affordable units over 18 months" },
       { id: "rent_subsidy", label: "Launch a temporary rent subsidy", tradeoff: "−$900K/mo OPEX, fast relief, no new supply" },
+    ],
+  },
+  economy_shortage: {
+    headline: "Store shelves thin as supply chains strain",
+    body: "Wholesale buyers report persistent stockouts across the city. Shopkeepers blame freight delays and weak industrial throughput; households are paying more for basics.",
+    options: [
+      { id: "industrial_incentives", label: "Offer tax breaks for new industrial capacity", tradeoff: "−$1.2M revenue, gradual goods relief" },
+      { id: "import_subsidy", label: "Subsidize emergency freight imports", tradeoff: "−$800K/quarter, faster shelf recovery" },
+      { id: "rationing_review", label: "Study rationing for essential goods", tradeoff: "Stabilizes prices, unpopular with retailers" },
     ],
   },
   crime_rising: {

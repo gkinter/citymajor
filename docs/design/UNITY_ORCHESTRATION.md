@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `182f871` — wave 5 complete (web HUD parity, utility overlay, budget deepen)  
+**Integration tip:** `d8a7777` — wave 6 complete (Herald economy shortage, constructing meshes, demand overlay foundation)  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -15,18 +15,18 @@
 |-------|--------|--------|-------|
 | Phase 1 scaffold + MCP | SB-4171 | ✅ Done | — |
 | Forge.SimCore bridge | SB-4172 | ✅ `SimHost` + foundation deepen (employment/trade on snapshot, rush OD) — see [SIM_FOUNDATION_CHARTER.md](./SIM_FOUNDATION_CHARTER.md) | — |
-| GLTF instancing | SB-4173 | 🟡 gltfast + catalog wired — CI verifies 12 GLBs; **reimport in Unity Editor** | Agent |
+| GLTF instancing | SB-4173 | 🟡 gltfast + catalog wired — constructing buildings render at partial height; CI verifies 12 GLBs | Agent |
 | Zone paint | SB-4174 | ✅ Done + `SimHost.PaintZone` | — |
 | RCI HUD | SB-4175 | ✅ UI Toolkit `ResourcesHud` + pop growth + utility stress + cranes | — |
 | Bulldoze tool | — | ✅ `BulldozeTool` + `SimHost.Bulldoze` (`X`) | — |
-| Demand overlay | — | ✅ Bottom-center R/C/I meters | — |
+| Demand overlay | — | ✅ R/C/I + goods shortage + utility stress (web); Unity R/C/I meters | — |
 | Tool mode HUD | — | ✅ `ToolModeHudController` — active paint/road/build/bulldoze | — |
 | Happiness meter | — | ✅ `HappinessMeterController` (left stack) | — |
 | Approval meter | — | ✅ `ApprovalMeterController` (top-right) | — |
 | Phase 2 roads | — | ✅ `RoadPaintTool` + overlay in bootstrap | — |
 | Phase 2 economy panels | — | ✅ `BudgetPanelController` in bootstrap | — |
 | Phase 2 research | — | ✅ `ResearchPanelController` (`R`) in bootstrap | — |
-| Phase 2 Herald API | — | ✅ `HeraldPanelController` wired (`H`) | — |
+| Phase 2 Herald API | — | ✅ `HeraldPanelController` + web `economy_shortage` bucket from `goodsShortageIndex` | — |
 | Phase 2 CMJR save | — | ✅ `SaveLoadPanelController` + Steam cloud hook | — |
 | Phase 2 vehicles (v1.1) | SB-4188 | ✅ `VehicleInstancer` wired | — |
 | Phase 2 pedestrians (v1.1) | SB-4187 | ✅ `PedestrianInstancer` + citizen panel (`C`) | — |

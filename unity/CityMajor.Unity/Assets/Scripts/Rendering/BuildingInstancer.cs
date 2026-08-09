@@ -19,13 +19,18 @@ namespace CityMajor.Rendering
         ZoneGrowthVisualizer _growth;
         Mesh _fallbackMesh;
         Material _mat;
+        Material _matConstructing;
         SimSnapshot _snap;
+
+        const byte StateConstructing = 0;
+        const byte StateOperational = 1;
 
         readonly Dictionary<string, InstanceGroup> _groups = new();
 
         struct InstanceGroup
         {
             public Mesh Mesh;
+            public Material Material;
             public bool IsFallback;
             public Matrix4x4[] Matrices;
             public int Count;
@@ -42,6 +47,10 @@ namespace CityMajor.Rendering
             Destroy(cube);
 
             _mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            _matConstructing = new Material(Shader.Find("Universal Render Pipeline/Lit"))
+            {
+                color = new Color(0.92f, 0.68f, 0.22f, 1f),
+            };
             GltfMeshCache.Preload(GltfCatalog.ShippedKeys);
 
             _sim.OnSnapshotChanged += OnSnapshot;
@@ -70,7 +79,7 @@ namespace CityMajor.Rendering
                 var group = pair.Value;
                 if (group.Count <= 0 || group.Mesh == null)
                     continue;
-                Graphics.DrawMeshInstanced(group.Mesh, 0, _mat, group.Matrices, group.Count);
+                Graphics.DrawMeshInstanced(group.Mesh, 0, group.Material, group.Matrices, group.Count);
             }
         }
 
@@ -96,18 +105,19 @@ namespace CityMajor.Rendering
 
             foreach (var b in snap.Buildings)
             {
-                if (b.State != 1 || b.TypeId == 0)
+                if (b.TypeId == 0 || (b.State != StateConstructing && b.State != StateOperational))
                     continue;
 
                 var catalogKey = BuildingArchetypes.CatalogKeyForTypeId(b.TypeId);
                 if (string.IsNullOrEmpty(catalogKey))
                     continue;
 
+                var groupKey = b.State == StateConstructing ? catalogKey + "::constructing" : catalogKey;
                 var matrix = ComposeBuildingMatrix(b.GridX, b.GridY, b.TypeId, b.Level, b.State, b.Condition);
-                if (!grouped.TryGetValue(catalogKey, out var list))
+                if (!grouped.TryGetValue(groupKey, out var list))
                 {
                     list = new List<Matrix4x4>();
-                    grouped[catalogKey] = list;
+                    grouped[groupKey] = list;
                 }
                 list.Add(matrix);
                 total++;
@@ -173,21 +183,24 @@ namespace CityMajor.Rendering
         {
             foreach (var pair in grouped)
             {
-                var catalogKey = pair.Key;
+                var groupKey = pair.Key;
                 var matrices = pair.Value;
                 var count = Mathf.Min(matrices.Count, maxInstances);
                 var buffer = new Matrix4x4[count];
                 for (var i = 0; i < count; i++)
                     buffer[i] = matrices[i];
 
+                var constructing = groupKey.EndsWith("::constructing");
+                var catalogKey = constructing ? groupKey[..^"::constructing".Length] : groupKey;
                 var mesh = GltfMeshCache.GetOrLoad(catalogKey);
                 var isFallback = mesh == null;
                 if (isFallback)
                     mesh = _fallbackMesh;
 
-                _groups[catalogKey] = new InstanceGroup
+                _groups[groupKey] = new InstanceGroup
                 {
                     Mesh = mesh,
+                    Material = constructing ? _matConstructing : _mat,
                     IsFallback = isFallback,
                     Matrices = buffer,
                     Count = count,

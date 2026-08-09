@@ -40,13 +40,17 @@ namespace CityMajor.Rendering
             var seen = new HashSet<long>();
             foreach (var b in snap.Buildings)
             {
-                if (b.State != 1 || b.TypeId == 0)
+                if (b.TypeId == 0 || (b.State != 0 && b.State != 1))
                     continue;
 
                 var key = Key(b.GridX, b.GridY);
                 seen.Add(key);
                 if (!_growth.ContainsKey(key))
-                    _growth[key] = b.Condition < 200 ? foundationScale : 1f;
+                {
+                    _growth[key] = b.State == 0
+                        ? Mathf.Clamp(b.Condition / 255f, 0.1f, 1f)
+                        : b.Condition < 200 ? foundationScale : 1f;
+                }
             }
 
             // Drop demolished / inactive keys.
@@ -77,8 +81,8 @@ namespace CityMajor.Rendering
 
         public float ScaleFor(int tileX, int tileY, byte state, byte condition)
         {
-            if (state != 1)
-                return foundationScale * 0.5f;
+            if (state == 0)
+                return Mathf.Clamp(condition / 255f, 0.1f, 1f);
 
             var key = Key(tileX, tileY);
             if (_growth.TryGetValue(key, out var scale))

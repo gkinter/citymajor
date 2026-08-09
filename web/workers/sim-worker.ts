@@ -96,6 +96,16 @@ type WasmStatus = {
     name?: string;
     active?: boolean;
   };
+  employmentRate?: number;
+  meanTrafficDensity?: number;
+  constructingBuildingCount?: number;
+  powerCoverageFraction?: number;
+  waterCoverageFraction?: number;
+  utilityStressIndex?: number;
+  goodsShortageIndex?: number;
+  goodsSurplusIndex?: number;
+  interZoneTradeVolume?: number;
+  meanInterZoneFriction?: number;
 };
 
 type SimExports = {
@@ -469,6 +479,16 @@ function readStatus(): Pick<
   | "lawDefinitionCount"
   | "activeLawCount"
   | "sampleLaw"
+  | "employmentRate"
+  | "meanTrafficDensity"
+  | "constructingBuildingCount"
+  | "powerCoverageFraction"
+  | "waterCoverageFraction"
+  | "utilityStressIndex"
+  | "goodsShortageIndex"
+  | "goodsSurplusIndex"
+  | "interZoneTradeVolume"
+  | "meanInterZoneFriction"
 > | null {
   if (!sim?.GetStatus) return null;
   try {
@@ -528,6 +548,16 @@ function readStatus(): Pick<
       lawDefinitionCount: parsed.lawDefinitionCount,
       activeLawCount: parsed.activeLawCount,
       sampleLaw: parseSampleLaw(parsed.sampleLaw),
+      employmentRate: parsed.employmentRate,
+      meanTrafficDensity: parsed.meanTrafficDensity,
+      constructingBuildingCount: parsed.constructingBuildingCount,
+      powerCoverageFraction: parsed.powerCoverageFraction,
+      waterCoverageFraction: parsed.waterCoverageFraction,
+      utilityStressIndex: parsed.utilityStressIndex,
+      goodsShortageIndex: parsed.goodsShortageIndex,
+      goodsSurplusIndex: parsed.goodsSurplusIndex,
+      interZoneTradeVolume: parsed.interZoneTradeVolume,
+      meanInterZoneFriction: parsed.meanInterZoneFriction,
     };
   } catch {
     return null;
@@ -595,6 +625,21 @@ function readSnapshot(): SimSnapshot {
       parsed.lawDefinitionCount ?? status?.lawDefinitionCount,
     activeLawCount: parsed.activeLawCount ?? status?.activeLawCount,
     sampleLaw: parseSampleLaw(parsed.sampleLaw) ?? status?.sampleLaw,
+    employmentRate: parsed.employmentRate ?? status?.employmentRate,
+    meanTrafficDensity: parsed.meanTrafficDensity ?? status?.meanTrafficDensity,
+    constructingBuildingCount:
+      parsed.constructingBuildingCount ?? status?.constructingBuildingCount,
+    powerCoverageFraction:
+      parsed.powerCoverageFraction ?? status?.powerCoverageFraction,
+    waterCoverageFraction:
+      parsed.waterCoverageFraction ?? status?.waterCoverageFraction,
+    utilityStressIndex: parsed.utilityStressIndex ?? status?.utilityStressIndex,
+    goodsShortageIndex: parsed.goodsShortageIndex ?? status?.goodsShortageIndex,
+    goodsSurplusIndex: parsed.goodsSurplusIndex ?? status?.goodsSurplusIndex,
+    interZoneTradeVolume:
+      parsed.interZoneTradeVolume ?? status?.interZoneTradeVolume,
+    meanInterZoneFriction:
+      parsed.meanInterZoneFriction ?? status?.meanInterZoneFriction,
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),

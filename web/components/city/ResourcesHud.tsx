@@ -69,6 +69,28 @@ function hasTradeData(resources: SimResources): boolean {
   );
 }
 
+function hasUtilityData(resources: SimResources): boolean {
+  return (
+    resources.powerCoverageFraction !== undefined ||
+    resources.waterCoverageFraction !== undefined
+  );
+}
+
+type UtilityStressTone = "ok" | "warn" | "stress";
+
+function utilityStressTone(stress: number): UtilityStressTone {
+  if (stress < 0.2) return "ok";
+  if (stress <= 0.5) return "warn";
+  return "stress";
+}
+
+function employmentTone(rate: number): MetricTone {
+  const pct = rate * 100;
+  if (pct >= 70) return "good";
+  if (pct >= 50) return "warn";
+  return "bad";
+}
+
 function formatTradeInflow(amount: number): string {
   const abs = Math.abs(amount);
   if (abs >= 1_000_000) return `+$${(abs / 1_000_000).toFixed(1)}M`;
@@ -242,6 +264,61 @@ export function ResourcesHud({
                   </span>
                 </>
               ) : null}
+            </span>
+          </div>
+        ) : null}
+
+        {resources && hasUtilityData(resources) ? (
+          <div
+            className={`hud-resources__stat hud-resources__utilities hud-resources__utilities--${utilityStressTone(
+              resources.utilityStressIndex ?? 0,
+            )}`}
+            title={`Utility coverage — power ${Math.round((resources.powerCoverageFraction ?? 0) * 100)}%, water ${Math.round((resources.waterCoverageFraction ?? 0) * 100)}%${
+              resources.utilityStressIndex !== undefined
+                ? `; stress ${Math.round(resources.utilityStressIndex * 100)}%`
+                : ""
+            }`}
+          >
+            <span className="hud-resources__label">Util</span>
+            <span
+              className={`hud-resources__utilities-value hud-resources__utilities-value--${utilityStressTone(
+                resources.utilityStressIndex ?? 0,
+              )}`}
+            >
+              ⚡ {Math.round((resources.powerCoverageFraction ?? 0) * 100)}% · 💧{" "}
+              {Math.round((resources.waterCoverageFraction ?? 0) * 100)}%
+            </span>
+          </div>
+        ) : null}
+
+        {resources?.employmentRate !== undefined ? (
+          <div
+            className="hud-resources__stat"
+            title="Share of working-age households with a workplace"
+          >
+            <span className="hud-resources__label">Jobs</span>
+            <span
+              className={toneClass(
+                employmentTone(resources.employmentRate),
+                "hud-resources__value",
+              )}
+            >
+              {formatPercent(resources.employmentRate * 100)}
+            </span>
+          </div>
+        ) : null}
+
+        {resources?.constructingBuildingCount !== undefined &&
+        resources.constructingBuildingCount > 0 ? (
+          <div
+            className="hud-resources__stat hud-resources__cranes"
+            title="Buildings under construction"
+          >
+            <span className="hud-resources__value">
+              🚧 {resources.constructingBuildingCount}{" "}
+              {resources.constructingBuildingCount === 1
+                ? "building"
+                : "buildings"}
             </span>
           </div>
         ) : null}

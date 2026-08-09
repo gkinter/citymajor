@@ -83,6 +83,16 @@ public sealed class SimSnapshotDto
     public Dictionary<int, float> EurekaBonuses { get; init; } = new();
     public Dictionary<int, int> BranchingChoices { get; init; } = new();
     public int ConstructingBuildingCount { get; init; }
+    /// <summary>Share of working-age households with a workplace (0–1).</summary>
+    public float EmploymentRate { get; init; }
+    public float MeanTrafficDensity { get; init; }
+    public float PowerCoverageFraction { get; init; } = 1f;
+    public float WaterCoverageFraction { get; init; } = 1f;
+    public float UtilityStressIndex { get; init; }
+    public float GoodsShortageIndex { get; init; }
+    public float GoodsSurplusIndex { get; init; }
+    public float InterZoneTradeVolume { get; init; }
+    public float MeanInterZoneFriction { get; init; } = 1f;
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
@@ -130,6 +140,15 @@ public sealed class SimSnapshotDto
             EurekaBonuses = research is null ? new() : new Dictionary<int, float>(research.EurekaBonuses),
             BranchingChoices = research is null ? new() : new Dictionary<int, int>(research.BranchingChoices),
             ConstructingBuildingCount = state.ConstructingBuildingCount,
+            EmploymentRate = state.EmploymentRate,
+            MeanTrafficDensity = state.MeanTrafficDensity,
+            PowerCoverageFraction = state.PowerCoverageFraction,
+            WaterCoverageFraction = state.WaterCoverageFraction,
+            UtilityStressIndex = state.UtilityStressIndex,
+            GoodsShortageIndex = state.GoodsShortageIndex,
+            GoodsSurplusIndex = state.GoodsSurplusIndex,
+            InterZoneTradeVolume = state.InterZoneTradeVolume,
+            MeanInterZoneFriction = state.MeanInterZoneFriction,
         };
     }
 

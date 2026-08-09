@@ -183,6 +183,26 @@ export type SimResources = {
   activeLawCount?: number;
   /** WASM GetStatus — first catalog entry for sample HUD toggle (v1.5 stub). */
   sampleLaw?: LawPreview;
+  /** WASM — share of working-age households with a workplace (0–1). */
+  employmentRate?: number;
+  /** WASM — mean road-tile traffic density (0–1+). */
+  meanTrafficDensity?: number;
+  /** WASM — buildings currently in constructing state. */
+  constructingBuildingCount?: number;
+  /** WASM — fraction of partitions with power supply ≥ demand (0–1). */
+  powerCoverageFraction?: number;
+  /** WASM — fraction of partitions with water supply ≥ demand (0–1). */
+  waterCoverageFraction?: number;
+  /** WASM — composite utility stress (0 = healthy, 1 = severe shortage). */
+  utilityStressIndex?: number;
+  /** WASM — city-wide goods shortage pressure (0–1). */
+  goodsShortageIndex?: number;
+  /** WASM — city-wide goods surplus pressure (0–1). */
+  goodsSurplusIndex?: number;
+  /** WASM — daily inter-zone goods volume. */
+  interZoneTradeVolume?: number;
+  /** WASM — weighted mean trade friction for inter-zone transfers (≥1.0). */
+  meanInterZoneFriction?: number;
 };
 
 export type LawPreview = {

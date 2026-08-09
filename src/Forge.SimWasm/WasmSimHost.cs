@@ -82,6 +82,16 @@ public sealed class WasmSimHost
         _host.Services is null || _host.State is null
             ? 0f
             : _host.ComputeAverageCoverage(_host.Services.EducationCoverage);
+    public float EmploymentRate => _host.State?.EmploymentRate ?? 0f;
+    public float MeanTrafficDensity => _host.State?.MeanTrafficDensity ?? 0f;
+    public int ConstructingBuildingCount => _host.State?.ConstructingBuildingCount ?? 0;
+    public float PowerCoverageFraction => _host.State?.PowerCoverageFraction ?? 1f;
+    public float WaterCoverageFraction => _host.State?.WaterCoverageFraction ?? 1f;
+    public float UtilityStressIndex => _host.State?.UtilityStressIndex ?? 0f;
+    public float GoodsShortageIndex => _host.State?.GoodsShortageIndex ?? 0f;
+    public float GoodsSurplusIndex => _host.State?.GoodsSurplusIndex ?? 0f;
+    public float InterZoneTradeVolume => _host.State?.InterZoneTradeVolume ?? 0f;
+    public float MeanInterZoneFriction => _host.State?.MeanInterZoneFriction ?? 1f;
 
     internal SimHost InnerHost => _host;
 
@@ -268,6 +278,17 @@ public sealed class WasmStatusDto
     public float MonthlyImportCost { get; init; }
     public float TradeBalance { get; init; }
     public PopulationL2Dto PopulationL2 { get; init; } = new();
+    /// <summary>Share of working-age households with a workplace (0–1).</summary>
+    public float EmploymentRate { get; init; }
+    public float MeanTrafficDensity { get; init; }
+    public int ConstructingBuildingCount { get; init; }
+    public float PowerCoverageFraction { get; init; } = 1f;
+    public float WaterCoverageFraction { get; init; } = 1f;
+    public float UtilityStressIndex { get; init; }
+    public float GoodsShortageIndex { get; init; }
+    public float GoodsSurplusIndex { get; init; }
+    public float InterZoneTradeVolume { get; init; }
+    public float MeanInterZoneFriction { get; init; } = 1f;
 
     public static WasmStatusDto From(WasmSimHost host) => new()
     {
@@ -344,6 +365,16 @@ public sealed class WasmStatusDto
         MonthlyImportCost = host.MonthlyImportCost,
         TradeBalance = host.TradeBalance,
         PopulationL2 = host.GetPopulationL2Export(),
+        EmploymentRate = host.EmploymentRate,
+        MeanTrafficDensity = host.MeanTrafficDensity,
+        ConstructingBuildingCount = host.ConstructingBuildingCount,
+        PowerCoverageFraction = host.PowerCoverageFraction,
+        WaterCoverageFraction = host.WaterCoverageFraction,
+        UtilityStressIndex = host.UtilityStressIndex,
+        GoodsShortageIndex = host.GoodsShortageIndex,
+        GoodsSurplusIndex = host.GoodsSurplusIndex,
+        InterZoneTradeVolume = host.InterZoneTradeVolume,
+        MeanInterZoneFriction = host.MeanInterZoneFriction,
     };
 }
 

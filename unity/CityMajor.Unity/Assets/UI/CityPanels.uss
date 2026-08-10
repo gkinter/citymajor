@@ -783,3 +783,75 @@
     margin-right: 8px;
     background-color: rgba(255, 255, 255, 0.18);
 }
+
+/* Bottom zoning palette (P2.1 / P2.2) — sits above road toolbar */
+.zoning-toolbar-root {
+    position: absolute;
+    bottom: 156px;
+    left: 50%;
+    translate: -50% 0;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.zoning-toolbar {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 10px;
+    background-color: rgba(12, 16, 24, 0.9);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+}
+
+.zoning-title {
+    font-size: 10px;
+    color: rgba(180, 190, 210, 0.75);
+    margin-right: 6px;
+    -unity-font-style: bold;
+}
+
+.zoning-tiers,
+.zoning-density {
+    flex-direction: row;
+    align-items: center;
+}
+
+.zoning-divider {
+    width: 1px;
+    height: 22px;
+    margin-left: 8px;
+    margin-right: 8px;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.zoning-btn {
+    margin-right: 4px;
+    min-width: 36px;
+    padding: 4px 8px;
+    font-size: 11px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.14);
+    background-color: rgba(28, 34, 48, 0.95);
+    color: rgb(220, 228, 240);
+}
+
+.zoning-btn--density {
+    min-width: 40px;
+}
+
+.zoning-btn--active {
+    border-color: rgba(120, 180, 255, 0.75);
+    background-color: rgba(50, 90, 150, 0.55);
+    color: rgb(235, 242, 255);
+}
+
+.zoning-status {
+    margin-left: 8px;
+    font-size: 10px;
+    color: rgba(190, 200, 215, 0.8);
+    max-width: 220px;
+    white-space: normal;
+}
+

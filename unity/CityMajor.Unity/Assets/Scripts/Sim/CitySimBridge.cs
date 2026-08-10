@@ -67,6 +67,9 @@ namespace CityMajor.Sim
             ZonePaintTool.ZoneKind.Residential => 1,
             ZonePaintTool.ZoneKind.Commercial => 3,
             ZonePaintTool.ZoneKind.Industrial => 4,
+            ZonePaintTool.ZoneKind.Office => 5,
+            ZonePaintTool.ZoneKind.Mixed => 6,
+            ZonePaintTool.ZoneKind.Agricultural => 7,
             _ => 0,
         };
 
@@ -358,6 +361,9 @@ namespace CityMajor.Sim
             1 or 2 => ZonePaintTool.ZoneKind.Residential,
             3 => ZonePaintTool.ZoneKind.Commercial,
             4 => ZonePaintTool.ZoneKind.Industrial,
+            5 => ZonePaintTool.ZoneKind.Office,
+            6 => ZonePaintTool.ZoneKind.Mixed,
+            7 => ZonePaintTool.ZoneKind.Agricultural,
             _ => ZonePaintTool.ZoneKind.None,
         };
 

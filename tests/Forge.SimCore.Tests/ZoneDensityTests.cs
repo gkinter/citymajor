@@ -1,9 +1,10 @@
+using Forge.Game.Simulation;
 using Forge.SimCore;
 using Xunit;
 
 namespace Forge.SimCore.Tests;
 
-/// <summary>P2.2 — zone density brush sets TileData.ZoneDensity.</summary>
+/// <summary>P2.2 — zone density brush + ZoneGrowthSystem occupant scaling (CATHEDRAL_P2).</summary>
 public sealed class ZoneDensityTests
 {
     [Theory]
@@ -63,5 +64,33 @@ public sealed class ZoneDensityTests
         int idx = host.State.Tiles.Index(12, 12);
         Assert.Equal((byte)5, host.State.Tiles.ZoneType[idx]);
         Assert.Equal((byte)2, host.State.Tiles.ZoneDensity[idx]);
+    }
+
+    [Theory]
+    [InlineData(1)] // Residential low
+    [InlineData(2)] // Residential high
+    [InlineData(3)] // Commercial
+    [InlineData(4)] // Industrial
+    public void CalculateMaxOccupants_Density3_DoublesEachStepVsDensity1(byte zoneType)
+    {
+        // CATHEDRAL_P2 §4: low ×1, medium ×2, high ×4 — each density step doubles.
+        // Acceptance: "Density brush doubles max occupants at high vs low"
+        // (density 3 is double×double vs density 1).
+        ushort low = ZoneGrowthSystem.CalculateMaxOccupants(zoneType, density: 1);
+        ushort medium = ZoneGrowthSystem.CalculateMaxOccupants(zoneType, density: 2);
+        ushort high = ZoneGrowthSystem.CalculateMaxOccupants(zoneType, density: 3);
+
+        Assert.True(low > 0, "base occupants must be positive");
+        Assert.Equal((ushort)(low * 2), medium);
+        Assert.Equal((ushort)(medium * 2), high);
+        Assert.Equal((ushort)(low * 4), high);
+    }
+
+    [Fact]
+    public void CalculateMaxOccupants_Density0_MatchesDensity1()
+    {
+        Assert.Equal(
+            ZoneGrowthSystem.CalculateMaxOccupants(1, density: 1),
+            ZoneGrowthSystem.CalculateMaxOccupants(1, density: 0));
     }
 }

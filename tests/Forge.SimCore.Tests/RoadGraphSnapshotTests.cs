@@ -65,6 +65,38 @@ public sealed class RoadGraphSnapshotTests
             NodeTypeAt(exported, 5, 4));
     }
 
+    [Fact]
+    public void RoadGraphSnapshotDto_From_ExportsEdgeEndpointsParallelToVolumes()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        Assert.True(host.PlaceRoad(2, 2, 1));
+        Assert.True(host.PlaceRoad(3, 2, 1));
+        Assert.True(host.PlaceRoad(4, 2, 1));
+        host.Tick(0.001);
+
+        float[] volumes = { 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f };
+        float[] times = { 1.1f, 1.2f, 1.3f, 1.4f, 1.5f, 1.6f, 1.7f, 1.8f };
+        var exported = RoadGraphSnapshotDto.From(
+            host.State.Roads,
+            volumes,
+            times);
+
+        Assert.True(exported.EdgeCount > 0);
+        Assert.Equal(exported.EdgeCount, exported.EdgeFrom.Length);
+        Assert.Equal(exported.EdgeCount, exported.EdgeTo.Length);
+        Assert.Equal(exported.EdgeCount, exported.EdgeVolumes.Length);
+        Assert.Equal(exported.EdgeCount, exported.TravelTimes.Length);
+
+        for (int e = 0; e < exported.EdgeCount; e++)
+        {
+            Assert.InRange(exported.EdgeFrom[e], 0, exported.NodeCount - 1);
+            Assert.InRange(exported.EdgeTo[e], 0, exported.NodeCount - 1);
+            Assert.NotEqual(exported.EdgeFrom[e], exported.EdgeTo[e]);
+        }
+    }
+
     private static byte NodeTypeAt(RoadGraphSnapshotDto graph, int tileX, int tileZ)
     {
         for (int i = 0; i < graph.NodeCount; i++)

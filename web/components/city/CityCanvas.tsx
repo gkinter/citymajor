@@ -27,6 +27,7 @@ import {
   resourcesFromSnapshot,
 } from "@/lib/sim-bridge";
 import { estimateHealthcareCoverage } from "@/lib/sim-metrics";
+import { resolveTrafficOverlayTiles } from "@/lib/congestion-heatmap";
 import type { ZoningTool, ZoneTile, RoadTile, TrafficTile, PaintBrushSize, ZoneDensityLevel } from "@/lib/zoning";
 import {
   brushTileOffsets,
@@ -191,11 +192,14 @@ ref,
         })),
       );
       setTraffic(
-        (snapshot.traffic ?? []).map((t) => ({
-          tileX: t.tileX,
-          tileZ: t.tileZ,
-          density: t.density,
-        })),
+        resolveTrafficOverlayTiles(
+          snapshot.roadGraph,
+          (snapshot.traffic ?? []).map((t) => ({
+            tileX: t.tileX,
+            tileZ: t.tileZ,
+            density: t.density,
+          })),
+        ),
       );
       setServiceCoverage(snapshot.serviceCoverage ?? []);
       const resources = resourcesFromSnapshot(snapshot);

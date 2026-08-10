@@ -139,6 +139,11 @@ type WasmStatus = {
     nodeTypes?: number[];
     nodeTileX?: number[];
     nodeTileZ?: number[];
+    edgeCount?: number;
+    edgeFrom?: number[];
+    edgeTo?: number[];
+    edgeVolumes?: number[];
+    travelTimes?: number[];
   };
   meanRentBurden?: number;
   residentialVacancy?: number;

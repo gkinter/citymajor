@@ -378,7 +378,8 @@ public sealed class RoadDto
 
 /// <summary>
 /// Compact segment-graph export — <see cref="NodeTypes"/>[i] is <see cref="RoadNodeType"/> for node i.
-/// <see cref="EdgeVolumes"/> and <see cref="TravelTimes"/> are parallel arrays indexed by graph edge id (P1.6 / P4.2).
+/// <see cref="EdgeVolumes"/>, <see cref="TravelTimes"/>, <see cref="EdgeFrom"/>, and <see cref="EdgeTo"/>
+/// are parallel arrays indexed by graph edge id (P1.6 / P4.2) in CSR neighbor order.
 /// </summary>
 public sealed class RoadGraphSnapshotDto
 {
@@ -387,6 +388,10 @@ public sealed class RoadGraphSnapshotDto
     public int[] NodeTileX { get; init; } = [];
     public int[] NodeTileZ { get; init; } = [];
     public int EdgeCount { get; init; }
+    /// <summary>Source node id per edge (CSR order — matches traffic lite edge tables).</summary>
+    public int[] EdgeFrom { get; init; } = [];
+    /// <summary>Target node id per edge.</summary>
+    public int[] EdgeTo { get; init; } = [];
     public float[] EdgeVolumes { get; init; } = [];
     public float[] TravelTimes { get; init; } = [];
 
@@ -410,6 +415,20 @@ public sealed class RoadGraphSnapshotDto
             types[i] = (byte)graph.GetNodeType(i);
         }
 
+        var edgeFrom = new int[edgeCount];
+        var edgeTo = new int[edgeCount];
+        int edgeIdx = 0;
+        for (int node = 0; node < n; node++)
+        {
+            foreach (var (target, _, _) in graph.GetNeighbors(node))
+            {
+                if (edgeIdx >= edgeCount) break;
+                edgeFrom[edgeIdx] = node;
+                edgeTo[edgeIdx] = target;
+                edgeIdx++;
+            }
+        }
+
         return new RoadGraphSnapshotDto
         {
             NodeCount = n,
@@ -417,6 +436,8 @@ public sealed class RoadGraphSnapshotDto
             NodeTileX = xs,
             NodeTileZ = zs,
             EdgeCount = edgeCount,
+            EdgeFrom = edgeFrom,
+            EdgeTo = edgeTo,
             EdgeVolumes = NormalizeEdgeArray(edgeVolumes, edgeCount),
             TravelTimes = NormalizeEdgeArray(travelTimes, edgeCount),
         };

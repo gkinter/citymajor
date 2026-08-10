@@ -6,7 +6,6 @@ using Xunit;
 namespace Forge.SimCore.Tests;
 
 /// <summary>Characterization tests for Cathedral P4 population O-D truth.</summary>
-[Collection("SimHost")]
 public sealed class CathedralPopulationTests
 {
     [Fact]

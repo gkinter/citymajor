@@ -9,7 +9,6 @@ namespace Forge.SimCore.Tests;
 /// Characterization tests for Cathedral P5 politics foundation (program P6 Governance).
 /// Pins approval export + Herald delta bridge before faction/Herald-predicate deepen.
 /// </summary>
-[Collection("SimHost")]
 public sealed class CathedralPoliticsTests
 {
     [Fact]

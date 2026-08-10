@@ -261,7 +261,7 @@ public static class MapGenerator
 
     private static float[] GenerateHeightmap(int size, int seed, MapTypeParams p)
     {
-        SimplexNoise.Seed(seed);
+        var noise = new SimplexNoise(seed);
         var map = new float[size * size];
 
         for (int y = 0; y < size; y++)
@@ -269,12 +269,12 @@ public static class MapGenerator
             for (int x = 0; x < size; x++)
             {
                 // Layer 1: Continental (1 octave)
-                float continental = SimplexNoise.Noise2D(
+                float continental = noise.Noise2D(
                     x * p.ContinentalFreq,
                     y * p.ContinentalFreq) * p.ContinentalAmplitude;
 
                 // Layer 2: Regional (4 octaves)
-                float regional = SimplexNoise.Fbm(
+                float regional = noise.Fbm(
                     x * p.RegionalFreq,
                     y * p.RegionalFreq,
                     octaves: 4,
@@ -282,7 +282,7 @@ public static class MapGenerator
                     persistence: 0.5f) * p.RegionalAmplitude;
 
                 // Layer 3: Local detail (6 octaves)
-                float local = SimplexNoise.Fbm(
+                float local = noise.Fbm(
                     x * 0.025f,
                     y * 0.025f,
                     octaves: 6,
@@ -290,7 +290,7 @@ public static class MapGenerator
                     persistence: 0.45f) * 0.15f;
 
                 // Layer 4: Micro detail (3 octaves)
-                float micro = SimplexNoise.Fbm(
+                float micro = noise.Fbm(
                     x * 0.08f,
                     y * 0.08f,
                     octaves: 3,

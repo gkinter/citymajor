@@ -2,26 +2,33 @@
 
 ## P1.1 — Road tier API
 
-- [ ] Add `PlaceRoad(int x, int y, byte tier = 1)` to `SimHost`
-- [ ] Update `ComputeRoadFlags` to encode tier in bits 4–5
-- [ ] `RebuildRoadGraphFromTiles`: read tier from flags; set edge level + cost
-- [ ] Add `RoadCapacityForLevel(byte level)` helper
-- [ ] WASM: accept tier on `place_road` command
-- [ ] Web: extend `sim-bridge` + `sim-worker` + road toolbar
-- [ ] Tests: `RoadTierGraphTests` (tier → level/capacity)
+- [x] Add `PlaceRoad(int x, int y, byte tier = 1)` to `SimHost`
+- [x] Update `ComputeRoadFlags` to encode tier in bits 4–5
+- [x] `RebuildRoadGraphFromTiles`: read tier from flags; set edge level + cost
+- [x] Add `RoadCapacityForLevel(byte level)` helper
+- [x] WASM: accept tier on `place_road` command
+- [x] Web: extend `sim-bridge` + `sim-worker` + road toolbar
+- [x] Tests: `RoadTierGraphTests` (tier → level/capacity)
 
 ## P1.2 — Graph builder v2 (start)
 
-- [ ] Document intersection detection algorithm in `RoadGraphBuilder`
-- [ ] Implement segment collapse between intersection nodes
-- [ ] Assign `RoadNode.NodeType` for 4-way and T-junction
-- [ ] Tests: intersection node count on cross pattern
-- [ ] Feature flag `UseSegmentGraph` (default off until validated)
+- [x] Document intersection detection algorithm in `RoadGraphBuilder`
+- [x] Implement segment collapse between intersection nodes
+- [x] Assign `RoadNode.NodeType` for 4-way and T-junction
+- [x] Tests: intersection node count on cross pattern
+- [x] Feature flag `UseSegmentGraph` (default off until validated)
+
+## P1.3 — Bridge/tunnel flags
+
+- [x] Define `RoadFlags.Bridge` and `RoadFlags.Tunnel` (bits 6–7)
+- [x] `PlaceRoad`: optional bridge/tunnel bool (WASM + web stub; default false)
+- [x] `RoadGraphBuilder`: segment cost multiplier — bridge ×1.15, tunnel ×1.25
+- [x] Tests: bridge/tunnel tiles increase segment travel cost
 
 ## Verification
 
 ```bash
-dotnet test tests/Forge.SimCore.Tests/Forge.SimCore.Tests.csproj --filter "FullyQualifiedName~RoadTier"
+dotnet test tests/Forge.SimCore.Tests/Forge.SimCore.Tests.csproj --filter "FullyQualifiedName~Road"
 cd web && pnpm test
 ```
 

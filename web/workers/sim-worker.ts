@@ -125,7 +125,7 @@ type SimExports = {
   GetStatus?: () => string;
   PaintZone?: (x: number, y: number, zoneType: number, density?: number) => void;
   Bulldoze?: (x: number, y: number) => void;
-  PlaceRoad?: (x: number, y: number, tier?: number) => void;
+  PlaceRoad?: (x: number, y: number, tier?: number, bridge?: number, tunnel?: number) => void;
   PlaceBuilding?: (x: number, y: number, typeId: number) => boolean;
   EnqueueResearch?: (techId: number) => boolean;
   SetLawActive?: (lawId: string, active: boolean) => boolean;
@@ -704,17 +704,20 @@ function bulldozeTile(tileX: number, tileZ: number) {
   publishSnapshot();
 }
 
-function roadFlagsForTier(tier: number): number {
+function roadFlagsForTier(tier: number, bridge = false, tunnel = false): number {
   const t = tier & 0x03;
-  return (t << 4) | 0x01;
+  let flags = (t << 4) | 0x01;
+  if (bridge) flags |= 0x40;
+  if (tunnel) flags |= 0x80;
+  return flags;
 }
 
-function placeRoadTile(tileX: number, tileZ: number, tier = 1) {
+function placeRoadTile(tileX: number, tileZ: number, tier = 1, bridge = false, tunnel = false) {
   const grid = ensureRoadGrid(worldSize);
   if (tileX < 0 || tileZ < 0 || tileX >= worldSize || tileZ >= worldSize) return;
-  const roadFlags = roadFlagsForTier(tier);
+  const roadFlags = roadFlagsForTier(tier, bridge, tunnel);
   grid[zoneIndex(tileX, tileZ)] = roadFlags;
-  sim?.PlaceRoad?.(tileX, tileZ, tier);
+  sim?.PlaceRoad?.(tileX, tileZ, tier, bridge ? 1 : 0, tunnel ? 1 : 0);
   publishSnapshot();
 }
 

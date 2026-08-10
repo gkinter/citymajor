@@ -258,7 +258,7 @@ public sealed partial class SimHost
         }
     }
 
-    public void PlaceRoad(int x, int y, byte tier = 1)
+    public void PlaceRoad(int x, int y, byte tier = 1, bool bridge = false, bool tunnel = false)
     {
         if (!IsInitialized || !_state.Tiles.InBounds(x, y)) return;
 
@@ -267,7 +267,7 @@ public sealed partial class SimHost
         if (terrain == (byte)TerrainId.Water || terrain == (byte)TerrainId.Rock) return;
 
         tier = (byte)Math.Clamp(tier, (byte)0, (byte)2);
-        _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y, tier);
+        _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y, tier, bridge, tunnel);
         _roadsNeedRebuild = true;
 
         RefreshRoadFlagsAt(x - 1, y);
@@ -1087,15 +1087,18 @@ public sealed partial class SimHost
             1f - constructionCost * 0.2f, 0.25f, 3f);
     }
 
-    private byte ComputeRoadFlags(int x, int y, byte tier)
+    private byte ComputeRoadFlags(int x, int y, byte tier, bool bridge, bool tunnel)
     {
         byte connections = 0;
-        if (HasRoadAt(x, y - 1)) connections |= 0x01;
-        if (HasRoadAt(x + 1, y)) connections |= 0x02;
-        if (HasRoadAt(x, y + 1)) connections |= 0x04;
-        if (HasRoadAt(x - 1, y)) connections |= 0x08;
-        if (connections == 0) connections = 0x01;
-        return (byte)(connections | ((tier & 0x03) << 4));
+        if (HasRoadAt(x, y - 1)) connections |= RoadFlags.North;
+        if (HasRoadAt(x + 1, y)) connections |= RoadFlags.East;
+        if (HasRoadAt(x, y + 1)) connections |= RoadFlags.South;
+        if (HasRoadAt(x - 1, y)) connections |= RoadFlags.West;
+        if (connections == 0) connections = RoadFlags.North;
+        byte flags = (byte)(connections | ((tier & 0x03) << 4));
+        if (bridge) flags |= RoadFlags.Bridge;
+        if (tunnel) flags |= RoadFlags.Tunnel;
+        return flags;
     }
 
     private bool HasRoadAt(int x, int y)
@@ -1109,8 +1112,11 @@ public sealed partial class SimHost
         if (!_state.Tiles.InBounds(x, y)) return;
         int idx = _state.Tiles.Index(x, y);
         if (_state.Tiles.RoadFlags[idx] == 0) return;
-        byte tier = RoadTier.ExtractLevel(_state.Tiles.RoadFlags[idx]);
-        _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y, tier);
+        byte existing = _state.Tiles.RoadFlags[idx];
+        byte tier = RoadTier.ExtractLevel(existing);
+        bool bridge = (existing & RoadFlags.Bridge) != 0;
+        bool tunnel = (existing & RoadFlags.Tunnel) != 0;
+        _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y, tier, bridge, tunnel);
     }
 
     private void ClearNeighborRoadConnections(int cx, int cy)

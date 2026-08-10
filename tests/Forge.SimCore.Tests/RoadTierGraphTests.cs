@@ -1,3 +1,4 @@
+using Forge.Engine.Data;
 using Forge.SimCore;
 using Xunit;
 
@@ -74,6 +75,58 @@ public sealed class RoadTierGraphTests
         float highwayCost = GetFirstEdgeCost(host);
         Assert.Equal(0.7f, highwayCost, 3);
         Assert.True(highwayCost < dirtCost);
+    }
+
+    [Fact]
+    public void PlaceRoad_StoresBridgeAndTunnelInRoadFlags()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        host.PlaceRoad(7, 7, 1, bridge: true);
+        byte bridgeFlags = host.State.Tiles.RoadFlags[host.State.Tiles.Index(7, 7)];
+        Assert.True((bridgeFlags & RoadFlags.Bridge) != 0);
+        Assert.False((bridgeFlags & RoadFlags.Tunnel) != 0);
+
+        host.PlaceRoad(8, 7, 1, tunnel: true);
+        byte tunnelFlags = host.State.Tiles.RoadFlags[host.State.Tiles.Index(8, 7)];
+        Assert.False((tunnelFlags & RoadFlags.Bridge) != 0);
+        Assert.True((tunnelFlags & RoadFlags.Tunnel) != 0);
+    }
+
+    [Fact]
+    public void PlaceRoad_BridgeIncreasesGraphEdgeCost()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        host.PlaceRoad(30, 30, 1);
+        host.PlaceRoad(31, 30, 1);
+        host.PlaceRoad(32, 30, 1, bridge: true);
+        host.PlaceRoad(33, 30, 1);
+        host.Tick(0.001);
+
+        float plainCost = 0f;
+        var hostPlain = new SimHost();
+        hostPlain.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+        for (int x = 30; x <= 33; x++)
+            hostPlain.PlaceRoad(x, 30, 1);
+        hostPlain.Tick(0.001);
+        plainCost = GetSegmentCost(hostPlain, 30, 30);
+
+        float bridgeCost = GetSegmentCost(host, 30, 30);
+        Assert.Equal(plainCost + 0.15f, bridgeCost, 3);
+    }
+
+    private static float GetSegmentCost(SimHost host, int x, int y)
+    {
+        var roads = host.State.Roads;
+        int node = roads.GetNodeAt(x, y);
+        Assert.True(node >= 0);
+        foreach (var (_, cost, _) in roads.GetNeighbors(node))
+            return cost;
+        Assert.Fail("No edges from node");
+        return 0f;
     }
 
     private static byte GetFirstEdgeLevel(SimHost host)

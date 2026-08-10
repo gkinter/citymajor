@@ -85,6 +85,48 @@ public sealed class RoadGraphBuilderTests
     }
 
     [Fact]
+    public void BridgeTile_IncreasesSegmentTravelCost()
+    {
+        var tiles = new TileData(16);
+        PaintStraightRoad(tiles, 2, 2, 2, 6, tier: 1);
+        SetRoadExtra(tiles, 2, 4, bridge: true);
+
+        var graph = new RoadGraph(16);
+        RoadGraphBuilder.Build(tiles, graph);
+
+        int nodeA = graph.GetNodeAt(2, 2);
+        Assert.True(nodeA >= 0);
+
+        foreach (var (_, cost, _) in graph.GetNeighbors(nodeA))
+            Assert.Equal(4.15f, cost, 3);
+    }
+
+    [Fact]
+    public void TunnelTile_IncreasesSegmentTravelCost()
+    {
+        var tiles = new TileData(16);
+        PaintStraightRoad(tiles, 2, 2, 2, 6, tier: 1);
+        SetRoadExtra(tiles, 2, 4, tunnel: true);
+
+        var graph = new RoadGraph(16);
+        RoadGraphBuilder.Build(tiles, graph);
+
+        int nodeA = graph.GetNodeAt(2, 2);
+        Assert.True(nodeA >= 0);
+
+        foreach (var (_, cost, _) in graph.GetNeighbors(nodeA))
+            Assert.Equal(4.25f, cost, 3);
+    }
+
+    [Fact]
+    public void TileTravelCost_BridgeAndTunnelMultipliers()
+    {
+        Assert.Equal(1.15f, RoadGraphBuilder.TileTravelCost((byte)(0x10 | RoadFlags.Bridge)), 3);
+        Assert.Equal(1.25f, RoadGraphBuilder.TileTravelCost((byte)(0x10 | RoadFlags.Tunnel)), 3);
+        Assert.Equal(1.0f, RoadGraphBuilder.TileTravelCost(0x10), 3);
+    }
+
+    [Fact]
     public void IsNodeTile_DegreeTwoStraight_IsNotNode()
     {
         var tiles = new TileData(8);
@@ -95,6 +137,18 @@ public sealed class RoadGraphBuilderTests
         Assert.False(RoadGraphBuilder.IsNodeTile(tiles, 2, 1));
         Assert.True(RoadGraphBuilder.IsNodeTile(tiles, 1, 1));
         Assert.True(RoadGraphBuilder.IsNodeTile(tiles, 3, 1));
+    }
+
+    private static void SetRoadExtra(TileData tiles, int x, int y, bool bridge = false, bool tunnel = false)
+    {
+        int idx = tiles.Index(x, y);
+        if (tiles.RoadFlags[idx] == 0) return;
+        byte flags = tiles.RoadFlags[idx];
+        if (bridge) flags |= RoadFlags.Bridge;
+        else flags &= unchecked((byte)~RoadFlags.Bridge);
+        if (tunnel) flags |= RoadFlags.Tunnel;
+        else flags &= unchecked((byte)~RoadFlags.Tunnel);
+        tiles.RoadFlags[idx] = flags;
     }
 
     private static void PaintStraightRoad(TileData tiles, int x0, int y0, int x1, int y1, byte tier)
@@ -133,14 +187,18 @@ public sealed class RoadGraphBuilderTests
         if (!tiles.InBounds(x, y)) return;
         int idx = tiles.Index(x, y);
         if (tiles.RoadFlags[idx] == 0) return;
-        byte tier = RoadTier.ExtractLevel(tiles.RoadFlags[idx]);
+        byte existing = tiles.RoadFlags[idx];
+        byte tier = RoadTier.ExtractLevel(existing);
         byte connections = 0;
         if (HasRoad(tiles, x, y - 1)) connections |= 0x01;
         if (HasRoad(tiles, x + 1, y)) connections |= 0x02;
         if (HasRoad(tiles, x, y + 1)) connections |= 0x04;
         if (HasRoad(tiles, x - 1, y)) connections |= 0x08;
         if (connections == 0) connections = 0x01;
-        tiles.RoadFlags[idx] = (byte)(connections | ((tier & 0x03) << 4));
+        byte flags = (byte)(connections | ((tier & 0x03) << 4));
+        if ((existing & RoadFlags.Bridge) != 0) flags |= RoadFlags.Bridge;
+        if ((existing & RoadFlags.Tunnel) != 0) flags |= RoadFlags.Tunnel;
+        tiles.RoadFlags[idx] = flags;
     }
 
     private static bool HasRoad(TileData tiles, int x, int y)

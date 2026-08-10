@@ -51,14 +51,13 @@ public static class RoadGraphBuilder
             {
                 if (!IsRoad(tiles, x + dx, y + dy)) continue;
 
-                var (toX, toY, length, level) = TraceSegment(tiles, isNode, x, y, dx, dy);
+                var (toX, toY, length, level, cost) = TraceSegment(tiles, isNode, x, y, dx, dy);
                 int toIdx = tiles.Index(toX, toY);
                 if (!isNode[toIdx]) continue;
 
                 int toNode = nodeAt[toIdx];
                 if (toNode < 0) continue;
 
-                float cost = length * RoadTier.RoadTravelCostForLevel(level);
                 edges.Add((fromNode, toNode, cost, level, length));
             }
         }
@@ -94,7 +93,7 @@ public static class RoadGraphBuilder
         return !opposite;
     }
 
-    private static (int toX, int toY, int length, byte minLevel) TraceSegment(
+    private static (int toX, int toY, int length, byte minLevel, float cost) TraceSegment(
         TileData tiles,
         bool[] isNode,
         int startX,
@@ -108,6 +107,7 @@ public static class RoadGraphBuilder
         int x = startX + dirX;
         int y = startY + dirY;
         int length = 0;
+        float cost = 0f;
 
         while (IsRoad(tiles, x, y))
         {
@@ -115,9 +115,10 @@ public static class RoadGraphBuilder
             int idx = tiles.Index(x, y);
             byte tier = RoadTier.ExtractLevel(tiles.RoadFlags[idx]);
             if (tier < minLevel) minLevel = tier;
+            cost += TileTravelCost(tiles.RoadFlags[idx]);
 
             if (isNode[idx])
-                return (x, y, length, minLevel);
+                return (x, y, length, minLevel, cost);
 
             int nextX = -1;
             int nextY = -1;
@@ -133,7 +134,7 @@ public static class RoadGraphBuilder
             }
 
             if (nextX < 0)
-                return (x, y, length, minLevel);
+                return (x, y, length, minLevel, cost);
 
             prevX = x;
             prevY = y;
@@ -141,7 +142,15 @@ public static class RoadGraphBuilder
             y = nextY;
         }
 
-        return (prevX, prevY, length, minLevel);
+        return (prevX, prevY, length, minLevel, cost);
+    }
+
+    internal static float TileTravelCost(byte roadFlags)
+    {
+        float cost = RoadTier.RoadTravelCostForLevel(RoadTier.ExtractLevel(roadFlags));
+        if ((roadFlags & RoadFlags.Bridge) != 0) cost *= RoadFlags.BridgeCostMultiplier;
+        if ((roadFlags & RoadFlags.Tunnel) != 0) cost *= RoadFlags.TunnelCostMultiplier;
+        return cost;
     }
 
     private static int CountRoadNeighbors(TileData tiles, int x, int y)

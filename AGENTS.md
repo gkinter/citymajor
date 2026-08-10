@@ -1,18 +1,27 @@
-# CityMajor — Agent Guide (Web v1)
+# CityMajor — Agent Guide (Unity product)
 
-Browser-only mesh-3D city builder. **Locked v1 scope:** [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md).
+Unity 6 desktop mesh-3D city builder (**shipped product since 2026-07-12**). Web R3F is an **archival harness only** — not shipped.
+
+> **Stop — read this first.** Canonical `main` may lag the Unity tree. Do **not** implement product work from this checkout or from `origin/HEAD` if it still points at the Jul web spike. Switch to **`~/citymajor/citymajor-unity-port-plan`** (`feat/unity-port-plan-2026-07-12`) for Unity code and full design docs (`UNITY_V1_SCOPE.md`, `UNITY_ORCHESTRATION.md`, …).
+
+**Locked v1 scope (on Unity tip):** `docs/design/UNITY_V1_SCOPE.md`  
+**Canonical orchestration (on Unity tip):** `docs/design/UNITY_ORCHESTRATION.md`  
+**Web archival charter:** [`docs/design/WEB_ARCHIVAL.md`](docs/design/WEB_ARCHIVAL.md)
+
+**Linear:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) = Unity v1 desktop (product). [SB-3704](https://linear.app/softblaze/issue/SB-3704) = Jul 2026 web/WASM R3F spike (historical only). Unity has been the product surface since **2026-07-12** — not a new Aug 10 decision.
 
 ## Worktree rules (mandatory)
 
 Never edit tracked files on `main`, `master`, `develop`, `production`, `prod`, or `staging`. The canonical clone at `~/citymajor/citymajor` stays on `main`.
 
-**Active web v1 worktree:** `~/citymajor/citymajor-web-r3f-spike` → branch `feat/wasm-r3f-integration-2026-07-04`.
+**Active Unity v1 worktree:** `~/citymajor/citymajor-unity-port-plan` → branch `feat/unity-port-plan-2026-07-12`.
 
 ```bash
-# Create a new isolated worktree for your task
+# Create a new isolated worktree for your task (prefer from integration tip)
 TOPIC=<short-kebab-slug>
 SLUG="feat/${TOPIC}-$(date +%Y-%m-%d)"
-git worktree add "../citymajor-${TOPIC}" -b "$SLUG"
+INTEG_TIP=$(git -C ../citymajor-unity-port-plan rev-parse HEAD)
+git worktree add "../citymajor-${TOPIC}" -b "$SLUG" "$INTEG_TIP"
 cd "../citymajor-${TOPIC}"
 ```
 
@@ -20,85 +29,89 @@ cd "../citymajor-${TOPIC}"
 - Verify before commit: `git rev-parse --abbrev-ref HEAD` must not be a protected branch.
 - After merge: `git worktree remove "../citymajor-${TOPIC}"` && `git branch -d "$SLUG"`.
 
-## Build & verify
+## Remote / default branch note
+
+`origin/HEAD` may still point at the Jul web spike (`feat/wasm-r3f-integration-2026-07-04`) or stale `main`. **Do not** treat that as the product default. Work from `feat/unity-port-plan-2026-07-12`.
+
+**Do not** change `origin/HEAD` without explicit user approval. Recommended when approved:
+
+```bash
+git remote set-head origin feat/unity-port-plan-2026-07-12
+# or merge Unity integration into main
+```
+
+## Build & verify (Unity — product)
+
+| Command / action | Purpose |
+|------------------|---------|
+| Unity Hub → open `unity/CityMajor.Unity/` | Primary dev entry |
+| **Play** in Editor (`Assets/Scenes/Play.unity`) | Local play-test (player experience) |
+| **File → Build Settings** → macOS / Win / Linux | Desktop player builds |
+| Symlink assets (once): see [`unity/README.md`](unity/README.md) | Link `base/data` + GLTF into Unity Assets |
+
+**Sim changes:** Edit `src/Forge.SimCore/` — Unity references it in-process. Re-run Play mode after C# sim changes. Rebuild DLL: `./scripts/build-simcore-for-unity.sh`.
+
+### Unity MCP workflow
+
+1. Unity Editor open on `unity/CityMajor.Unity` with `Play.unity` loaded
+2. Cursor MCP: `unity-mcp` via `.cursor/mcp.json` (`uvx --from mcpforunityserver mcp-for-unity`)
+3. Verify: prompt *"List Unity editor state"* — must return active scene info
+4. Agent tasks: scene setup, script edits, GLTF import, play-mode tests via MCP tools
+5. **Never** commit `unity/CityMajor.Unity/Library/` or `Temp/`
+
+Full setup: [`docs/UNITY_MCP_SETUP.md`](docs/UNITY_MCP_SETUP.md)
+
+### Blender MCP (3D asset polish)
+
+1. Blender open with **Blender MCP** addon connected (sidebar → Connect)
+2. Cursor MCP: `blender` via `.cursor/mcp.json` (`uvx --python 3.11 blender-mcp`)
+3. Pipeline: **Meshy batch → Blender polish → `web/public/assets/gltf/` → validate-manifest → Unity Refresh**
+4. Use `scripts/blender/citymajor_export_conventions.py` for ground-center + tile scale
+
+Full setup: [`docs/BLENDER_MCP_SETUP.md`](docs/BLENDER_MCP_SETUP.md)
+
+## Build & verify (web / WASM — archival harness only)
 
 | Command | Purpose |
 |---------|---------|
-| `pnpm dev` | Next.js dev server (`@citymajor/web`, port 3000) |
-| `pnpm build:wasm` | Publish C# `Forge.SimWasm` → `web/public/dotnet/` |
-| `pnpm dev:wasm` | `build:wasm` then `dev` (use after sim changes) |
-| `pnpm build` | Production Next.js build |
-| `pnpm smoke:all` | HTTP + copy checks on `/`, `/shop`, `/play` + WebGL (needs `pnpm dev` running) |
-| `pnpm smoke:play` | `/play` only smoke |
-| `pnpm perf:gate` | WebGL FPS threshold gate on `/play` (≥30 FPS integrated; needs `pnpm dev`) |
+| `pnpm build:wasm` | Publish `Forge.SimWasm` for optional snapshot/CI harness |
+| `pnpm smoke:all` | Historical browser smoke — **not** a ship gate for player UX |
+| `pnpm dev` | Local R3F spike only — archival |
 
-**WASM:** `pnpm build:wasm` runs `web/wasm/build-wasm.sh` — `dotnet publish` on `src/Forge.SimWasm`, copies `AppBundle` to `web/public/dotnet/`. Re-run after any C# sim change. Without WASM, `/play` falls back to procedural city data (HUD shows `Data: procedural`).
-
-### WASM boot triage
-
-**Symptoms (WASM failed to boot — app still playable on procedural fallback):**
-
-- FPS HUD shows **`Data: procedural`** instead of **`Data: WASM sim`**
-- Browser console: `[CityMajor] WASM sim unavailable — using procedural city fallback` or init timeout after ~45s
-- Worker never posts `ready` (bad `/dotnet` URL, missing boot manifest, dotnet module exception)
-
-**Quick check (local or deployed FQDN):**
-
-```bash
-# Local dev (after pnpm build:wasm)
-curl -sf http://localhost:3000/dotnet/_framework/blazor.boot.json && echo "WASM assets OK"
-
-# Preview / prod
-FQDN="https://citymajor.apps.softblaze.net"
-curl -sf "$FQDN/dotnet/_framework/blazor.boot.json" && echo "WASM assets OK"
-```
-
-404 or connection refused → bundle not published or not copied into the image. Fix publish/build, not runtime env.
-
-**`BUILD_WASM` gate (Docker / Coolify):**
-
-| Value | Effect |
-|-------|--------|
-| `BUILD_WASM=1` (default) | `wasm` stage runs `pnpm build:wasm`; Dockerfile **fails** if `web/public/dotnet/_framework/blazor.boot.json` is missing |
-| `BUILD_WASM=0` | Skip .NET publish — procedural-only preview (faster CI); boot check will 404 by design |
-
-Set `BUILD_WASM=1` on production previews. If build fails with OOM/SDK errors, increase builder RAM — do not silently ship `BUILD_WASM=0` when WASM is expected. Details: [`docs/DEPLOY_WEB.md`](docs/DEPLOY_WEB.md).
-
-**Smoke:** Prereq is a running dev server (`pnpm dev` or `pnpm dev:wasm`). First run: `npx playwright install chromium`. Optional: `SCREENSHOT=1 pnpm smoke:all` saves `test-results/smoke-play.png`. Smoke records a single HUD FPS snapshot (warn-only if `—`); **`pnpm perf:gate`** samples FPS over 5s and fails below **30** (WEB_V1_SCOPE §4). Optional: `PERF_GATE=1 pnpm smoke:play` runs smoke + perf gate in one session.
+**Do not** treat `/play` as the product surface. WASM/web work may validate `Forge.SimCore` exports; **player experience is Unity**. See [`docs/design/WEB_ARCHIVAL.md`](docs/design/WEB_ARCHIVAL.md) and superseded [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md).
 
 ## Key paths
 
 ```
-web/                          → Next.js 16 app (@citymajor/web)
-web/app/play/                 → /play — R3F city canvas entry
-web/app/shop/                 → Stripe cosmetic shop
-web/app/api/                  → saves, entitlements, narrative, checkout, webhooks
-web/components/city/          → R3F scene (CityCanvas, BuildingInstances, TerrainChunks, HUD)
-web/lib/                      → sim-bridge, zoning, LOD, saves, entitlements, catalogs
-web/workers/                  → WASM sim worker (SharedArrayBuffer ticks)
-web/wasm/                     → build-wasm.sh, publish pipeline
-web/public/dotnet/            → WASM bundle output (_framework/blazor.boot.json)
-web/public/assets/gltf/       → Era archetype GLTF kits
-web/packages/sim-types/       → Shared TS types for sim snapshots
-web/scripts/smoke-all.mjs     → Full smoke suite
-web/scripts/perf-gate.mjs   → WebGL FPS gate (≥30 integrated, WEB_V1_SCOPE §4)
-src/Forge.SimWasm/            → C# sim → browser WASM host
-src/Forge.SimCore/            → Core simulation logic
-src/Forge.Game/               → Game rules, economy, zoning
-docs/design/WEB_V1_SCOPE.md   → Locked v1 charter (256×256, 10k HH, Frontier→Industrial)
-docs/design/WASM_SIM_BRIDGE.md → WASM ↔ R3F data contract
-docs/DEPLOY_WEB.md            → Coolify preview deploy (Dockerfile, BUILD_WASM arg)
+unity/CityMajor.Unity/        → Unity 6 project (URP, UI Toolkit, Steam) — PRODUCT
+unity/CityMajor.Unity/Assets/Scripts/  → Sim bridge, rendering, input, UI
+src/Forge.SimCore/            → Core simulation logic (Unity native target)
+src/Forge.SimWasm/            → Optional WASM harness (not player runtime)
+base/data/                    → Shared JSON content
+web/public/assets/gltf/modern/ → Modern era GLTF kits (content host path for Unity)
+web/                            → Archival R3F harness (not shipped)
+docs/design/UNITY_V1_SCOPE.md → Locked Unity v1 charter (modern era, 256×256)
+docs/design/UNITY_ORCHESTRATION.md → Canonical Unity integration tracker
+docs/design/WEB_ARCHIVAL.md   → Web frozen as harness — agents must not ship web UX
+docs/design/CATHEDRAL_UNITY_SPRINT.md → Next Cathedral sprint (Unity HUD/tools)
+docs/UNITY_MCP_SETUP.md       → Cursor ↔ Unity MCP setup
 ```
 
 ## Architecture reminders
 
-- Sim snapshots → `InstancedMesh` matrices in `useFrame` — not React state per building.
+- Sim snapshots → GPU instanced meshes — not per-building GameObjects.
 - LOD: full GLTF → simplified mesh → instanced boxes → heatmap blocks.
-- Play URL: `/play`. Preview deploys: `*.apps.softblaze.net` (see `docs/DEPLOY_WEB.md`).
+- Era filter: **modern only** for v1 — Frontier/Industrial/Postwar/Future deferred.
+- **Do not fork simulation logic.** One PR to `src/Forge.SimCore` updates Unity; WASM harness stays thin.
+- Cathedral UI/tools land in Unity first ([`CATHEDRAL_UNITY_SPRINT.md`](docs/design/CATHEDRAL_UNITY_SPRINT.md)).
 
 ## Related docs
 
 - [`CLAUDE.md`](CLAUDE.md) — stack summary, monetization, architecture notes
-- [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) — **canonical locked scope**; supersedes conflicting rows in older design docs
+- [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md) — **canonical locked scope**
+- [`docs/design/UNITY_ORCHESTRATION.md`](docs/design/UNITY_ORCHESTRATION.md) — **canonical** integration / lanes
+- [`docs/design/WEB_ARCHIVAL.md`](docs/design/WEB_ARCHIVAL.md) — web = archival harness only
+- [`docs/design/CATHEDRAL_PROGRAM.md`](docs/design/CATHEDRAL_PROGRAM.md) — sim depth program (Unity-first)
+- [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) — superseded archival web charter (SB-3704 spike)
 - [`docs/design/MASTER_GAME_CONCEPT.md`](docs/design/MASTER_GAME_CONCEPT.md) — sim depth, economy, narrative design
-- [`web/README.md`](web/README.md) — local dev setup, WASM parity notes
+- [`unity/README.md`](unity/README.md) — Unity project quick start

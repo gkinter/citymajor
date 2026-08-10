@@ -176,6 +176,7 @@ type SimExports = {
     tier?: number,
     bridge?: number,
     tunnel?: number,
+    ramp?: number,
   ) => boolean;
   PlaceBuilding?: (x: number, y: number, typeId: number) => boolean;
   EnqueueResearch?: (techId: number) => boolean;
@@ -389,6 +390,7 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
             tier?: number,
             bridge?: number,
             tunnel?: number,
+            ramp?: number,
           ) => boolean)
         : undefined,
     PlaceBuilding:
@@ -821,11 +823,17 @@ function bulldozeTile(tileX: number, tileZ: number) {
   publishSnapshot();
 }
 
-function roadFlagsForTier(tier: number, bridge = false, tunnel = false): number {
+function roadFlagsForTier(
+  tier: number,
+  bridge = false,
+  tunnel = false,
+  ramp = false,
+): number {
   const t = tier & 0x03;
   let flags = (t << 4) | 0x01;
-  if (bridge) flags |= 0x40;
-  if (tunnel) flags |= 0x80;
+  if (ramp) flags |= 0xc0;
+  else if (bridge) flags |= 0x40;
+  else if (tunnel) flags |= 0x80;
   return flags;
 }
 
@@ -835,16 +843,28 @@ function placeRoadTile(
   tier = 1,
   bridge = false,
   tunnel = false,
+  ramp = false,
 ): boolean {
   if (tileX < 0 || tileZ < 0 || tileX >= worldSize || tileZ >= worldSize) return false;
+  if (ramp) {
+    bridge = false;
+    tunnel = false;
+  }
   const placeFn = sim?.PlaceRoad;
   if (!placeFn) {
     const grid = ensureRoadGrid(worldSize);
-    grid[zoneIndex(tileX, tileZ)] = roadFlagsForTier(tier, bridge, tunnel);
+    grid[zoneIndex(tileX, tileZ)] = roadFlagsForTier(tier, bridge, tunnel, ramp);
     publishSnapshot();
     return true;
   }
-  const placed = placeFn(tileX, tileZ, tier, bridge ? 1 : 0, tunnel ? 1 : 0);
+  const placed = placeFn(
+    tileX,
+    tileZ,
+    tier,
+    bridge ? 1 : 0,
+    tunnel ? 1 : 0,
+    ramp ? 1 : 0,
+  );
   if (!placed) {
     post({
       type: "command_result",
@@ -852,12 +872,12 @@ function placeRoadTile(
       ok: false,
       tileX,
       tileZ,
-      reason: "illegal_highway_merge",
+      reason: ramp ? "invalid_ramp" : "illegal_highway_merge",
     });
     return false;
   }
   const grid = ensureRoadGrid(worldSize);
-  grid[zoneIndex(tileX, tileZ)] = roadFlagsForTier(tier, bridge, tunnel);
+  grid[zoneIndex(tileX, tileZ)] = roadFlagsForTier(tier, bridge, tunnel, ramp);
   publishSnapshot();
   return true;
 }
@@ -1068,7 +1088,14 @@ function handleCommand(command: SimCommand) {
       placeBuildingTile(command.tileX, command.tileZ, command.typeId);
       break;
     case "place_road":
-      placeRoadTile(command.tileX, command.tileZ, command.tier);
+      placeRoadTile(
+        command.tileX,
+        command.tileZ,
+        command.tier,
+        command.bridge === true,
+        command.tunnel === true,
+        command.ramp === true,
+      );
       break;
     case "zone_paint":
       paintZone(

@@ -10,9 +10,19 @@ import {
 /** Active road paint tier for /play (local → collector → highway). */
 export type RoadTier = 0 | 1 | 2;
 
+/** Toolbar selection — tiers plus dedicated ramp connector tool (P1.5). */
+export type RoadToolId = RoadTier | "ramp";
+
 /** HUD toast when WASM rejects an illegal highway merge (P1.4 ramp rules). */
 export const ILLEGAL_HIGHWAY_MERGE_TOAST =
   "Illegal highway merge — use a ramp";
+
+/** RoadFlags structure encoding (bits 6–7, mutually exclusive). */
+export const ROAD_FLAG_BRIDGE = 0x40;
+export const ROAD_FLAG_TUNNEL = 0x80;
+export const ROAD_FLAG_RAMP = ROAD_FLAG_BRIDGE | ROAD_FLAG_TUNNEL; // 0xC0
+
+export const RAMP_OVERLAY_COLOR = "#b45309";
 
 export type RoadTierDefinition = {
   tier: RoadTier;
@@ -56,6 +66,7 @@ export const ROAD_TIER_DEFINITIONS: readonly RoadTierDefinition[] = [
 ] as const;
 
 export const DEFAULT_ROAD_TIER: RoadTier = 0;
+export const DEFAULT_ROAD_TOOL: RoadToolId = DEFAULT_ROAD_TIER;
 
 const PLAYABLE_ERA_SET = new Set<string>(WEB_V1_PLAYABLE_ERAS);
 
@@ -81,6 +92,29 @@ export function isRoadTierUnlocked(
   return isContentUnlocked(def.contentKey, toUnlockedTechSet(unlockedTechIds));
 }
 
+/**
+ * Ramp tool unlocks with highway — connectors only make sense once highways exist.
+ */
+export function isRampToolUnlocked(
+  unlockedTechIds?: readonly number[],
+): boolean {
+  return isRoadTierUnlocked(2, unlockedTechIds);
+}
+
+/**
+ * Tier for ramp paint: prefer collector when unlocked, else local.
+ */
+export function resolveRampPaintTier(
+  unlockedTechIds?: readonly number[],
+): RoadTier {
+  if (isRoadTierUnlocked(1, unlockedTechIds)) return 1;
+  return 0;
+}
+
+export function isRoadToolId(value: unknown): value is RoadToolId {
+  return value === "ramp" || value === 0 || value === 1 || value === 2;
+}
+
 export function roadTierLabel(tier: RoadTier): string {
   return ROAD_TIER_DEFINITIONS.find((d) => d.tier === tier)?.label ?? "Road";
 }
@@ -90,4 +124,9 @@ export function roadTierOverlayColor(tier: RoadTier): string {
     ROAD_TIER_DEFINITIONS.find((d) => d.tier === tier)?.overlayColor ??
     "#6b7280"
   );
+}
+
+export function roadToolOverlayColor(tool: RoadToolId): string {
+  if (tool === "ramp") return RAMP_OVERLAY_COLOR;
+  return roadTierOverlayColor(tool);
 }

@@ -83,9 +83,10 @@ import { resolveRci } from "@/lib/zoning-economy";
 import { GltfPreloader } from "@/components/city/GltfPreloader";
 import type { HouseholdPreview } from "@/lib/population-l2";
 import {
-  DEFAULT_ROAD_TIER,
+  DEFAULT_ROAD_TOOL,
   ILLEGAL_HIGHWAY_MERGE_TOAST,
-  type RoadTier,
+  resolveRampPaintTier,
+  type RoadToolId,
 } from "@/lib/road-types";
 import {
   DEFAULT_TRANSIT_MODE,
@@ -186,7 +187,7 @@ export function PlayClient() {
   const [residentialZonePainted, setResidentialZonePainted] = useState(false);
   const [buildMode, setBuildMode] = useState<BuildMode>("zone");
   const [buildTypeId, setBuildTypeId] = useState<number | null>(null);
-  const [roadTier, setRoadTier] = useState<RoadTier>(DEFAULT_ROAD_TIER);
+  const [roadTool, setRoadTool] = useState<RoadToolId>(DEFAULT_ROAD_TOOL);
   const [transitMode, setTransitMode] = useState<TransitModeId>(
     DEFAULT_TRANSIT_MODE,
   );
@@ -547,8 +548,8 @@ export function PlayClient() {
     }
   }, [buildMode, buildTypeId]);
 
-  const handleRoadTierSelect = useCallback((tier: RoadTier) => {
-    setRoadTier(tier);
+  const handleRoadToolSelect = useCallback((tool: RoadToolId) => {
+    setRoadTool(tool);
     setBuildMode("road");
     setActiveTool("road");
     setBuildTypeId(null);
@@ -679,7 +680,14 @@ export function PlayClient() {
         buildTypeId={
           buildMode === "plop" || buildMode === "education" ? buildTypeId : null
         }
-        roadTier={buildMode === "road" ? roadTier : undefined}
+        roadTier={
+          buildMode === "road"
+            ? roadTool === "ramp"
+              ? resolveRampPaintTier(simResources?.unlockedTechIds)
+              : roadTool
+            : undefined
+        }
+        roadRamp={buildMode === "road" && roadTool === "ramp"}
         gameSpeed={gameSpeed}
         qualityTier={qualityTier}
         showTrafficOverlay={showTrafficOverlay}
@@ -823,8 +831,8 @@ export function PlayClient() {
       {buildMode === "road" ? (
         <>
           <RoadTypeToolbar
-            activeRoadTier={roadTier}
-            onSelect={handleRoadTierSelect}
+            activeRoadTool={roadTool}
+            onSelect={handleRoadToolSelect}
             unlockedTechIds={simResources?.unlockedTechIds}
           />
           <TransportToolbar

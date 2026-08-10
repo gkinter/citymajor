@@ -144,15 +144,14 @@ public sealed class RoadGraphBuilderTests
         Assert.True(RoadGraphBuilder.IsNodeTile(tiles, 3, 1));
     }
 
-    private static void SetRoadExtra(TileData tiles, int x, int y, bool bridge = false, bool tunnel = false)
+    private static void SetRoadExtra(TileData tiles, int x, int y, bool bridge = false, bool tunnel = false, bool ramp = false)
     {
         int idx = tiles.Index(x, y);
         if (tiles.RoadFlags[idx] == 0) return;
-        byte flags = tiles.RoadFlags[idx];
-        if (bridge) flags |= RoadFlags.Bridge;
-        else flags &= unchecked((byte)~RoadFlags.Bridge);
-        if (tunnel) flags |= RoadFlags.Tunnel;
-        else flags &= unchecked((byte)~RoadFlags.Tunnel);
+        byte flags = (byte)(tiles.RoadFlags[idx] & ~RoadFlags.StructureMask);
+        if (ramp) flags |= RoadFlags.Ramp;
+        else if (bridge) flags |= RoadFlags.Bridge;
+        else if (tunnel) flags |= RoadFlags.Tunnel;
         tiles.RoadFlags[idx] = flags;
     }
 
@@ -201,8 +200,9 @@ public sealed class RoadGraphBuilderTests
         if (HasRoad(tiles, x - 1, y)) connections |= 0x08;
         if (connections == 0) connections = 0x01;
         byte flags = (byte)(connections | ((tier & 0x03) << 4));
-        if ((existing & RoadFlags.Bridge) != 0) flags |= RoadFlags.Bridge;
-        if ((existing & RoadFlags.Tunnel) != 0) flags |= RoadFlags.Tunnel;
+        if (RoadFlags.IsRamp(existing)) flags |= RoadFlags.Ramp;
+        else if (RoadFlags.IsBridge(existing)) flags |= RoadFlags.Bridge;
+        else if (RoadFlags.IsTunnel(existing)) flags |= RoadFlags.Tunnel;
         tiles.RoadFlags[idx] = flags;
     }
 

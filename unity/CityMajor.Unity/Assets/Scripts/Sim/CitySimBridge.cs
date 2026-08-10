@@ -82,17 +82,26 @@ namespace CityMajor.Sim
             PublishFromSimHost();
         }
 
+<<<<<<< HEAD
         /// <param name="bridge">Cathedral P1.3 — mark tile as bridge (graph cost ×1.15).</param>
         /// <param name="tunnel">Cathedral P1.3 — mark tile as tunnel (graph cost ×1.25).</param>
         public bool PlaceRoad(int tileX, int tileY, byte tier = 1, bool bridge = false, bool tunnel = false)
+=======
+        public void PlaceRoad(int tileX, int tileY, byte tier = 1, bool bridge = false, bool tunnel = false, bool ramp = false)
+>>>>>>> d7a979e (feat(cathedral): P1.5 dedicated highway ramp paint tool)
         {
             if (!_simCoreReady)
                 return false;
 
+<<<<<<< HEAD
             var ok = _simHost.PlaceRoad(tileX, tileY, tier, bridge, tunnel);
             if (ok)
                 PublishFromSimHost();
             return ok;
+=======
+            _simHost.PlaceRoad(tileX, tileY, tier, bridge, tunnel, ramp);
+            PublishFromSimHost();
+>>>>>>> d7a979e (feat(cathedral): P1.5 dedicated highway ramp paint tool)
         }
 
         /// <summary>Clears zone, buildings, and roads on tile (Forge desktop bulldoze parity).</summary>

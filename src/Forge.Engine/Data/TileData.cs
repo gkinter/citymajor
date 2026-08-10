@@ -48,7 +48,7 @@ public sealed class TileData
     // Infrastructure layer (binary connectivity + road details)
     // =========================================================================
 
-    /// <summary>Road bitfield: bits 0-3 = N/E/S/W connections, bits 4-5 = road level (dirt/paved/highway), bit 6 = bridge, bit 7 = tunnel.</summary>
+    /// <summary>Road bitfield: bits 0-3 = N/E/S/W connections, bits 4-5 = road level (dirt/paved/highway), bits 6-7 = structure (none/bridge/tunnel/ramp).</summary>
     public byte[] RoadFlags;
 
     /// <summary>Power connection: 0=none, 1=has_power.</summary>

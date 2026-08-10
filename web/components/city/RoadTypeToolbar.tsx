@@ -9,22 +9,27 @@ import {
 } from "@/lib/hud-theme";
 import {
   getPlayableRoadTiers,
+  isRampToolUnlocked,
   isRoadTierUnlocked,
+  RAMP_OVERLAY_COLOR,
+  type RoadToolId,
   type RoadTier,
 } from "@/lib/road-types";
 
 type RoadTypeToolbarProps = {
-  activeRoadTier: RoadTier;
-  onSelect: (tier: RoadTier) => void;
+  activeRoadTool: RoadToolId;
+  onSelect: (tool: RoadToolId) => void;
   unlockedTechIds?: number[];
 };
 
 export function RoadTypeToolbar({
-  activeRoadTier,
+  activeRoadTool,
   onSelect,
   unlockedTechIds,
 }: RoadTypeToolbarProps) {
   const tiers = useMemo(() => getPlayableRoadTiers(), []);
+  const rampUnlocked = isRampToolUnlocked(unlockedTechIds);
+  const rampActive = activeRoadTool === "ramp";
 
   return (
     <div
@@ -48,12 +53,13 @@ export function RoadTypeToolbar({
       </span>
       {tiers.map(({ tier, label, shortLabel, overlayColor }) => {
         const unlocked = isRoadTierUnlocked(tier, unlockedTechIds);
-        const active = activeRoadTier === tier;
+        const active = activeRoadTool === tier;
 
         return (
           <button
             key={tier}
             type="button"
+            data-testid={`road-tool-${tier}`}
             style={{
               ...hudButton(active, !unlocked),
               minWidth: 72,
@@ -70,7 +76,7 @@ export function RoadTypeToolbar({
                 : `Research ${label.toLowerCase()} to unlock`
             }
             onClick={() => {
-              if (unlocked) onSelect(tier);
+              if (unlocked) onSelect(tier as RoadTier);
             }}
           >
             <span
@@ -88,6 +94,41 @@ export function RoadTypeToolbar({
           </button>
         );
       })}
+      <button
+        type="button"
+        data-testid="road-tool-ramp"
+        style={{
+          ...hudButton(rampActive, !rampUnlocked),
+          minWidth: 72,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          opacity: rampUnlocked ? 1 : 0.45,
+        }}
+        aria-pressed={rampActive}
+        disabled={!rampUnlocked}
+        title={
+          rampUnlocked
+            ? "Place highway ramp connector (collector/local)"
+            : "Research highway to unlock ramp connectors"
+        }
+        onClick={() => {
+          if (rampUnlocked) onSelect("ramp");
+        }}
+      >
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: 2,
+            background: RAMP_OVERLAY_COLOR,
+            flexShrink: 0,
+          }}
+          aria-hidden
+        />
+        Ramp
+        {!rampUnlocked ? " 🔒" : null}
+      </button>
     </div>
   );
 }

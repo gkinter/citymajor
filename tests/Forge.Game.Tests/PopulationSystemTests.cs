@@ -250,6 +250,107 @@ public class PopulationSystemTests
     }
 
     [Fact]
+    public void EmploymentMatching_OfficeZone_EmploysUniversityEducatedHousehold()
+    {
+        var state = new WorldState(64, 256, 64);
+        var system = new PopulationSystem(seed: 42);
+
+        // HomeBuildingId 0 = homeless sentinel — burn slot 0, home at id 1.
+        _ = state.Buildings.Allocate();
+
+        int homeId = state.Buildings.Allocate();
+        state.Buildings.GridX[homeId] = 10;
+        state.Buildings.GridY[homeId] = 10;
+        state.Buildings.Width[homeId] = 2;
+        state.Buildings.Height[homeId] = 2;
+        state.Buildings.TypeId[homeId] = 1;
+        state.Buildings.State[homeId] = 1;
+        state.Buildings.MaxOccupants[homeId] = 50;
+        state.Tiles.ZoneType[state.Tiles.Index(10, 10)] = 1;
+        state.Tiles.BuildingId[state.Tiles.Index(10, 10)] = (ushort)homeId;
+
+        int officeId = state.Buildings.Allocate();
+        state.Buildings.GridX[officeId] = 12;
+        state.Buildings.GridY[officeId] = 12;
+        state.Buildings.Width[officeId] = 2;
+        state.Buildings.Height[officeId] = 2;
+        state.Buildings.TypeId[officeId] = 3;
+        state.Buildings.State[officeId] = 1;
+        state.Buildings.MaxOccupants[officeId] = 20;
+        state.Buildings.Occupants[officeId] = 0;
+        state.Buildings.Condition[officeId] = 255;
+        state.Buildings.Level[officeId] = 2;
+        state.Tiles.ZoneType[state.Tiles.Index(12, 12)] = 5; // Office
+        state.Tiles.BuildingId[state.Tiles.Index(12, 12)] = (ushort)officeId;
+
+        state.Roads.AddNode(10, 10);
+        state.Roads.AddNode(12, 12);
+
+        int slot = AddHousehold(
+            state,
+            system,
+            members: 3,
+            education: 3,
+            homeBuilding: (ushort)homeId,
+            workBuilding: 0,
+            headAge: 32);
+
+        system.MatchEmployment(state);
+
+        Assert.Equal((ushort)officeId, state.Households.WorkBuildingId[slot]);
+        Assert.Equal(0, state.Households.Flags[slot] & 4);
+        Assert.True(state.Buildings.Occupants[officeId] >= 1);
+    }
+
+    [Fact]
+    public void EmploymentMatching_OfficeZone_RejectsBelowUniversityEducation()
+    {
+        var state = new WorldState(64, 256, 64);
+        var system = new PopulationSystem(seed: 42);
+
+        _ = state.Buildings.Allocate();
+
+        int homeId = state.Buildings.Allocate();
+        state.Buildings.GridX[homeId] = 10;
+        state.Buildings.GridY[homeId] = 10;
+        state.Buildings.Width[homeId] = 2;
+        state.Buildings.Height[homeId] = 2;
+        state.Buildings.TypeId[homeId] = 1;
+        state.Buildings.State[homeId] = 1;
+        state.Buildings.MaxOccupants[homeId] = 50;
+        state.Tiles.ZoneType[state.Tiles.Index(10, 10)] = 1;
+        state.Tiles.BuildingId[state.Tiles.Index(10, 10)] = (ushort)homeId;
+
+        int officeId = state.Buildings.Allocate();
+        state.Buildings.GridX[officeId] = 12;
+        state.Buildings.GridY[officeId] = 12;
+        state.Buildings.Width[officeId] = 2;
+        state.Buildings.Height[officeId] = 2;
+        state.Buildings.TypeId[officeId] = 3;
+        state.Buildings.State[officeId] = 1;
+        state.Buildings.MaxOccupants[officeId] = 20;
+        state.Buildings.Occupants[officeId] = 0;
+        state.Tiles.ZoneType[state.Tiles.Index(12, 12)] = 5;
+        state.Tiles.BuildingId[state.Tiles.Index(12, 12)] = (ushort)officeId;
+        state.Roads.AddNode(10, 10);
+        state.Roads.AddNode(12, 12);
+
+        int slot = AddHousehold(
+            state,
+            system,
+            members: 3,
+            education: 1,
+            homeBuilding: (ushort)homeId,
+            workBuilding: 0,
+            headAge: 30);
+
+        system.MatchEmployment(state);
+
+        Assert.Equal((ushort)0, state.Households.WorkBuildingId[slot]);
+        Assert.NotEqual(0, state.Households.Flags[slot] & 4);
+    }
+
+    [Fact]
     public void Tick_StaggeredProcessing_CoversAllHouseholds()
     {
         var state = CreateTestWorld();

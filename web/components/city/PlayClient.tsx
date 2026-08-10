@@ -598,6 +598,8 @@ export function PlayClient() {
         onSelectRoad: handleKeyboardSelectRoad,
         onSelectZoneTool: handleToolChange,
         unlockedTechIds: simResources?.unlockedTechIds,
+        currentEra: simResources?.era,
+        supportsZoneBytes: stats.simSource === "wasm",
       };
 
       if (event.key === "?") {
@@ -636,6 +638,8 @@ export function PlayClient() {
     lawOpen,
     researchOpen,
     simResources?.unlockedTechIds,
+    simResources?.era,
+    stats.simSource,
   ]);
 
   const canvasActiveTool: ZoningTool =
@@ -802,6 +806,8 @@ export function PlayClient() {
         onZoneDensityChange={setZoneDensity}
         rci={resolveRci(simResources)}
         unlockedTechIds={simResources?.unlockedTechIds}
+        currentEra={simResources?.era}
+        supportsZoneBytes={stats.simSource === "wasm"}
       />
       <EducationToolbar
         viewMode={serviceViewMode}

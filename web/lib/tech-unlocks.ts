@@ -38,6 +38,7 @@ export const BASELINE_CONTENT_KEYS = new Set([
   "residential_zone",
   "commercial_zone",
   "industrial_zone",
+  "agricultural_zone",
 ]);
 
 /** True when content is playable with no tech research required. */

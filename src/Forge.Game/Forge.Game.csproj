@@ -11,6 +11,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Forge.SimCore\PopulationGrowthTracker.cs" Link="SimCore\PopulationGrowthTracker.cs" />
+    <Compile Include="..\Forge.SimCore\RoadTier.cs" Link="SimCore\RoadTier.cs" />
+    <Compile Include="..\Forge.SimCore\TrafficBpr.cs" Link="SimCore\TrafficBpr.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\production_chains.json">

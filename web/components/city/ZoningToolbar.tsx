@@ -20,15 +20,17 @@ import type { PaintBrushSize, ZoningTool, ZoneDensityLevel } from "@/lib/zoning"
 import {
   nextBrushSize,
   nextZoneDensity,
-  ZONING_TOOLS,
   ZONE_DENSITY_LABELS,
   zoningToolColor,
   zoningToolShortLabel,
 } from "@/lib/zoning";
 import {
+  getVisibleZoneTiers,
+  isZoneTierEraUnlocked,
   isZoneTierUnlocked,
+  isZoneTierVisible,
+  lockedTierEraName,
   lockedTierTechName,
-  ZONE_TIERS,
   zoneTierByTool,
   type ZoneTierTool,
 } from "@/lib/zone-tiers";
@@ -45,6 +47,10 @@ type ZoningToolbarProps = {
   rci?: RciDemand | null;
   /** WASM research indices — gates advanced zone tiers when omitted. */
   unlockedTechIds?: number[];
+  /** WASM sim era index (0=Frontier) — P2.1 era gates for office/mixed. */
+  currentEra?: number;
+  /** True when WASM PaintZone is live (extended zone bytes 5–7). */
+  supportsZoneBytes?: boolean;
 };
 
 function isZoneTierTool(tool: ZoningTool): tool is ZoneTierTool {
@@ -60,6 +66,8 @@ export function ZoningToolbar({
   onZoneDensityChange,
   rci = null,
   unlockedTechIds,
+  currentEra,
+  supportsZoneBytes = false,
 }: ZoningToolbarProps) {
   const [feedbackOn, setFeedbackOn] = useState(false);
 
@@ -70,6 +78,24 @@ export function ZoningToolbar({
   const unlockedTechSet = useMemo(
     () => new Set(unlockedTechIds ?? []),
     [unlockedTechIds],
+  );
+
+  const visibleTiers = useMemo(
+    () => getVisibleZoneTiers(supportsZoneBytes),
+    [supportsZoneBytes],
+  );
+
+  const zoningTools = useMemo(
+    () => [
+      ...visibleTiers.map((tier) => ({
+        id: tier.tool,
+        label: tier.label,
+        shortLabel: tier.shortLabel,
+      })),
+      { id: "bulldoze" as const, label: "Bulldoze", shortLabel: "✕" },
+      { id: "road" as const, label: "Road", shortLabel: "Rd", stub: true },
+    ],
+    [visibleTiers],
   );
 
   const activeColor = zoningToolColor(activeTool);
@@ -94,9 +120,10 @@ export function ZoningToolbar({
       if (!isZoneTierTool(tool)) return true;
       const tier = zoneTierByTool(tool);
       if (!tier) return true;
-      return isZoneTierUnlocked(tier, [...unlockedTechSet]);
+      if (!isZoneTierVisible(tier, supportsZoneBytes)) return false;
+      return isZoneTierUnlocked(tier, [...unlockedTechSet], currentEra);
     },
-    [unlockedTechSet],
+    [currentEra, supportsZoneBytes, unlockedTechSet],
   );
 
   const toolTitle = useCallback(
@@ -105,7 +132,16 @@ export function ZoningToolbar({
 
       if (isZoneTierTool(tool)) {
         const tier = zoneTierByTool(tool);
-        if (tier && !isZoneTierUnlocked(tier, [...unlockedTechSet])) {
+        if (tier && !isZoneTierVisible(tier, supportsZoneBytes)) {
+          return "Requires WASM sim (extended zone types)";
+        }
+        if (tier && !isZoneTierEraUnlocked(tier, currentEra)) {
+          const eraName = lockedTierEraName(tier);
+          return eraName
+            ? `Locked — reach ${eraName} era`
+            : "Locked — era requirement not met";
+        }
+        if (tier && !isZoneTierUnlocked(tier, [...unlockedTechSet], currentEra)) {
           const techName = lockedTierTechName(tier);
           return techName
             ? `Locked — research ${techName}`
@@ -116,7 +152,7 @@ export function ZoningToolbar({
       const demandHint = zoningDemandHint(tool, rci);
       return demandHint ? `${label}: ${demandHint}` : label;
     },
-    [rci, unlockedTechSet],
+    [rci, currentEra, supportsZoneBytes, unlockedTechSet],
   );
 
   return (
@@ -202,7 +238,7 @@ export function ZoningToolbar({
         aria-label="Zoning tools"
         data-onboarding-target="zoning"
       >
-        {ZONING_TOOLS.map(({ id, label, shortLabel, stub }) => {
+        {zoningTools.map(({ id, label, shortLabel, stub }) => {
           const unlocked = isToolUnlocked(id);
           const locked = !unlocked;
           const title = toolTitle(id, label, stub);
@@ -243,8 +279,8 @@ export function ZoningToolbar({
         }}
         aria-label="Zone color legend"
       >
-        {ZONE_TIERS.map((tier) => {
-          const unlocked = isZoneTierUnlocked(tier, [...unlockedTechSet]);
+        {visibleTiers.map((tier) => {
+          const unlocked = isZoneTierUnlocked(tier, [...unlockedTechSet], currentEra);
           return (
             <span
               key={tier.tool}
@@ -254,7 +290,11 @@ export function ZoningToolbar({
                 gap: 4,
                 color: unlocked ? HUD_COLORS.textMuted : HUD_COLORS.textDisabled,
               }}
-              title={unlocked ? tier.label : lockedTierTechName(tier) ?? "Locked"}
+              title={
+                unlocked
+                  ? tier.label
+                  : lockedTierEraName(tier) ?? lockedTierTechName(tier) ?? "Locked"
+              }
             >
               <span
                 style={{

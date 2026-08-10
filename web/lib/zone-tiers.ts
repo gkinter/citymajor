@@ -1,3 +1,4 @@
+import { hudEraName } from "@/lib/era";
 import { techIdFromCatalogId, techNameFromIndex } from "@/lib/tech-catalog";
 import {
   isBaselineContent,
@@ -14,6 +15,9 @@ export const ENGINE_ZONE_TYPE_ID = {
   mixedUse: 6,
   agricultural: 7,
 } as const;
+
+/** Max zone type byte in baseline R/C/I palette (procedural fallback). */
+export const BASELINE_MAX_ZONE_TYPE = ENGINE_ZONE_TYPE_ID.industrial;
 
 export type ZoneTierTool =
   | "residential"
@@ -33,6 +37,8 @@ export type ZoneTier = {
   contentKey: string;
   /** Catalog tech id (e.g. T030); null = baseline / always available. */
   requiredTechCatalogId: string | null;
+  /** Minimum sim era index (0=Frontier) — P2.1 era gates. */
+  minEra: number;
   overlayColor: string;
 };
 
@@ -45,6 +51,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.residentialLow,
     contentKey: "residential_zone",
     requiredTechCatalogId: null,
+    minEra: 0,
     overlayColor: "#5eb3f5",
   },
   {
@@ -54,6 +61,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.residentialHigh,
     contentKey: "residential_high_zone",
     requiredTechCatalogId: "T029",
+    minEra: 0,
     overlayColor: "#6366f1",
   },
   {
@@ -63,6 +71,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.commercial,
     contentKey: "commercial_zone",
     requiredTechCatalogId: null,
+    minEra: 0,
     overlayColor: "#f0b429",
   },
   {
@@ -72,6 +81,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.industrial,
     contentKey: "industrial_zone",
     requiredTechCatalogId: null,
+    minEra: 0,
     overlayColor: "#b87333",
   },
   {
@@ -81,6 +91,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.office,
     contentKey: "office_zone",
     requiredTechCatalogId: "T134",
+    minEra: 1,
     overlayColor: "#c084fc",
   },
   {
@@ -90,6 +101,7 @@ export const ZONE_TIERS: ZoneTier[] = [
     engineZoneType: ENGINE_ZONE_TYPE_ID.mixedUse,
     contentKey: "mixed_use_zone",
     requiredTechCatalogId: "T086",
+    minEra: 0,
     overlayColor: "#2dd4a8",
   },
   {
@@ -98,7 +110,8 @@ export const ZONE_TIERS: ZoneTier[] = [
     shortLabel: "Ag",
     engineZoneType: ENGINE_ZONE_TYPE_ID.agricultural,
     contentKey: "agricultural_zone",
-    requiredTechCatalogId: "T047",
+    requiredTechCatalogId: null,
+    minEra: 0,
     overlayColor: "#84cc16",
   },
 ];
@@ -123,11 +136,45 @@ export function requiredTechIndex(catalogId: string): number {
   return techIdFromCatalogId(catalogId);
 }
 
-/** Whether a zone tier is playable with the current research state. */
+/** True when WASM PaintZone accepts extended zone bytes (office/mixed/ag). */
+export function simSupportsExtendedZoneBytes(
+  supportsZonePaint?: boolean,
+): boolean {
+  return supportsZonePaint === true;
+}
+
+/** Whether a tier is shown in the toolbar (hidden on procedural fallback). */
+export function isZoneTierVisible(
+  tier: ZoneTier,
+  supportsZonePaint?: boolean,
+): boolean {
+  if (tier.engineZoneType <= BASELINE_MAX_ZONE_TYPE) return true;
+  return simSupportsExtendedZoneBytes(supportsZonePaint);
+}
+
+/** Zone tiers exposed in the zoning toolbar for the current sim mode. */
+export function getVisibleZoneTiers(
+  supportsZonePaint?: boolean,
+): ZoneTier[] {
+  return ZONE_TIERS.filter((tier) => isZoneTierVisible(tier, supportsZonePaint));
+}
+
+/** Whether the city has reached the era gate for a zone tier. */
+export function isZoneTierEraUnlocked(
+  tier: ZoneTier,
+  currentEra?: number,
+): boolean {
+  const era = currentEra ?? 0;
+  return era >= tier.minEra;
+}
+
+/** Whether a zone tier is playable with current era + research state. */
 export function isZoneTierUnlocked(
   tier: ZoneTier,
   unlockedTechIds?: number[],
+  currentEra?: number,
 ): boolean {
+  if (!isZoneTierEraUnlocked(tier, currentEra)) return false;
   if (isBaselineContent(tier.contentKey)) return true;
   const unlocked = new Set(unlockedTechIds ?? []);
   if (tier.requiredTechCatalogId) {
@@ -142,4 +189,10 @@ export function lockedTierTechName(tier: ZoneTier): string | undefined {
   if (!tier.requiredTechCatalogId) return undefined;
   const idx = requiredTechIndex(tier.requiredTechCatalogId);
   return techNameFromIndex(idx);
+}
+
+/** Era name required when a tier is era-gated. */
+export function lockedTierEraName(tier: ZoneTier): string | undefined {
+  if (tier.minEra <= 0) return undefined;
+  return hudEraName(tier.minEra);
 }

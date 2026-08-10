@@ -31,6 +31,17 @@ namespace CityMajor.Net
             public string cityName;
             public string era;
             public float metricValue;
+            public float goodsShortageIndex;
+            public float utilityStressIndex;
+            public float employmentRate;
+            public float approval;
+            public int cityFunds;
+            public float residentialDemand;
+            public float commercialDemand;
+            public float industrialDemand;
+            public int constructingBuildingCount;
+            public float powerCoverageFraction;
+            public float waterCoverageFraction;
         }
 
         [Serializable]
@@ -84,6 +95,17 @@ namespace CityMajor.Net
                 {
                     metricValue = healthcareCoverage,
                     era = NarrativeTemplates.EraToApiString(snap.Era),
+                    goodsShortageIndex = state.GoodsShortageIndex,
+                    utilityStressIndex = state.UtilityStressIndex,
+                    employmentRate = state.EmploymentRate,
+                    approval = state.Approval,
+                    cityFunds = state.Funds,
+                    residentialDemand = state.DemandResidential,
+                    commercialDemand = state.DemandCommercial,
+                    industrialDemand = state.DemandIndustrial,
+                    constructingBuildingCount = state.ConstructingBuildingCount,
+                    powerCoverageFraction = state.PowerCoverageFraction,
+                    waterCoverageFraction = state.WaterCoverageFraction,
                 },
             };
 

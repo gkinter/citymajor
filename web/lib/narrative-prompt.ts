@@ -53,16 +53,51 @@ function buildSystemPrompt(): string {
   ].join(" ");
 }
 
+type LiveSimMetricKey = Exclude<
+  keyof NonNullable<NarrativeEventRequest["context"]>,
+  "cityName" | "era"
+>;
+
+const LIVE_SIM_METRIC_LINES: Array<{ key: LiveSimMetricKey; label: string }> = [
+  { key: "metricValue", label: "Healthcare coverage" },
+  { key: "goodsShortageIndex", label: "Goods shortage index" },
+  { key: "utilityStressIndex", label: "Utility stress index" },
+  { key: "employmentRate", label: "Employment rate" },
+  { key: "approval", label: "Mayor approval" },
+  { key: "cityFunds", label: "City treasury" },
+  { key: "residentialDemand", label: "Residential demand" },
+  { key: "commercialDemand", label: "Commercial demand" },
+  { key: "industrialDemand", label: "Industrial demand" },
+  { key: "constructingBuildingCount", label: "Constructing buildings" },
+  { key: "powerCoverageFraction", label: "Power coverage" },
+  { key: "waterCoverageFraction", label: "Water coverage" },
+];
+
+function formatLiveSimMetricValue(key: LiveSimMetricKey, value: number): string {
+  if (key === "cityFunds") return String(Math.round(value));
+  if (key === "constructingBuildingCount") return String(Math.round(value));
+  if (key === "approval") return `${Math.round(value)}%`;
+  return value.toFixed(2);
+}
+
 function buildUserPrompt(
   bucket: SimStateBucket,
   context: NarrativeEventRequest["context"] | undefined,
   template: NarrativeEventResponse,
 ): string {
+  const liveMetricLines = LIVE_SIM_METRIC_LINES.flatMap(({ key, label }) => {
+    const value = context?.[key];
+    if (value === undefined) return [];
+    return [`- ${label}: ${formatLiveSimMetricValue(key, value)}`];
+  });
+
   const lines = [
     `Story bucket: ${bucket}`,
     context?.cityName ? `City name: ${context.cityName}` : null,
     context?.era ? `Era: ${context.era}` : null,
-    context?.metricValue !== undefined ? `Key metric: ${context.metricValue}` : null,
+    liveMetricLines.length > 0 ? "" : null,
+    liveMetricLines.length > 0 ? "Live sim metrics:" : null,
+    ...liveMetricLines,
     "",
     "Template reference (tone and stakes — rewrite, do not copy verbatim):",
     `Headline: ${template.headline}`,

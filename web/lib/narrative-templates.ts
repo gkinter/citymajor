@@ -23,6 +23,17 @@ export const NarrativeEventRequestSchema = z.object({
       cityName: z.string().optional(),
       era: z.string().optional(),
       metricValue: z.number().optional(),
+      goodsShortageIndex: z.number().optional(),
+      utilityStressIndex: z.number().optional(),
+      employmentRate: z.number().optional(),
+      approval: z.number().optional(),
+      cityFunds: z.number().optional(),
+      residentialDemand: z.number().optional(),
+      commercialDemand: z.number().optional(),
+      industrialDemand: z.number().optional(),
+      constructingBuildingCount: z.number().int().optional(),
+      powerCoverageFraction: z.number().optional(),
+      waterCoverageFraction: z.number().optional(),
     })
     .optional(),
 });

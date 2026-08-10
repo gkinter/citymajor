@@ -332,6 +332,17 @@ export function PlayClient() {
             metricValue: coverage,
             era:
               resources?.era !== undefined ? String(resources.era) : undefined,
+            goodsShortageIndex: resources?.goodsShortageIndex,
+            utilityStressIndex: resources?.utilityStressIndex,
+            employmentRate: resources?.employmentRate,
+            approval: resources?.approval,
+            cityFunds: resources?.cityFunds,
+            residentialDemand: resources?.residentialDemand,
+            commercialDemand: resources?.commercialDemand,
+            industrialDemand: resources?.industrialDemand,
+            constructingBuildingCount: resources?.constructingBuildingCount,
+            powerCoverageFraction: resources?.powerCoverageFraction,
+            waterCoverageFraction: resources?.waterCoverageFraction,
           },
         }),
       });

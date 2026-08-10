@@ -36,11 +36,6 @@ namespace CityMajor.Core
             sim.BindGrid(grid);
 
             root.AddComponent<ZoneGrowthVisualizer>().Configure(sim);
-            var buildings = root.AddComponent<BuildingInstancer>();
-            buildings.Configure(grid, sim);
-
-            var overlay = root.AddComponent<ZoneOverlayRenderer>();
-            overlay.Configure(grid);
 
             var camGo = new GameObject("CityCamera");
             camGo.transform.SetParent(root.transform, false);
@@ -49,8 +44,14 @@ namespace CityMajor.Core
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.08f, 0.12f, 0.18f);
             cam.orthographic = false;
-            camGo.AddComponent<IsometricCameraController>().FocusOn(
-                new Vector3(mapSize * tileSize * 0.5f, 0f, mapSize * tileSize * 0.5f));
+            var isoCam = camGo.AddComponent<IsometricCameraController>();
+            isoCam.FocusOn(new Vector3(mapSize * tileSize * 0.5f, 0f, mapSize * tileSize * 0.5f));
+
+            var buildings = root.AddComponent<BuildingInstancer>();
+            buildings.Configure(grid, sim, isoCam);
+
+            var overlay = root.AddComponent<ZoneOverlayRenderer>();
+            overlay.Configure(grid);
 
             var paint = root.AddComponent<ZonePaintTool>();
             paint.Configure(cam, grid, sim);

@@ -17,6 +17,9 @@ namespace CityMajor.Core
 
         Vector3 _focus = Vector3.zero;
 
+        /// <summary>Current orbit distance — used by building LOD and overlays.</summary>
+        public float Distance => distance;
+
         public void FocusOn(Vector3 worldPoint)
         {
             _focus = worldPoint;

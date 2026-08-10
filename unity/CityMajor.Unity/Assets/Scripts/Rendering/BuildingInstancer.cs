@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CityMajor.Core;
 using CityMajor.Input;
 using CityMajor.Sim;
 using Forge.Engine.Simulation;
@@ -13,10 +14,12 @@ namespace CityMajor.Rendering
     {
         [SerializeField] int maxInstances = 5000;
         [SerializeField] float buildingHeight = 4f;
+        [SerializeField] float boxLodDistance = 200f;
 
         ZoneGrid _grid;
         CitySimBridge _sim;
         ZoneGrowthVisualizer _growth;
+        IsometricCameraController _camera;
         Mesh _fallbackMesh;
         Material _mat;
         Material _matConstructing;
@@ -36,10 +39,11 @@ namespace CityMajor.Rendering
             public int Count;
         }
 
-        public void Configure(ZoneGrid grid, CitySimBridge sim)
+        public void Configure(ZoneGrid grid, CitySimBridge sim, IsometricCameraController camera = null)
         {
             _grid = grid;
             _sim = sim;
+            _camera = camera;
             _growth = GetComponent<ZoneGrowthVisualizer>();
 
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -74,12 +78,16 @@ namespace CityMajor.Rendering
             if (_mat == null)
                 return;
 
+            var useBoxLod = _camera != null && _camera.Distance >= boxLodDistance;
+
             foreach (var pair in _groups)
             {
                 var group = pair.Value;
                 if (group.Count <= 0 || group.Mesh == null)
                     continue;
-                Graphics.DrawMeshInstanced(group.Mesh, 0, group.Material, group.Matrices, group.Count);
+
+                var mesh = useBoxLod ? _fallbackMesh : group.Mesh;
+                Graphics.DrawMeshInstanced(mesh, 0, group.Material, group.Matrices, group.Count);
             }
         }
 

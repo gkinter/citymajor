@@ -72,8 +72,12 @@ export type RoadGraphSnapshot = {
   nodeTypes: number[];
   nodeTileX: number[];
   nodeTileZ: number[];
-  /** Graph edge count — parallel to edgeVolumes / travelTimes (P1.6 / P4.2). */
+  /** Graph edge count — parallel to edgeFrom/To / edgeVolumes / travelTimes (P1.6 / P4.2). */
   edgeCount?: number;
+  /** Source node id per edge (CSR neighbor order). */
+  edgeFrom?: number[];
+  /** Target node id per edge. */
+  edgeTo?: number[];
   edgeVolumes?: number[];
   travelTimes?: number[];
 };

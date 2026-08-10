@@ -27,6 +27,8 @@ function densityToColor(density: number): THREE.Color {
 
 /**
  * Semi-transparent congestion heatmap on road tiles — sits above RoadOverlay.
+ * Densities come from P4.2 roadGraph edgeVolumes/travelTimes (via congestion-heatmap)
+ * with WasmTrafficLite sparse traffic as fallback.
  */
 export function TrafficOverlay({ traffic, visible = true }: TrafficOverlayProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null);

@@ -1,7 +1,8 @@
 import type { ZoningTool } from "@/lib/zoning";
 import {
+  getVisibleZoneTiers,
   isZoneTierUnlocked,
-  ZONE_TIERS,
+  isZoneTierVisible,
   type ZoneTier,
 } from "@/lib/zone-tiers";
 
@@ -47,7 +48,7 @@ export const PLAY_KEYBOARD_SHORTCUTS: PlayKeyboardShortcutEntry[] = [
     description: "Select the road paint tool",
     category: "tools",
   },
-  ...ZONE_TIERS.map((tier, index) => ({
+  ...getVisibleZoneTiers(true).map((tier, index) => ({
     keys: String(index + 1),
     label: tier.shortLabel,
     description: `Select ${tier.label} zone tier`,
@@ -99,13 +100,17 @@ export function isEditableKeyboardTarget(target: EventTarget | null): boolean {
   return target.isContentEditable;
 }
 
-/** Map digit keys 1–7 to zone tiers in toolbar order. */
-export function zoneTierForDigitKey(key: string): ZoneTier | undefined {
+/** Map digit keys 1–7 to visible zone tiers in toolbar order. */
+export function zoneTierForDigitKey(
+  key: string,
+  supportsZoneBytes?: boolean,
+): ZoneTier | undefined {
+  const tiers = getVisibleZoneTiers(supportsZoneBytes);
   const digit = Number(key);
-  if (!Number.isInteger(digit) || digit < 1 || digit > ZONE_TIERS.length) {
+  if (!Number.isInteger(digit) || digit < 1 || digit > tiers.length) {
     return undefined;
   }
-  return ZONE_TIERS[digit - 1];
+  return tiers[digit - 1];
 }
 
 export type PlayKeyboardHandlers = {
@@ -116,6 +121,8 @@ export type PlayKeyboardHandlers = {
   onSelectRoad: () => void;
   onSelectZoneTool: (tool: ZoningTool) => void;
   unlockedTechIds?: number[];
+  currentEra?: number;
+  supportsZoneBytes?: boolean;
 };
 
 /**
@@ -165,9 +172,14 @@ export function handlePlayKeyboardShortcut(
     return true;
   }
 
-  const tier = zoneTierForDigitKey(event.key);
+  const tier = zoneTierForDigitKey(event.key, handlers.supportsZoneBytes);
   if (tier) {
-    const unlocked = isZoneTierUnlocked(tier, handlers.unlockedTechIds);
+    if (!isZoneTierVisible(tier, handlers.supportsZoneBytes)) return false;
+    const unlocked = isZoneTierUnlocked(
+      tier,
+      handlers.unlockedTechIds,
+      handlers.currentEra,
+    );
     if (!unlocked) return false;
     event.preventDefault();
     handlers.onSelectZoneTool(tier.tool);

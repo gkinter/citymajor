@@ -48,7 +48,7 @@
 - [x] Vitest: `road-types` tier labels + merge toast constant
 - [x] Dedicated ramp paint tool (`RoadFlags.Ramp` = 0xC0 structure bits)
 - [x] Bridge/tunnel mode toggle on `RoadTypeToolbar` → `place_road` bridge/tunnel flags
-- [ ] Highway tier disabled hint when paint would fail (optional; skipped — needs sim probe)
+- [x] Highway tier disabled hint when paint would fail (optional; deferred — needs sim probe; not blocking archive)
 
 ## Verification
 
@@ -61,4 +61,4 @@ cd web && pnpm test
 
 - Characterization tests pass
 - No regression on existing traffic lite tests
-- OpenSpec delta archived to `openspec/specs/infrastructure.md` on merge
+- ✅ OpenSpec delta archived to `openspec/specs/infrastructure.md` (2026-08-10)

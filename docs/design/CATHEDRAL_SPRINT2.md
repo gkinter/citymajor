@@ -1,13 +1,13 @@
 # Cathedral Sprint 2 — Economy depth + population truth
 
-**Status:** Active sprint plan — mid-sprint sync 2026-08-10  
+**Status:** Active sprint plan — wave-2 sync 2026-08-10  
 **Dates:** 2026-08-11 → 2026-08-24 (2 weeks)  
-**Integration branch:** `feat/unity-port-plan-2026-07-12` (`citymajor-unity-port-plan`) @ `f72dd3d`  
+**Integration branch:** `feat/unity-port-plan-2026-07-12` (`citymajor-unity-port-plan`) @ `571352a`  
 **Charter:** [`CATHEDRAL_PROGRAM.md`](./CATHEDRAL_PROGRAM.md)  
 **Linear:** SB-4211, SB-4222–4224, SB-4231–4232, SB-4262 (flaky-test gate)
 
-**Landed this sync:** P2.1 ✅ · P3.2 ✅ · P4.1 O-D ✅ · P4.2 FW+commute sat ✅ · test isolation `49edba1` ✅  
-**Still open:** P3.3–P3.4 · P7.2 unskip/flaky gate
+**Landed this sync:** P2.1 ✅ · P3.2 export+HUD ✅ · P3.4 friction ✅ · P4.1 O-D+HUD ✅ · P4.2 FW+commute sat ✅ · P4.5 mode choice ✅ · P1.5 ramp/bridge UI ✅ · congestion heatmap ✅ · SimplexNoise ✅ · P5 politics stub ✅ · OpenSpec `001` archived ✅  
+**Still open:** P3.3 partition pricing depth · P7.2 unskip/flaky gate
 
 ---
 
@@ -44,15 +44,15 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **OpenSpec** | New change `002-zone-palette-v1` (delta on `zoning-housing.md`) |
 | **Landed** | `a990636` — extended zone palette with era gates |
 
-### P3.2 — Market zone partition prices export (SB-4222) ✅
+### P3.2 — Production chain + partition prices (SB-4222) ✅
 
 | Field | Value |
 |-------|-------|
-| **Owner** | SimCore / snapshot |
-| **Deliverable** | Export market-zone partition prices on snapshot (HUD-ready) |
-| **Acceptance** | Partition prices present on Cathedral economy snapshot export |
+| **Owner** | SimCore / snapshot + HUD |
+| **Deliverable** | Export market-zone partition prices; production-chain HUD with goods flow |
+| **Acceptance** | Partition prices + chain inputs/outputs visible in Economy HUD |
 | **Depends** | P3.1 ✅ |
-| **Landed** | `45d8186` — export market zone partition prices |
+| **Landed** | `45d8186` partition prices · `746780c` production-chain HUD |
 
 ### P3.3 — Market zone partition pricing (SB-4223)
 
@@ -63,24 +63,25 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Acceptance** | `CathedralEconomyTests.MarketZonePrices_DifferAcrossPartitions` **unskipped and green**; two zones show price delta after trade shock |
 | **Depends** | P3.1 ✅ |
 
-### P3.4 — Inter-zone friction UI (SB-4224)
+### P3.4 — Inter-zone friction UI (SB-4224) ✅
 
 | Field | Value |
 |-------|-------|
 | **Owner** | Web + Unity overlay |
-| **Deliverable** | Read-only 16×16 friction matrix overlay (high-friction corridors highlighted) |
+| **Deliverable** | Read-only friction corridor overlay (high-friction corridors highlighted) |
 | **Acceptance** | Overlay matches `MeanInterZoneFriction` / `InterZoneTradeVolume` on snapshot |
-| **Depends** | P3.3 |
+| **Depends** | P3.1 ✅ (shipped against existing friction fields; P3.3 depth still open) |
+| **Landed** | `a9e7878` — goods transport friction overlay |
 
 ### P4.1 — Home/work building IDs (SB-4231) ✅
 
 | Field | Value |
 |-------|-------|
-| **Owner** | SimCore (population + traffic) |
-| **Deliverable** | Replace gravity O-D with building-pair assignment for commuters |
+| **Owner** | SimCore (population + traffic) + web HUD |
+| **Deliverable** | Replace gravity O-D with building-pair assignment for commuters; surface coverage in HUD |
 | **Acceptance** | ≥90% commuters have valid `homeBuildingId` + `workBuildingId` on snapshot |
 | **Depends** | P1.5 ✅ (typed-edge traffic) |
-| **Landed** | `99a6547` — home/work building O-D for traffic lite (+ `fe69037` BPR foundation) |
+| **Landed** | `99a6547` O-D · `fe69037` BPR · `ccf7f22` O-D sample HUD |
 
 ### P4.2 — Commute time → satisfaction (SB-4232) ✅
 
@@ -92,6 +93,37 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Depends** | P4.1 |
 | **Landed** | `76db8bf` commute→satisfaction; `f72dd3d` multi-iteration Frank-Wolfe + edge travel time export |
 
+### P4.5 — Mode choice stub ✅
+
+| Field | Value |
+|-------|-------|
+| **Owner** | SimCore (WasmTrafficLite) |
+| **Deliverable** | Simple MNL car vs transit weight from `TransitPreference` |
+| **Landed** | `571352a` — mode-choice stub for WasmTrafficLite |
+
+### P1.5 UX stretch — Ramp / bridge toolbar ✅
+
+| Field | Value |
+|-------|-------|
+| **Owner** | Web toolbar |
+| **Deliverable** | Dedicated highway ramp paint tool + bridge/tunnel mode toggle |
+| **Landed** | `6084fad` ramp tool · `b34942a` bridge/tunnel toggle · `c8f9e52` ramp PlaceRoad fix |
+
+### Client overlays ✅
+
+| Deliverable | Tip |
+|-------------|-----|
+| Congestion heatmap from `edgeVolumes` / `travelTimes` | `c8827bf` |
+| O-D / commuter coverage in Economy HUD | `ccf7f22` |
+
+### P5 politics foundation stub ✅
+
+| Field | Value |
+|-------|-------|
+| **Owner** | SimCore / characterization |
+| **Deliverable** | Approval characterization stub (program P6 foundation; dispatch label P5) |
+| **Landed** | `fb64bd9` — see [`CATHEDRAL_P5_POLITICS.md`](./CATHEDRAL_P5_POLITICS.md) |
+
 ### P7.2 gate — Flaky / skipped test cleanup (SB-4262) — partial
 
 | Field | Value |
@@ -100,7 +132,11 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Deliverable** | Cathedral test filter runs clean in CI; no `[Fact(Skip=…)]` for shipped milestones |
 | **Acceptance** | `dotnet test --filter "FullyQualifiedName~Cathedral"` — 0 skipped, 0 flaky retries; unskip `MarketZonePrices_DifferAcrossPartitions` when P3.3 lands |
 | **Depends** | P3.3 merge |
-| **Landed (partial)** | `49edba1` — serialize SimHost tests to avoid SimplexNoise races (test isolation) |
+| **Landed (partial)** | `49edba1` SimHost serialize · `b4be623` instance-local SimplexNoise permutation tables |
+
+### OpenSpec `001-road-tier-and-graph-v2` ✅ archived
+
+Moved to [`openspec/changes/archive/2026-08-10-001-road-tier-and-graph-v2/`](../../openspec/changes/archive/2026-08-10-001-road-tier-and-graph-v2/); requirements merged into [`openspec/specs/infrastructure.md`](../../openspec/specs/infrastructure.md).
 
 ---
 
@@ -108,11 +144,11 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 
 | Lane | Branch prefix | Sprint 2 owns | Merge gate |
 |------|---------------|---------------|------------|
-| **SimCore — economy** | `feat/cathedral-p3-market-*` | P3.3 partition export, P3.4 snapshot fields | `dotnet test --filter CathedralEconomy` |
-| **SimCore — population** | `feat/cathedral-p4-*` | P4.1 home/work IDs, P4.2 satisfaction | `dotnet test --filter CathedralPopulation` (new) |
-| **Unity HUD** | `feat/cathedral-p3-chain-*` | P3.2 production chain panel | Play mode — building click shows chain |
-| **Web overlay** | `feat/cathedral-p3-friction-*` | P3.4 friction matrix overlay | `pnpm test` + smoke |
-| **Zone palette** | `feat/cathedral-p2-palette-*` | P2.1 brush + era gates | Zone paint + growth characterization |
+| **SimCore — economy** | `feat/cathedral-p3-market-*` | P3.3 partition export | `dotnet test --filter CathedralEconomy` |
+| **SimCore — population** | `feat/cathedral-p4-*` | P4.1–P4.5 (landed) | `dotnet test --filter CathedralPopulation` |
+| **Unity HUD** | `feat/cathedral-p3-chain-*` | P3.2 production chain panel (landed) | Play mode — building click shows chain |
+| **Web overlay** | `feat/cathedral-p3-friction-*` | P3.4 friction matrix overlay (landed) | `pnpm test` + smoke |
+| **Zone palette** | `feat/cathedral-p2-palette-*` | P2.1 brush + era gates (landed) | Zone paint + growth characterization |
 | **CI / tests** | `feat/cathedral-p7-tests-*` | P7.2 flaky gate | Full Cathedral filter green |
 
 **Orchestrator rule:** cherry-pick one lane at a time to integration; human Play gate subset after each SimCore batch.
@@ -134,9 +170,8 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 
 - P3.5 traffic→goods delivery lag (needs P1 edge volumes fully wired — defer Sprint 3)
 - P3.6 bilateral trade routes (v2 boundary)
-- P4.3–P4.5 unemployment HUD, L2 scale export, mode choice
-- P5 services, P6 governance (Phase 3 per roadmap)
-- Dedicated ramp paint tool (deferred from P1.4 — optional stretch)
+- P4.3–P4.4 unemployment HUD, L2 scale export
+- P5 services depth, P6 governance depth beyond politics stub (Phase 3–4 per roadmap)
 
 ---
 
@@ -144,12 +179,17 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 
 - [ ] `dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"` — all pass, zero skipped
 - [x] Goods panel / snapshot shows partition prices (export landed `45d8186`; UI spread still P3.3)
-- [ ] Building click shows production chain inputs/outputs (Unity) — deferred / not in this sync
-- [ ] Friction overlay renders on web + Unity
-- [x] Snapshot: home/work building O-D (`99a6547`)
+- [x] Production-chain HUD with goods flow (`746780c`)
+- [x] Friction overlay renders on web (`a9e7878`)
+- [x] Snapshot: home/work building O-D (`99a6547`) + O-D HUD (`ccf7f22`)
 - [x] Commute time → satisfaction + FW travel times (`76db8bf` / `f72dd3d`)
+- [x] Mode-choice stub (`571352a`)
+- [x] Congestion heatmap (`c8827bf`)
+- [x] Ramp paint + bridge/tunnel toolbar (`6084fad` / `b34942a`)
 - [x] Office / mixed / park / ag brushes paintable with era gates (`a990636`)
-- [x] Test isolation: SimHost serialize (`49edba1`) — full P7.2 unskip gate still open
+- [x] Test isolation: SimHost serialize (`49edba1`) + SimplexNoise instance-local (`b4be623`) — full P7.2 unskip gate still open
+- [x] P5 politics foundation stub (`fb64bd9`)
+- [x] OpenSpec `001-road-tier-and-graph-v2` archived
 - [ ] OpenSpec `002-zone-palette-v1` + economy delta archived
 - [ ] Integration tip Play gate subset passed ([`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md))
 
@@ -160,7 +200,7 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | Risk | Mitigation |
 |------|------------|
 | P4.1 blocks P4.2 mid-sprint | Start P4.1 W1 day 1; P4.2 lands only after P4.1 cherry-pick |
-| P3.3 sim work delays P3.4 UI | P3.4 can ship read-only overlay against existing `MeanInterZoneFriction` while P3.3 finishes |
+| P3.3 sim work delays P3.4 UI | P3.4 shipped read-only overlay against existing `MeanInterZoneFriction` while P3.3 finishes |
 | Skipped tests mask regressions | P7.2 gate is a **merge blocker** — no cherry-pick without green Cathedral filter |
 | P2.1 scope creep (full Modern era) | v1 subset only: office, mixed, park ploppable, frontier/industrial ag |
 
@@ -170,10 +210,10 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 
 | ID | Title | Sprint |
 |----|-------|--------|
-| SB-4211 | P2.1 Extended zone types | W1 |
-| SB-4222 | P3.2 Production chain visibility | W2 |
+| SB-4211 | P2.1 Extended zone types | W1 ✅ |
+| SB-4222 | P3.2 Production chain visibility | W2 ✅ |
 | SB-4223 | P3.3 Market zone partition pricing | W1 |
-| SB-4224 | P3.4 Inter-zone friction UI | W2 |
-| SB-4231 | P4.1 Home/work building IDs | W1 |
-| SB-4232 | P4.2 Commute time → satisfaction | W2 |
-| SB-4262 | P7.2 Cathedral test gate (no skip/flaky) | W2 |
+| SB-4224 | P3.4 Inter-zone friction UI | W2 ✅ |
+| SB-4231 | P4.1 Home/work building IDs | W1 ✅ |
+| SB-4232 | P4.2 Commute time → satisfaction | W2 ✅ |
+| SB-4262 | P7.2 Cathedral test gate (no skip/flaky) | W2 partial |

@@ -165,6 +165,9 @@ public sealed class WorldState
     /// <summary>Weighted mean trade friction for executed inter-zone transfers (≥1.0).</summary>
     public float MeanInterZoneFriction { get; set; }
 
+    /// <summary>Active Leontief market partitions (1–16), from <see cref="EconomySystem.ActiveZoneCount"/>.</summary>
+    public int MarketZoneCount { get; set; } = 1;
+
     // =========================================================================
     // Budget state
     // =========================================================================

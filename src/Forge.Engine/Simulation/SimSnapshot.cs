@@ -110,6 +110,12 @@ public sealed class SimSnapshot
     /// <summary>Weighted mean trade friction for executed inter-zone transfers (≥1.0).</summary>
     public float MeanInterZoneFriction { get; init; }
 
+    /// <summary>Active Leontief market partitions (1–16).</summary>
+    public int MarketZoneCount { get; init; } = 1;
+
+    /// <summary>Mean household rent burden (rent / income). TODO P2.3 — export when rent model lands.</summary>
+    public float MeanRentBurden { get; init; }
+
     // --- Research / Technology data ---
 
     /// <summary>Accumulated research points.</summary>
@@ -303,6 +309,8 @@ public sealed class SimSnapshot
             GoodsSurplusIndex = state.GoodsSurplusIndex,
             InterZoneTradeVolume = state.InterZoneTradeVolume,
             MeanInterZoneFriction = state.MeanInterZoneFriction,
+            MarketZoneCount = state.MarketZoneCount,
+            MeanRentBurden = 0f, // TODO P2.3: PopulationSystem mean rent burden rollup
             // Research / Technology
             ResearchPoints = state.ResearchPoints,
             ResearchRate = state.ResearchRate,

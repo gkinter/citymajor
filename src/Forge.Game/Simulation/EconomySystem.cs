@@ -546,6 +546,7 @@ public sealed class EconomySystem
         state.GoodsSurplusIndex = ComputeSurplusIndex();
         state.InterZoneTradeVolume = LastInterZoneTradeVolume;
         state.MeanInterZoneFriction = LastMeanInterZoneFriction;
+        state.MarketZoneCount = ActiveZoneCount;
     }
 
     // =========================================================================

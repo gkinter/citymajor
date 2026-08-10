@@ -3,6 +3,7 @@
 import type {
   ActiveEventSnapshot,
   EconomySnapshot,
+  GoodFlow,
   GoodImbalance,
   MarketZonePriceSpread,
   RoadSnapshot,
@@ -106,6 +107,13 @@ type WasmStatus = {
       name?: string;
       magnitude?: number;
       price?: number;
+    }>;
+    flows?: Array<{
+      goodId?: number;
+      name?: string;
+      production?: number;
+      demand?: number;
+      inventoryRate?: number;
     }>;
     marketZoneCount?: number;
     marketZonePrices?: Array<{
@@ -516,6 +524,24 @@ function parseMarketZonePrices(raw: unknown): MarketZonePriceSpread[] | undefine
   return rows;
 }
 
+function parseGoodFlows(raw: unknown): GoodFlow[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const rows: GoodFlow[] = [];
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null) continue;
+    const row = item as Record<string, unknown>;
+    if (typeof row.name !== "string") continue;
+    rows.push({
+      goodId: typeof row.goodId === "number" ? row.goodId : undefined,
+      name: row.name,
+      production: typeof row.production === "number" ? row.production : 0,
+      demand: typeof row.demand === "number" ? row.demand : 0,
+      inventoryRate: typeof row.inventoryRate === "number" ? row.inventoryRate : 0,
+    });
+  }
+  return rows.length > 0 ? rows : undefined;
+}
+
 function parseEconomy(raw: unknown): EconomySnapshot | undefined {
   if (raw === undefined) return undefined;
   if (typeof raw !== "object" || raw === null) return undefined;
@@ -523,6 +549,7 @@ function parseEconomy(raw: unknown): EconomySnapshot | undefined {
   return {
     shortages: parseGoodImbalances(economy.shortages),
     surpluses: parseGoodImbalances(economy.surpluses),
+    flows: parseGoodFlows(economy.flows),
     marketZoneCount:
       typeof economy.marketZoneCount === "number" ? economy.marketZoneCount : undefined,
     marketZonePrices: parseMarketZonePrices(economy.marketZonePrices),

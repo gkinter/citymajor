@@ -741,6 +741,14 @@
   color: var(--hud-text);
 }
 
+.hud-economy-flow__rate--in {
+  color: #7dffb2;
+}
+
+.hud-economy-flow__rate--out {
+  color: #ff9aa8;
+}
+
 .hud-economy-list__hint {
   margin-top: 4px;
   font-size: 10px;

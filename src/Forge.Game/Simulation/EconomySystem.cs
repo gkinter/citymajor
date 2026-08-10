@@ -154,6 +154,17 @@ public sealed class EconomySystem
     /// <summary>Per-good imbalance row for WASM / web HUD export.</summary>
     public readonly record struct GoodImbalanceEntry(byte GoodId, string Name, float Magnitude);
 
+    /// <summary>
+    /// City-wide production (supply) vs demand for a good — production-chain HUD (P3.2 stretch).
+    /// <see cref="InventoryRate"/> is (production − demand) / activity, clamped −1…+1.
+    /// </summary>
+    public readonly record struct GoodFlowEntry(
+        byte GoodId,
+        string Name,
+        float Production,
+        float Demand,
+        float InventoryRate);
+
     /// <summary>Min/max zone prices for a staple good when partitions diverge.</summary>
     public readonly record struct ZonePriceSpread(byte GoodId, string Name, float MinPrice, float MaxPrice, float CityAvgPrice);
 
@@ -482,6 +493,48 @@ public sealed class EconomySystem
         if (surpluses.Count > topN) surpluses.RemoveRange(topN, surpluses.Count - topN);
 
         return (shortages.ToArray(), surpluses.ToArray());
+    }
+
+    /// <summary>
+    /// Top goods by market activity with city-wide production (supply) vs demand.
+    /// InventoryRate = (production − demand) / activity, clamped −1…+1 (positive = stock building).
+    /// </summary>
+    public GoodFlowEntry[] GetTopGoodFlows(int topN = 8)
+    {
+        const float MinActivity = 0.01f;
+        topN = Math.Clamp(topN, 1, GoodCount);
+
+        var flows = new List<(float Activity, GoodFlowEntry Entry)>(GoodCount);
+        for (int g = 0; g < GoodCount; g++)
+        {
+            float production = 0f;
+            float demand = 0f;
+            for (int z = 0; z < ActiveZoneCount; z++)
+            {
+                production += _zones[z].Supply[g];
+                demand += _zones[z].Demand[g];
+            }
+
+            float activity = production + demand;
+            if (activity < MinActivity) continue;
+
+            float inventoryRate = Math.Clamp((production - demand) / activity, -1f, 1f);
+            var good = (Good)g;
+            flows.Add((activity, new GoodFlowEntry(
+                (byte)good,
+                good.ToString(),
+                production,
+                demand,
+                inventoryRate)));
+        }
+
+        flows.Sort((a, b) => b.Activity.CompareTo(a.Activity));
+        if (flows.Count > topN) flows.RemoveRange(topN, flows.Count - topN);
+
+        var result = new GoodFlowEntry[flows.Count];
+        for (int i = 0; i < flows.Count; i++)
+            result[i] = flows[i].Entry;
+        return result;
     }
 
     /// <summary>

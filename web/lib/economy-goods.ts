@@ -46,6 +46,33 @@ export function formatGoodPrice(price: number): string {
   return `$${price.toFixed(2)}`;
 }
 
+/** Format daily production or demand units for the production-chain HUD. */
+export function formatGoodFlowUnits(value: number): string {
+  if (!Number.isFinite(value) || value < 0) return "—";
+  if (value >= 100) return value.toFixed(0);
+  if (value >= 10) return value.toFixed(1);
+  return value.toFixed(2);
+}
+
+/**
+ * Format inventory rate (−1…+1) as a signed percent.
+ * Positive = production ahead of demand (stock building).
+ */
+export function formatInventoryRate(rate: number): string {
+  if (!Number.isFinite(rate)) return "—";
+  const pct = Math.round(Math.max(-1, Math.min(1, rate)) * 100);
+  if (pct > 0) return `+${pct}%`;
+  return `${pct}%`;
+}
+
+/** Compact production vs demand line for a good flow row. */
+export function formatProductionVsDemand(
+  production: number,
+  demand: number,
+): string {
+  return `${formatGoodFlowUnits(production)} prod / ${formatGoodFlowUnits(demand)} dem`;
+}
+
 /** Zoning hint when a good maps to an R/C/I category. */
 export function zoningHintForGood(name: string): string | undefined {
   const category = GOOD_RCI_HINT[name];

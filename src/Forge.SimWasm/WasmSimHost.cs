@@ -412,6 +412,8 @@ public sealed class WasmStatusDto
 [JsonSerializable(typeof(EconomySnapshotDto))]
 [JsonSerializable(typeof(GoodImbalanceDto))]
 [JsonSerializable(typeof(GoodImbalanceDto[]))]
+[JsonSerializable(typeof(GoodFlowDto))]
+[JsonSerializable(typeof(GoodFlowDto[]))]
 [JsonSerializable(typeof(MarketZonePriceDto))]
 [JsonSerializable(typeof(MarketZonePriceDto[]))]
 [JsonSerializable(typeof(PopulationL2Dto))]

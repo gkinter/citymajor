@@ -10,13 +10,15 @@ import {
   economyFromRciFallback,
   formatGoodName,
   formatGoodPrice,
+  formatInventoryRate,
+  formatProductionVsDemand,
   zoningHintForGood,
 } from "@/lib/economy-goods";
 import {
   HUD_COLORS,
   hudSlidePanel,
 } from "@/lib/hud-theme";
-import type { EconomySnapshot, SimResources } from "@/lib/sim-bridge";
+import type { EconomySnapshot, GoodFlow, SimResources } from "@/lib/sim-bridge";
 
 const headerStyle: CSSProperties = {
   display: "flex",
@@ -472,6 +474,55 @@ function ZonePriceSpreads({ economy }: { economy: EconomySnapshot }) {
   );
 }
 
+function ProductionChainFlows({ flows }: { flows: GoodFlow[] }) {
+  if (flows.length === 0) return null;
+
+  return (
+    <section className="hud-economy-section" aria-label="Production chains">
+      <div style={{ ...sectionTitle, color: "#7ec8ff" }}>Production flow</div>
+      <p className="hud-economy-trade__note" style={{ marginTop: 0, marginBottom: 8 }}>
+        Top goods by activity — production vs demand (inventory rate).
+      </p>
+      <ul className="hud-economy-list">
+        {flows.slice(0, 8).map((row) => {
+          const tone =
+            row.inventoryRate < -0.05
+              ? "shortage"
+              : row.inventoryRate > 0.05
+                ? "surplus"
+                : "balanced";
+          return (
+            <li
+              key={row.name}
+              className={`hud-economy-list__item hud-economy-list__item--${tone === "balanced" ? "surplus" : tone}`}
+            >
+              <div className="hud-economy-list__row">
+                <span className="hud-economy-list__name">
+                  {formatGoodName(row.name)}
+                </span>
+                <span className="hud-economy-list__metrics">
+                  <span className="hud-economy-list__magnitude">
+                    {formatProductionVsDemand(row.production, row.demand)}
+                  </span>
+                  <span
+                    className={
+                      row.inventoryRate >= 0
+                        ? "hud-economy-list__price hud-economy-flow__rate--in"
+                        : "hud-economy-list__price hud-economy-flow__rate--out"
+                    }
+                  >
+                    {formatInventoryRate(row.inventoryRate)}
+                  </span>
+                </span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 function TradeRoutesStub() {
   return (
     <section className="hud-economy-section" aria-label="Trade routes">
@@ -546,6 +597,10 @@ export function EconomyPanel({ open, onClose, resources }: EconomyPanelProps) {
 
         {resources?.economy?.marketZonePrices?.length
           ? <ZonePriceSpreads economy={resources.economy} />
+          : null}
+
+        {resources?.economy?.flows?.length
+          ? <ProductionChainFlows flows={resources.economy.flows} />
           : null}
 
         {hasTradeData(resources) ? (

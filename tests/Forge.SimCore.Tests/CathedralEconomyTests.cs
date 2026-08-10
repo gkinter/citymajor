@@ -108,4 +108,31 @@ public sealed class CathedralEconomyTests
             $"Expected zone spread for Food. min={food.MinPrice:F2}, max={food.MaxPrice:F2}");
         Assert.Equal(economy.GetAveragePrice(Good.Food), food.CityAvgPrice);
     }
+
+    [Fact]
+    public void EconomySnapshot_ExportsProductionFlows_WithInventoryRate()
+    {
+        var economy = new EconomySystem();
+        economy.SetActiveZoneCount(1);
+        economy.SetZoneSupply(0, Good.Food, 20f);
+        economy.SetZoneDemand(0, Good.Food, 80f);
+        economy.SetZoneSupply(0, Good.Timber, 50f);
+        economy.SetZoneDemand(0, Good.Timber, 10f);
+        economy.RecalculatePrices();
+
+        var flows = economy.GetTopGoodFlows(8);
+        Assert.NotEmpty(flows);
+
+        var food = Assert.Single(flows, row => row.Name == "Food");
+        Assert.Equal(20f, food.Production);
+        Assert.Equal(80f, food.Demand);
+        Assert.True(food.InventoryRate < 0f, "Food deficit should yield negative inventory rate.");
+
+        var timber = Assert.Single(flows, row => row.Name == "Timber");
+        Assert.True(timber.InventoryRate > 0f, "Timber surplus should yield positive inventory rate.");
+
+        var snapshot = EconomySnapshotDto.From(economy);
+        Assert.NotEmpty(snapshot.Flows);
+        Assert.Contains(snapshot.Flows, row => row.Name == "Food" && row.Production == 20f);
+    }
 }

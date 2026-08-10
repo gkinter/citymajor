@@ -143,6 +143,18 @@ export type GoodImbalance = {
   price?: number;
 };
 
+/** City-wide production vs demand for a top-activity good (P3.2 stretch). */
+export type GoodFlow = {
+  goodId?: number;
+  name: string;
+  /** City-wide supply (production) units this day. */
+  production: number;
+  /** City-wide demand units this day. */
+  demand: number;
+  /** (production − demand) / activity, clamped −1…+1. */
+  inventoryRate: number;
+};
+
 /** Top shortages/surpluses exported from EconomySystem market zones. */
 export type MarketZonePriceSpread = {
   goodId: number;
@@ -155,6 +167,8 @@ export type MarketZonePriceSpread = {
 export type EconomySnapshot = {
   shortages: GoodImbalance[];
   surpluses: GoodImbalance[];
+  /** Top goods by activity with production vs demand. */
+  flows?: GoodFlow[];
   /** Active Leontief market partitions (1–16). */
   marketZoneCount?: number;
   /** Per-zone min/max for staple goods when marketZoneCount > 1. */

@@ -507,6 +507,19 @@ public sealed class GoodImbalanceDto
     public float Price { get; init; }
 }
 
+/// <summary>Production vs demand for a top-activity good (P3.2 production-chain HUD).</summary>
+public sealed class GoodFlowDto
+{
+    public byte GoodId { get; init; }
+    public string Name { get; init; } = "";
+    /// <summary>City-wide supply (production) units this day.</summary>
+    public float Production { get; init; }
+    /// <summary>City-wide demand units this day.</summary>
+    public float Demand { get; init; }
+    /// <summary>(production − demand) / activity, clamped −1…+1.</summary>
+    public float InventoryRate { get; init; }
+}
+
 public sealed class MarketZonePriceDto
 {
     public byte GoodId { get; init; }
@@ -523,6 +536,8 @@ public sealed class EconomySnapshotDto
 {
     public GoodImbalanceDto[] Shortages { get; init; } = [];
     public GoodImbalanceDto[] Surpluses { get; init; } = [];
+    /// <summary>Top goods by activity with production vs demand (P3.2 stretch).</summary>
+    public GoodFlowDto[] Flows { get; init; } = [];
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Per-zone min/max for staple goods when <see cref="MarketZoneCount"/> &gt; 1.</summary>
@@ -533,6 +548,7 @@ public sealed class EconomySnapshotDto
         if (economy is null) return new EconomySnapshotDto();
 
         var (shortages, surpluses) = economy.GetTopImbalances(5);
+        var flows = economy.GetTopGoodFlows(8);
         var zoneSpreads = economy.GetAnchorZonePriceSpreads();
         var zonePrices = new MarketZonePriceDto[zoneSpreads.Length];
         for (int i = 0; i < zoneSpreads.Length; i++)
@@ -548,10 +564,24 @@ public sealed class EconomySnapshotDto
             };
         }
 
+        var flowDtos = new GoodFlowDto[flows.Length];
+        for (int i = 0; i < flows.Length; i++)
+        {
+            flowDtos[i] = new GoodFlowDto
+            {
+                GoodId = flows[i].GoodId,
+                Name = flows[i].Name,
+                Production = flows[i].Production,
+                Demand = flows[i].Demand,
+                InventoryRate = flows[i].InventoryRate,
+            };
+        }
+
         return new EconomySnapshotDto
         {
             Shortages = ToDto(economy, shortages),
             Surpluses = ToDto(economy, surpluses),
+            Flows = flowDtos,
             MarketZoneCount = economy.ActiveZoneCount,
             MarketZonePrices = zonePrices,
         };
@@ -597,6 +627,8 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(ActiveEventDto[]))]
 [JsonSerializable(typeof(GoodImbalanceDto))]
 [JsonSerializable(typeof(GoodImbalanceDto[]))]
+[JsonSerializable(typeof(GoodFlowDto))]
+[JsonSerializable(typeof(GoodFlowDto[]))]
 [JsonSerializable(typeof(MarketZonePriceDto))]
 [JsonSerializable(typeof(MarketZonePriceDto[]))]
 [JsonSerializable(typeof(EconomySnapshotDto))]

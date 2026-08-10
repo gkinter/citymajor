@@ -77,12 +77,14 @@ SUPERSEDED — banner only, no new work
 | Milestone | Status | Notes |
 |-----------|--------|-------|
 | **P1.1**–**P1.6** | ✅ Done | Road tiers, graph v2, bridge/tunnel, ramps, toolbar UX, snapshot export — OpenSpec `001-road-tier-and-graph-v2` |
+| **P2.1** | ✅ Done | Extended zone palette (office, mixed, park, ag) — `a990636` |
 | **P2.2**–**P2.5** | ✅ Done | Density brush, rent model, Herald housing triggers, vacancy/rent burden snapshot |
 | **P3.1** | ✅ Done | Goods panel shortages/surpluses + prices in HUD |
-| **P2.1** | 🔲 Sprint 2 | Extended zone palette (office, mixed, park, ag) |
-| **P3.2**–**P3.4** | 🔲 Sprint 2 | Production chains, market-zone pricing, friction UI |
-| **P4.1**–**P4.2** | 🔲 Sprint 2 | Home/work O-D truth; commute → satisfaction |
-| **P7.2** (gate) | 🔲 Sprint 2 | Unskip / stabilize Cathedral characterization tests in CI |
+| **P3.2** | ✅ Done | Market zone partition prices export — `45d8186` |
+| **P3.3**–**P3.4** | 🔲 Sprint 2 | Market-zone pricing depth, friction UI |
+| **P4.1** | ✅ Done | Home/work building O-D for traffic lite — `99a6547` |
+| **P4.2** | ✅ Done | Frank-Wolfe + graph commute → satisfaction — `76db8bf` / `f72dd3d` |
+| **P7.2** (partial) | ✅ Test isolation | SimHost collection serialize (`49edba1`); unskip/flaky gate still open |
 
 **Sprint 2 plan:** [`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md)
 
@@ -155,7 +157,7 @@ flowchart TB
 
 | Milestone | Deliverable | Spec ref |
 |-----------|-------------|----------|
-| **P2.1** | Zone types: R-low/high, C, I, office, mixed, park, ag (modern-era subset) | `AGENT_05`, `EXPANDED_ZONES` |
+| **P2.1** ✅ | Zone types: R-low/high, C, I, office, mixed, park, ag (modern-era subset) | `AGENT_05`, `EXPANDED_ZONES` |
 | **P2.2** ✅ | Density brush (low/med/high) affects spawn tier + HH cap | `ZoneDensity` in `TileData` |
 | **P2.3** ✅ | Housing market: rent = f(land value, supply, shortage); `rent_burden` per HH | `PopulationSystem`, events |
 | **P2.4** ✅ | Affordability → migration + `housing_crisis` events | Herald + politics |
@@ -167,7 +169,7 @@ flowchart TB
 | Milestone | Deliverable | Spec ref |
 |-----------|-------------|----------|
 | **P3.1** ✅ | Goods panel: top shortages/surpluses, prices by good | `EconomySystem` |
-| **P3.2** | Production chain visibility (building → inputs/outputs) | `ProductionChain` |
+| **P3.2** ✅ | Market zone partition prices export (snapshot) | `EconomySystem` / `45d8186` |
 | **P3.3** | 8–16 market zones with partition pricing | `SIMULATION_ARCHITECTURE` §5 |
 | **P3.4** | Inter-zone trade friction matrix visible | WP-E complete |
 | **P3.5** | Bilateral trade routes (v2): partner city, contract, freight time | `TradeSystem`, SB-3728 |
@@ -177,8 +179,8 @@ flowchart TB
 
 | Milestone | Deliverable |
 |-----------|-------------|
-| **P4.1** | Full home/work building IDs on all commuters (not gravity O-D) |
-| **P4.2** | Commute time from graph → satisfaction |
+| **P4.1** ✅ | Full home/work building IDs on all commuters (not gravity O-D) |
+| **P4.2** ✅ | Commute time from graph → satisfaction (FW + edge travel times) |
 | **P4.3** | Employment matching visible (unemployment by zone) |
 | **P4.4** | L2 export at scale (top 50–100 HH) + pick on map |
 | **P4.5** | Mode choice stub: car vs transit weight from `TransitPreference` |
@@ -323,3 +325,4 @@ openspec/
 | 2026-08-10 | Program charter + OpenSpec scaffold + Linear issue templates |
 | 2026-08-10 | **Sprint 1 complete** — P1.1–P1.6, P2.2–P2.5, P3.1 merged to integration (`b61c4b1`) |
 | 2026-08-10 | **Sprint 2 planned** — P2.1 palette, P3.2–P3.4 economy depth, P4.1–P4.2 population truth, flaky-test gate ([`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md)) |
+| 2026-08-10 | **Sprint 2 mid-sync** — P2.1 (`a990636`), P3.2 (`45d8186`), P4.1 O-D (`99a6547`), P4.2 FW+commute sat (`76db8bf`/`f72dd3d`), test isolation (`49edba1`); remaining P3.3–P3.4 + P7.2 unskip gate |

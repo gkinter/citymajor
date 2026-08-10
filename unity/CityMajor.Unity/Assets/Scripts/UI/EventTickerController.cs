@@ -1,13 +1,15 @@
+using CityMajor.Net;
 using CityMajor.Sim;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace CityMajor.UI
 {
-    /// <summary>Bottom news ticker scaffold — surfaces Herald headline placeholder.</summary>
+    /// <summary>Bottom news ticker — Herald-template headline from live sim bucket (mirrors web NewsTicker).</summary>
     public sealed class EventTickerController : MonoBehaviour
     {
         const string TickerPath = "Assets/UI/EventTicker.uxml";
+        const string IdleMessage = "City Major Gazette — municipal wires quiet";
 
         CitySimBridge _sim;
         UIDocument _document;
@@ -15,10 +17,17 @@ namespace CityMajor.UI
 
         public void Configure(CitySimBridge sim)
         {
+            if (_sim != null)
+                _sim.OnStateChanged -= OnState;
+
             _sim = sim;
             EnsureUi();
-            _sim.OnStateChanged += OnState;
-            OnState(_sim.State);
+
+            if (_sim != null)
+            {
+                _sim.OnStateChanged += OnState;
+                OnState(_sim.State);
+            }
         }
 
         void OnDestroy()
@@ -37,9 +46,8 @@ namespace CityMajor.UI
                 var asset = UiAssetLoader.LoadUxml(TickerPath);
                 if (asset == null)
                 {
-                    // Minimal runtime fallback if UXML missing.
                     _document.sortingOrder = 50;
-                    _line = new Label("CityMajor — press H for Herald");
+                    _line = new Label(IdleMessage);
                     _document.rootVisualElement?.Add(_line);
                     return;
                 }
@@ -56,8 +64,16 @@ namespace CityMajor.UI
             if (_line == null)
                 return;
 
+            var snap = _sim?.LatestSnapshot;
+            if (snap != null)
+            {
+                var evt = NarrativeTemplates.FromSnapshot(snap, state);
+                _line.text = string.IsNullOrEmpty(evt.Headline) ? IdleMessage : evt.Headline;
+                return;
+            }
+
             _line.text =
-                $"Pop {state.Population:N0} · Approval {(state.Approval * 100f):F0}% · Hour {state.TimeOfDay:F0} · Rush ×{state.RushMultiplier:F1} — H Herald · C Citizens";
+                $"Pop {state.Population:N0} · Approval {(state.Approval * 100f):F0}% · H Herald";
         }
     }
 }

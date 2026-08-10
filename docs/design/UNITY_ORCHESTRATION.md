@@ -37,6 +37,7 @@
 | Phase 3 Steam facade | SB-4180 | ✅ `SteamNativePlatform` + rich presence + cloud save hooks | — |
 | Phase 3 achievements | SB-4181 | ✅ Catalog + toast + headless Windows build script | — |
 | Phase 3 Steam depot | SB-4180 | 🟡 Runbook: [DEPOT_UPLOAD_RUNBOOK.md](../steam/DEPOT_UPLOAD_RUNBOOK.md) — partner AppId + live upload pending | Agent |
+| **Sim Cathedral program** | SB-4200–4260 | 🆕 Post WP-E depth — [CATHEDRAL_PROGRAM.md](./CATHEDRAL_PROGRAM.md) · OpenSpec `openspec/` · first change P1.1 road tiers | Orchestrator |
 
 ---
 

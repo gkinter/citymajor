@@ -86,6 +86,16 @@ Only after A–D are green. V1-scale pool characterization (WP-D) establishes ba
 - ✅ v1-scale tick characterization (10K HH / 5K buildings) — `SeedV1ScaleCity` + `TickBudgetTests`.
 - Economic Control Spectrum slider ([SB-3729](https://linear.app/softblaze/issue/SB-3729)) — **v2**.
 
+### Successor program — Simulation Cathedral
+
+WP-E completes the **sim foundation** (engines, tick budget, inter-zone trade, L0 utilities). Player-facing depth and infrastructure truth roll into the successor program:
+
+| Program | Doc | Scope |
+|---------|-----|-------|
+| **Simulation Cathedral** | [`CATHEDRAL_PROGRAM.md`](./CATHEDRAL_PROGRAM.md) | P1–P7 pillars: roads, housing market, goods UI, population O-D, services depth, governance bridge, snapshot v2 |
+
+Create Linear project **CityMajor Sim Cathedral**; issue templates in [`docs/linear/CATHEDRAL_ISSUES.md`](../linear/CATHEDRAL_ISSUES.md). OpenSpec deltas under `openspec/changes/`.
+
 ---
 
 ## 4. Non-goals (explicit)

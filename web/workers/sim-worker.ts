@@ -4,6 +4,7 @@ import type {
   ActiveEventSnapshot,
   EconomySnapshot,
   GoodImbalance,
+  MarketZonePriceSpread,
   RoadSnapshot,
   ServiceCoverageSnapshot,
   SimCommand,
@@ -102,7 +103,16 @@ type WasmStatus = {
       magnitude?: number;
       price?: number;
     }>;
+    marketZoneCount?: number;
+    marketZonePrices?: Array<{
+      goodId?: number;
+      name?: string;
+      minPrice?: number;
+      maxPrice?: number;
+      cityAvgPrice?: number;
+    }>;
   };
+  marketZoneCount?: number;
   monthlyExportValue?: number;
   monthlyImportCost?: number;
   tradeBalance?: number;
@@ -477,6 +487,24 @@ function parseGoodImbalances(raw: unknown): GoodImbalance[] {
   return rows;
 }
 
+function parseMarketZonePrices(raw: unknown): MarketZonePriceSpread[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const rows: MarketZonePriceSpread[] = [];
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null) continue;
+    const row = item as Record<string, unknown>;
+    if (typeof row.name !== "string") continue;
+    rows.push({
+      goodId: typeof row.goodId === "number" ? row.goodId : 0,
+      name: row.name,
+      minPrice: typeof row.minPrice === "number" ? row.minPrice : 0,
+      maxPrice: typeof row.maxPrice === "number" ? row.maxPrice : 0,
+      cityAvgPrice: typeof row.cityAvgPrice === "number" ? row.cityAvgPrice : 0,
+    });
+  }
+  return rows;
+}
+
 function parseEconomy(raw: unknown): EconomySnapshot | undefined {
   if (raw === undefined) return undefined;
   if (typeof raw !== "object" || raw === null) return undefined;
@@ -484,6 +512,9 @@ function parseEconomy(raw: unknown): EconomySnapshot | undefined {
   return {
     shortages: parseGoodImbalances(economy.shortages),
     surpluses: parseGoodImbalances(economy.surpluses),
+    marketZoneCount:
+      typeof economy.marketZoneCount === "number" ? economy.marketZoneCount : undefined,
+    marketZonePrices: parseMarketZonePrices(economy.marketZonePrices),
   };
 }
 
@@ -534,6 +565,7 @@ function readStatus(): Pick<
   | "goodsSurplusIndex"
   | "interZoneTradeVolume"
   | "meanInterZoneFriction"
+  | "marketZoneCount"
   | "meanRentBurden"
   | "residentialVacancy"
 > | null {
@@ -605,6 +637,7 @@ function readStatus(): Pick<
       goodsSurplusIndex: parsed.goodsSurplusIndex,
       interZoneTradeVolume: parsed.interZoneTradeVolume,
       meanInterZoneFriction: parsed.meanInterZoneFriction,
+      marketZoneCount: parsed.marketZoneCount,
       meanRentBurden: parsed.meanRentBurden,
       residentialVacancy: parsed.residentialVacancy,
     };
@@ -689,6 +722,7 @@ function readSnapshot(): SimSnapshot {
       parsed.interZoneTradeVolume ?? status?.interZoneTradeVolume,
     meanInterZoneFriction:
       parsed.meanInterZoneFriction ?? status?.meanInterZoneFriction,
+    marketZoneCount: parsed.marketZoneCount ?? status?.marketZoneCount,
     roadGraph: parsed.roadGraph ?? status?.roadGraph,
     meanRentBurden: parsed.meanRentBurden ?? status?.meanRentBurden,
     residentialVacancy:

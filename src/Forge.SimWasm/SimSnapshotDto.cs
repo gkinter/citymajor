@@ -98,6 +98,8 @@ public sealed class SimSnapshotDto
     public float MeanInterZoneFriction { get; init; } = 1f;
     public float MeanRentBurden { get; init; }
     public float ResidentialVacancy { get; init; } = 1f;
+    /// <summary>Active Leontief market partitions (1–16).</summary>
+    public int MarketZoneCount { get; init; } = 1;
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
@@ -158,6 +160,7 @@ public sealed class SimSnapshotDto
             MeanInterZoneFriction = state.MeanInterZoneFriction,
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,
+            MarketZoneCount = state.MarketZoneCount,
         };
     }
 
@@ -412,20 +415,53 @@ public sealed class GoodImbalanceDto
     public float Price { get; init; }
 }
 
+public sealed class MarketZonePriceDto
+{
+    public byte GoodId { get; init; }
+    public string Name { get; init; } = "";
+    /// <summary>Lowest price among active market zones.</summary>
+    public float MinPrice { get; init; }
+    /// <summary>Highest price among active market zones.</summary>
+    public float MaxPrice { get; init; }
+    /// <summary>City-wide mean price for this good.</summary>
+    public float CityAvgPrice { get; init; }
+}
+
 public sealed class EconomySnapshotDto
 {
     public GoodImbalanceDto[] Shortages { get; init; } = [];
     public GoodImbalanceDto[] Surpluses { get; init; } = [];
+    /// <summary>Active Leontief market partitions (1–16).</summary>
+    public int MarketZoneCount { get; init; } = 1;
+    /// <summary>Per-zone min/max for staple goods when <see cref="MarketZoneCount"/> &gt; 1.</summary>
+    public MarketZonePriceDto[] MarketZonePrices { get; init; } = [];
 
     public static EconomySnapshotDto From(EconomySystem? economy)
     {
         if (economy is null) return new EconomySnapshotDto();
 
         var (shortages, surpluses) = economy.GetTopImbalances(5);
+        var zoneSpreads = economy.GetAnchorZonePriceSpreads();
+        var zonePrices = new MarketZonePriceDto[zoneSpreads.Length];
+        for (int i = 0; i < zoneSpreads.Length; i++)
+        {
+            var spread = zoneSpreads[i];
+            zonePrices[i] = new MarketZonePriceDto
+            {
+                GoodId = spread.GoodId,
+                Name = spread.Name,
+                MinPrice = spread.MinPrice,
+                MaxPrice = spread.MaxPrice,
+                CityAvgPrice = spread.CityAvgPrice,
+            };
+        }
+
         return new EconomySnapshotDto
         {
             Shortages = ToDto(economy, shortages),
             Surpluses = ToDto(economy, surpluses),
+            MarketZoneCount = economy.ActiveZoneCount,
+            MarketZonePrices = zonePrices,
         };
     }
 
@@ -469,6 +505,8 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(ActiveEventDto[]))]
 [JsonSerializable(typeof(GoodImbalanceDto))]
 [JsonSerializable(typeof(GoodImbalanceDto[]))]
+[JsonSerializable(typeof(MarketZonePriceDto))]
+[JsonSerializable(typeof(MarketZonePriceDto[]))]
 [JsonSerializable(typeof(EconomySnapshotDto))]
 [JsonSerializable(typeof(HouseholdPreviewDto))]
 [JsonSerializable(typeof(HouseholdPreviewDto[]))]

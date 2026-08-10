@@ -154,6 +154,13 @@ public sealed class EconomySystem
     /// <summary>Per-good imbalance row for WASM / web HUD export.</summary>
     public readonly record struct GoodImbalanceEntry(byte GoodId, string Name, float Magnitude);
 
+    /// <summary>Min/max zone prices for a staple good when partitions diverge.</summary>
+    public readonly record struct ZonePriceSpread(byte GoodId, string Name, float MinPrice, float MaxPrice, float CityAvgPrice);
+
+    /// <summary>Staple goods exported for per-zone price spread HUD (P3.2/P3.3).</summary>
+    public static readonly Good[] AnchorGoods =
+        [Good.Food, Good.Water, Good.Steel, Good.Timber, Good.Electricity];
+
     /// <summary>
     /// Result of a "what-if" building placement prediction.
     /// </summary>
@@ -400,6 +407,39 @@ public sealed class EconomySystem
         for (int z = 0; z < ActiveZoneCount; z++)
             sum += _zones[z].Prices[(int)good];
         return sum / ActiveZoneCount;
+    }
+
+    /// <summary>
+    /// Min/max prices across active zones for staple goods. Empty when single-zone.
+    /// </summary>
+    public ZonePriceSpread[] GetAnchorZonePriceSpreads()
+    {
+        if (ActiveZoneCount <= 1) return [];
+
+        var spreads = new ZonePriceSpread[AnchorGoods.Length];
+        for (int i = 0; i < AnchorGoods.Length; i++)
+        {
+            var good = AnchorGoods[i];
+            float min = float.MaxValue;
+            float max = float.MinValue;
+            float sum = 0f;
+            for (int z = 0; z < ActiveZoneCount; z++)
+            {
+                float price = _zones[z].Prices[(int)good];
+                min = MathF.Min(min, price);
+                max = MathF.Max(max, price);
+                sum += price;
+            }
+
+            spreads[i] = new ZonePriceSpread(
+                (byte)good,
+                good.ToString(),
+                min,
+                max,
+                sum / ActiveZoneCount);
+        }
+
+        return spreads;
     }
 
     /// <summary>

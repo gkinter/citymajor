@@ -136,9 +136,21 @@ export type GoodImbalance = {
 };
 
 /** Top shortages/surpluses exported from EconomySystem market zones. */
+export type MarketZonePriceSpread = {
+  goodId: number;
+  name: string;
+  minPrice: number;
+  maxPrice: number;
+  cityAvgPrice: number;
+};
+
 export type EconomySnapshot = {
   shortages: GoodImbalance[];
   surpluses: GoodImbalance[];
+  /** Active Leontief market partitions (1–16). */
+  marketZoneCount?: number;
+  /** Per-zone min/max for staple goods when marketZoneCount > 1. */
+  marketZonePrices?: MarketZonePriceSpread[];
 };
 
 export type ActiveEventSnapshot = {
@@ -253,6 +265,8 @@ export type SimResources = {
   interZoneTradeVolume?: number;
   /** WASM — weighted mean trade friction for inter-zone transfers (≥1.0). */
   meanInterZoneFriction?: number;
+  /** WASM — active Leontief market partitions (1–16). */
+  marketZoneCount?: number;
   /** WASM — mean household rent burden (rent / income, 0–1+). */
   meanRentBurden?: number;
   /** WASM — city-wide residential vacancy proxy (0–1). */

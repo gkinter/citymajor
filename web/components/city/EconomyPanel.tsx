@@ -273,6 +273,7 @@ function hasFoundationMetrics(resources: SimResources | null): resources is SimR
   return (
     resources.employmentRate !== undefined ||
     resources.interZoneTradeVolume !== undefined ||
+    resources.marketZoneCount !== undefined ||
     resources.residentialDemand !== undefined ||
     resources.meanRentBurden !== undefined ||
     resources.residentialVacancy !== undefined ||
@@ -334,6 +335,14 @@ function FoundationMetrics({ resources }: { resources: SimResources }) {
             </span>
           </li>
         ) : null}
+        {resources.marketZoneCount !== undefined && resources.marketZoneCount > 1 ? (
+          <li className="hud-economy-trade__row">
+            <span className="hud-economy-trade__label">Market zones</span>
+            <span className="hud-economy-trade__value">
+              {resources.marketZoneCount} partitions
+            </span>
+          </li>
+        ) : null}
         {resources.residentialDemand !== undefined ? (
           <li className="hud-economy-trade__row">
             <span className="hud-economy-trade__label">RCI demand</span>
@@ -360,6 +369,31 @@ function FoundationMetrics({ resources }: { resources: SimResources }) {
             </span>
           </li>
         ) : null}
+      </ul>
+    </section>
+  );
+}
+
+function ZonePriceSpreads({ economy }: { economy: EconomySnapshot }) {
+  const spreads =
+    economy.marketZonePrices?.filter((row) => row.maxPrice > row.minPrice * 1.05) ??
+    [];
+  if (spreads.length === 0) return null;
+
+  return (
+    <section className="hud-economy-section" aria-label="District price spread">
+      <div style={{ ...sectionTitle, color: "#ffd27a" }}>District spreads</div>
+      <ul className="hud-economy-trade">
+        {spreads.slice(0, 4).map((row) => (
+          <li key={row.name} className="hud-economy-trade__row">
+            <span className="hud-economy-trade__label">
+              {formatGoodName(row.name)}
+            </span>
+            <span className="hud-economy-trade__value">
+              {formatGoodPrice(row.minPrice)} – {formatGoodPrice(row.maxPrice)}
+            </span>
+          </li>
+        ))}
       </ul>
     </section>
   );
@@ -432,6 +466,10 @@ export function EconomyPanel({ open, onClose, resources }: EconomyPanelProps) {
         {hasFoundationMetrics(resources) ? (
           <FoundationMetrics resources={resources} />
         ) : null}
+
+        {resources?.economy?.marketZonePrices?.length
+          ? <ZonePriceSpreads economy={resources.economy} />
+          : null}
 
         {hasTradeData(resources) ? (
           <section className="hud-economy-section" aria-label="Global trade">

@@ -94,6 +94,7 @@ public sealed class WasmSimHost
     public float MeanInterZoneFriction => _host.State?.MeanInterZoneFriction ?? 1f;
     public float MeanRentBurden => _host.State?.MeanRentBurden ?? 0f;
     public float ResidentialVacancy => _host.State?.ResidentialVacancy ?? 1f;
+    public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
     public RoadGraphSnapshotDto RoadGraphSnapshot =>
         _host.State is null ? new RoadGraphSnapshotDto() : RoadGraphSnapshotDto.From(_host.State.Roads);
@@ -301,6 +302,8 @@ public sealed class WasmStatusDto
     public RoadGraphSnapshotDto RoadGraph { get; init; } = new();
     public float MeanRentBurden { get; init; }
     public float ResidentialVacancy { get; init; } = 1f;
+    /// <summary>Active Leontief market partitions (1–16).</summary>
+    public int MarketZoneCount { get; init; } = 1;
 
     public static WasmStatusDto From(WasmSimHost host) => new()
     {
@@ -390,6 +393,7 @@ public sealed class WasmStatusDto
         RoadGraph = host.RoadGraphSnapshot,
         MeanRentBurden = host.MeanRentBurden,
         ResidentialVacancy = host.ResidentialVacancy,
+        MarketZoneCount = host.MarketZoneCount,
     };
 }
 
@@ -400,6 +404,8 @@ public sealed class WasmStatusDto
 [JsonSerializable(typeof(EconomySnapshotDto))]
 [JsonSerializable(typeof(GoodImbalanceDto))]
 [JsonSerializable(typeof(GoodImbalanceDto[]))]
+[JsonSerializable(typeof(MarketZonePriceDto))]
+[JsonSerializable(typeof(MarketZonePriceDto[]))]
 [JsonSerializable(typeof(PopulationL2Dto))]
 [JsonSerializable(typeof(HouseholdPreviewDto))]
 [JsonSerializable(typeof(HouseholdPreviewDto[]))]

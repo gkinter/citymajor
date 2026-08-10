@@ -35,7 +35,7 @@ public sealed class CathedralEconomyTests
             $"Industrial demand should rise when food supply lags. Got {economy.IndustrialDemand:F3}");
     }
 
-    [Fact(Skip = "P3.3 not implemented")]
+    [Fact]
     public void MarketZonePrices_DifferAcrossPartitions()
     {
         var economy = new EconomySystem();
@@ -87,5 +87,26 @@ public sealed class CathedralEconomyTests
         Assert.True(snap.MarketZoneCount >= 4,
             $"Population 2500 should activate multiple market zones. Got {snap.MarketZoneCount}");
         Assert.Equal(host.Economy.ActiveZoneCount, snap.MarketZoneCount);
+    }
+
+    [Fact]
+    public void EconomySnapshot_ExportsZonePriceSpread_WhenMultiZone()
+    {
+        var economy = new EconomySystem();
+        economy.SetActiveZoneCount(4);
+        economy.SetZoneSupply(0, Good.Food, 100f);
+        economy.SetZoneDemand(0, Good.Food, 10f);
+        economy.SetZoneSupply(3, Good.Food, 1f);
+        economy.SetZoneDemand(3, Good.Food, 80f);
+        economy.RecalculatePrices();
+
+        var snapshot = EconomySnapshotDto.From(economy);
+
+        Assert.Equal(4, snapshot.MarketZoneCount);
+        Assert.NotEmpty(snapshot.MarketZonePrices);
+        var food = Assert.Single(snapshot.MarketZonePrices, row => row.Name == "Food");
+        Assert.True(food.MaxPrice > food.MinPrice * 1.2f,
+            $"Expected zone spread for Food. min={food.MinPrice:F2}, max={food.MaxPrice:F2}");
+        Assert.Equal(economy.GetAveragePrice(Good.Food), food.CityAvgPrice);
     }
 }

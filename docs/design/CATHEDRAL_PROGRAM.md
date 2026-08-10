@@ -106,10 +106,14 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P3.4** | ✅ Done | Inter-zone friction overlay — `a9e7878` |
 | **P4.1** | ✅ Done | Home/work building O-D for traffic lite — `99a6547` · O-D HUD `ccf7f22` |
 | **P4.2** | ✅ Done | Frank-Wolfe + graph commute → satisfaction — `76db8bf` / `f72dd3d` |
-| **P4.5** | ✅ Done | Mode-choice stub (simple MNL) — `571352a` |
+| **P4.5** | ✅ Done | Mode-choice stub (simple MNL) — `571352a` · mode-share HUD `370e944` |
 | **P5 stub** | ✅ Done | Politics foundation stub — approval characterization — `fb64bd9` |
-| **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` |
-| **P7.2** (partial) | ✅ Test isolation | SimHost serialize `49edba1` + instance-local SimplexNoise `b4be623`; unskip/flaky gate still open |
+| **P5.1** | ✅ Done | Utilities L0 coverage export + characterization — `ae635b0` / SB-4987 |
+| **P5.2** | ✅ Done | Emergency response time (graph + BPR) — `06977a9` / SB-4242 |
+| **P5.5** / **P5.6** | ✅ Done | Herald approval predicates `0452f88` · council seats export `ae15498` |
+| **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` · mode share `370e944` · unemployment HUD `e70ed78` |
+| **P7.2** | ✅ Done | 0 Cathedral `Skip=` gate — `817e968` / SB-4986 · isolation `49edba1` / `b4be623` |
+| **Harness polish** | ✅ Done | Smoke wait WASM `0ecc0ba` · E-key economy toggle `5205201` · perf median gate `6c1f077` |
 
 **Sprint 2 plan (closing):** [`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md) — P3.3 still open  
 **Sprint 3 plan (active next):** [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md) — Unity UI/HUD + tools parity
@@ -207,9 +211,9 @@ flowchart TB
 |-----------|-------------|
 | **P4.1** ✅ | Full home/work building IDs on all commuters (not gravity O-D); O-D HUD sample |
 | **P4.2** ✅ | Commute time from graph → satisfaction (FW + edge travel times) |
-| **P4.3** | Employment matching visible (unemployment by zone) |
+| **P4.3** ✅ | Unemployment + job vacancy HUD (city-level export) — `e70ed78` / web `46a08e1` |
 | **P4.4** | L2 export at scale (top 50–100 HH) + pick on map |
-| **P4.5** ✅ | Mode choice stub: car vs transit weight from `TransitPreference` — `571352a` |
+| **P4.5** ✅ | Mode choice stub + mode-share HUD — `571352a` / `370e944` |
 
 ### P5 — Services & emergencies
 
@@ -219,8 +223,8 @@ flowchart TB
 | Milestone | Deliverable |
 |-----------|-------------|
 | **P5 stub** ✅ | Politics foundation stub (approval characterization) — see [`CATHEDRAL_P5_POLITICS.md`](./CATHEDRAL_P5_POLITICS.md) / `fb64bd9` |
-| **P5.1** ✅ | Utilities L0 balance surfaced in HUD — [`CATHEDRAL_P5_SERVICES.md`](./CATHEDRAL_P5_SERVICES.md) / SB-4987 |
-| **P5.2** ✅ | Emergency response time model (distance + traffic) — `EmergencyResponseTime` / SB-4242 |
+| **P5.1** ✅ | Utilities L0 balance + coverage export characterization — [`CATHEDRAL_P5_SERVICES.md`](./CATHEDRAL_P5_SERVICES.md) / `ae635b0` / SB-4987 |
+| **P5.2** ✅ | Emergency response time model (distance + traffic / BPR) — `EmergencyResponseTime` / `06977a9` / SB-4242 |
 | **P5.3** | Fire v1 (spread + hydrant coverage) |
 
 ### P6 — Governance
@@ -229,15 +233,16 @@ flowchart TB
 |-----------|-------------|
 | **P6.1** | Law toggles apply budget/traffic/spawn multipliers |
 | **P6.2** | `ApplyEventEffectsToState` bridge (Unity primary; WASM harness optional) — **partial**: happiness/approval aggregate; `activeEventCount` exported to Herald HUD |
-| **P6.3** | Herald buckets only fire when snapshot predicates true |
+| **P6.3** ✅ | Herald buckets only fire when snapshot predicates true — P5.5 `0452f88` |
 | **P6.4** | Economic Control Spectrum slider (SB-3729) — **v2**, not EA |
+| **P5.6** ✅ | Council seats export on WASM status/snapshot — `ae15498` |
 
 ### P7 — Client truth layer *(Unity = product UI)*
 
 | Milestone | Deliverable |
 |-----------|-------------|
 | **P7.1** | `SIM_SNAPSHOT_V2.md` — fields, cadence, ownership |
-| **P7.2** | Per-pillar characterization tests in `Forge.SimCore.Tests` |
+| **P7.2** ✅ | Per-pillar characterization tests — 0 Cathedral `Skip=` (`817e968` / SB-4986) |
 | **P7.3** | Unity Play menu verifies ([`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md)); optional WASM smoke as harness only |
 | **P7.4** | Gap matrix auto-regenerated in CI (script diffs spec vs exports) |
 | **P7.5** | Unity HUD/tools parity for Cathedral snapshot fields (Sprint 3 — [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md)) |
@@ -353,3 +358,4 @@ openspec/
 | 2026-08-10 | **Sprint 2 mid-sync** — P2.1 (`a990636`), P3.2 (`45d8186`), P4.1 O-D (`99a6547`), P4.2 FW+commute sat (`76db8bf`/`f72dd3d`), test isolation (`49edba1`); remaining P3.3–P3.4 + P7.2 unskip gate |
 | 2026-08-10 | **Sprint 2 wave-2 sync** — P3.2 chain HUD (`746780c`), P3.4 friction (`a9e7878`), P1.5 ramp/bridge UI (`6084fad`/`b34942a`), congestion heatmap (`c8827bf`), O-D HUD (`ccf7f22`), mode choice (`571352a`), SimplexNoise (`b4be623`), P5 politics stub (`fb64bd9`); OpenSpec `001` archived; remaining **P3.3** + P7.2 unskip gate |
 | 2026-08-10 | **Unity-first mandate locked** — player experience = Unity Editor + builds; web R3F archival/spike; WASM optional harness; next sprint [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md); orchestration canonical [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md) |
+| 2026-08-10 | **Sprint 2 wave-3 sync** @ `06977a9` — P5.2 EMS response (`06977a9`), P5.5/P5.6 (`0452f88`/`ae15498`), P5.1 utilities char (`ae635b0`), P7.2 0-skip (`817e968`/SB-4986), mode-share HUD (`370e944`), unemployment HUD (`e70ed78`), smoke WASM wait (`0ecc0ba`), E-key fix (`5205201`), perf median gate (`6c1f077`); remaining **P3.3** |

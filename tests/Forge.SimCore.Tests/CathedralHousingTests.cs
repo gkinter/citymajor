@@ -5,6 +5,7 @@ using Xunit;
 namespace Forge.SimCore.Tests;
 
 /// <summary>Characterization tests for Cathedral P2 housing / rent burden (pinned before implementation).</summary>
+[Collection("SimHost")]
 public sealed class CathedralHousingTests
 {
     [Fact]

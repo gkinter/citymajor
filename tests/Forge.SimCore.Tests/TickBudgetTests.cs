@@ -10,6 +10,7 @@ namespace Forge.SimCore.Tests;
 /// Wall-clock tick budget characterization for native <see cref="SimHost"/> (SB-3685 / WP-D).
 /// CI gate: median &lt; 25 ms on shared ubuntu runners. Local dev target: ≤ 10 ms.
 /// </summary>
+[Collection("SimHost")]
 public sealed class TickBudgetTests
 {
     private const double FrameDt = 0.125; // 8 Hz sim frame

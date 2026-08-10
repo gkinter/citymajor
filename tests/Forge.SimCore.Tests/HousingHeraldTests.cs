@@ -5,6 +5,7 @@ using Xunit;
 namespace Forge.SimCore.Tests;
 
 /// <summary>Cathedral P2.4 — housing Herald trigger characterization tests.</summary>
+[Collection("SimHost")]
 public sealed class HousingHeraldTests
 {
     private const string HousingEventsJson = """

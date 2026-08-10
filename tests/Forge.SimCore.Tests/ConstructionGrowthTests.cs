@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Forge.SimCore.Tests;
 
+[Collection("SimHost")]
 public sealed class ConstructionGrowthTests
 {
     private const string FastConstructionLawJson = """

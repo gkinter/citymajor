@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Forge.SimCore.Tests;
 
+[Collection("SimHost")]
 public sealed class LawEffectsTests
 {
     private const string SampleLawsJson = """

@@ -7,6 +7,7 @@ namespace Forge.SimCore.Tests;
 /// <summary>
 /// Desktop opt-in full <see cref="Forge.Game.Simulation.TrafficSystem"/> (WP-E).
 /// </summary>
+[Collection("SimHost")]
 public sealed class FullTrafficTests
 {
     private const double FrameDt = 0.125;

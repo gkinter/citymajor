@@ -4,6 +4,7 @@ using Xunit;
 namespace Forge.SimCore.Tests;
 
 /// <summary>P2.2 — zone density brush sets TileData.ZoneDensity.</summary>
+[Collection("SimHost")]
 public sealed class ZoneDensityTests
 {
     [Theory]

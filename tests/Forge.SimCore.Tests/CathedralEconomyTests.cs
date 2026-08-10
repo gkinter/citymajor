@@ -7,6 +7,7 @@ using Xunit;
 namespace Forge.SimCore.Tests;
 
 /// <summary>Characterization tests for Cathedral P3 economy / market zones.</summary>
+[Collection("SimHost")]
 public sealed class CathedralEconomyTests
 {
     [Fact]

@@ -8,6 +8,7 @@ using Xunit;
 namespace Forge.SimCore.Tests;
 
 /// <summary>Characterization tests for Cathedral P4.1–P4.2 traffic lite BPR + Frank-Wolfe.</summary>
+[Collection("SimHost")]
 public sealed class CathedralTrafficBprTests
 {
     [Fact]

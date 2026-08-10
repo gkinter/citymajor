@@ -1,4 +1,3 @@
-using Forge.SimCore;
 using Xunit;
 
 namespace Forge.SimCore.Tests;
@@ -8,4 +7,4 @@ namespace Forge.SimCore.Tests;
 /// <c>SimplexNoise</c> static permutation tables and is not thread-safe.
 /// </summary>
 [CollectionDefinition("SimHost", DisableParallelization = true)]
-public sealed class SimHostTestCollection;
+public class SimHostCollection { }

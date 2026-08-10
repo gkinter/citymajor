@@ -26,6 +26,8 @@ public sealed class WasmSimHost
     public int EventDefinitionCount => _host.Events?.Definitions.Count ?? 0;
     public int LawDefinitionCount => _host.Laws?.DefinitionCount ?? 0;
     public int ActiveLawCount => _host.Laws?.ActiveLawCount ?? 0;
+    /// <summary>Live EventSystem instances — scalar for Herald HUD badge (Cathedral P6).</summary>
+    public int ActiveEventCount => _host.Events?.ActiveEventCount ?? 0;
     public int UnlockedTechCount =>
         _host.State is null ? 0 : ResearchSystem.CountUnlockedTechs(_host.State);
     public int CurrentResearchId => _host.State?.CurrentResearchId ?? -1;
@@ -298,6 +300,8 @@ public sealed class WasmStatusDto
     /// <summary>First ordinance for HUD sample toggle (v1.5 stub).</summary>
     public LawPreviewDto? SampleLaw { get; init; }
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
+    /// <summary>Count of live EventSystem instances (mirrors ActiveEvents.Length).</summary>
+    public int ActiveEventCount { get; init; }
     public int TechCount { get; init; }
     public int CurrentResearchId { get; init; } = -1;
     public float CurrentResearchProgress { get; init; }
@@ -381,6 +385,7 @@ public sealed class WasmStatusDto
             ActiveLawCount = host.ActiveLawCount,
             SampleLaw = host.GetSampleLawPreview(),
             ActiveEvents = host.ActiveEvents,
+            ActiveEventCount = host.ActiveEventCount,
             TechCount = host.UnlockedTechCount,
             CurrentResearchId = host.CurrentResearchId,
             CurrentResearchProgress = host.CurrentResearchProgress,

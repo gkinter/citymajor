@@ -262,6 +262,8 @@ export type SimResources = {
   monthlyExpenses?: number;
   /** Live EventSystem instances from WASM GetStatus / snapshot. */
   activeEvents?: ActiveEventSnapshot[];
+  /** WASM GetStatus — count of live events (Herald HUD badge; mirrors activeEvents length). */
+  activeEventCount?: number;
   /** WASM GetStatus — mean health coverage over zoned tiles (0–1). */
   healthcareCoverage?: number;
   /** WASM GetStatus — mean police coverage over zoned tiles (0–1). */

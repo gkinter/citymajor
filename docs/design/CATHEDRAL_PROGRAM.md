@@ -228,7 +228,7 @@ flowchart TB
 | Milestone | Deliverable |
 |-----------|-------------|
 | **P6.1** | Law toggles apply budget/traffic/spawn multipliers |
-| **P6.2** | `ApplyEventEffectsToState` bridge (Unity primary; WASM harness optional) |
+| **P6.2** | `ApplyEventEffectsToState` bridge (Unity primary; WASM harness optional) — **partial**: happiness/approval aggregate; `activeEventCount` exported to Herald HUD |
 | **P6.3** | Herald buckets only fire when snapshot predicates true |
 | **P6.4** | Economic Control Spectrum slider (SB-3729) — **v2**, not EA |
 

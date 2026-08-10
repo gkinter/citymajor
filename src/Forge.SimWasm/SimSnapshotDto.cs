@@ -92,6 +92,8 @@ public sealed class SimSnapshotDto
     /// <summary>Sparse zoned tiles with per-service coverage (0–1).</summary>
     public ServiceCoverageDto[] ServiceCoverage { get; init; } = [];
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
+    /// <summary>Count of live EventSystem instances — Herald HUD badge (Cathedral P6).</summary>
+    public int ActiveEventCount { get; init; }
     /// <summary>Leontief goods shortages/surpluses for economy HUD.</summary>
     public EconomySnapshotDto Economy { get; init; } = new();
     /// <summary>Top households sample for CitizenPanel L2 drill-down.</summary>
@@ -188,6 +190,7 @@ public sealed class SimSnapshotDto
             ServiceCoverage = serviceCoverage,
             FrictionCorridors = frictionCorridors,
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
+            ActiveEventCount = events?.ActiveEventCount ?? 0,
             Economy = EconomySnapshotDto.From(economy),
             PopulationL2 = PopulationL2Dto.From(state, population),
             ResearchPoints = state.ResearchPoints,

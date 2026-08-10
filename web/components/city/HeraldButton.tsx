@@ -13,6 +13,8 @@ type HeraldButtonProps = {
   onClick: () => void;
   /** When true, skip absolute top-right positioning (use inside a cluster). */
   embedded?: boolean;
+  /** Live EventSystem count from WASM — shown beside quota when &gt; 0. */
+  eventCountLabel?: string;
 };
 
 export function HeraldButton({
@@ -21,11 +23,13 @@ export function HeraldButton({
   title,
   onClick,
   embedded = false,
+  eventCountLabel,
 }: HeraldButtonProps) {
   return (
     <button
       type="button"
       data-onboarding-target="herald"
+      data-testid="herald-button"
       style={{
         ...(embedded ? {} : HUD_ZONE.topRight),
         ...hudActionButton(disabled),
@@ -38,6 +42,14 @@ export function HeraldButton({
       onClick={onClick}
     >
       <span>Herald</span>
+      {eventCountLabel ? (
+        <span
+          data-testid="herald-active-event-count"
+          style={hudBadge()}
+        >
+          {eventCountLabel}
+        </span>
+      ) : null}
       <span style={hudBadge()}>{quotaLabel}</span>
     </button>
   );

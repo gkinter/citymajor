@@ -43,8 +43,11 @@ public static class WasmConfig
     /// </summary>
     public const bool UseFullTrafficUnityDefault = false;
 
-    /// <summary>Max Frank-Wolfe iterations per lite traffic tick.</summary>
-    public const int TrafficLiteFrankWolfeIterations = 4;
+    /// <summary>
+    /// Assignment iterations per lite traffic tick. P4.1 = 1 (static AON on free-flow);
+    /// P4.2 raises this for multi-iteration Frank-Wolfe convergence.
+    /// </summary>
+    public const int TrafficLiteFrankWolfeIterations = 1;
 
     /// <summary>Edge batches for partial BPR refresh between full lite ticks.</summary>
     public const int TrafficLiteEdgeBatchCount = 4;

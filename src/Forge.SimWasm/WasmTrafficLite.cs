@@ -6,7 +6,8 @@ namespace Forge.SimWasm;
 
 /// <summary>
 /// Lightweight BPR traffic for browser WASM (SB-3685 partial).
-/// Runs Frank-Wolfe on a 64-zone grid with at most 4 iterations, scheduled at
+/// P4.1: single-iteration static assignment on free-flow paths + BPR edge times.
+/// P4.2: multi-iteration Frank-Wolfe at
 /// <see cref="WasmConfig.TrafficLiteInterval"/> — never every 8 Hz sim tick.
 /// </summary>
 public sealed class WasmTrafficLite
@@ -207,7 +208,7 @@ public sealed class WasmTrafficLite
                 float lawCapacityMult = state.LawTrafficCapacityMult > 0f
                     ? state.LawTrafficCapacityMult
                     : 1f;
-                _edgeCapacity[edgeIdx] = RoadTier.RoadCapacityForLevel(level) * lanes * lawCapacityMult;
+                _edgeCapacity[edgeIdx] = TrafficBpr.EdgeCapacity(level, lanes, lawCapacityMult);
                 _edgeFreeFlow[edgeIdx] = cost;
                 edgeIdx++;
             }
@@ -318,7 +319,7 @@ public sealed class WasmTrafficLite
             var currentTimes = new float[_edgeCount];
             for (int e = 0; e < _edgeCount; e++)
             {
-                currentTimes[e] = CalculateBprTravelTime(
+                currentTimes[e] = TrafficBpr.CalculateTravelTime(
                     _edgeFreeFlow[e], _edgeVolume[e], _edgeCapacity[e]);
             }
 
@@ -551,14 +552,4 @@ public sealed class WasmTrafficLite
         }
     }
 
-    private const float BprAlpha = 0.15f;
-
-    private static float CalculateBprTravelTime(float freeFlowTime, float volume, float capacity)
-    {
-        if (capacity <= 0f) return freeFlowTime * 10f;
-        float vc = volume / capacity;
-        float vc2 = vc * vc;
-        float vc4 = vc2 * vc2;
-        return freeFlowTime * (1f + BprAlpha * vc4);
-    }
 }

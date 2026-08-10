@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using Forge.Engine.Data;
 using Forge.Engine.Simulation;
+using Forge.SimCore;
 
 namespace Forge.Game.Simulation;
 
@@ -25,12 +26,11 @@ public sealed class TrafficSystem
     // =========================================================================
 
     private const int TargetZoneCount = 500;
-    private const int MaxFrankWolfeIterations = 5;
+    /// <summary>P4.1 static assignment; P4.2 raises for Frank-Wolfe convergence.</summary>
+    private const int MaxFrankWolfeIterations = 1;
     private const float FrankWolfeConvergenceThreshold = 0.01f;
 
-    // BPR formula: travel_time = free_flow * (1 + alpha * (volume/capacity)^beta)
-    private const float BprAlpha = 0.15f;
-    private const float BprBeta = 4.0f;
+    // BPR formula delegated to <see cref="TrafficBpr"/>
 
     // MNL mode choice coefficients (calibrated from transport research)
     // V_car = beta_time * time + beta_cost * cost + ASC_car
@@ -58,9 +58,6 @@ public sealed class TrafficSystem
 
     // Car cost per tile
     private const float CarCostPerTile = 0.15f;
-
-    // Road capacity per edge (vehicles per tick period)
-    private const float BaseLaneCapacity = 50f;
 
     // Rush hour multipliers
     private const float MorningPeakMultiplier = 1.8f;
@@ -271,7 +268,7 @@ public sealed class TrafficSystem
                         2 => 4f,   // Highway
                         _ => 2f,
                     };
-                    _edgeCapacity[edgeIdx] = BaseLaneCapacity * lanes;
+                    _edgeCapacity[edgeIdx] = TrafficBpr.EdgeCapacity(level, lanes);
                     _edgeFreeFlow[edgeIdx] = cost;
                     edgeIdx++;
                 }
@@ -568,14 +565,8 @@ public sealed class TrafficSystem
     /// travel_time = free_flow * (1 + 0.15 * (volume/capacity)^4)
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float CalculateBprTravelTime(float freeFlowTime, float volume, float capacity)
-    {
-        if (capacity <= 0f) return freeFlowTime * 10f; // Effectively infinite congestion
-        float vc = volume / capacity;
-        float vc2 = vc * vc;
-        float vc4 = vc2 * vc2;
-        return freeFlowTime * (1f + BprAlpha * vc4);
-    }
+    public static float CalculateBprTravelTime(float freeFlowTime, float volume, float capacity) =>
+        TrafficBpr.CalculateTravelTime(freeFlowTime, volume, capacity);
 
     private void AssignAllOrNothing(WorldState state, float[] targetVolume, float[] edgeTimes)
     {
@@ -801,7 +792,7 @@ public sealed class TrafficSystem
 
             // Apply congestion to car time
             float avgCongestion = GetAverageCongestion();
-            float congestedCarTime = carTime * (1f + BprAlpha * MathF.Pow(avgCongestion, BprBeta));
+            float congestedCarTime = carTime * (1f + TrafficBpr.Alpha * MathF.Pow(avgCongestion, TrafficBpr.Beta));
 
             float avgCommuteTime = congestedCarTime * carShare +
                                    transitTime * transitShareLocal +

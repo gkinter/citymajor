@@ -25,4 +25,27 @@ public static class TrafficBpr
         float lawMult = lawCapacityMult > 0f ? lawCapacityMult : 1f;
         return RoadTier.RoadCapacityForLevel(level) * lanes * lawMult;
     }
+
+    /// <summary>
+    /// Frank-Wolfe relative gap: (TSTT − SPTT) / TSTT using marginal edge times.
+    /// TSTT = Σ t_e·x_e; SPTT = Σ t_e·y_e with auxiliary all-or-nothing flows y.
+    /// </summary>
+    public static float FrankWolfeRelativeGap(
+        ReadOnlySpan<float> edgeTimes,
+        ReadOnlySpan<float> currentVolumes,
+        ReadOnlySpan<float> auxVolumes)
+    {
+        int n = Math.Min(edgeTimes.Length, Math.Min(currentVolumes.Length, auxVolumes.Length));
+        double tstt = 0;
+        double sptt = 0;
+        for (int e = 0; e < n; e++)
+        {
+            float t = edgeTimes[e];
+            tstt += t * currentVolumes[e];
+            sptt += t * auxVolumes[e];
+        }
+
+        if (tstt <= 0d) return 0f;
+        return (float)Math.Max(0d, (tstt - sptt) / tstt);
+    }
 }

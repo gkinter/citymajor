@@ -15,10 +15,23 @@ public sealed partial class SimHost
         if (!IsInitialized) return "{}";
 
         var snap = GetSnapshot();
+        var (edgeVolumes, edgeTravelTimes) = CollectTrafficEdgeExport();
         var dto = SimSnapshotDto.From(
-            snap, _state, _events, _economy, _services, _population, _research);
+            snap, _state, _events, _economy, _services, _population, _research,
+            edgeVolumes, edgeTravelTimes);
         return JsonSerializer.Serialize(dto, SnapshotJsonContext.Default.SimSnapshotDto);
     }
+
+    private (float[] EdgeVolumes, float[] EdgeTravelTimes) CollectTrafficEdgeExport()
+    {
+        if (_useFullTraffic && _fullTraffic is not null)
+            return (_fullTraffic.EdgeVolumes, _fullTraffic.EdgeTravelTimes);
+        return (_traffic.EdgeVolumes, _traffic.EdgeTravelTimes);
+    }
+
+    /// <summary>Per-edge assignment export for snapshot/status (P1.6 / P4.2).</summary>
+    public (float[] EdgeVolumes, float[] EdgeTravelTimes) GetTrafficEdgeExport() =>
+        CollectTrafficEdgeExport();
 
     public bool LoadSnapshotFromJson(string json)
     {

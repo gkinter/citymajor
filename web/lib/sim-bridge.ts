@@ -72,6 +72,10 @@ export type RoadGraphSnapshot = {
   nodeTypes: number[];
   nodeTileX: number[];
   nodeTileZ: number[];
+  /** Graph edge count — parallel to edgeVolumes / travelTimes (P1.6 / P4.2). */
+  edgeCount?: number;
+  edgeVolumes?: number[];
+  travelTimes?: number[];
 };
 
 /** Debug helper — lookup node type at a grid tile from snapshot export. */

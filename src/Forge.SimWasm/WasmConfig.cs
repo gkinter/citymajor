@@ -47,7 +47,10 @@ public static class WasmConfig
     /// Assignment iterations per lite traffic tick. P4.1 = 1 (static AON on free-flow);
     /// P4.2 raises this for multi-iteration Frank-Wolfe convergence.
     /// </summary>
-    public const int TrafficLiteFrankWolfeIterations = 1;
+    public const int TrafficLiteFrankWolfeIterations = 3;
+
+    /// <summary>Relative-gap stop threshold for lite Frank-Wolfe (1% per SIMULATION_ARCHITECTURE §4).</summary>
+    public const float TrafficLiteFrankWolfeConvergenceThreshold = 0.01f;
 
     /// <summary>Edge batches for partial BPR refresh between full lite ticks.</summary>
     public const int TrafficLiteEdgeBatchCount = 4;

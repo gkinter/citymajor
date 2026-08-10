@@ -96,8 +96,16 @@ public sealed class WasmSimHost
     public float ResidentialVacancy => _host.State?.ResidentialVacancy ?? 1f;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
-    public RoadGraphSnapshotDto RoadGraphSnapshot =>
-        _host.State is null ? new RoadGraphSnapshotDto() : RoadGraphSnapshotDto.From(_host.State.Roads);
+    public RoadGraphSnapshotDto RoadGraphSnapshot
+    {
+        get
+        {
+            if (_host.State is null) return new RoadGraphSnapshotDto();
+            var (edgeVolumes, edgeTravelTimes) = _host.GetTrafficEdgeExport();
+            return RoadGraphSnapshotDto.From(
+                _host.State.Roads, edgeVolumes, edgeTravelTimes);
+        }
+    }
 
     internal SimHost InnerHost => _host;
 

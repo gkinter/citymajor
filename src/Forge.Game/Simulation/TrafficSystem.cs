@@ -27,7 +27,7 @@ public sealed class TrafficSystem
 
     private const int TargetZoneCount = 500;
     /// <summary>P4.1 static assignment; P4.2 raises for Frank-Wolfe convergence.</summary>
-    private const int MaxFrankWolfeIterations = 1;
+    private const int MaxFrankWolfeIterations = 3;
     private const float FrankWolfeConvergenceThreshold = 0.01f;
 
     // BPR formula delegated to <see cref="TrafficBpr"/>
@@ -101,6 +101,12 @@ public sealed class TrafficSystem
 
     /// <summary>Congestion per road edge (0.0 = free flow, values > 1.0 = congested).</summary>
     public float[] EdgeCongestion { get; private set; } = Array.Empty<float>();
+
+    /// <summary>Assigned volume per road edge (parallel to graph edge index).</summary>
+    public float[] EdgeVolumes => _edgeVolume ?? Array.Empty<float>();
+
+    /// <summary>BPR travel time per road edge after assignment (parallel to graph edge index).</summary>
+    public float[] EdgeTravelTimes { get; private set; } = Array.Empty<float>();
 
     /// <summary>Average commute time in minutes across all commuting households.</summary>
     public float AverageCommuteMinutes { get; private set; }
@@ -244,6 +250,7 @@ public sealed class TrafficSystem
             _edgeCapacity = Array.Empty<float>();
             _edgeFreeFlow = Array.Empty<float>();
             EdgeCongestion = Array.Empty<float>();
+            EdgeTravelTimes = Array.Empty<float>();
             return;
         }
 
@@ -251,6 +258,7 @@ public sealed class TrafficSystem
         _edgeCapacity = new float[_edgeCount];
         _edgeFreeFlow = new float[_edgeCount];
         EdgeCongestion = new float[_edgeCount];
+        EdgeTravelTimes = new float[_edgeCount];
 
         // Set capacity and free flow times based on road level
         // We derive edge data from the road graph structure
@@ -534,29 +542,25 @@ public sealed class TrafficSystem
             Array.Clear(auxVolume, 0, auxVolume.Length);
             AssignAllOrNothing(state, auxVolume, currentTimes);
 
+            float gap = TrafficBpr.FrankWolfeRelativeGap(currentTimes, _edgeVolume, auxVolume);
+            if (gap < FrankWolfeConvergenceThreshold)
+                break;
+
             // Frank-Wolfe step size: lambda = 2 / (iteration + 2)
             float lambda = 2f / (iteration + 2);
 
             // Update volumes: volume = (1 - lambda) * volume + lambda * auxVolume
-            float maxChange = 0f;
             for (int e = 0; e < _edgeCount; e++)
-            {
-                float newVol = (1f - lambda) * _edgeVolume[e] + lambda * auxVolume[e];
-                float change = MathF.Abs(newVol - _edgeVolume[e]);
-                if (change > maxChange) maxChange = change;
-                _edgeVolume[e] = newVol;
-            }
-
-            // Check convergence
-            if (maxChange < FrankWolfeConvergenceThreshold)
-                break;
+                _edgeVolume[e] = (1f - lambda) * _edgeVolume[e] + lambda * auxVolume[e];
         }
 
-        // Compute final congestion ratios
+        // Compute final congestion ratios and BPR travel times
         for (int e = 0; e < _edgeCount; e++)
         {
             float cap = _edgeCapacity[e];
             EdgeCongestion[e] = cap > 0 ? _edgeVolume[e] / cap : 0f;
+            EdgeTravelTimes[e] = CalculateBprTravelTime(
+                _edgeFreeFlow[e], _edgeVolume[e], _edgeCapacity[e]);
         }
 
         PublishEdgeTravelTimes(state);

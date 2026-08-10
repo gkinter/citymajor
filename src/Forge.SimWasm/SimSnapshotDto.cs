@@ -131,12 +131,14 @@ public sealed class SimSnapshotDto
         EconomySystem? economy = null,
         ServiceSystem? services = null,
         PopulationSystem? population = null,
-        ResearchSystem? research = null)
+        ResearchSystem? research = null,
+        float[]? edgeVolumes = null,
+        float[]? edgeTravelTimes = null)
     {
         var buildings = CollectBuildings(state);
         var zones = CollectZones(state);
         var roads = CollectRoads(state);
-        var roadGraph = RoadGraphSnapshotDto.From(state.Roads);
+        var roadGraph = RoadGraphSnapshotDto.From(state.Roads, edgeVolumes, edgeTravelTimes);
         var traffic = CollectTraffic(state);
         var serviceCoverage = services is null ? [] : CollectServiceCoverage(state, services);
         var commuterAudit = population?.AuditCommuters(state) ?? default;
@@ -376,6 +378,7 @@ public sealed class RoadDto
 
 /// <summary>
 /// Compact segment-graph export — <see cref="NodeTypes"/>[i] is <see cref="RoadNodeType"/> for node i.
+/// <see cref="EdgeVolumes"/> and <see cref="TravelTimes"/> are parallel arrays indexed by graph edge id (P1.6 / P4.2).
 /// </summary>
 public sealed class RoadGraphSnapshotDto
 {
@@ -383,11 +386,18 @@ public sealed class RoadGraphSnapshotDto
     public byte[] NodeTypes { get; init; } = [];
     public int[] NodeTileX { get; init; } = [];
     public int[] NodeTileZ { get; init; } = [];
+    public int EdgeCount { get; init; }
+    public float[] EdgeVolumes { get; init; } = [];
+    public float[] TravelTimes { get; init; } = [];
 
-    public static RoadGraphSnapshotDto From(RoadGraph graph)
+    public static RoadGraphSnapshotDto From(
+        RoadGraph graph,
+        float[]? edgeVolumes = null,
+        float[]? travelTimes = null)
     {
         int n = graph.NodeCount;
-        if (n == 0) return new RoadGraphSnapshotDto();
+        int edgeCount = graph.EdgeCount;
+        if (n == 0 && edgeCount == 0) return new RoadGraphSnapshotDto();
 
         var types = new byte[n];
         var xs = new int[n];
@@ -406,7 +416,20 @@ public sealed class RoadGraphSnapshotDto
             NodeTypes = types,
             NodeTileX = xs,
             NodeTileZ = zs,
+            EdgeCount = edgeCount,
+            EdgeVolumes = NormalizeEdgeArray(edgeVolumes, edgeCount),
+            TravelTimes = NormalizeEdgeArray(travelTimes, edgeCount),
         };
+    }
+
+    private static float[] NormalizeEdgeArray(float[]? values, int edgeCount)
+    {
+        if (edgeCount <= 0) return [];
+        if (values is null || values.Length == 0) return new float[edgeCount];
+        if (values.Length == edgeCount) return values;
+        var normalized = new float[edgeCount];
+        Array.Copy(values, normalized, Math.Min(values.Length, edgeCount));
+        return normalized;
     }
 }
 

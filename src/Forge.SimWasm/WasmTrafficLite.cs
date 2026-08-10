@@ -41,6 +41,12 @@ public sealed class WasmTrafficLite
 
     public float[] EdgeCongestion { get; private set; } = Array.Empty<float>();
 
+    /// <summary>Assigned volume per road edge (parallel to graph edge index).</summary>
+    public float[] EdgeVolumes => _edgeVolume ?? Array.Empty<float>();
+
+    /// <summary>BPR travel time per road edge after assignment (parallel to graph edge index).</summary>
+    public float[] EdgeTravelTimes { get; private set; } = Array.Empty<float>();
+
     /// <summary>Set O-D zone grid resolution; invalidates cached zone layout when changed.</summary>
     public void Configure(int zoneCount)
     {
@@ -180,6 +186,7 @@ public sealed class WasmTrafficLite
             _edgeCapacity = Array.Empty<float>();
             _edgeFreeFlow = Array.Empty<float>();
             EdgeCongestion = Array.Empty<float>();
+            EdgeTravelTimes = Array.Empty<float>();
             _nodeEdgeStart = nodeCount > 0 ? new int[nodeCount] : Array.Empty<int>();
             return;
         }
@@ -188,6 +195,7 @@ public sealed class WasmTrafficLite
         _edgeCapacity = new float[_edgeCount];
         _edgeFreeFlow = new float[_edgeCount];
         EdgeCongestion = new float[_edgeCount];
+        EdgeTravelTimes = new float[_edgeCount];
         _nodeEdgeStart = new int[nodeCount];
 
         int edgeIdx = 0;
@@ -360,6 +368,10 @@ public sealed class WasmTrafficLite
             Array.Clear(auxVolume, 0, auxVolume.Length);
             AssignAllOrNothing(state, auxVolume, currentTimes);
 
+            float gap = TrafficBpr.FrankWolfeRelativeGap(currentTimes, _edgeVolume, auxVolume);
+            if (gap < WasmConfig.TrafficLiteFrankWolfeConvergenceThreshold)
+                break;
+
             float lambda = 2f / (iteration + 2);
             for (int e = 0; e < _edgeCount; e++)
                 _edgeVolume[e] = (1f - lambda) * _edgeVolume[e] + lambda * auxVolume[e];
@@ -369,6 +381,8 @@ public sealed class WasmTrafficLite
         {
             float cap = _edgeCapacity[e];
             EdgeCongestion[e] = cap > 0 ? _edgeVolume[e] / cap : 0f;
+            EdgeTravelTimes[e] = TrafficBpr.CalculateTravelTime(
+                _edgeFreeFlow[e], _edgeVolume[e], _edgeCapacity[e]);
         }
 
         PublishEdgeTravelTimes(state);

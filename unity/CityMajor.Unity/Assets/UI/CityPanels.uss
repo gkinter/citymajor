@@ -723,3 +723,63 @@
     font-size: 11px;
     padding: 4px 10px;
 }
+
+.road-toolbar {
+    position: absolute;
+    bottom: 108px;
+    left: 50%;
+    translate: -50% 0;
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 8px;
+    background-color: rgba(12, 16, 24, 0.9);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+}
+
+.road-toolbar__label {
+    font-size: 11px;
+    color: rgba(200, 210, 225, 0.7);
+    margin-right: 6px;
+    -unity-text-align: middle-left;
+}
+
+.road-toolbar__btn {
+    min-width: 72px;
+    margin-right: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: rgba(220, 228, 240, 0.92);
+    background-color: rgba(28, 34, 48, 0.95);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.road-toolbar__btn--active {
+    background-color: rgba(55, 90, 140, 0.95);
+    border-color: rgba(120, 160, 220, 0.55);
+    -unity-font-style: bold;
+}
+
+.road-toolbar__btn--ramp.road-toolbar__btn--active {
+    background-color: rgba(140, 80, 30, 0.95);
+    border-color: rgba(220, 140, 60, 0.55);
+}
+
+.road-toolbar__btn--elev.road-toolbar__btn--active {
+    background-color: rgba(50, 90, 150, 0.95);
+}
+
+.road-toolbar__btn--disabled {
+    opacity: 0.45;
+}
+
+.road-toolbar__sep {
+    width: 1px;
+    height: 18px;
+    margin-left: 4px;
+    margin-right: 8px;
+    background-color: rgba(255, 255, 255, 0.18);
+}

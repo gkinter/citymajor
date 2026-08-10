@@ -43,7 +43,7 @@ namespace CityMajor.Editor
                 "[CityMajor] SB-4176 Play gate: run CityMajor → Smoke → Run Smoke Prep first " +
                 "(docs/design/UNITY_PLAY_SMOKE.md), then Open Play Verification Checklist. " +
                 "Rebuild SimCore after SimHost edits: ./scripts/build-simcore-for-unity.sh. " +
-                "Cathedral P1–P4: RoadPaintTool Paint Bridge/Tunnel/Ramp + ZonePaintTool density; " +
+                "Cathedral P1–P4: RoadTypeToolbar Local/Collector/Highway + Bridge/Tunnel/Ramp → PlaceRoad; ZonePaintTool density; " +
                 "CitySimState MeanRentBurden / ResidentialVacancy (F1 Help).");
         }
 

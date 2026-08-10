@@ -164,6 +164,10 @@ namespace CityMajor.Core
             helpUi.transform.SetParent(root.transform, false);
             helpUi.AddComponent<HelpPanelController>().Configure(sim);
 
+            var roadToolbarUi = new GameObject("CityMajor_RoadToolbar");
+            roadToolbarUi.transform.SetParent(root.transform, false);
+            roadToolbarUi.AddComponent<RoadTypeToolbarController>().Configure(roads);
+
             var toolHud = new GameObject("CityMajor_ToolModeHud");
             toolHud.transform.SetParent(root.transform, false);
             toolHud.AddComponent<ToolModeHudController>().Configure(paint, roads, buildPlop, bulldoze);

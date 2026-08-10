@@ -47,6 +47,11 @@ export function deriveBucketFromEventType(typeId: string): SimStateBucket {
     return "housing_shortage";
   }
   if (
+    /shortage|supply[-_ ]?chain|stockout|goods|famine/.test(haystack)
+  ) {
+    return "economy_shortage";
+  }
+  if (
     /disease|epidemic|plague|cholera|hospital|clinic|health|pandemic/.test(
       haystack,
     )

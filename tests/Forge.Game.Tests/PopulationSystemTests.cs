@@ -300,6 +300,48 @@ public class PopulationSystemTests
     }
 
     [Fact]
+    public void GetUnemploymentRate_AllWorkingAgeUnemployed_ReturnsOne()
+    {
+        var state = CreateTestWorld();
+        var system = new PopulationSystem(seed: 42);
+
+        int slot = AddHousehold(state, system,
+            members: 2, education: 1, homeBuilding: 0, workBuilding: 0, headAge: 30);
+        state.Households.AgeGroup[slot] = 1;
+        state.Households.Flags[slot] = (byte)(1 | 4); // active + unemployed
+        state.Households.WorkBuildingId[slot] = 0;
+
+        float rate = system.GetUnemploymentRate(state);
+
+        Assert.Equal(1f, rate);
+    }
+
+    [Fact]
+    public void GetJobVacancyRate_EmptyCommercial_ReturnsOne()
+    {
+        var state = CreateTestWorld();
+        var system = new PopulationSystem(seed: 42);
+
+        // CreateTestWorld commercial building has MaxOccupants=30, Occupants=0
+        float vacancy = system.GetJobVacancyRate(state);
+
+        Assert.Equal(1f, vacancy);
+    }
+
+    [Fact]
+    public void GetJobVacancyRate_FullyStaffed_ReturnsZero()
+    {
+        var state = CreateTestWorld();
+        var system = new PopulationSystem(seed: 42);
+
+        state.Buildings.Occupants[1] = state.Buildings.MaxOccupants[1];
+
+        float vacancy = system.GetJobVacancyRate(state);
+
+        Assert.Equal(0f, vacancy);
+    }
+
+    [Fact]
     public void WealthClassTransitions_GradualChange_OneStepPerMonth()
     {
         var state = CreateTestWorld();

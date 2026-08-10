@@ -6,6 +6,7 @@ import {
   formatGoodName,
   zoningHintForGood,
 } from "@/lib/economy-goods";
+import { formatEmploymentShare } from "@/lib/economy-employment";
 import {
   HUD_COLORS,
   hudSlidePanel,
@@ -106,6 +107,8 @@ function EconomySummary({ resources }: { resources: SimResources | null }) {
   }
 
   const taxRate = resources.taxRate;
+  const unemploymentRate = resources.unemploymentRate;
+  const jobVacancy = resources.jobVacancy;
 
   return (
     <section className="hud-economy-section" aria-label="City treasury">
@@ -118,6 +121,17 @@ function EconomySummary({ resources }: { resources: SimResources | null }) {
         />
         {taxRate !== undefined ? (
           <SummaryStat label="Tax rate" value={formatTaxRate(taxRate)} />
+        ) : null}
+        {unemploymentRate !== undefined ? (
+          <SummaryStat
+            label="Unemployment"
+            value={formatEmploymentShare(unemploymentRate)}
+          />
+        ) : jobVacancy !== undefined ? (
+          <SummaryStat
+            label="Job vacancy"
+            value={formatEmploymentShare(jobVacancy)}
+          />
         ) : null}
       </div>
     </section>

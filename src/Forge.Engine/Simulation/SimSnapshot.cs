@@ -190,6 +190,12 @@ public sealed class SimSnapshot
     /// <summary>Composite utility stress (0 = healthy, 1 = severe shortage).</summary>
     public float UtilityStressIndex { get; init; }
 
+    /// <summary>
+    /// Mean fire/EMS response minutes over sampled zoned tiles (road distance + traffic).
+    /// Default matches <c>EmergencyResponseTime.NoStationResponseMinutes</c>.
+    /// </summary>
+    public float MeanEmergencyResponseMinutes { get; init; } = 30f;
+
     public readonly record struct BuildingSnapshot(
         int GridX, int GridY, ushort TypeId, byte Level,
         byte State, ushort Occupants, ushort MaxOccupants, byte Condition);
@@ -344,6 +350,7 @@ public sealed class SimSnapshot
             BlackoutFraction = state.BlackoutFraction,
             WaterShortageFraction = state.WaterShortageFraction,
             UtilityStressIndex = state.UtilityStressIndex,
+            MeanEmergencyResponseMinutes = state.MeanEmergencyResponseMinutes,
         };
     }
 }

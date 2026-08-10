@@ -162,6 +162,9 @@ public sealed class CathedralUtilitiesTests
 
         var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
         Assert.Equal(mean, dto.MeanEmergencyResponseMinutes, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(mean, snap.MeanEmergencyResponseMinutes, precision: 3);
     }
 
     private static float[] CaptureFreeFlowEdgeCosts(RoadGraph graph)

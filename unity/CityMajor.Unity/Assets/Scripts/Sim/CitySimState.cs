@@ -42,6 +42,11 @@ namespace CityMajor.Sim
         public float BlackoutFraction;
         public float WaterShortageFraction;
 
+        /// <summary>
+        /// Cathedral P5.2 — mean fire/EMS response minutes over sampled zoned tiles.
+        /// </summary>
+        public float MeanEmergencyResponseMinutes;
+
         /// <summary>Cathedral P2 — mean rent / income burden (0–1+).</summary>
         public float MeanRentBurden;
 

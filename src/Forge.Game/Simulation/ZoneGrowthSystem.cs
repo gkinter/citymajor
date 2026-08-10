@@ -790,8 +790,10 @@ public sealed class ZoneGrowthSystem
 
     /// <summary>
     /// Calculate max occupants based on zone type and density level.
+    /// CATHEDRAL_P2 §4: each density step doubles the occupant multiplier (×1 → ×2 → ×4),
+    /// so density 3 is 4× (double×double) vs density 1.
     /// </summary>
-    private static ushort CalculateMaxOccupants(byte zoneType, byte density)
+    internal static ushort CalculateMaxOccupants(byte zoneType, byte density)
     {
         int baseOccupants = zoneType switch
         {
@@ -805,7 +807,7 @@ public sealed class ZoneGrowthSystem
             _ => 4
         };
 
-        // Density multiplier: low=1, medium=2, high=4
+        // Density multiplier: low=1, medium=2, high=4 (each step doubles)
         int densityMul = density switch
         {
             0 => 1,

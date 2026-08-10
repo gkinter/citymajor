@@ -29,6 +29,7 @@
     <Compile Include="..\Forge.SimWasm\WasmConfig.cs" Link="Wasm\WasmConfig.cs" />
     <Compile Include="..\Forge.SimWasm\WasmTrafficLite.cs" Link="Wasm\WasmTrafficLite.cs" />
     <Compile Include="..\Forge.SimWasm\SimSnapshotDto.cs" Link="Snapshot\SimSnapshotDto.cs" />
+    <Compile Include="..\Forge.SimWasm\HeraldNarrativePredicates.cs" Link="Wasm\HeraldNarrativePredicates.cs" />
     <Compile Include="..\Forge.SimWasm\LifeSimMath.cs" Link="Wasm\LifeSimMath.cs" />
     <Compile Include="..\Forge.SimWasm\ServiceCoverageExport.cs" Link="Wasm\ServiceCoverageExport.cs" />
     <Compile Include="..\Forge.SimWasm\UtilityCoverageExport.cs" Link="Wasm\UtilityCoverageExport.cs" />

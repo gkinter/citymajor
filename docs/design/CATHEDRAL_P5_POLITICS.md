@@ -92,9 +92,9 @@ Herald / WASM deltas use **percentage points** via `ApplyApprovalDelta(deltaPerc
 ```typescript
 interface PoliticsStatusStub {
   approval: number;           // 0–100
-  corruptionIndex?: number;   // 0–100
-  protestPhase?: string;      // None…Riot
-  councilSeats?: number[];    // faction id per seat (length 9)
+  councilSeats: number[];     // faction id per seat (length 9)
+  corruptionIndex?: number;   // 0–100 — HUD follow-on
+  protestPhase?: string;      // None…Riot — HUD follow-on
   nextElectionYear?: number;
 }
 ```

@@ -6,8 +6,8 @@
 **Charter:** [`CATHEDRAL_PROGRAM.md`](./CATHEDRAL_PROGRAM.md)  
 **Linear:** SB-4211, SB-4222–4224, SB-4231–4232, SB-4262 (flaky-test gate)
 
-**Landed this sync:** P2.1 ✅ · P3.2 export+HUD ✅ · P3.4 friction ✅ · P4.1 O-D+HUD ✅ · P4.2 FW+commute sat ✅ · P4.5 mode choice ✅ · P1.5 ramp/bridge UI ✅ · congestion heatmap ✅ · SimplexNoise ✅ · P5 politics stub ✅ · OpenSpec `001` archived ✅  
-**Still open:** P3.3 partition pricing depth · P7.2 unskip/flaky gate
+**Landed this sync:** P2.1 ✅ · P3.2 export+HUD ✅ · P3.4 friction ✅ · P4.1 O-D+HUD ✅ · P4.2 FW+commute sat ✅ · P4.5 mode choice ✅ · P1.5 ramp/bridge UI ✅ · congestion heatmap ✅ · SimplexNoise ✅ · P5 politics stub ✅ · OpenSpec `001` archived ✅ · **P7.2 Cathedral skip gate ✅**  
+**Still open:** P3.3 partition pricing depth
 
 ---
 
@@ -124,19 +124,22 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Deliverable** | Approval characterization stub (program P6 foundation; dispatch label P5) |
 | **Landed** | `fb64bd9` — see [`CATHEDRAL_P5_POLITICS.md`](./CATHEDRAL_P5_POLITICS.md) |
 
-### P7.2 gate — Flaky / skipped test cleanup (SB-4262) — partial
+### P7.2 gate — Flaky / skipped test cleanup (SB-4262) ✅
 
 | Field | Value |
 |-------|-------|
 | **Owner** | Orchestrator (CI lane) |
 | **Deliverable** | Cathedral test filter runs clean in CI; no `[Fact(Skip=…)]` for shipped milestones |
-| **Acceptance** | `dotnet test --filter "FullyQualifiedName~Cathedral"` — 0 skipped, 0 flaky retries; unskip `MarketZonePrices_DifferAcrossPartitions` when P3.3 lands |
-| **Depends** | P3.3 merge |
-| **Landed (partial)** | `49edba1` SimHost serialize · `b4be623` instance-local SimplexNoise permutation tables |
+| **Acceptance** | `dotnet test --filter "FullyQualifiedName~Cathedral"` — 0 skipped, 0 flaky retries |
+| **Depends** | P3.3 merge (MarketZonePrices already green) |
+| **Landed** | Test isolation `49edba1`; P7.2 unskip — Herald P5.5 predicates + council-seat export stub (0 Cathedral `Skip=`) |
 
-### OpenSpec `001-road-tier-and-graph-v2` ✅ archived
+**Remaining deferrals (documented, no Skip attributes):**
 
-Moved to [`openspec/changes/archive/2026-08-10-001-road-tier-and-graph-v2/`](../../openspec/changes/archive/2026-08-10-001-road-tier-and-graph-v2/); requirements merged into [`openspec/specs/infrastructure.md`](../../openspec/specs/infrastructure.md).
+| Item | Why not a Skip | Tracking |
+|------|----------------|----------|
+| **P5.7 Economic Control Spectrum** | No characterization test yet — **v2 boundary** | [`CATHEDRAL_P5_POLITICS.md`](./CATHEDRAL_P5_POLITICS.md) §2 |
+| Full faction HUD / protest polish | Seats export stubbed on snapshot + WASM status; UI still Phase 2 | P5.6 follow-on when Politics HUD ships |
 
 ---
 
@@ -177,7 +180,7 @@ Moved to [`openspec/changes/archive/2026-08-10-001-road-tier-and-graph-v2/`](../
 
 ## 7. Acceptance checklist (Fri W2)
 
-- [ ] `dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"` — all pass, zero skipped
+- [x] `dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"` — all pass, zero skipped
 - [x] Goods panel / snapshot shows partition prices (export landed `45d8186`; UI spread still P3.3)
 - [x] Production-chain HUD with goods flow (`746780c`)
 - [x] Friction overlay renders on web (`a9e7878`)
@@ -187,7 +190,7 @@ Moved to [`openspec/changes/archive/2026-08-10-001-road-tier-and-graph-v2/`](../
 - [x] Congestion heatmap (`c8827bf`)
 - [x] Ramp paint + bridge/tunnel toolbar (`6084fad` / `b34942a`)
 - [x] Office / mixed / park / ag brushes paintable with era gates (`a990636`)
-- [x] Test isolation: SimHost serialize (`49edba1`) + SimplexNoise instance-local (`b4be623`) — full P7.2 unskip gate still open
+- [x] Test isolation: SimHost serialize (`49edba1`) + SimplexNoise instance-local (`b4be623`) + **P7.2 unskip gate** (0 Cathedral politics Skip; P5.7 ECS remains v2 defer)
 - [x] P5 politics foundation stub (`fb64bd9`)
 - [x] OpenSpec `001-road-tier-and-graph-v2` archived
 - [ ] OpenSpec `002-zone-palette-v1` + economy delta archived

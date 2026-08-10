@@ -10,7 +10,7 @@
 
 ## 1. Goal
 
-Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Defer emergency response timing (P5.2) and fire-spread depth (P5.3).
+Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Defer fire-spread depth (P5.3).
 
 ---
 
@@ -19,7 +19,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 | ID | Deliverable | Current state |
 |----|-------------|---------------|
 | **P5.1** | Utilities L0 balance on WASM status + HUD % | **Live** — `WorldState.PowerCoverageFraction` / `WaterCoverageFraction` → `WasmStatusDto` + ResourcesHud `Util` line |
-| **P5.2** | Emergency response time = distance + traffic | **Not started** |
+| **P5.2** | Emergency response time = distance + traffic | **Live** — `EmergencyResponseTime` + `ServiceSystem.CalculateFireResponseTime` use road graph / BPR edge times |
 | **P5.3** | Fire v1 (spread + hydrant coverage) | **Not started** (post-EA Phase 5b) |
 
 ---
@@ -71,6 +71,17 @@ Worker maps the same keys onto `SimResources`; ResourcesHud renders when either 
 - Snapshot JSON includes `powerCoverageFraction` / `waterCoverageFraction` in `[0, 1]`
 - `SimSnapshotDto` mirrors `WorldState` utility fields
 - L0 tick without plants drops coverage below 1; plants restore local coverage
+- Emergency response minutes rise with road-graph distance and BPR congestion (`EmergencyResponseTime_UsesDistancePlusTraffic`)
+
+### 4.3 P5.2 response formula
+
+```
+responseMinutes =
+  roadGraphPathCost(station → incident, BPR edge times) / vehicleSpeed
+  + crewReadiness
+```
+
+`pathCost` uses Dijkstra on `WorldState.Roads` with `RoadEdgeTravelTimes` when present; otherwise free-flow edge costs; Euclidean tile distance as last resort. `ServiceSystem.CalculateFireResponseTime` forwards to `EmergencyResponseTime`.
 
 ---
 

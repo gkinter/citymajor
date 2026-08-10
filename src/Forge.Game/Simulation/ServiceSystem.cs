@@ -1,6 +1,7 @@
 using Forge.Engine.Core;
 using Forge.Engine.Data;
 using Forge.Engine.Simulation;
+using Forge.SimCore;
 
 namespace Forge.Game.Simulation;
 
@@ -322,42 +323,19 @@ public sealed class ServiceSystem
 
     /// <summary>
     /// Calculate fire response time in minutes for a tile.
-    /// Formula: distance_to_nearest_station / speed + crew_readiness + traffic_delay
+    /// Uses road-graph distance with BPR edge travel times when available
+    /// (Cathedral P5.2); falls back to Euclidean / free-flow graph costs.
     /// </summary>
     public float CalculateFireResponseTime(WorldState state, int tileX, int tileY)
     {
-        if (!state.Tiles.InBounds(tileX, tileY)) return float.MaxValue;
-
-        // Find the nearest fire station by scanning buildings
-        float minDist = float.MaxValue;
-        var buildings = state.Buildings;
-
-        for (int i = 0; i < buildings.Capacity; i++)
-        {
-            if (!buildings.IsActive(i)) continue;
-            if ((buildings.ServiceFlags[i] & ServiceFire) == 0) continue;
-
-            float dx = buildings.GridX[i] - tileX;
-            float dy = buildings.GridY[i] - tileY;
-            float dist = MathF.Sqrt(dx * dx + dy * dy);
-            if (dist < minDist) minDist = dist;
-        }
-
-        if (minDist >= float.MaxValue) return 30f; // No fire station: 30 min response
-
-        // Base speed: 2 tiles/minute for fire trucks
-        const float firetruckSpeed = 2f;
-        float travelTime = minDist / firetruckSpeed;
-
-        // Crew readiness: 1 minute base dispatch time
-        const float crewReadiness = 1f;
-
-        // Traffic delay: based on local traffic density
-        int idx = state.Tiles.Index(tileX, tileY);
-        float traffic = state.Tiles.Traffic[idx];
-        float trafficDelay = traffic * 5f; // up to 5 min delay in gridlock
-
-        return travelTime + crewReadiness + trafficDelay;
+        // Prefer state.RoadEdgeTravelTimes so congestion from the latest traffic
+        // assignment raises response minutes (Cathedral P5.2 / SB-4242).
+        return EmergencyResponseTime.CalculateMinutes(
+            state,
+            tileX,
+            tileY,
+            EmergencyResponseTime.ServiceFire,
+            state.RoadEdgeTravelTimes);
     }
 
     /// <summary>

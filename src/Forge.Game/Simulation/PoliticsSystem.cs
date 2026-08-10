@@ -685,6 +685,19 @@ public sealed class PoliticsSystem
         Array.Copy(CouncilSeats, state.CouncilSeats, CouncilSeatCount);
     }
 
+    /// <summary>Restore council seat faction ids from a snapshot (save/load).</summary>
+    public void RestoreCouncilSeats(ReadOnlySpan<int> seats, WorldState state)
+    {
+        int n = Math.Min(seats.Length, CouncilSeatCount);
+        for (int i = 0; i < n; i++)
+        {
+            int faction = seats[i];
+            CouncilSeats[i] = (byte)Math.Clamp(faction, 0, FactionCount - 1);
+        }
+
+        Array.Copy(CouncilSeats, state.CouncilSeats, CouncilSeatCount);
+    }
+
     /// <summary>
     /// Apply consequences based on approval level.
     /// >80: bonus funding, 40-60: protests possible, less than 20: forced election.

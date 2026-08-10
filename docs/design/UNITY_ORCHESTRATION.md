@@ -199,7 +199,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 
 | Component | Key / toggle | Notes |
 |-----------|--------------|-------|
-| `ZonePaintTool` | `1`/`2`/`3`/`0` | R/C/I paint + erase; inspector `zoneDensity` → `SimHost.PaintZone` |
+| `ZonePaintTool` | `1`/`2`/`3`/`5`/`6`/`7`/`0`, `D` | R/C/I + Office/Mixed/Ag + erase; density Low/Med/High → `CitySimBridge.PaintZone`; P2.1 era/tech gates |
 | `RoadPaintTool` | `4` | `SimHost.PlaceRoad(tier, bridge?, tunnel?, ramp?)` — inspector Paint Bridge / Tunnel / Ramp |
 | `BulldozeTool` | `X` | Zone/building/road clear via `SimHost.Bulldoze` |
 | `BuildPlopTool` | `B` + panel | Service plop on zoned tiles |
@@ -218,6 +218,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `ResourcesHudController` | — | Pop, funds, hour, rush multiplier, growth `(+N/mo)` |
 | `EraBadgeController` | — | Era name badge (reads `SimSnapshot.Era`) |
 | `DemandOverlayController` | — | Bottom-center bidirectional R/C/I meters |
+| `ZoningToolbarController` | — | Bottom zone palette + Low/Med/High density (P2.1/P2.2) |
 | `HappinessMeterController` | — | Left-stack happiness bar |
 | `BudgetPanelController` | — | Top-right economy strip |
 | `ApprovalMeterController` | — | Top-right mayor approval |

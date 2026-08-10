@@ -92,6 +92,10 @@ namespace CityMajor.Core
             demandUi.transform.SetParent(root.transform, false);
             demandUi.AddComponent<DemandOverlayController>().Configure(sim);
 
+            var zoningUi = new GameObject("CityMajor_ZoningToolbar");
+            zoningUi.transform.SetParent(root.transform, false);
+            zoningUi.AddComponent<ZoningToolbarController>().Configure(sim, paint);
+
             var happinessUi = new GameObject("CityMajor_HappinessUi");
             happinessUi.transform.SetParent(root.transform, false);
             happinessUi.AddComponent<HappinessMeterController>().Configure(sim);

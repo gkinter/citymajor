@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="zoning-root" class="zoning-toolbar-root" picking-mode="Position">
+        <ui:VisualElement class="zoning-toolbar">
+            <ui:Label name="zoning-title" class="zoning-title" text="Zones" />
+            <ui:VisualElement name="zoning-tiers" class="zoning-tiers" />
+            <ui:VisualElement class="zoning-divider" />
+            <ui:Label class="zoning-title" text="Density" />
+            <ui:VisualElement name="zoning-density" class="zoning-density">
+                <ui:Button name="density-low" class="zoning-btn zoning-btn--density" text="Low" />
+                <ui:Button name="density-med" class="zoning-btn zoning-btn--density" text="Med" />
+                <ui:Button name="density-high" class="zoning-btn zoning-btn--density" text="High" />
+            </ui:VisualElement>
+            <ui:Label name="zoning-status" class="zoning-status" text="" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -31,11 +31,14 @@
 ## Zoning & roads
 
 - [ ] `1` / `2` / `3` — R / C / I zone paint on LMB drag
+- [ ] `5` / `6` / `7` — Office / Mixed / Ag when era + research unlock (locked otherwise)
 - [ ] `0` — erase zones
+- [ ] `D` — cycle density Low → Med → High (also bottom Zoning toolbar)
+- [ ] Bottom **Zoning** toolbar — tier buttons + Low/Med/High; paints via `CitySimBridge.PaintZone`
 - [ ] `X` — bulldoze mode (clears zones, buildings, roads on tile)
 - [ ] `4` — road mode; roads appear in overlay + traffic tint after sim ticks
 - [ ] RoadPaintTool inspector — optional **Paint Bridge** / **Paint Tunnel** (P1.3) / **Paint Ramp** (P1.5)
-- [ ] ZonePaintTool inspector — **Zone Density** 0–3 paints through `CitySimBridge.PaintZone`
+- [ ] ZonePaintTool inspector — **Zone Density** 1–3 paints through `CitySimBridge.PaintZone`
 - [ ] MMB — camera pan
 
 ---

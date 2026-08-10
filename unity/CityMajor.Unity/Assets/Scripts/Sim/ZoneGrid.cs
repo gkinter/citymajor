@@ -56,9 +56,12 @@ namespace CityMajor.Sim
 
         public Color ZoneColor(ZonePaintTool.ZoneKind kind) => kind switch
         {
-            ZonePaintTool.ZoneKind.Residential => new Color(0.2f, 0.75f, 0.35f, 0.45f),
-            ZonePaintTool.ZoneKind.Commercial => new Color(0.2f, 0.45f, 0.95f, 0.45f),
-            ZonePaintTool.ZoneKind.Industrial => new Color(0.95f, 0.75f, 0.15f, 0.45f),
+            ZonePaintTool.ZoneKind.Residential => new Color(0.37f, 0.70f, 0.96f, 0.45f),
+            ZonePaintTool.ZoneKind.Commercial => new Color(0.94f, 0.70f, 0.16f, 0.45f),
+            ZonePaintTool.ZoneKind.Industrial => new Color(0.72f, 0.45f, 0.20f, 0.45f),
+            ZonePaintTool.ZoneKind.Office => new Color(0.75f, 0.52f, 0.99f, 0.45f),
+            ZonePaintTool.ZoneKind.Mixed => new Color(0.18f, 0.83f, 0.66f, 0.45f),
+            ZonePaintTool.ZoneKind.Agricultural => new Color(0.52f, 0.80f, 0.09f, 0.45f),
             _ => Color.clear,
         };
     }

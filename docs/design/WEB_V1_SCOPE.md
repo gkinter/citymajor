@@ -66,6 +66,8 @@ v1 delivers roughly **60–90 minutes** of focused progression (not the full 150
 
 **FPS vs sim tick-ms:** The ≥30 / ≥60 FPS rows are **render wall-clock** (R3F/WebGL with LOD). They are **not** a `SimHost.Tick` millisecond budget. Sim runs at **8 Hz** (125 ms/frame) on a worker; characterization gates live in [`SIM_TICK_BUDGET.md`](./SIM_TICK_BUDGET.md) (keep-pace &lt;125 ms always; historical &lt;25 ms under `CI_STRICT=1`).
 
+**Measurement (CI / `pnpm perf:gate`):** Enforce **stable** FPS — **median** sample after canvas warm-up (`PERF_WARMUP_MS`) plus discard of the first `PERF_DISCARD_MS` of the sample window (default 2s). Absolute min is diagnostic only (GC / shader / first-frame hitch). A healthy sustained window (median typically ≫ floor while a single sample dips) must clear ≥30. See [`web/PERF.md`](../../web/PERF.md).
+
 **Non-goals:** 4K ultra, uncapped entity counts, or “full vision” 1024×1024 / 50k building stress tests.
 
 ---

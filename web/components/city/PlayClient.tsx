@@ -573,6 +573,9 @@ export function PlayClient() {
 
   const handleRoadToolSelect = useCallback((tool: RoadToolId) => {
     setRoadTool(tool);
+    if (tool === "ramp") {
+      setRoadElevation(DEFAULT_ROAD_ELEVATION);
+    }
     setBuildMode("road");
     setActiveTool("road");
     setBuildTypeId(null);

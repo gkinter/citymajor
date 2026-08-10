@@ -90,6 +90,51 @@ public sealed class RoadRampTests
     }
 
     [Fact]
+    public void PlaceRoad_RampFlag_SetsStructureBitsAndRequiresHighwayNeighbor()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        Assert.True(host.PlaceRoad(40, 40, RoadTier.HighwayLevel));
+
+        Assert.False(host.PlaceRoad(42, 40, 1, ramp: true)); // not adjacent
+        Assert.True(host.PlaceRoad(41, 40, 1, ramp: true));
+
+        byte flags = host.State.Tiles.RoadFlags[host.State.Tiles.Index(41, 40)];
+        Assert.True(RoadFlags.IsRamp(flags));
+        Assert.False(RoadFlags.IsBridge(flags));
+        Assert.False(RoadFlags.IsTunnel(flags));
+        Assert.Equal(1, RoadTier.ExtractLevel(flags));
+    }
+
+    [Fact]
+    public void PlaceRoad_RampTool_ClampsHighwayTierToCollector()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        Assert.True(host.PlaceRoad(50, 50, RoadTier.HighwayLevel));
+        Assert.True(host.PlaceRoad(51, 50, RoadTier.HighwayLevel, ramp: true));
+
+        byte flags = host.State.Tiles.RoadFlags[host.State.Tiles.Index(51, 50)];
+        Assert.True(RoadFlags.IsRamp(flags));
+        Assert.Equal(1, RoadTier.ExtractLevel(flags));
+    }
+
+    [Fact]
+    public void PlaceRoad_RampExtension_FromExistingRamp_Allowed()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        Assert.True(host.PlaceRoad(60, 60, RoadTier.HighwayLevel));
+        Assert.True(host.PlaceRoad(61, 60, 1, ramp: true));
+        Assert.True(host.PlaceRoad(62, 60, 1, ramp: true));
+
+        Assert.True(RoadFlags.IsRamp(host.State.Tiles.RoadFlags[host.State.Tiles.Index(62, 60)]));
+    }
+
+    [Fact]
     public void ClassifyNodeType_TJunction_AllLocal_IsIntersection()
     {
         var tiles = new TileData(16);
@@ -131,8 +176,9 @@ public sealed class RoadRampTests
         if (HasRoad(tiles, x - 1, y)) connections |= 0x08;
         if (connections == 0) connections = 0x01;
         byte flags = (byte)(connections | ((tier & 0x03) << 4));
-        if ((existing & RoadFlags.Bridge) != 0) flags |= RoadFlags.Bridge;
-        if ((existing & RoadFlags.Tunnel) != 0) flags |= RoadFlags.Tunnel;
+        if (RoadFlags.IsRamp(existing)) flags |= RoadFlags.Ramp;
+        else if (RoadFlags.IsBridge(existing)) flags |= RoadFlags.Bridge;
+        else if (RoadFlags.IsTunnel(existing)) flags |= RoadFlags.Tunnel;
         tiles.RoadFlags[idx] = flags;
     }
 

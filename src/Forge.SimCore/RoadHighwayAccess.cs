@@ -3,7 +3,7 @@ using Forge.Engine.Data;
 namespace Forge.SimCore;
 
 /// <summary>
-/// Highway ramp access rules — local roads may only touch highways via ramp connectors (P1.4).
+/// Highway ramp access rules — local roads may only touch highways via ramp connectors (P1.4 / P1.5).
 /// </summary>
 public static class RoadHighwayAccess
 {
@@ -34,6 +34,31 @@ public static class RoadHighwayAccess
             {
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Dedicated ramp tool: non-highway connector must touch exactly one highway tile
+    /// (or extend an existing ramp-flagged connector).
+    /// </summary>
+    public static bool IsValidRampPlacement(TileData tiles, int x, int y)
+    {
+        if (!tiles.InBounds(x, y)) return false;
+
+        int highwayNeighbors = CountHighwayRoadNeighbors(tiles, x, y);
+        if (highwayNeighbors == 1) return true;
+        if (highwayNeighbors > 1) return false;
+
+        foreach (var (dx, dy) in NeighborDirs)
+        {
+            int nx = x + dx;
+            int ny = y + dy;
+            if (!IsRoad(tiles, nx, ny)) continue;
+            byte flags = tiles.RoadFlags[tiles.Index(nx, ny)];
+            if (RoadFlags.IsRamp(flags) && !RoadTier.IsHighwayTier(RoadTier.ExtractLevel(flags)))
+                return true;
         }
 
         return false;

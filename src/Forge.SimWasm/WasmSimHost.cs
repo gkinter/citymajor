@@ -154,8 +154,8 @@ public sealed class WasmSimHost
 
     public void Bulldoze(int x, int y) => _host.Bulldoze(x, y);
 
-    public bool PlaceRoad(int x, int y, byte tier = 1, bool bridge = false, bool tunnel = false) =>
-        _host.PlaceRoad(x, y, tier, bridge, tunnel);
+    public bool PlaceRoad(int x, int y, byte tier = 1, bool bridge = false, bool tunnel = false, bool ramp = false) =>
+        _host.PlaceRoad(x, y, tier, bridge, tunnel, ramp);
 
     public bool PlaceBuilding(int x, int y, int typeId) => _host.PlaceBuilding(x, y, typeId);
 

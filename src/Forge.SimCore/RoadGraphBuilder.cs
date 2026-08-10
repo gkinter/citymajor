@@ -116,7 +116,7 @@ public static class RoadGraphBuilder
         }
 
         bool tierBoundary = (selfHighway && hasLowerNeighbor) || (!selfHighway && hasHighwayNeighbor);
-        if (tierBoundary)
+        if (tierBoundary || (!selfHighway && RoadFlags.IsRamp(tiles.RoadFlags[tiles.Index(x, y)])))
         {
             if (degree >= 3) return RoadNodeType.Ramp;
             return RoadTier.IsHighwayTier(selfTier) ? RoadNodeType.HighwayOff : RoadNodeType.HighwayOn;
@@ -198,8 +198,8 @@ public static class RoadGraphBuilder
     internal static float TileTravelCost(byte roadFlags)
     {
         float cost = RoadTier.RoadTravelCostForLevel(RoadTier.ExtractLevel(roadFlags));
-        if ((roadFlags & RoadFlags.Bridge) != 0) cost *= RoadFlags.BridgeCostMultiplier;
-        if ((roadFlags & RoadFlags.Tunnel) != 0) cost *= RoadFlags.TunnelCostMultiplier;
+        if (RoadFlags.IsBridge(roadFlags)) cost *= RoadFlags.BridgeCostMultiplier;
+        if (RoadFlags.IsTunnel(roadFlags)) cost *= RoadFlags.TunnelCostMultiplier;
         return cost;
     }
 

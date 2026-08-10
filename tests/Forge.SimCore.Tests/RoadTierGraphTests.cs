@@ -86,13 +86,15 @@ public sealed class RoadTierGraphTests
 
         host.PlaceRoad(7, 7, 1, bridge: true);
         byte bridgeFlags = host.State.Tiles.RoadFlags[host.State.Tiles.Index(7, 7)];
-        Assert.True((bridgeFlags & RoadFlags.Bridge) != 0);
-        Assert.False((bridgeFlags & RoadFlags.Tunnel) != 0);
+        Assert.True(RoadFlags.IsBridge(bridgeFlags));
+        Assert.False(RoadFlags.IsTunnel(bridgeFlags));
+        Assert.False(RoadFlags.IsRamp(bridgeFlags));
 
         host.PlaceRoad(8, 7, 1, tunnel: true);
         byte tunnelFlags = host.State.Tiles.RoadFlags[host.State.Tiles.Index(8, 7)];
-        Assert.False((tunnelFlags & RoadFlags.Bridge) != 0);
-        Assert.True((tunnelFlags & RoadFlags.Tunnel) != 0);
+        Assert.False(RoadFlags.IsBridge(tunnelFlags));
+        Assert.True(RoadFlags.IsTunnel(tunnelFlags));
+        Assert.False(RoadFlags.IsRamp(tunnelFlags));
     }
 
     [Fact]

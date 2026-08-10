@@ -81,12 +81,12 @@ namespace CityMajor.Sim
             PublishFromSimHost();
         }
 
-        public void PlaceRoad(int tileX, int tileY, byte tier = 1)
+        public void PlaceRoad(int tileX, int tileY, byte tier = 1, bool bridge = false, bool tunnel = false, bool ramp = false)
         {
             if (!_simCoreReady)
                 return;
 
-            _simHost.PlaceRoad(tileX, tileY, tier);
+            _simHost.PlaceRoad(tileX, tileY, tier, bridge, tunnel, ramp);
             PublishFromSimHost();
         }
 

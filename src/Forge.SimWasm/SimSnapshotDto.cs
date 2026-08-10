@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Forge.Engine.Data;
 using Forge.Engine.Simulation;
 using Forge.Game.Simulation;
 
@@ -65,6 +66,8 @@ public sealed class SimSnapshotDto
     public BuildingDto[] Buildings { get; init; } = [];
     public ZoneDto[] Zones { get; init; } = [];
     public RoadDto[] Roads { get; init; } = [];
+    /// <summary>Segment-graph nodes — parallel arrays indexed by node id (Cathedral P1.6).</summary>
+    public RoadGraphSnapshotDto RoadGraph { get; init; } = new();
     /// <summary>Sparse road tiles with congestion density (0–1).</summary>
     public TrafficDto[] Traffic { get; init; } = [];
     /// <summary>Sparse zoned tiles with per-service coverage (0–1).</summary>
@@ -106,6 +109,7 @@ public sealed class SimSnapshotDto
         var buildings = CollectBuildings(state);
         var zones = CollectZones(state);
         var roads = CollectRoads(state);
+        var roadGraph = RoadGraphSnapshotDto.From(state.Roads);
         var traffic = CollectTraffic(state);
         var serviceCoverage = services is null ? [] : CollectServiceCoverage(state, services);
 
@@ -126,6 +130,7 @@ public sealed class SimSnapshotDto
             Buildings = buildings,
             Zones = zones,
             Roads = roads,
+            RoadGraph = roadGraph,
             Traffic = traffic,
             ServiceCoverage = serviceCoverage,
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
@@ -314,6 +319,42 @@ public sealed class RoadDto
     public byte RoadFlags { get; init; }
 }
 
+/// <summary>
+/// Compact segment-graph export — <see cref="NodeTypes"/>[i] is <see cref="RoadNodeType"/> for node i.
+/// </summary>
+public sealed class RoadGraphSnapshotDto
+{
+    public int NodeCount { get; init; }
+    public byte[] NodeTypes { get; init; } = [];
+    public int[] NodeTileX { get; init; } = [];
+    public int[] NodeTileZ { get; init; } = [];
+
+    public static RoadGraphSnapshotDto From(RoadGraph graph)
+    {
+        int n = graph.NodeCount;
+        if (n == 0) return new RoadGraphSnapshotDto();
+
+        var types = new byte[n];
+        var xs = new int[n];
+        var zs = new int[n];
+        for (int i = 0; i < n; i++)
+        {
+            var (x, z) = graph.GetNodePosition(i);
+            xs[i] = x;
+            zs[i] = z;
+            types[i] = (byte)graph.GetNodeType(i);
+        }
+
+        return new RoadGraphSnapshotDto
+        {
+            NodeCount = n,
+            NodeTypes = types,
+            NodeTileX = xs,
+            NodeTileZ = zs,
+        };
+    }
+}
+
 public sealed class TrafficDto
 {
     public int TileX { get; init; }
@@ -413,6 +454,7 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(ZoneDto[]))]
 [JsonSerializable(typeof(RoadDto))]
 [JsonSerializable(typeof(RoadDto[]))]
+[JsonSerializable(typeof(RoadGraphSnapshotDto))]
 [JsonSerializable(typeof(TrafficDto))]
 [JsonSerializable(typeof(TrafficDto[]))]
 [JsonSerializable(typeof(ServiceCoverageDto))]

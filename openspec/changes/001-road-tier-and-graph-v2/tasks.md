@@ -33,7 +33,12 @@
 - [x] `PlaceRoad` rejects illegal highway merge (non-highway tile with 2+ highway neighbors)
 - [x] Tests: T-highway-local junction + illegal merge rejection
 - [ ] Dedicated ramp paint tool / `RoadFlags.Ramp` bit (deferred to P1.6+ road toolbar UI)
-- [ ] Snapshot export of `nodeTypes[]` (deferred to P1.6)
+
+## P1.6 — Road graph snapshot export
+
+- [x] Export compact `nodeTypes[]` (+ parallel tile coords) in render snapshot and GetStatus
+- [x] Web: `RoadGraphSnapshot` + `roadNodeTypeAt` debug helper in `sim-bridge`
+- [x] Tests: T-highway-local snapshot contains Ramp + HighwayOff node types
 
 ## P1.5 — Road toolbar UX (partial)
 

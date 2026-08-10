@@ -124,6 +124,12 @@ type WasmStatus = {
   goodsSurplusIndex?: number;
   interZoneTradeVolume?: number;
   meanInterZoneFriction?: number;
+  roadGraph?: {
+    nodeCount?: number;
+    nodeTypes?: number[];
+    nodeTileX?: number[];
+    nodeTileZ?: number[];
+  };
 };
 
 type SimExports = {
@@ -677,6 +683,7 @@ function readSnapshot(): SimSnapshot {
       parsed.interZoneTradeVolume ?? status?.interZoneTradeVolume,
     meanInterZoneFriction:
       parsed.meanInterZoneFriction ?? status?.meanInterZoneFriction,
+    roadGraph: parsed.roadGraph ?? status?.roadGraph,
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),

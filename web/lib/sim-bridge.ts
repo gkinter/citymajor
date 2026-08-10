@@ -53,6 +53,42 @@ export type RoadSnapshot = {
   roadFlags: number;
 };
 
+/** Segment-graph node topology (matches Forge.Engine.Data.RoadNodeType). */
+export const RoadNodeType = {
+  Intersection: 0,
+  DeadEnd: 1,
+  Corner: 2,
+  Ramp: 3,
+  HighwayOn: 4,
+  HighwayOff: 5,
+} as const;
+
+export type RoadNodeTypeValue =
+  (typeof RoadNodeType)[keyof typeof RoadNodeType];
+
+/** Parallel arrays indexed by graph node id (Cathedral P1.6). */
+export type RoadGraphSnapshot = {
+  nodeCount: number;
+  nodeTypes: number[];
+  nodeTileX: number[];
+  nodeTileZ: number[];
+};
+
+/** Debug helper — lookup node type at a grid tile from snapshot export. */
+export function roadNodeTypeAt(
+  graph: RoadGraphSnapshot | undefined,
+  tileX: number,
+  tileZ: number,
+): RoadNodeTypeValue | undefined {
+  if (!graph || graph.nodeCount <= 0) return undefined;
+  for (let i = 0; i < graph.nodeCount; i++) {
+    if (graph.nodeTileX[i] === tileX && graph.nodeTileZ[i] === tileZ) {
+      return graph.nodeTypes[i] as RoadNodeTypeValue;
+    }
+  }
+  return undefined;
+}
+
 /** Sparse road tiles with congestion density (0–1) from WasmTrafficLite. */
 export type TrafficSnapshot = {
   tileX: number;
@@ -233,6 +269,7 @@ export function resourcesFromSnapshot(snapshot: SimSnapshot): SimResources {
     roads: _roads,
     traffic: _traffic,
     serviceCoverage: _serviceCoverage,
+    roadGraph: _roadGraph,
     ...resources
   } = snapshot;
   return resources;
@@ -244,6 +281,8 @@ export type SimSnapshot = SimResources & {
   zones?: ZoneSnapshot[];
   /** Sparse road tiles (non-zero roadFlags). */
   roads?: RoadSnapshot[];
+  /** Segment-graph nodes — parallel nodeTypes[] (debug / ramp viz). */
+  roadGraph?: RoadGraphSnapshot;
   /** Sparse road tiles with congestion density (≥0.01). */
   traffic?: TrafficSnapshot[];
   /** Sparse zoned tiles with health/police/fire/education coverage (0–1). */

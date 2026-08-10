@@ -93,6 +93,9 @@ public sealed class WasmSimHost
     public float InterZoneTradeVolume => _host.State?.InterZoneTradeVolume ?? 0f;
     public float MeanInterZoneFriction => _host.State?.MeanInterZoneFriction ?? 1f;
 
+    public RoadGraphSnapshotDto RoadGraphSnapshot =>
+        _host.State is null ? new RoadGraphSnapshotDto() : RoadGraphSnapshotDto.From(_host.State.Roads);
+
     internal SimHost InnerHost => _host;
 
     public int[] CollectUnlockedTechIds()
@@ -291,6 +294,8 @@ public sealed class WasmStatusDto
     public float GoodsSurplusIndex { get; init; }
     public float InterZoneTradeVolume { get; init; }
     public float MeanInterZoneFriction { get; init; } = 1f;
+    /// <summary>Segment-graph node types (parallel arrays, Cathedral P1.6).</summary>
+    public RoadGraphSnapshotDto RoadGraph { get; init; } = new();
 
     public static WasmStatusDto From(WasmSimHost host) => new()
     {
@@ -377,6 +382,7 @@ public sealed class WasmStatusDto
         GoodsSurplusIndex = host.GoodsSurplusIndex,
         InterZoneTradeVolume = host.InterZoneTradeVolume,
         MeanInterZoneFriction = host.MeanInterZoneFriction,
+        RoadGraph = host.RoadGraphSnapshot,
     };
 }
 
@@ -391,6 +397,7 @@ public sealed class WasmStatusDto
 [JsonSerializable(typeof(HouseholdPreviewDto))]
 [JsonSerializable(typeof(HouseholdPreviewDto[]))]
 [JsonSerializable(typeof(WasmStatusDto))]
+[JsonSerializable(typeof(RoadGraphSnapshotDto))]
 [JsonSerializable(typeof(TickIntervalsDto))]
 [JsonSerializable(typeof(TrafficLiteInfoDto))]
 [JsonSerializable(typeof(EraProgressSnapshot))]

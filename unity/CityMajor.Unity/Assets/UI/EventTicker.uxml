@@ -1,6 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="CityPanels.uss" />
     <ui:VisualElement name="ticker-root" class="ticker-root">
+        <ui:Label name="ticker-event-count" class="ticker-event-count" text="" style="display: none;" />
         <ui:Label name="ticker-line" class="ticker-line" text="CityMajor" />
     </ui:VisualElement>
 </ui:UXML>

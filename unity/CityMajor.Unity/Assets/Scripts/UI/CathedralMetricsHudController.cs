@@ -76,7 +76,7 @@ namespace CityMajor.UI
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(1f, 1f);
             rt.anchoredPosition = new Vector2(-16f, -140f);
-            rt.sizeDelta = new Vector2(PanelWidth, 220f);
+            rt.sizeDelta = new Vector2(PanelWidth, 240f);
 
             var image = go.AddComponent<Image>();
             image.color = new Color(0.06f, 0.09f, 0.14f, 0.82f);
@@ -97,7 +97,7 @@ namespace CityMajor.UI
             _title.color = new Color(0.85f, 0.9f, 0.95f, 1f);
 
             _body = CreateUguiText(panel, "Body", 13, FontStyle.Normal, new Vector2(PanelPad, -36f),
-                new Vector2(PanelWidth - PanelPad * 2f, 170f));
+                new Vector2(PanelWidth - PanelPad * 2f, 190f));
             _body.alignment = TextAnchor.UpperLeft;
             _body.horizontalOverflow = HorizontalWrapMode.Wrap;
             _body.verticalOverflow = VerticalWrapMode.Overflow;
@@ -137,7 +137,7 @@ namespace CityMajor.UI
             var title = CreateTmp(tmpType, panel, "Title", 15f, true,
                 new Vector2(PanelPad, -PanelPad), new Vector2(PanelWidth - PanelPad * 2f, 22f), "Cathedral");
             _tmpBody = CreateTmp(tmpType, panel, "Body", 13f, false,
-                new Vector2(PanelPad, -36f), new Vector2(PanelWidth - PanelPad * 2f, 170f), "—");
+                new Vector2(PanelPad, -36f), new Vector2(PanelWidth - PanelPad * 2f, 190f), "—");
             return title != null && _tmpBody != null;
         }
 
@@ -188,7 +188,7 @@ namespace CityMajor.UI
             if (_panel == null)
                 EnsureCanvas();
 
-            var text = FormatMetrics(state);
+            var text = FormatMetrics(state, _sim?.LatestActiveEvents);
             if (_useTmp && _tmpBody != null)
             {
                 _tmpBody.GetType().GetProperty("text")?.SetValue(_tmpBody, text);
@@ -199,7 +199,7 @@ namespace CityMajor.UI
                 _body.text = text;
         }
 
-        internal static string FormatMetrics(CitySimState state)
+        internal static string FormatMetrics(CitySimState state, Forge.SimWasm.ActiveEventDto[] activeEvents = null)
         {
             var rent = Pct(state.MeanRentBurden);
             var vacancy = Pct(state.ResidentialVacancy);
@@ -215,6 +215,13 @@ namespace CityMajor.UI
                 ? $"Food {state.FoodAvgPrice:0.00} · Water {state.WaterAvgPrice:0.00} · Steel {state.SteelAvgPrice:0.00}"
                 : $"Shortage {Pct(state.GoodsShortageIndex)} · Surplus {Pct(state.GoodsSurplusIndex)}";
 
+            var eventCount = SimActiveEventHeadlines.ResolveCount(activeEvents);
+            if (eventCount <= 0)
+                eventCount = state.ActiveEventCount;
+            var eventLine = SimActiveEventHeadlines.TryGetPriorityEvent(activeEvents, out var priority)
+                ? $"Events [{eventCount}]  {SimActiveEventHeadlines.FormatPriorityHeadline(priority)}"
+                : $"Events [{eventCount}]";
+
             return
                 $"Rent burden  {rent}\n" +
                 $"Vacancy      {vacancy}\n" +
@@ -223,7 +230,7 @@ namespace CityMajor.UI
                 $"Approval     {approval}\n" +
                 $"Power {power} · Water {water}\n" +
                 $"Goods  {goods}\n" +
-                $"Events [{state.ActiveEventCount}]";
+                eventLine;
         }
 
         static string Pct(float fraction) =>

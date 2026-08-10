@@ -232,11 +232,22 @@
     border-radius: 4px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.08);
+    flex-direction: row;
+    align-items: center;
+}
+
+.ticker-event-count {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(255, 199, 89);
+    margin-right: 8px;
+    min-width: 16px;
 }
 
 .ticker-line {
     font-size: 10px;
     color: rgba(200, 210, 225, 0.75);
+    flex-grow: 1;
 }
 
 .tool-mode-hud {

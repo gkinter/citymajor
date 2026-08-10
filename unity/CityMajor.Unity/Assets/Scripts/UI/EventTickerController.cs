@@ -17,6 +17,7 @@ namespace CityMajor.UI
         CitySimBridge _sim;
         UIDocument _document;
         Label _line;
+        Label _countBadge;
 
         public void Configure(CitySimBridge sim)
         {
@@ -59,22 +60,64 @@ namespace CityMajor.UI
             }
 
             _document.sortingOrder = 50;
-            _line = _document.rootVisualElement?.Q<Label>("ticker-line");
+            var tree = _document.rootVisualElement;
+            if (tree == null)
+                return;
+
+            EnsureCountBadge(tree);
+            _line = tree.Q<Label>("ticker-line");
+        }
+
+        void EnsureCountBadge(VisualElement root)
+        {
+            _countBadge = root.Q<Label>("ticker-event-count");
+            if (_countBadge != null)
+                return;
+
+            _countBadge = new Label();
+            _countBadge.name = "ticker-event-count";
+            _countBadge.AddToClassList("ticker-event-count");
+            _countBadge.style.display = DisplayStyle.None;
+            _countBadge.style.marginRight = 8;
+            _countBadge.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _countBadge.style.color = new Color(1f, 0.78f, 0.35f, 1f);
+
+            var tickerRoot = root.Q<VisualElement>("ticker-root") ?? root;
+            tickerRoot.Insert(0, _countBadge);
         }
 
         void OnState(CitySimState state)
         {
+            if (_line == null)
+                EnsureUi();
+
             if (_line == null)
                 return;
 
             var snap = _sim?.LatestSnapshot;
             var active = _sim?.LatestActiveEvents;
             var count = SimActiveEventHeadlines.ResolveCount(active);
+
+            if (_countBadge != null)
+            {
+                var badge = SimActiveEventHeadlines.FormatCountBadge(count);
+                if (badge != null)
+                {
+                    _countBadge.text = badge;
+                    _countBadge.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    _countBadge.text = "";
+                    _countBadge.style.display = DisplayStyle.None;
+                }
+            }
+
             if (snap != null || count > 0)
             {
                 var evt = NarrativeTemplates.FromActiveEventsOrSnapshot(active, snap, state);
                 var headline = string.IsNullOrEmpty(evt.Headline) ? IdleMessage : evt.Headline;
-                _line.text = count > 0 ? $"[{count}] {headline}" : headline;
+                _line.text = headline;
                 return;
             }
 

@@ -200,7 +200,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | Component | Key / toggle | Notes |
 |-----------|--------------|-------|
 | `ZonePaintTool` | `1`/`2`/`3`/`0` | R/C/I paint + erase; inspector `zoneDensity` → `SimHost.PaintZone` |
-| `RoadPaintTool` | `4` | `SimHost.PlaceRoad(tier, bridge?, tunnel?)` — inspector Paint Bridge / Tunnel |
+| `RoadPaintTool` | `4` | `SimHost.PlaceRoad(tier, bridge?, tunnel?, ramp?)` — inspector Paint Bridge / Tunnel / Ramp |
 | `BulldozeTool` | `X` | Zone/building/road clear via `SimHost.Bulldoze` |
 | `BuildPlopTool` | `B` + panel | Service plop on zoned tiles |
 | `CitizenPickTool` | LMB | Pick pedestrian dot → citizen panel |

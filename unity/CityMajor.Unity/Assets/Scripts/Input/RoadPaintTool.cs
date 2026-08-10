@@ -5,7 +5,8 @@ namespace CityMajor.Input
 {
     /// <summary>
     /// Paint roads into Forge.SimCore via CitySimBridge. Key 4 toggles road brush.
-    /// Inspector: <see cref="paintBridge"/> / <see cref="paintTunnel"/> map to Cathedral P1.3 RoadFlags.
+    /// Inspector: <see cref="paintBridge"/> / <see cref="paintTunnel"/> map to Cathedral P1.3 RoadFlags;
+    /// <see cref="paintRamp"/> maps to Cathedral P1.5 highway ramp connectors (mutually exclusive with elevation).
     /// </summary>
     public sealed class RoadPaintTool : MonoBehaviour
     {
@@ -13,6 +14,7 @@ namespace CityMajor.Input
         [SerializeField] byte roadTier = 1;
         [SerializeField] bool paintBridge;
         [SerializeField] bool paintTunnel;
+        [SerializeField] bool paintRamp;
         [SerializeField] bool roadMode;
 
         Camera _camera;
@@ -23,6 +25,7 @@ namespace CityMajor.Input
         public bool RoadModeActive => roadMode;
         public bool PaintBridge => paintBridge;
         public bool PaintTunnel => paintTunnel;
+        public bool PaintRamp => paintRamp;
 
         public void SetRoadMode(bool active) => roadMode = active;
 
@@ -30,6 +33,19 @@ namespace CityMajor.Input
         {
             paintBridge = bridge;
             paintTunnel = tunnel;
+            if (bridge || tunnel)
+                paintRamp = false;
+        }
+
+        /// <summary>Cathedral P1.5 — dedicated ramp paint (clears bridge/tunnel elevation).</summary>
+        public void SetRamp(bool ramp)
+        {
+            paintRamp = ramp;
+            if (ramp)
+            {
+                paintBridge = false;
+                paintTunnel = false;
+            }
         }
 
         public void Configure(Camera cityCamera, ZoneGrid grid, CitySimBridge sim)
@@ -90,7 +106,13 @@ namespace CityMajor.Input
             {
                 if (dx * dx + dy * dy > brushRadius * brushRadius)
                     continue;
-                _sim.PlaceRoad(center.x + dx, center.y + dy, roadTier, paintBridge, paintTunnel);
+                _sim.PlaceRoad(
+                    center.x + dx,
+                    center.y + dy,
+                    roadTier,
+                    paintBridge,
+                    paintTunnel,
+                    paintRamp);
             }
         }
     }

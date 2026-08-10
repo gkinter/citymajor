@@ -143,7 +143,7 @@ immigration_rate    *= rent_attractiveness
 | Rent burden rises when residential demand high and supply low | `CathedralHousingTests` | **Skipped** (`P2.3 not implemented`) |
 | Migration out when `rent_burden > threshold` | `CathedralHousingTests` | **Skipped** (`P2.3 not implemented`) |
 | Density brush doubles max occupants at high vs low | `ZoneGrowthSystemTests` (extend) | Pending P2.2 |
-| Office zone employs edu≥3 households | `PopulationSystem` employment tests | Pending P2.1 |
+| Office zone employs edu≥3 households | `PopulationSystemTests` (`EmploymentMatching_OfficeZone_*`); era-gate Industrial via `zone-tiers.test.ts` | **Done** (`a990636`) |
 | `housing_crisis` event when mean burden > 0.50 | Herald integration | Pending P2.4 |
 | `MeanRentBurden` on snapshot matches manual calc | `CathedralHousingTests` | Pending P2.5 |
 

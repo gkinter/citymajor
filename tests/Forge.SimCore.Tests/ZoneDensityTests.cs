@@ -47,4 +47,21 @@ public sealed class ZoneDensityTests
         Assert.Equal((byte)0, host.State.Tiles.ZoneDensity[idx]);
         Assert.Equal((byte)0, host.State.Tiles.ZoneType[idx]);
     }
+
+    /// <summary>
+    /// P2.1 — PaintZone accepts office zone byte (5). Employment still requires edu≥3
+    /// (see PopulationSystemTests); UI era-gates office at Industrial (zone-tiers).
+    /// </summary>
+    [Fact]
+    public void PaintZone_OfficeZone_SetsTypeAndDensity()
+    {
+        var host = new SimHost();
+        host.Init(32, new SimHostInitOptions { SkipStarterCity = true });
+
+        host.PaintZone(12, 12, zoneType: 5, density: 2); // Office
+
+        int idx = host.State.Tiles.Index(12, 12);
+        Assert.Equal((byte)5, host.State.Tiles.ZoneType[idx]);
+        Assert.Equal((byte)2, host.State.Tiles.ZoneDensity[idx]);
+    }
 }

@@ -2,6 +2,11 @@
 
 import type { CSSProperties } from "react";
 import {
+  formatCommuterCoverage,
+  formatOdTilePair,
+  topCommuteOdPairs,
+} from "@/lib/commute-od";
+import {
   economyFromRciFallback,
   formatGoodName,
   formatGoodPrice,
@@ -374,6 +379,74 @@ function FoundationMetrics({ resources }: { resources: SimResources }) {
   );
 }
 
+function hasTransportMetrics(resources: SimResources | null): resources is SimResources {
+  if (!resources) return false;
+  return (
+    resources.commuterCoverage !== undefined ||
+    (resources.commuteOdSample !== undefined &&
+      resources.commuteOdSample.length > 0) ||
+    resources.meanTrafficDensity !== undefined
+  );
+}
+
+function TransportMetrics({ resources }: { resources: SimResources }) {
+  const odPairs = topCommuteOdPairs(resources.commuteOdSample, 5);
+
+  return (
+    <section className="hud-economy-section" aria-label="Transport">
+      <div style={{ ...sectionTitle, color: "#7ad4c0" }}>Transport</div>
+      <ul className="hud-economy-trade">
+        {resources.commuterCoverage !== undefined ? (
+          <li className="hud-economy-trade__row">
+            <span className="hud-economy-trade__label">Commuter coverage</span>
+            <span className="hud-economy-trade__value">
+              {formatCommuterCoverage(resources.commuterCoverage)}
+            </span>
+          </li>
+        ) : null}
+        {resources.meanTrafficDensity !== undefined ? (
+          <li className="hud-economy-trade__row">
+            <span className="hud-economy-trade__label">Mean traffic</span>
+            <span className="hud-economy-trade__value">
+              {Math.round(resources.meanTrafficDensity * 100)}% density
+            </span>
+          </li>
+        ) : null}
+      </ul>
+      {odPairs.length > 0 ? (
+        <>
+          <div
+            style={{
+              ...sectionTitle,
+              marginTop: 12,
+              marginBottom: 6,
+              color: HUD_COLORS.textMuted,
+            }}
+          >
+            Top O-D pairs
+          </div>
+          <ul className="hud-economy-trade">
+            {odPairs.map((row) => (
+              <li
+                key={`${row.homeTileX},${row.homeTileZ}-${row.workTileX},${row.workTileZ}`}
+                className="hud-economy-trade__row"
+              >
+                <span className="hud-economy-trade__label">
+                  {formatOdTilePair(row)}
+                </span>
+                <span className="hud-economy-trade__value">
+                  {row.tripCount.toLocaleString()} trip
+                  {row.tripCount === 1 ? "" : "s"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+    </section>
+  );
+}
+
 function ZonePriceSpreads({ economy }: { economy: EconomySnapshot }) {
   const spreads =
     economy.marketZonePrices?.filter((row) => row.maxPrice > row.minPrice * 1.05) ??
@@ -465,6 +538,10 @@ export function EconomyPanel({ open, onClose, resources }: EconomyPanelProps) {
 
         {hasFoundationMetrics(resources) ? (
           <FoundationMetrics resources={resources} />
+        ) : null}
+
+        {hasTransportMetrics(resources) ? (
+          <TransportMetrics resources={resources} />
         ) : null}
 
         {resources?.economy?.marketZonePrices?.length

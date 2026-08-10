@@ -11,6 +11,10 @@ import type {
   SimSnapshot,
   ZoneSnapshot,
 } from "../lib/sim-bridge";
+import {
+  parseCommuteOdSample,
+  parseCommuterCoverage,
+} from "../lib/commute-od";
 import { parsePopulationL2 } from "../lib/population-l2";
 
 type WorkerInbound =
@@ -142,6 +146,8 @@ type WasmStatus = {
   };
   meanRentBurden?: number;
   residentialVacancy?: number;
+  commuterCoverage?: number;
+  commuteOdSample?: unknown;
 };
 
 type SimExports = {
@@ -568,6 +574,8 @@ function readStatus(): Pick<
   | "marketZoneCount"
   | "meanRentBurden"
   | "residentialVacancy"
+  | "commuterCoverage"
+  | "commuteOdSample"
 > | null {
   if (!sim?.GetStatus) return null;
   try {
@@ -640,6 +648,8 @@ function readStatus(): Pick<
       marketZoneCount: parsed.marketZoneCount,
       meanRentBurden: parsed.meanRentBurden,
       residentialVacancy: parsed.residentialVacancy,
+      commuterCoverage: parseCommuterCoverage(parsed.commuterCoverage),
+      commuteOdSample: parseCommuteOdSample(parsed.commuteOdSample),
     };
   } catch {
     return null;
@@ -727,6 +737,11 @@ function readSnapshot(): SimSnapshot {
     meanRentBurden: parsed.meanRentBurden ?? status?.meanRentBurden,
     residentialVacancy:
       parsed.residentialVacancy ?? status?.residentialVacancy,
+    commuterCoverage:
+      parseCommuterCoverage(parsed.commuterCoverage) ??
+      status?.commuterCoverage,
+    commuteOdSample:
+      parseCommuteOdSample(parsed.commuteOdSample) ?? status?.commuteOdSample,
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),

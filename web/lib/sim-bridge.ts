@@ -181,6 +181,7 @@ export type EraProgress = {
   gates: EraProgressGate[];
 };
 
+import type { CommuteOdSample } from "@/lib/commute-od";
 import type { PopulationL2Snapshot } from "@/lib/population-l2";
 
 export type SimResources = {
@@ -275,6 +276,10 @@ export type SimResources = {
   meanRentBurden?: number;
   /** WASM — city-wide residential vacancy proxy (0–1). */
   residentialVacancy?: number;
+  /** WASM — share of working commuters with valid home + work building IDs (0–1). */
+  commuterCoverage?: number;
+  /** WASM — top home→work tile pairs aggregated from household assignments. */
+  commuteOdSample?: CommuteOdSample[];
 };
 
 export type LawPreview = {

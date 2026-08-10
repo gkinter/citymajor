@@ -226,6 +226,37 @@ public sealed partial class SimHost
         return UtilityCoverageExport.Sample(_state, step);
     }
 
+    /// <summary>
+    /// Active Herald / sim events for EventTicker (Unity) and WASM status export.
+    /// Includes Cathedral housing_crisis, housing_shortage, and approval_unrest.
+    /// </summary>
+    public ActiveEventDto[] GetActiveEvents()
+    {
+        if (!IsInitialized || _events is null)
+            return [];
+
+        var active = _events.ActiveEvents;
+        if (active.Count == 0)
+            return [];
+
+        var result = new ActiveEventDto[active.Count];
+        for (int i = 0; i < active.Count; i++)
+        {
+            var e = active[i];
+            result[i] = new ActiveEventDto
+            {
+                EventId = e.EventId,
+                TypeId = e.TypeId ?? "",
+                Phase = e.Phase.ToString().ToLowerInvariant(),
+                Severity = e.Severity,
+                TileX = e.TileX,
+                TileY = e.TileY,
+            };
+        }
+
+        return result;
+    }
+
     /// <param name="density">0 = low (default); 1–3 = low / medium / high per TileData.ZoneDensity.</param>
     public void PaintZone(int x, int y, byte zoneType, byte density = 0)
     {

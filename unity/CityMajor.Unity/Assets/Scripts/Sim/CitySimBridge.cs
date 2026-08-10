@@ -30,6 +30,8 @@ namespace CityMajor.Sim
         public SimSnapshot LatestSnapshot { get; private set; }
         public ServiceCoverageDto[] LatestServiceCoverage { get; private set; } = Array.Empty<ServiceCoverageDto>();
         public UtilityCoverageDto[] LatestUtilityCoverage { get; private set; } = Array.Empty<UtilityCoverageDto>();
+        /// <summary>Active sim/Herald events for EventTicker (housing_crisis, housing_shortage, approval_unrest, …).</summary>
+        public ActiveEventDto[] LatestActiveEvents { get; private set; } = Array.Empty<ActiveEventDto>();
         /// <summary>
         /// P4.2 road graph + edge volumes / travel times from <see cref="SimHost.GetTrafficEdgeExport"/>.
         /// Empty when sim core is offline or the graph has no edges.
@@ -299,6 +301,7 @@ namespace CityMajor.Sim
             LatestServiceCoverage = _simHost.GetServiceCoverageSample(step: 8);
             LatestUtilityCoverage = _simHost.GetUtilityCoverageSample(step: 8);
             LatestRoadGraph = BuildLatestRoadGraph();
+            LatestActiveEvents = _simHost.GetActiveEvents();
 
             LatestSnapshot = snap;
             SyncGridFromSnapshot(snap);

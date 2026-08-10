@@ -224,29 +224,7 @@ public sealed class WasmSimHost
         }
     }
 
-    private ActiveEventDto[] CollectActiveEvents()
-    {
-        var events = _host.Events;
-        if (events is null) return [];
-
-        var active = events.ActiveEvents;
-        var result = new ActiveEventDto[active.Count];
-        for (int i = 0; i < active.Count; i++)
-        {
-            var e = active[i];
-            result[i] = new ActiveEventDto
-            {
-                EventId = e.EventId,
-                TypeId = e.TypeId,
-                Phase = e.Phase.ToString().ToLowerInvariant(),
-                Severity = e.Severity,
-                TileX = e.TileX,
-                TileY = e.TileY,
-            };
-        }
-
-        return result;
-    }
+    private ActiveEventDto[] CollectActiveEvents() => _host.GetActiveEvents();
 }
 
 public sealed class TickIntervalsDto

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Forge.Engine.Simulation;
+using Forge.SimWasm;
 
 namespace CityMajor.Net
 {
@@ -175,6 +176,107 @@ namespace CityMajor.Net
                 goodsSurplus);
 
             return FromBucket(bucket);
+        }
+
+        /// <summary>
+        /// Map a live sim event typeId to a Herald bucket (mirrors web event-catalog).
+        /// </summary>
+        public static SimStateBucket DeriveBucketFromEventType(string typeId)
+        {
+            if (string.IsNullOrEmpty(typeId))
+                return SimStateBucket.Default;
+
+            var id = typeId.ToLowerInvariant();
+            if (id is "housing_crisis" or "housing_shortage")
+                return SimStateBucket.HousingShortage;
+            if (id is "approval_unrest" or "protest" or "riot")
+                return SimStateBucket.HappinessLow;
+            if (id.Contains("housing") || id.Contains("rent") || id.Contains("homeless"))
+                return SimStateBucket.HousingShortage;
+            if (id.Contains("shortage") || id.Contains("stockout") || id.Contains("famine"))
+                return SimStateBucket.EconomyShortage;
+            if (id.Contains("unrest") || id.Contains("approval") || id.Contains("dissent"))
+                return SimStateBucket.HappinessLow;
+            if (id.Contains("crime") || id.Contains("theft"))
+                return SimStateBucket.CrimeRising;
+            if (id.Contains("pollution") || id.Contains("smog"))
+                return SimStateBucket.PollutionSpike;
+            if (id.Contains("traffic") || id.Contains("congestion"))
+                return SimStateBucket.TrafficCongestion;
+            if (id.Contains("budget") || id.Contains("recession") || id.Contains("bankrupt"))
+                return SimStateBucket.BudgetCrisis;
+
+            return SimStateBucket.Default;
+        }
+
+        /// <summary>Canonical Gazette headlines for Cathedral Herald event typeIds (events.json names).</summary>
+        public static string DisplayNameForEventType(string typeId) => typeId?.ToLowerInvariant() switch
+        {
+            "housing_crisis" => "Housing Crisis",
+            "housing_shortage" => "Housing Shortage",
+            "approval_unrest" => "Approval Unrest",
+            _ => "",
+        };
+
+        /// <summary>Herald story from a live sim event — prefers events.json-style display names.</summary>
+        public static NarrativeEvent FromSimEvent(string typeId, string displayName = null)
+        {
+            var bucket = DeriveBucketFromEventType(typeId);
+            var template = FromBucket(bucket);
+            var name = !string.IsNullOrEmpty(displayName)
+                ? displayName
+                : DisplayNameForEventType(typeId);
+            if (!string.IsNullOrEmpty(name))
+                template.Headline = name;
+            return template;
+        }
+
+        /// <summary>
+        /// Prefer active sim events (housing_crisis / housing_shortage / approval_unrest first),
+        /// else fall back to metric-derived Herald bucket — mirrors web NewsTicker.
+        /// </summary>
+        public static NarrativeEvent FromActiveEventsOrSnapshot(
+            ActiveEventDto[] activeEvents,
+            SimSnapshot snap,
+            CityMajor.Sim.CitySimState state)
+        {
+            var chosen = PreferHeraldEvent(activeEvents);
+            if (chosen != null && !string.IsNullOrEmpty(chosen.TypeId))
+                return FromSimEvent(chosen.TypeId);
+
+            if (snap != null)
+                return FromSnapshot(snap, state);
+
+            return FromBucket(SimStateBucket.Default);
+        }
+
+        /// <summary>Pick housing_crisis → housing_shortage → approval_unrest → first active event.</summary>
+        public static ActiveEventDto PreferHeraldEvent(ActiveEventDto[] activeEvents)
+        {
+            if (activeEvents == null || activeEvents.Length == 0)
+                return null;
+
+            ActiveEventDto first = null;
+            ActiveEventDto housingCrisis = null;
+            ActiveEventDto housingShortage = null;
+            ActiveEventDto approvalUnrest = null;
+
+            foreach (var evt in activeEvents)
+            {
+                if (evt == null || string.IsNullOrEmpty(evt.TypeId))
+                    continue;
+
+                first ??= evt;
+                var id = evt.TypeId.ToLowerInvariant();
+                if (id == "housing_crisis")
+                    housingCrisis = evt;
+                else if (id == "housing_shortage")
+                    housingShortage = evt;
+                else if (id == "approval_unrest")
+                    approvalUnrest = evt;
+            }
+
+            return housingCrisis ?? housingShortage ?? approvalUnrest ?? first;
         }
 
         public static float EstimateHealthcareCoverage(SimSnapshot snap)

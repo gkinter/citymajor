@@ -59,6 +59,19 @@ jobs:
           chmod +x scripts/verify-achievements-catalog.sh
           ./scripts/verify-achievements-catalog.sh
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Web unit tests (vitest)
+        run: |
+          pnpm install --filter @citymajor/web --frozen-lockfile
+          pnpm --filter @citymajor/web test
+
       # -----------------------------------------------------------------------
       # dotnet tests
       # Forge.Engine.Tests (822 tests) and Forge.Game.Tests (110 tests) both

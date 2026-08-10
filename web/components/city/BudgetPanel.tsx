@@ -16,6 +16,7 @@ type BudgetPanelProps = {
 
 const sectionTitle: CSSProperties = {
   fontWeight: 700,
+  marginTop: 10,
   marginBottom: 6,
   fontSize: 11,
   letterSpacing: "0.06em",
@@ -23,11 +24,23 @@ const sectionTitle: CSSProperties = {
   color: HUD_COLORS.textMuted,
 };
 
+const rowStyle: CSSProperties = {
+  marginBottom: 4,
+  fontSize: 12,
+  fontVariantNumeric: "tabular-nums",
+};
+
 const stubNote: CSSProperties = {
   marginTop: 6,
   fontSize: 11,
   lineHeight: 1.4,
   color: HUD_COLORS.textMuted,
+};
+
+const detailStyle: CSSProperties = {
+  fontSize: 11,
+  opacity: 0.75,
+  fontVariantNumeric: "tabular-nums",
 };
 
 function formatFunds(cityFunds: number): string {
@@ -52,6 +65,22 @@ function hasMonthlyBudget(resources: SimResources): boolean {
   );
 }
 
+function hasFoundationEconomy(resources: SimResources): boolean {
+  return (
+    resources.employmentRate !== undefined ||
+    resources.tradeBalance !== undefined ||
+    resources.meanTrafficDensity !== undefined ||
+    resources.constructingBuildingCount !== undefined ||
+    (resources.goodsShortageIndex !== undefined &&
+      resources.goodsShortageIndex > 0)
+  );
+}
+
+function formatDemand(demand: number): string {
+  const pct = Math.round(demand * 100);
+  return pct >= 0 ? `+${pct}%` : `${pct}%`;
+}
+
 export function BudgetPanel({ resources }: BudgetPanelProps) {
   const hasBudget = resources !== null && hasMonthlyBudget(resources);
   const monthlyNet =
@@ -68,56 +97,125 @@ export function BudgetPanel({ resources }: BudgetPanelProps) {
         ...HUD_ZONE.topRight,
         top: topOffset,
         zIndex: HUD_Z.panel,
-        ...hudInfoPanel({ minWidth: 200, maxWidth: 240 }),
+        ...hudInfoPanel({ minWidth: 200, maxWidth: 260 }),
       }}
     >
-      <div style={sectionTitle}>Budget</div>
+      <div style={{ ...sectionTitle, marginTop: 0 }}>Budget</div>
 
-      {resources ? (
-        <div style={{ marginBottom: 4 }}>
-          <span style={hudLabel()}>Treasury</span>
-          {formatFunds(resources.cityFunds)}
-        </div>
+      {!resources ? (
+        <p style={stubNote}>
+          Treasury unavailable — start or load a city with WASM sim active.
+        </p>
       ) : (
-        <p style={stubNote}>
-          TODO: Treasury unavailable — read{" "}
-          <code style={{ fontSize: 10 }}>CityFunds</code> from WASM status JSON
-          (BudgetSystem / PoliticsSystem).
-        </p>
-      )}
-
-      {hasBudget && resources && monthlyNet !== null ? (
         <>
-          <div style={{ marginBottom: 4 }}>
-            <span style={hudLabel()}>Cashflow</span>
-            <span
-              style={{
-                color: monthlyNet >= 0 ? "#7dffb2" : "#ff9aa8",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {formatCompactMoney(monthlyNet)}/mo
-            </span>
+          <div style={rowStyle}>
+            <span style={hudLabel()}>Treasury</span>
+            {formatFunds(resources.cityFunds)}
           </div>
-          <div style={{ fontSize: 11, opacity: 0.75, fontVariantNumeric: "tabular-nums" }}>
-            {formatCompactMoney(resources.monthlyIncome!)} in ·{" "}
-            {formatCompactMoney(-resources.monthlyExpenses!)} out
-          </div>
+
+          {hasBudget && monthlyNet !== null ? (
+            <>
+              <div style={rowStyle}>
+                <span style={hudLabel()}>Cashflow</span>
+                <span
+                  style={{
+                    color: monthlyNet >= 0 ? "#7dffb2" : "#ff9aa8",
+                  }}
+                >
+                  {formatCompactMoney(monthlyNet)}/mo
+                </span>
+              </div>
+              <div style={detailStyle}>
+                {formatCompactMoney(resources.monthlyIncome!)} in ·{" "}
+                {formatCompactMoney(-resources.monthlyExpenses!)} out
+              </div>
+            </>
+          ) : null}
+
+          {resources.approval !== undefined ? (
+            <div style={{ ...rowStyle, marginTop: 6 }}>
+              <span style={hudLabel()}>Approval</span>
+              {resources.approval.toFixed(0)}%
+            </div>
+          ) : null}
+
+          {hasFoundationEconomy(resources) ? (
+            <>
+              <div style={sectionTitle}>Economy</div>
+
+              {resources.employmentRate !== undefined ? (
+                <div style={rowStyle}>
+                  <span style={hudLabel()}>Employment</span>
+                  {Math.round(resources.employmentRate * 100)}%
+                </div>
+              ) : null}
+
+              {resources.tradeBalance !== undefined ? (
+                <>
+                  <div style={rowStyle}>
+                    <span style={hudLabel()}>Trade</span>
+                    <span
+                      style={{
+                        color:
+                          resources.tradeBalance >= 0 ? "#7dffb2" : "#ff9aa8",
+                      }}
+                    >
+                      {formatCompactMoney(resources.tradeBalance)}/mo
+                    </span>
+                  </div>
+                  {resources.monthlyExportValue !== undefined &&
+                  resources.monthlyImportCost !== undefined ? (
+                    <div style={detailStyle}>
+                      Exports {formatCompactMoney(resources.monthlyExportValue)}{" "}
+                      · Imports{" "}
+                      {formatCompactMoney(-resources.monthlyImportCost)}
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
+
+              {resources.meanTrafficDensity !== undefined ? (
+                <div style={rowStyle}>
+                  <span style={hudLabel()}>Traffic</span>
+                  {(resources.meanTrafficDensity * 100).toFixed(0)}%
+                </div>
+              ) : null}
+
+              {resources.constructingBuildingCount !== undefined &&
+              resources.constructingBuildingCount > 0 ? (
+                <div style={rowStyle}>
+                  <span style={hudLabel()}>Building</span>
+                  {resources.constructingBuildingCount} cranes active
+                </div>
+              ) : null}
+
+              {resources.goodsShortageIndex !== undefined &&
+              resources.goodsShortageIndex > 0 ? (
+                <div
+                  style={{
+                    ...rowStyle,
+                    color:
+                      resources.goodsShortageIndex >= 0.35
+                        ? "#ffb347"
+                        : undefined,
+                  }}
+                >
+                  <span style={hudLabel()}>Goods</span>
+                  {Math.round(resources.goodsShortageIndex * 100)}% shortage
+                </div>
+              ) : null}
+
+              {resources.residentialDemand !== undefined ? (
+                <div style={detailStyle}>
+                  RCI {formatDemand(resources.residentialDemand)} ·{" "}
+                  {formatDemand(resources.commercialDemand ?? 0)} ·{" "}
+                  {formatDemand(resources.industrialDemand ?? 0)}
+                </div>
+              ) : null}
+            </>
+          ) : null}
         </>
-      ) : resources ? (
-        <p style={stubNote}>
-          TODO: Monthly cashflow not exported — BudgetSystem ledgers missing from
-          status JSON. PoliticsSystem fields available: approval{" "}
-          {resources.approval !== undefined
-            ? `${resources.approval.toFixed(0)}%`
-            : "—"}
-          , happiness{" "}
-          {resources.happiness !== undefined
-            ? `${(resources.happiness * 100).toFixed(0)}%`
-            : "—"}
-          .
-        </p>
-      ) : null}
+      )}
     </aside>
   );
 }

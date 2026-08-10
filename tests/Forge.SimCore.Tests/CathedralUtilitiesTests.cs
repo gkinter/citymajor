@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Forge.Engine.Data;
 using Forge.Engine.Simulation;
 using Forge.Game.Simulation;
 using Forge.SimCore;
@@ -8,14 +9,14 @@ using Xunit;
 namespace Forge.SimCore.Tests;
 
 /// <summary>
-/// Characterization tests for Cathedral P5.1 utilities foundation (SB-4987).
-/// Pins power/water coverage export on WorldState → snapshot/status JSON before
-/// emergency-response (P5.2) and fire-spread (P5.3) deepen.
+/// Characterization tests for Cathedral P5.1 utilities foundation (SB-4987)
+/// and P5.2 emergency response time (SB-4242).
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
     private const uint ServicePowerPlant = 1u << 7;
     private const uint ServiceWaterPump = 1u << 8;
+    private const uint ServiceFire = 1u << 3;
 
     [Fact]
     public void GetSnapshotJson_IncludesPowerAndWaterCoverageFractions()
@@ -89,10 +90,62 @@ public sealed class CathedralUtilitiesTests
         Assert.InRange(state.UtilityStressIndex, 0f, 1f);
     }
 
-    [Fact(Skip = "P5.2 emergency response time (distance + traffic) not wired yet")]
+    [Fact]
     public void EmergencyResponseTime_UsesDistancePlusTraffic()
     {
-        // Placeholder: assert response minutes = graph distance / speed × congestion.
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        // Straight paved corridor — station west, incidents mid/east.
+        for (int x = 8; x <= 32; x++)
+            host.PlaceRoad(x, 10);
+
+        PlaceBuilding(host.State!, 10, 11, ServiceFire);
+        const int nearX = 18;
+        const int farX = 30;
+        const int incidentY = 11;
+
+        // PlaceRoad defers graph rebuild until Tick.
+        host.Tick(1.0);
+
+        Assert.True(host.State.Roads.EdgeCount > 0, "road graph should have edges after PlaceRoad + Tick");
+
+        float[] freeFlow = CaptureFreeFlowEdgeCosts(host.State.Roads);
+        float[] congested = new float[freeFlow.Length];
+        for (int e = 0; e < freeFlow.Length; e++)
+            congested[e] = TrafficBpr.CalculateTravelTime(freeFlow[e], volume: 200f, capacity: 100f);
+
+        float nearFree = EmergencyResponseTime.CalculateMinutes(
+            host.State, nearX, incidentY, ServiceFire, freeFlow);
+        float farFree = EmergencyResponseTime.CalculateMinutes(
+            host.State, farX, incidentY, ServiceFire, freeFlow);
+        float farCongested = EmergencyResponseTime.CalculateMinutes(
+            host.State, farX, incidentY, ServiceFire, congested);
+
+        Assert.True(nearFree < farFree,
+            $"near incident ({nearFree:F2} min) should be faster than far ({farFree:F2} min)");
+        Assert.True(farCongested > farFree,
+            $"congestion should raise response time (free={farFree:F2}, congested={farCongested:F2})");
+
+        // ServiceSystem facade must honor the same BPR edge times.
+        host.State.RoadEdgeTravelTimes = congested;
+        var services = new ServiceSystem(64);
+        float viaServices = services.CalculateFireResponseTime(host.State, farX, incidentY);
+        Assert.Equal(farCongested, viaServices, precision: 3);
+    }
+
+    private static float[] CaptureFreeFlowEdgeCosts(RoadGraph graph)
+    {
+        var costs = new float[graph.EdgeCount];
+        int e = 0;
+        for (int n = 0; n < graph.NodeCount; n++)
+        {
+            foreach (var (_, cost, _) in graph.GetNeighbors(n))
+                costs[e++] = cost;
+        }
+
+        Assert.Equal(graph.EdgeCount, e);
+        return costs;
     }
 
     private static void PlaceBuilding(

@@ -199,7 +199,7 @@ flowchart TB
 |-----------|-------------|
 | **P5 stub** ✅ | Politics foundation stub (approval characterization) — see [`CATHEDRAL_P5_POLITICS.md`](./CATHEDRAL_P5_POLITICS.md) / `fb64bd9` |
 | **P5.1** ✅ | Utilities L0 balance surfaced in HUD — [`CATHEDRAL_P5_SERVICES.md`](./CATHEDRAL_P5_SERVICES.md) / SB-4987 |
-| **P5.2** | Emergency response time model (distance + traffic) |
+| **P5.2** ✅ | Emergency response time model (distance + traffic) — `EmergencyResponseTime` / SB-4242 |
 | **P5.3** | Fire v1 (spread + hydrant coverage) |
 
 ### P6 — Governance

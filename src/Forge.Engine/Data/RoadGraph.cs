@@ -15,6 +15,7 @@ public sealed class RoadGraph
     private int[] _colIndices;    // Target node for each edge
     private float[] _edgeCosts;   // Travel cost for each edge
     private byte[] _edgeLevels;   // Road level: 0=dirt, 1=paved, 2=highway
+    private int[] _edgeLengths;   // Segment length in tile hops
 
     // Node data
     private int[] _nodeGridX;     // Grid position of each intersection
@@ -41,6 +42,7 @@ public sealed class RoadGraph
         _colIndices = new int[maxNodes * 4]; // Assume avg 4 edges per node
         _edgeCosts = new float[maxNodes * 4];
         _edgeLevels = new byte[maxNodes * 4];
+        _edgeLengths = new int[maxNodes * 4];
         _nodeGridX = new int[maxNodes];
         _nodeGridY = new int[maxNodes];
     }
@@ -71,6 +73,17 @@ public sealed class RoadGraph
     /// </summary>
     public void BuildFromEdgeList(List<(int from, int to, float cost, byte level)> edges)
     {
+        var withLengths = new List<(int from, int to, float cost, byte level, int length)>(edges.Count);
+        foreach (var e in edges)
+            withLengths.Add((e.from, e.to, e.cost, e.level, 1));
+        BuildFromEdgeList(withLengths);
+    }
+
+    /// <summary>
+    /// Rebuild CSR from edges that include segment length in tile hops (P1.2 segment graph).
+    /// </summary>
+    public void BuildFromEdgeList(List<(int from, int to, float cost, byte level, int length)> edges)
+    {
         _edgeCount = edges.Count;
 
         // Sort edges by source node
@@ -82,6 +95,7 @@ public sealed class RoadGraph
             _colIndices = new int[_edgeCount];
             _edgeCosts = new float[_edgeCount];
             _edgeLevels = new byte[_edgeCount];
+            _edgeLengths = new int[_edgeCount];
         }
 
         // Build CSR offsets
@@ -104,6 +118,7 @@ public sealed class RoadGraph
             _colIndices[i] = edges[i].to;
             _edgeCosts[i] = edges[i].cost;
             _edgeLevels[i] = edges[i].level;
+            _edgeLengths[i] = edges[i].length;
         }
     }
 
@@ -131,6 +146,9 @@ public sealed class RoadGraph
 
         public (int targetNode, float cost, byte level) Current =>
             (_graph._colIndices[_current], _graph._edgeCosts[_current], _graph._edgeLevels[_current]);
+
+        /// <summary>Segment length in tile hops (1 for legacy per-tile edges).</summary>
+        public int CurrentLength => _graph._edgeLengths[_current];
 
         public NeighborEnumerator GetEnumerator() => this;
     }

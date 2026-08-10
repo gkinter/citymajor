@@ -1133,50 +1133,8 @@ public sealed partial class SimHost
     }
 
     /// <summary>Rebuild CSR road graph from tile RoadFlags (after bulldoze / bulk load).</summary>
-    private void RebuildRoadGraphFromTiles()
-    {
-        var tiles = _state.Tiles;
-        int size = tiles.Size;
-        _state.Roads.Clear();
-
-        for (int y = 0; y < size; y++)
-        for (int x = 0; x < size; x++)
-        {
-            if (tiles.RoadFlags[tiles.Index(x, y)] != 0)
-                _state.Roads.AddNode(x, y);
-        }
-
-        var edges = new List<(int from, int to, float cost, byte level)>();
-        ReadOnlySpan<(int dx, int dy)> dirs = [(0, -1), (1, 0), (0, 1), (-1, 0)];
-
-        for (int y = 0; y < size; y++)
-        for (int x = 0; x < size; x++)
-        {
-            if (tiles.RoadFlags[tiles.Index(x, y)] == 0) continue;
-
-            int from = _state.Roads.GetNodeAt(x, y);
-            if (from < 0) continue;
-
-            foreach (var (dx, dy) in dirs)
-            {
-                int nx = x + dx;
-                int ny = y + dy;
-                if (!tiles.InBounds(nx, ny)) continue;
-                if (tiles.RoadFlags[tiles.Index(nx, ny)] == 0) continue;
-
-                int to = _state.Roads.GetNodeAt(nx, ny);
-                if (to < 0) continue;
-
-                byte flagsA = tiles.RoadFlags[tiles.Index(x, y)];
-                byte flagsB = tiles.RoadFlags[tiles.Index(nx, ny)];
-                byte level = RoadTier.EdgeLevelFromTiles(flagsA, flagsB);
-                float cost = RoadTier.RoadTravelCostForLevel(level);
-                edges.Add((from, to, cost, level));
-            }
-        }
-
-        _state.Roads.BuildFromEdgeList(edges);
-    }
+    private void RebuildRoadGraphFromTiles() =>
+        RoadGraphBuilder.Build(_state.Tiles, _state.Roads);
 
     private static int NextPowerOfTwo(int value)
     {

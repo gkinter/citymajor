@@ -1,5 +1,6 @@
 using Forge.Engine.Simulation;
 using Forge.Game.Simulation;
+using Forge.SimCore;
 
 namespace Forge.SimWasm;
 
@@ -10,7 +11,6 @@ namespace Forge.SimWasm;
 /// </summary>
 public sealed class WasmTrafficLite
 {
-    private const float BaseLaneCapacity = 50f;
     private const float DefaultCarShare = 0.65f;
 
     private int _zoneSize;
@@ -207,7 +207,7 @@ public sealed class WasmTrafficLite
                 float lawCapacityMult = state.LawTrafficCapacityMult > 0f
                     ? state.LawTrafficCapacityMult
                     : 1f;
-                _edgeCapacity[edgeIdx] = BaseLaneCapacity * lanes * lawCapacityMult;
+                _edgeCapacity[edgeIdx] = RoadTier.RoadCapacityForLevel(level) * lanes * lawCapacityMult;
                 _edgeFreeFlow[edgeIdx] = cost;
                 edgeIdx++;
             }

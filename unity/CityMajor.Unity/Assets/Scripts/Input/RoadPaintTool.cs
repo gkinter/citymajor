@@ -5,13 +5,29 @@ namespace CityMajor.Input
 {
     /// <summary>
     /// Paint roads into Forge.SimCore via CitySimBridge. Key 4 toggles road brush.
-    /// Inspector: <see cref="paintBridge"/> / <see cref="paintTunnel"/> map to Cathedral P1.3 RoadFlags;
-    /// <see cref="paintRamp"/> maps to Cathedral P1.5 highway ramp connectors (mutually exclusive with elevation).
+    /// Toolbar / API mirrors web RoadTypeToolbar: Local / Collector / Highway tiers,
+    /// Bridge / Tunnel elevation, and Ramp connectors — all map to PlaceRoad(tier, bridge, tunnel, ramp).
     /// </summary>
     public sealed class RoadPaintTool : MonoBehaviour
     {
+        public enum RoadElevation : byte
+        {
+            None = 0,
+            Bridge = 1,
+            Tunnel = 2,
+        }
+
+        /// <summary>Toolbar selection — tier paint or dedicated ramp connector (web RoadToolId).</summary>
+        public enum RoadTool : byte
+        {
+            Local = 0,
+            Collector = 1,
+            Highway = 2,
+            Ramp = 3,
+        }
+
         [SerializeField] int brushRadius = 1;
-        [SerializeField] byte roadTier = 1;
+        [SerializeField] byte roadTier = 0;
         [SerializeField] bool paintBridge;
         [SerializeField] bool paintTunnel;
         [SerializeField] bool paintRamp;
@@ -23,14 +39,76 @@ namespace CityMajor.Input
         bool _painting;
 
         public bool RoadModeActive => roadMode;
+        public byte RoadTier => roadTier;
         public bool PaintBridge => paintBridge;
         public bool PaintTunnel => paintTunnel;
         public bool PaintRamp => paintRamp;
 
+        public RoadElevation Elevation =>
+            paintRamp ? RoadElevation.None
+            : paintBridge ? RoadElevation.Bridge
+            : paintTunnel ? RoadElevation.Tunnel
+            : RoadElevation.None;
+
+        public RoadTool ActiveTool =>
+            paintRamp ? RoadTool.Ramp : (RoadTool)Mathf.Clamp(roadTier, 0, 2);
+
+        public string ActiveToolLabel
+        {
+            get
+            {
+                if (paintRamp)
+                    return "Ramp";
+                var tierLabel = TierLabel(roadTier);
+                return Elevation switch
+                {
+                    RoadElevation.Bridge => $"{tierLabel} bridge",
+                    RoadElevation.Tunnel => $"{tierLabel} tunnel",
+                    _ => tierLabel,
+                };
+            }
+        }
+
         public void SetRoadMode(bool active) => roadMode = active;
+
+        public void SetRoadTier(byte tier)
+        {
+            roadTier = (byte)Mathf.Clamp(tier, 0, 2);
+            paintRamp = false;
+        }
+
+        /// <summary>Select Local / Collector / Highway paint (clears ramp; keeps elevation).</summary>
+        public void SelectTierTool(byte tier)
+        {
+            SetRoadTier(tier);
+            roadMode = true;
+        }
+
+        /// <summary>Cathedral P1.5 — dedicated ramp paint (clears bridge/tunnel elevation).</summary>
+        public void SelectRampTool()
+        {
+            paintRamp = true;
+            paintBridge = false;
+            paintTunnel = false;
+            // Ramp connectors prefer collector, else local — never highway (SimHost clamps).
+            if (roadTier >= 2)
+                roadTier = 1;
+            roadMode = true;
+        }
+
+        public void SetElevation(RoadElevation elevation)
+        {
+            if (paintRamp)
+                return;
+
+            paintBridge = elevation == RoadElevation.Bridge;
+            paintTunnel = elevation == RoadElevation.Tunnel;
+        }
 
         public void SetBridgeTunnel(bool bridge, bool tunnel)
         {
+            if (bridge && tunnel)
+                tunnel = false;
             paintBridge = bridge;
             paintTunnel = tunnel;
             if (bridge || tunnel)
@@ -45,8 +123,18 @@ namespace CityMajor.Input
             {
                 paintBridge = false;
                 paintTunnel = false;
+                if (roadTier >= 2)
+                    roadTier = 1;
             }
         }
+
+        public static string TierLabel(byte tier) => tier switch
+        {
+            0 => "Local",
+            1 => "Collector",
+            2 => "Highway",
+            _ => "Road",
+        };
 
         public void Configure(Camera cityCamera, ZoneGrid grid, CitySimBridge sim)
         {

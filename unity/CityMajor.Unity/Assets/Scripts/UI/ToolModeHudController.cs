@@ -73,15 +73,7 @@ namespace CityMajor.UI
             }
 
             if (_road != null && _road.RoadModeActive)
-            {
-                if (_road.PaintRamp)
-                    return "Road ramp (4)";
-                if (_road.PaintBridge)
-                    return "Road bridge (4)";
-                if (_road.PaintTunnel)
-                    return "Road tunnel (4)";
-                return "Road (4)";
-            }
+                return $"Road {_road.ActiveToolLabel} (4)";
 
             if (_zone == null)
                 return "—";

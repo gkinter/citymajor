@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="road-toolbar-root" class="road-toolbar" style="display: none;">
+        <ui:Label class="road-toolbar__label" text="Road" />
+        <ui:Button name="road-tier-0" class="road-toolbar__btn" text="Local" tooltip="Place local roads" />
+        <ui:Button name="road-tier-1" class="road-toolbar__btn" text="Collector" tooltip="Place collector roads" />
+        <ui:Button name="road-tier-2" class="road-toolbar__btn" text="Highway" tooltip="Place highway roads" />
+        <ui:Button name="road-tool-ramp" class="road-toolbar__btn road-toolbar__btn--ramp" text="Ramp" tooltip="Place highway ramp connector" />
+        <ui:VisualElement class="road-toolbar__sep" />
+        <ui:Button name="road-elev-bridge" class="road-toolbar__btn road-toolbar__btn--elev" text="Bridge" tooltip="Paint bridge roads" />
+        <ui:Button name="road-elev-tunnel" class="road-toolbar__btn road-toolbar__btn--elev" text="Tunnel" tooltip="Paint tunnel roads" />
+    </ui:VisualElement>
+</ui:UXML>

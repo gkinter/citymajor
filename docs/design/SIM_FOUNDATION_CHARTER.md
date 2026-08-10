@@ -128,6 +128,7 @@ One worktree per WP. Merge gate: `dotnet test tests/Forge.Engine.Tests` + `./scr
 | 2026-07-16 | wave-2 | Herald←shortage · multi-day construction+law growth · tick budget — merged |
 | 2026-07-18 | wave-3 | Inter-zone trade friction · L0 utility balance · v1-scale tick budget — merged |
 | 2026-07-18 | wave-4 | CitySimState bridge · foundation HUD · desktop full traffic opt-in — merged |
+| 2026-08-10 | cathedral | Program charter + OpenSpec + P1.1 road tiers + P2/P3 specs — merged |
 | 2026-08-10 | wave-11 | Smoke E-key economy · Steam depot readiness · GLTF symlink verify — merged |
 | 2026-08-10 | wave-10 | Verify Rendering Parity editor · play-keyboard vitest (12) · SB-4176 checklist — merged |
 | 2026-08-10 | wave-9 | Web BudgetPanel foundation · Economy E key · NewsTicker tests — merged |

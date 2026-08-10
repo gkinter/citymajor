@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `16b68e8` — wave 8 complete (EventTicker herald, building box LOD, CI vitest)  
+**Integration tip:** `6850f56` — wave 9 complete (web budget deepen, economy E key, NewsTicker tests)  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -24,7 +24,7 @@
 | Happiness meter | — | ✅ `HappinessMeterController` (left stack) | — |
 | Approval meter | — | ✅ `ApprovalMeterController` (top-right) | — |
 | Phase 2 roads | — | ✅ `RoadPaintTool` + overlay in bootstrap | — |
-| Phase 2 economy panels | — | ✅ `BudgetPanelController` in bootstrap | — |
+| Phase 2 economy panels | — | ✅ BudgetPanel + Economy panel (E) with foundation metrics | — |
 | Phase 2 research | — | ✅ `ResearchPanelController` (`R`) in bootstrap | — |
 | Phase 2 Herald API | — | ✅ Herald panel + `economy_shortage` bucket + LLM foundation context | — |
 | Phase 2 CMJR save | — | ✅ `SaveLoadPanelController` + Steam cloud hook | — |

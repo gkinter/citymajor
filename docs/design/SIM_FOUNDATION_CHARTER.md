@@ -118,4 +118,6 @@ One worktree per WP. Merge gate: `dotnet test tests/Forge.Engine.Tests` + `./scr
 | 2026-07-16 | wave-2 | Herald←shortage · multi-day construction+law growth · tick budget — merged |
 | 2026-07-18 | wave-3 | Inter-zone trade friction · L0 utility balance · v1-scale tick budget — merged |
 | 2026-07-18 | wave-4 | CitySimState bridge · foundation HUD · desktop full traffic opt-in — merged |
-| 2026-08-09 | wave-5 | Web HUD parity · utility GL overlay (U) · budget panel deepen — merged |
+| 2026-08-10 | wave-9 | Web BudgetPanel foundation · Economy E key · NewsTicker tests — merged |
+| 2026-08-10 | wave-8 | EventTicker herald · building box LOD · CI vitest — merged |
+| 2026-08-09 | wave-7 | Unity demand foundation · Herald LLM context · sim-metrics tests — merged |

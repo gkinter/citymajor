@@ -54,6 +54,12 @@ export const PLAY_KEYBOARD_SHORTCUTS: PlayKeyboardShortcutEntry[] = [
     category: "tools" as const,
   })),
   {
+    keys: "E",
+    label: "Economy",
+    description: "Toggle market and trade panel",
+    category: "panels",
+  },
+  {
     keys: "Esc",
     label: "Close panels",
     description: "Dismiss open slide-out panels and modals",
@@ -105,6 +111,7 @@ export function zoneTierForDigitKey(key: string): ZoneTier | undefined {
 export type PlayKeyboardHandlers = {
   onToggleHelp?: () => void;
   onToggleBuildMenu: () => void;
+  onToggleEconomy?: () => void;
   onEnterZoneMode: () => void;
   onSelectRoad: () => void;
   onSelectZoneTool: (tool: ZoningTool) => void;
@@ -137,6 +144,12 @@ export function handlePlayKeyboardShortcut(
   if (key === "b") {
     event.preventDefault();
     handlers.onToggleBuildMenu();
+    return true;
+  }
+
+  if (key === "e" && handlers.onToggleEconomy) {
+    event.preventDefault();
+    handlers.onToggleEconomy();
     return true;
   }
 

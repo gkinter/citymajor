@@ -257,6 +257,85 @@ function ImbalanceList({
   );
 }
 
+function hasFoundationMetrics(resources: SimResources | null): resources is SimResources {
+  if (!resources) return false;
+  return (
+    resources.employmentRate !== undefined ||
+    resources.interZoneTradeVolume !== undefined ||
+    resources.residentialDemand !== undefined ||
+    hasMonthlyBudget(resources)
+  );
+}
+
+function hasMonthlyBudget(resources: SimResources): boolean {
+  return (
+    resources.monthlyIncome !== undefined &&
+    resources.monthlyExpenses !== undefined
+  );
+}
+
+function formatDemand(demand: number): string {
+  const pct = Math.round(demand * 100);
+  return pct >= 0 ? `+${pct}%` : `${pct}%`;
+}
+
+function FoundationMetrics({ resources }: { resources: SimResources }) {
+  const monthlyNet = hasMonthlyBudget(resources)
+    ? resources.monthlyIncome! - resources.monthlyExpenses!
+    : null;
+
+  return (
+    <section className="hud-economy-section" aria-label="Foundation economy">
+      <div style={{ ...sectionTitle, color: "#9ecbff" }}>Foundation</div>
+      <ul className="hud-economy-trade">
+        {monthlyNet !== null ? (
+          <li className="hud-economy-trade__row hud-economy-trade__row--balance">
+            <span className="hud-economy-trade__label">Treasury flow</span>
+            <span
+              className={`hud-economy-trade__value ${
+                monthlyNet >= 0
+                  ? "hud-economy-trade__value--in"
+                  : "hud-economy-trade__value--out"
+              }`}
+            >
+              {formatTradeMoney(monthlyNet)}/mo
+            </span>
+          </li>
+        ) : null}
+        {resources.employmentRate !== undefined ? (
+          <li className="hud-economy-trade__row">
+            <span className="hud-economy-trade__label">Employment</span>
+            <span className="hud-economy-trade__value">
+              {Math.round(resources.employmentRate * 100)}%
+            </span>
+          </li>
+        ) : null}
+        {resources.interZoneTradeVolume !== undefined ? (
+          <li className="hud-economy-trade__row">
+            <span className="hud-economy-trade__label">Inter-zone</span>
+            <span className="hud-economy-trade__value">
+              {resources.interZoneTradeVolume.toLocaleString()}/day
+              {resources.meanInterZoneFriction !== undefined
+                ? ` · ×${resources.meanInterZoneFriction.toFixed(2)} friction`
+                : ""}
+            </span>
+          </li>
+        ) : null}
+        {resources.residentialDemand !== undefined ? (
+          <li className="hud-economy-trade__row">
+            <span className="hud-economy-trade__label">RCI demand</span>
+            <span className="hud-economy-trade__value">
+              R {formatDemand(resources.residentialDemand)} · C{" "}
+              {formatDemand(resources.commercialDemand ?? 0)} · I{" "}
+              {formatDemand(resources.industrialDemand ?? 0)}
+            </span>
+          </li>
+        ) : null}
+      </ul>
+    </section>
+  );
+}
+
 function TradeRoutesStub() {
   return (
     <section className="hud-economy-section" aria-label="Trade routes">
@@ -320,6 +399,10 @@ export function EconomyPanel({ open, onClose, resources }: EconomyPanelProps) {
 
       <div style={bodyStyle}>
         <EconomySummary resources={resources} />
+
+        {hasFoundationMetrics(resources) ? (
+          <FoundationMetrics resources={resources} />
+        ) : null}
 
         {hasTradeData(resources) ? (
           <section className="hud-economy-section" aria-label="Global trade">

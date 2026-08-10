@@ -573,6 +573,10 @@ export function PlayClient() {
     handleToolChange("road");
   }, [handleToolChange]);
 
+  const handleToggleEconomy = useCallback(() => {
+    setEconomyOpen((open) => !open);
+  }, []);
+
   const handleToggleHelp = useCallback(() => {
     setHelpOpen((open) => !open);
   }, []);
@@ -582,6 +586,7 @@ export function PlayClient() {
       const handlers = {
         onToggleHelp: handleToggleHelp,
         onToggleBuildMenu: handleToggleBuildMenu,
+        onToggleEconomy: handleToggleEconomy,
         onEnterZoneMode: handleEnterZoneMode,
         onSelectRoad: handleKeyboardSelectRoad,
         onSelectZoneTool: handleToolChange,
@@ -616,6 +621,7 @@ export function PlayClient() {
     handleEnterZoneMode,
     handleKeyboardSelectRoad,
     handleToggleBuildMenu,
+    handleToggleEconomy,
     handleToggleHelp,
     handleToolChange,
     helpOpen,

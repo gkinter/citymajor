@@ -2,6 +2,10 @@
 /**
  * Headless smoke test for /play — page boot, WebGL canvas, HUD, COOP/COEP.
  *
+ * Waits for Diagnostics "Data: WASM sim" before asserting sim source when
+ * WASM_EXPECTED=1 or /dotnet/_framework/blazor.boot.json is reachable
+ * (override timeout with WASM_BOOT_TIMEOUT_MS; WASM_EXPECTED=0 skips wait).
+ *
  * Prereq (terminal 1):
  *   unset NODE_OPTIONS          # Beast: emcc rejects --max-semi-space-size
  *   pnpm build:wasm && pnpm dev # or: pnpm dev:wasm

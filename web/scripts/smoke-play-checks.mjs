@@ -608,25 +608,89 @@ async function assertHudPanels(page, tag) {
   pass(tag, "herald panel closes");
 }
 
+/** Cold WASM boot is ~9–30s; keep headroom for preview CPUs. Override with WASM_BOOT_TIMEOUT_MS. */
+const WASM_BOOT_TIMEOUT_MS = Number(process.env.WASM_BOOT_TIMEOUT_MS ?? 90_000);
+
+/** @returns {Promise<boolean>} */
+async function probeWasmAssetsAvailable() {
+  try {
+    const res = await fetch(`${BASE_URL}/dotnet/_framework/blazor.boot.json`, {
+      redirect: "follow",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Preview/CI WASM sim boots async (~20–30s cold). Era quest and law panels need
- * WASM-derived HUD state — wait for Diagnostics "Data: WASM sim" before those checks.
+ * Decide whether to wait for HUD "Data: WASM sim" before asserting sim source.
+ * - WASM_EXPECTED=1 → wait + hard fail on timeout
+ * - WASM_EXPECTED=0 → skip wait (explicit procedural-only smoke)
+ * - unset → auto: wait + hard fail when blazor.boot.json is reachable
+ * @returns {Promise<{ shouldWait: boolean; required: boolean }>}
+ */
+async function resolveWasmWaitPolicy() {
+  if (process.env.WASM_EXPECTED === "1") {
+    return { shouldWait: true, required: true };
+  }
+  if (process.env.WASM_EXPECTED === "0") {
+    return { shouldWait: false, required: false };
+  }
+  const assetsOk = await probeWasmAssetsAvailable();
+  if (assetsOk) {
+    return { shouldWait: true, required: true };
+  }
+  return { shouldWait: false, required: false };
+}
+
+/**
+ * Preview/CI WASM sim boots async (~9s warm, ~20–30s cold). Wait for Diagnostics
+ * "Data: WASM sim" before era/law checks and the sim-source assert — early snapshots
+ * otherwise report `Data: procedural` while the worker is still booting.
  * @param {import('playwright').Page} page
  * @param {string} tag
+ * @returns {Promise<"WASM sim" | "procedural" | "unknown">}
  */
 async function waitForWasmSim(page, tag) {
-  if (!WASM_EXPECTED) return;
+  const policy = await resolveWasmWaitPolicy();
+  if (!policy.shouldWait) {
+    const hudText = await readDiagnosticsHud(page).catch(() => "");
+    return hudText.match(/Data:\s*(WASM sim|procedural)/)?.[1] ?? "unknown";
+  }
 
+  const timeoutMs = Number.isFinite(WASM_BOOT_TIMEOUT_MS) ? WASM_BOOT_TIMEOUT_MS : 90_000;
   try {
     await page.waitForFunction(
-      () => document.body.innerText.includes("Data: WASM sim"),
+      () => {
+        const nodes = document.querySelectorAll("div");
+        for (const el of nodes) {
+          const text = el.innerText ?? "";
+          if (text.includes("Diagnostics") && /Data:\s*WASM sim/.test(text)) {
+            return true;
+          }
+        }
+        return /Data:\s*WASM sim/.test(document.body.innerText ?? "");
+      },
       undefined,
-      { timeout: 90_000 },
+      { timeout: timeoutMs },
     );
   } catch {
-    fail(tag, "WASM sim did not become ready within 90s (HUD still procedural?)");
+    const hudText = await readDiagnosticsHud(page).catch(() => "");
+    const current = hudText.match(/Data:\s*(WASM sim|procedural)/)?.[1] ?? "unknown";
+    if (policy.required) {
+      fail(
+        tag,
+        `WASM sim did not become ready within ${Math.round(timeoutMs / 1000)}s (HUD Data: ${current}; expected Data: WASM sim — run pnpm build:wasm or check worker boot)`,
+      );
+    }
+    console.log(
+      `[${tag}] NOTE: waited ${Math.round(timeoutMs / 1000)}s for WASM; HUD Data: ${current}`,
+    );
+    return current;
   }
   pass(tag, "WASM sim live");
+  return "WASM sim";
 }
 
 /**
@@ -1815,6 +1879,7 @@ export async function runPlayChecks(page, options = {}) {
   await assertHeroCityHallLandmark(tag);
   await assertHeroChurchLandmark(tag);
   await assertHudPanels(page, tag);
+  // Wait here so era/citizen/law checks see live WASM — not the early procedural HUD.
   await waitForWasmSim(page, tag);
   await assertEraQuestPanel(page, tag);
   await assertEconomyPanel(page, tag);
@@ -1832,19 +1897,19 @@ export async function runPlayChecks(page, options = {}) {
     pass(tag, `screenshot saved: ${options.screenshotPath}`);
   }
 
-  const hudText = await page
-    .locator("div")
-    .filter({ hasText: "Diagnostics" })
-    .first()
-    .innerText();
-
-  const dataMatch = hudText.match(/Data:\s*(WASM sim|procedural)/);
-  const simSource = dataMatch?.[1] ?? "unknown";
-  if (WASM_EXPECTED && simSource !== "WASM sim") {
-    fail(
-      tag,
-      `Expected WASM sim (run pnpm build:wasm first); got Data: ${simSource}`,
-    );
+  // Re-wait (no-op if already WASM) so sim-source assert never early-snapshots procedural.
+  const waitedSource = await waitForWasmSim(page, tag);
+  const hudText = await readDiagnosticsHud(page);
+  const simSource =
+    hudText.match(/Data:\s*(WASM sim|procedural)/)?.[1] ?? waitedSource ?? "unknown";
+  if (simSource !== "WASM sim") {
+    const policy = await resolveWasmWaitPolicy();
+    if (policy.required) {
+      fail(
+        tag,
+        `Expected WASM sim (run pnpm build:wasm first); got Data: ${simSource}`,
+      );
+    }
   }
   pass(tag, `sim source: ${simSource}`);
 

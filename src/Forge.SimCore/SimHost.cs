@@ -31,6 +31,7 @@ public sealed partial class SimHost
     private LawSystem _laws = null!;
     private CulturalDNASystem _culturalDna = null!;
     private TradeSystem _trade = null!;
+    private HousingHeraldSystem _housingHerald = null!;
 
     private double _trafficLiteAccumulator;
     private double _trafficEdgeBatchAccumulator;
@@ -91,6 +92,7 @@ public sealed partial class SimHost
         _laws = new LawSystem();
         _culturalDna = new CulturalDNASystem();
         _trade = new TradeSystem();
+        _housingHerald = new HousingHeraldSystem();
 
         _budget.SetEventBus(_eventBus);
         _economy.SetEventBus(_eventBus);
@@ -608,6 +610,12 @@ public sealed partial class SimHost
         _budget.ApplyLawModifiers(_state, _laws);
         _politics.MonthlyTick(_state, WasmConfig.GameDayInterval);
         _research.MonthlyTick(_state, WasmConfig.GameDayInterval);
+
+        _housingHerald.MonthlyTick(
+            _state,
+            _events,
+            _state.MeanRentBurden,
+            _economy.ResidentialDemand);
 
         if (_state.Year > _lastCulturalDnaYear)
         {

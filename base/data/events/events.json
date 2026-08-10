@@ -865,6 +865,27 @@
     "description": "Skyrocketing rents and a dire shortage of affordable units push working families to the margins of the city."
   },
   {
+    "id": "housing_shortage",
+    "name": "Housing Shortage",
+    "category": "social",
+    "era_min": "frontier",
+    "severity": 2,
+    "base_probability": 0,
+    "duration_months": 12,
+    "effects": {
+      "happiness": -10,
+      "population": -2,
+      "homelessness": 0.15,
+      "crime": 0.05
+    },
+    "trigger_conditions": {},
+    "cascade_events": [
+      "housing_crisis",
+      "protest"
+    ],
+    "description": "Vacancy has collapsed while residential demand stays hot — families compete for every available unit and rents climb block by block."
+  },
+  {
     "id": "baby_boom",
     "name": "Baby Boom",
     "category": "social",

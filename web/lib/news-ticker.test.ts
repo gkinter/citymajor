@@ -23,4 +23,13 @@ describe("buildTickerHeadlines", () => {
 
     expect(headlines[0]).toContain("Housing Crisis");
   });
+
+  it("shows housing_shortage headline from active sim event", () => {
+    const headlines = buildTickerHeadlines(
+      [{ eventId: 2, typeId: "housing_shortage", phase: "active", severity: 1, tileX: 0, tileY: 0 }],
+      { tick: 1, population: 1200, cityFunds: 50_000, era: 0 },
+    );
+
+    expect(headlines[0]).toContain("Housing Shortage");
+  });
 });

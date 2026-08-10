@@ -32,6 +32,7 @@ public sealed partial class SimHost
     private CulturalDNASystem _culturalDna = null!;
     private TradeSystem _trade = null!;
     private HousingHeraldSystem _housingHerald = null!;
+    private ApprovalHeraldSystem _approvalHerald = null!;
 
     private double _trafficLiteAccumulator;
     private double _trafficEdgeBatchAccumulator;
@@ -93,6 +94,7 @@ public sealed partial class SimHost
         _culturalDna = new CulturalDNASystem();
         _trade = new TradeSystem();
         _housingHerald = new HousingHeraldSystem();
+        _approvalHerald = new ApprovalHeraldSystem();
 
         _budget.SetEventBus(_eventBus);
         _economy.SetEventBus(_eventBus);
@@ -637,6 +639,7 @@ public sealed partial class SimHost
             _events,
             _state.MeanRentBurden,
             _economy.ResidentialDemand);
+        _approvalHerald.MonthlyTick(_state, _events);
 
         if (_state.Year > _lastCulturalDnaYear)
         {

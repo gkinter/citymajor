@@ -50,6 +50,7 @@ public sealed class IronAndOakGame
     private Simulation.ResearchSystem? _researchSystem;
     private Simulation.EventSystem? _eventSystem;
     private Simulation.HousingHeraldSystem? _housingHerald;
+    private Simulation.ApprovalHeraldSystem? _approvalHerald;
     private Simulation.LawSystem? _lawSystem;
     private Simulation.CulturalDNASystem? _culturalDna;
 
@@ -110,6 +111,7 @@ public sealed class IronAndOakGame
         _researchSystem = new Simulation.ResearchSystem();
         _eventSystem = new Simulation.EventSystem(seed: 12345);
         _housingHerald = new Simulation.HousingHeraldSystem();
+        _approvalHerald = new Simulation.ApprovalHeraldSystem();
         _lawSystem = new Simulation.LawSystem();
         _culturalDna = new Simulation.CulturalDNASystem();
 
@@ -192,6 +194,7 @@ public sealed class IronAndOakGame
                 _eventSystem!,
                 state.MeanRentBurden,
                 _economy!.ResidentialDemand);
+            _approvalHerald!.MonthlyTick(state, _eventSystem!);
 
             // Cultural DNA yearly: drift dimensions, detect archetypes (runs once per year)
             if (state.Year > _lastCulturalDnaYear)

@@ -721,10 +721,24 @@
   color: var(--hud-text);
 }
 
+.hud-economy-list__metrics {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .hud-economy-list__magnitude {
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   color: var(--hud-text-muted);
+}
+
+.hud-economy-list__price {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--hud-text);
 }
 
 .hud-economy-list__hint {

@@ -358,9 +358,13 @@ public sealed class LawPreviewDto
 
 public sealed class GoodImbalanceDto
 {
+    /// <summary>Good enum byte (0–44).</summary>
+    public byte GoodId { get; init; }
     public string Name { get; init; } = "";
     /// <summary>Absolute demand−supply (shortage) or supply−demand (surplus).</summary>
     public float Magnitude { get; init; }
+    /// <summary>City-wide mean price across active market zones.</summary>
+    public float Price { get; init; }
 }
 
 public sealed class EconomySnapshotDto
@@ -375,20 +379,25 @@ public sealed class EconomySnapshotDto
         var (shortages, surpluses) = economy.GetTopImbalances(5);
         return new EconomySnapshotDto
         {
-            Shortages = ToDto(shortages),
-            Surpluses = ToDto(surpluses),
+            Shortages = ToDto(economy, shortages),
+            Surpluses = ToDto(economy, surpluses),
         };
     }
 
-    private static GoodImbalanceDto[] ToDto(EconomySystem.GoodImbalanceEntry[] entries)
+    private static GoodImbalanceDto[] ToDto(
+        EconomySystem economy,
+        EconomySystem.GoodImbalanceEntry[] entries)
     {
         var result = new GoodImbalanceDto[entries.Length];
         for (int i = 0; i < entries.Length; i++)
         {
+            var good = (Good)entries[i].GoodId;
             result[i] = new GoodImbalanceDto
             {
+                GoodId = entries[i].GoodId,
                 Name = entries[i].Name,
                 Magnitude = entries[i].Magnitude,
+                Price = economy.GetAveragePrice(good),
             };
         }
 

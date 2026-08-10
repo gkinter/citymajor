@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import {
   economyFromRciFallback,
   formatGoodName,
+  formatGoodPrice,
   zoningHintForGood,
 } from "@/lib/economy-goods";
 import {
@@ -144,6 +145,7 @@ function hasTradeData(resources: SimResources | null): resources is SimResources
 type DisplayRow = {
   name: string;
   magnitude: number;
+  price?: number;
   hint?: string;
 };
 
@@ -158,11 +160,13 @@ function resolveEconomyView(resources: SimResources | null): {
       shortages: economy.shortages.map((row) => ({
         name: row.name,
         magnitude: row.magnitude,
+        price: row.price,
         hint: zoningHintForGood(row.name),
       })),
       surpluses: economy.surpluses.map((row) => ({
         name: row.name,
         magnitude: row.magnitude,
+        price: row.price,
         hint: zoningHintForGood(row.name),
       })),
     };
@@ -243,8 +247,15 @@ function ImbalanceList({
               <span className="hud-economy-list__name">
                 {formatGoodName(row.name)}
               </span>
-              <span className="hud-economy-list__magnitude">
-                {formatMagnitude(row.magnitude, isRciFallback)}
+              <span className="hud-economy-list__metrics">
+                <span className="hud-economy-list__magnitude">
+                  {formatMagnitude(row.magnitude, isRciFallback)}
+                </span>
+                {row.price !== undefined ? (
+                  <span className="hud-economy-list__price">
+                    {formatGoodPrice(row.price)}
+                  </span>
+                ) : null}
               </span>
             </div>
             {row.hint ? (

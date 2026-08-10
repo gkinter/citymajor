@@ -82,8 +82,18 @@ type WasmStatus = {
   fireCoverage?: number;
   educationCoverage?: number;
   economy?: {
-    shortages?: Array<{ name?: string; magnitude?: number }>;
-    surpluses?: Array<{ name?: string; magnitude?: number }>;
+    shortages?: Array<{
+      goodId?: number;
+      name?: string;
+      magnitude?: number;
+      price?: number;
+    }>;
+    surpluses?: Array<{
+      goodId?: number;
+      name?: string;
+      magnitude?: number;
+      price?: number;
+    }>;
   };
   monthlyExportValue?: number;
   monthlyImportCost?: number;
@@ -430,8 +440,10 @@ function parseGoodImbalances(raw: unknown): GoodImbalance[] {
     const row = item as Record<string, unknown>;
     if (typeof row.name !== "string") continue;
     rows.push({
+      goodId: typeof row.goodId === "number" ? row.goodId : undefined,
       name: row.name,
       magnitude: typeof row.magnitude === "number" ? row.magnitude : 0,
+      price: typeof row.price === "number" ? row.price : undefined,
     });
   }
   return rows;

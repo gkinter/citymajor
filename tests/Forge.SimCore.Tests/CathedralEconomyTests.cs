@@ -1,6 +1,7 @@
 using Forge.Engine.Simulation;
 using Forge.Game.Simulation;
 using Forge.SimCore;
+using Forge.SimWasm;
 using Xunit;
 
 namespace Forge.SimCore.Tests;
@@ -50,6 +51,25 @@ public sealed class CathedralEconomyTests
         float priceZone3 = economy.GetPrice(3, Good.Food);
         Assert.True(priceZone3 > priceZone0 * 1.2f,
             $"Expected scarcity zone price > surplus zone. zone0={priceZone0:F2}, zone3={priceZone3:F2}");
+    }
+
+    [Fact]
+    public void EconomySnapshot_ExportsPricePerTopImbalance()
+    {
+        var economy = new EconomySystem();
+        economy.SetActiveZoneCount(1);
+        economy.SetZoneSupply(0, Good.Food, 2f);
+        economy.SetZoneDemand(0, Good.Food, 80f);
+        economy.RecalculatePrices();
+
+        var snapshot = EconomySnapshotDto.From(economy);
+
+        Assert.NotEmpty(snapshot.Shortages);
+        var food = Assert.Single(snapshot.Shortages, row => row.Name == "Food");
+        Assert.Equal((byte)Good.Food, food.GoodId);
+        Assert.True(food.Price > economy.GetAveragePrice(Good.Water),
+            $"Scarce food should price above a stable good. food={food.Price:F2}");
+        Assert.True(food.Magnitude > 0f);
     }
 
     [Fact]

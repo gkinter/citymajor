@@ -81,8 +81,12 @@ export type RciDemand = {
 
 /** Per-good Leontief market imbalance from WASM EconomySystem. */
 export type GoodImbalance = {
+  /** Good enum byte (0–44) when exported from WASM. */
+  goodId?: number;
   name: string;
   magnitude: number;
+  /** City-wide mean price across active market zones. */
+  price?: number;
 };
 
 /** Top shortages/surpluses exported from EconomySystem market zones. */

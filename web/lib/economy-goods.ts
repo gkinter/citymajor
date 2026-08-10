@@ -38,6 +38,14 @@ export function formatGoodName(name: string): string {
   return name.replace(/([a-z])([A-Z])/g, "$1 $2");
 }
 
+/** Format city-wide good price for economy panel rows. */
+export function formatGoodPrice(price: number): string {
+  if (!Number.isFinite(price) || price < 0) return "—";
+  if (price >= 100) return `$${price.toFixed(0)}`;
+  if (price >= 10) return `$${price.toFixed(1)}`;
+  return `$${price.toFixed(2)}`;
+}
+
 /** Zoning hint when a good maps to an R/C/I category. */
 export function zoningHintForGood(name: string): string | undefined {
   const category = GOOD_RCI_HINT[name];

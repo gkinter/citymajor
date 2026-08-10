@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `d8a7777` — wave 6 complete (Herald economy shortage, constructing meshes, demand overlay foundation)  
+**Integration tip:** `57b41f2` — wave 7 complete (Unity demand foundation, Herald LLM context, sim-metrics tests)  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -19,14 +19,14 @@
 | Zone paint | SB-4174 | ✅ Done + `SimHost.PaintZone` | — |
 | RCI HUD | SB-4175 | ✅ UI Toolkit `ResourcesHud` + pop growth + utility stress + cranes | — |
 | Bulldoze tool | — | ✅ `BulldozeTool` + `SimHost.Bulldoze` (`X`) | — |
-| Demand overlay | — | ✅ R/C/I + goods shortage + utility stress (web); Unity R/C/I meters | — |
+| Demand overlay | — | ✅ R/C/I + goods shortage + utility stress (web + Unity) | — |
 | Tool mode HUD | — | ✅ `ToolModeHudController` — active paint/road/build/bulldoze | — |
 | Happiness meter | — | ✅ `HappinessMeterController` (left stack) | — |
 | Approval meter | — | ✅ `ApprovalMeterController` (top-right) | — |
 | Phase 2 roads | — | ✅ `RoadPaintTool` + overlay in bootstrap | — |
 | Phase 2 economy panels | — | ✅ `BudgetPanelController` in bootstrap | — |
 | Phase 2 research | — | ✅ `ResearchPanelController` (`R`) in bootstrap | — |
-| Phase 2 Herald API | — | ✅ `HeraldPanelController` + web `economy_shortage` bucket from `goodsShortageIndex` | — |
+| Phase 2 Herald API | — | ✅ Herald panel + `economy_shortage` bucket + LLM foundation context | — |
 | Phase 2 CMJR save | — | ✅ `SaveLoadPanelController` + Steam cloud hook | — |
 | Phase 2 vehicles (v1.1) | SB-4188 | ✅ `VehicleInstancer` wired | — |
 | Phase 2 pedestrians (v1.1) | SB-4187 | ✅ `PedestrianInstancer` + citizen panel (`C`) | — |

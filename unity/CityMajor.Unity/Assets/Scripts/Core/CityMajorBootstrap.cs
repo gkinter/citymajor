@@ -104,6 +104,10 @@ namespace CityMajor.Core
             approvalUi.transform.SetParent(root.transform, false);
             approvalUi.AddComponent<ApprovalMeterController>().Configure(sim);
 
+            var cathedralMetricsUi = new GameObject("CityMajor_CathedralMetricsUi");
+            cathedralMetricsUi.transform.SetParent(root.transform, false);
+            cathedralMetricsUi.AddComponent<CathedralMetricsHudController>().Configure(sim);
+
             var steamPresence = root.AddComponent<SteamRichPresenceController>();
             steamPresence.Configure(sim);
 

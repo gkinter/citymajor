@@ -48,6 +48,30 @@ namespace CityMajor.Sim
         /// <summary>Cathedral P2 — residential vacancy fraction (1 = fully vacant).</summary>
         public float ResidentialVacancy;
 
+        /// <summary>Cathedral — 1 − EmploymentRate (0–1).</summary>
+        public float UnemploymentRate;
+
+        /// <summary>Cathedral P4 — city-wide car mode share (0–1).</summary>
+        public float CarModeShare;
+
+        /// <summary>Cathedral P4 — transit mode share (0–1).</summary>
+        public float TransitModeShare;
+
+        /// <summary>Cathedral P4 — walk mode share (0–1).</summary>
+        public float WalkModeShare;
+
+        /// <summary>Cathedral P3 — city-average Food price (0 if economy unavailable).</summary>
+        public float FoodAvgPrice;
+
+        /// <summary>Cathedral P3 — city-average Water price.</summary>
+        public float WaterAvgPrice;
+
+        /// <summary>Cathedral P3 — city-average Steel price.</summary>
+        public float SteelAvgPrice;
+
+        /// <summary>True when anchor goods prices were sampled from EconomySystem.</summary>
+        public bool HasGoodsPrices;
+
         /// <summary>Sim hour 0–24 (from SimSnapshot.TimeOfDay).</summary>
         public float TimeOfDay;
 

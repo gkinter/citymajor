@@ -233,6 +233,16 @@ namespace CityMajor.Sim
             UtilityStressIndex = 0.07f,
             BlackoutFraction = 0.02f,
             WaterShortageFraction = 0.03f,
+            MeanRentBurden = 0.28f,
+            ResidentialVacancy = 0.12f,
+            UnemploymentRate = 0.14f,
+            CarModeShare = 0.65f,
+            TransitModeShare = 0.20f,
+            WalkModeShare = 0.15f,
+            FoodAvgPrice = 1.0f,
+            WaterAvgPrice = 0.8f,
+            SteelAvgPrice = 2.4f,
+            HasGoodsPrices = true,
         };
 
         void PublishFromSimHost()
@@ -254,6 +264,13 @@ namespace CityMajor.Sim
             var timeOfDay = snap.TimeOfDay;
             var sampleLaw = _simHost.GetSampleLawPreview();
             var laws = _simHost.Laws;
+            var (carShare, transitShare, walkShare) = _simHost.CollectModeShares();
+            var employment = snap.EmploymentRate;
+            var unemployment = Mathf.Clamp01(1f - employment);
+            var hasGoodsPrices = economy != null;
+            var foodPrice = hasGoodsPrices ? economy.GetAveragePrice(Good.Food) : 0f;
+            var waterPrice = hasGoodsPrices ? economy.GetAveragePrice(Good.Water) : 0f;
+            var steelPrice = hasGoodsPrices ? economy.GetAveragePrice(Good.Steel) : 0f;
 
             State = new CitySimState
             {
@@ -268,7 +285,7 @@ namespace CityMajor.Sim
                 DemandIndustrial = economy?.IndustrialDemand ?? 0f,
                 GoodsShortageIndex = snap.GoodsShortageIndex,
                 GoodsSurplusIndex = snap.GoodsSurplusIndex,
-                EmploymentRate = snap.EmploymentRate,
+                EmploymentRate = employment,
                 TradeBalance = snap.TradeBalance,
                 MonthlyExportValue = snap.MonthlyExportValue,
                 MonthlyImportCost = snap.MonthlyImportCost,
@@ -285,6 +302,14 @@ namespace CityMajor.Sim
                 WaterShortageFraction = snap.WaterShortageFraction,
                 MeanRentBurden = snap.MeanRentBurden,
                 ResidentialVacancy = snap.ResidentialVacancy,
+                UnemploymentRate = unemployment,
+                CarModeShare = carShare,
+                TransitModeShare = transitShare,
+                WalkModeShare = walkShare,
+                FoodAvgPrice = foodPrice,
+                WaterAvgPrice = waterPrice,
+                SteelAvgPrice = steelPrice,
+                HasGoodsPrices = hasGoodsPrices,
                 TimeOfDay = timeOfDay,
                 RushMultiplier = LifeSimMath.RushHourMultiplier(timeOfDay),
                 HouseholdCount = households.Length,

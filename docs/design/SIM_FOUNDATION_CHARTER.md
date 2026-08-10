@@ -73,8 +73,8 @@ Unity HUD / Steam / CI are **consumers** of this foundation — not the foundati
 ### WP-D — Characterization & perf ✅
 
 - ✅ `Forge.SimCore.Tests` — foundation + goods + laws + traffic + construction + tick budget
-- ✅ Tick budget doc + CI gate @ 8 Hz — [`SIM_TICK_BUDGET.md`](./SIM_TICK_BUDGET.md); local target ≤10 ms (SB-3685), CI &lt;25 ms
-- ✅ V1-scale tick characterization (8.2K HH / 3.2K buildings on 256×256) via `SimHost.SeedV1ScaleCity()` — `TickBudgetTests.V1Scale_256x256_NearFullPools_MedianFrameTick_UnderCiBudget`
+- ✅ Tick budget doc + CI gate @ 8 Hz — [`SIM_TICK_BUDGET.md`](./SIM_TICK_BUDGET.md); local target ≤10 ms (SB-3685); starter CI &lt;25 ms; v1-scale keep-pace &lt;125 ms (hard &lt;25 ms under `CI_STRICT=1`)
+- ✅ V1-scale tick characterization (8.2K HH / 3.2K buildings on 256×256) via `SimHost.SeedV1ScaleCity()` — `TickBudgetTests.V1Scale_256x256_NearFullPools_MedianFrameTick_UnderCiBudget` (WEB_V1_SCOPE ≥30 FPS = render wall-clock, not tick-ms)
 
 ### WP-E — Spec stretch (cathedral, opt-in)
 

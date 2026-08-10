@@ -64,6 +64,8 @@ v1 delivers roughly **60–90 minutes** of focused progression (not the full 150
 | **Sim tick** | WASM worker; render reads snapshot only | No React state per building |
 | **LOD bands** | L0 full GLTF → L1 simplified → L2 boxes → L3 heatmap blocks | Mandatory at street/neighborhood/city zoom |
 
+**FPS vs sim tick-ms:** The ≥30 / ≥60 FPS rows are **render wall-clock** (R3F/WebGL with LOD). They are **not** a `SimHost.Tick` millisecond budget. Sim runs at **8 Hz** (125 ms/frame) on a worker; characterization gates live in [`SIM_TICK_BUDGET.md`](./SIM_TICK_BUDGET.md) (keep-pace &lt;125 ms always; historical &lt;25 ms under `CI_STRICT=1`).
+
 **Non-goals:** 4K ultra, uncapped entity counts, or “full vision” 1024×1024 / 50k building stress tests.
 
 ---

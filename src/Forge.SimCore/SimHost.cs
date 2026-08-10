@@ -258,15 +258,18 @@ public sealed partial class SimHost
         }
     }
 
-    public void PlaceRoad(int x, int y, byte tier = 1, bool bridge = false, bool tunnel = false)
+    public bool PlaceRoad(int x, int y, byte tier = 1, bool bridge = false, bool tunnel = false)
     {
-        if (!IsInitialized || !_state.Tiles.InBounds(x, y)) return;
+        if (!IsInitialized || !_state.Tiles.InBounds(x, y)) return false;
 
         int idx = _state.Tiles.Index(x, y);
         byte terrain = _state.Tiles.TerrainType[idx];
-        if (terrain == (byte)TerrainId.Water || terrain == (byte)TerrainId.Rock) return;
+        if (terrain == (byte)TerrainId.Water || terrain == (byte)TerrainId.Rock) return false;
 
         tier = (byte)Math.Clamp(tier, (byte)0, (byte)2);
+        if (RoadHighwayAccess.WouldCreateIllegalMerge(_state.Tiles, x, y, tier))
+            return false;
+
         _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y, tier, bridge, tunnel);
         _roadsNeedRebuild = true;
 
@@ -274,6 +277,7 @@ public sealed partial class SimHost
         RefreshRoadFlagsAt(x + 1, y);
         RefreshRoadFlagsAt(x, y - 1);
         RefreshRoadFlagsAt(x, y + 1);
+        return true;
     }
 
     public bool PlaceBuilding(int x, int y, int typeId)

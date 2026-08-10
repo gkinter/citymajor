@@ -20,6 +20,7 @@ public sealed class RoadGraph
     // Node data
     private int[] _nodeGridX;     // Grid position of each intersection
     private int[] _nodeGridY;
+    private RoadNodeType[] _nodeTypes;
 
     // Lookup: grid position -> node ID (-1 if no node)
     private readonly Dictionary<long, int> _gridToNode = new();
@@ -45,21 +46,29 @@ public sealed class RoadGraph
         _edgeLengths = new int[maxNodes * 4];
         _nodeGridX = new int[maxNodes];
         _nodeGridY = new int[maxNodes];
+        _nodeTypes = new RoadNodeType[maxNodes];
     }
 
     /// <summary>Add a node at the given grid position. Returns node ID.</summary>
-    public int AddNode(int gridX, int gridY)
+    public int AddNode(int gridX, int gridY, RoadNodeType nodeType = RoadNodeType.Intersection)
     {
         long key = PackKey(gridX, gridY);
         if (_gridToNode.TryGetValue(key, out int existing))
+        {
+            _nodeTypes[existing] = nodeType;
             return existing;
+        }
 
         int id = _nodeCount++;
         _nodeGridX[id] = gridX;
         _nodeGridY[id] = gridY;
+        _nodeTypes[id] = nodeType;
         _gridToNode[key] = id;
         return id;
     }
+
+    /// <summary>Topology / ramp classification for a graph node.</summary>
+    public RoadNodeType GetNodeType(int nodeId) => _nodeTypes[nodeId];
 
     /// <summary>Get the node ID at a grid position, or -1 if none.</summary>
     public int GetNodeAt(int gridX, int gridY)

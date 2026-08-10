@@ -71,14 +71,19 @@ public sealed class RoadGraphBuilderTests
         var graph = new RoadGraph(16);
         RoadGraphBuilder.Build(tiles, graph);
 
-        Assert.Equal(2, graph.NodeCount);
+        // Tier boundaries split the segment at the middle tile (P1.4).
+        Assert.Equal(3, graph.NodeCount);
 
         int nodeA = graph.GetNodeAt(3, 3);
+        int nodeMid = graph.GetNodeAt(4, 3);
         int nodeB = graph.GetNodeAt(5, 3);
         Assert.True(nodeA >= 0);
+        Assert.True(nodeMid >= 0);
         Assert.True(nodeB >= 0);
 
         foreach (var (_, _, level) in graph.GetNeighbors(nodeA))
+            Assert.Equal(0, level);
+        foreach (var (_, _, level) in graph.GetNeighbors(nodeMid))
             Assert.Equal(0, level);
         foreach (var (_, _, level) in graph.GetNeighbors(nodeB))
             Assert.Equal(0, level);

@@ -5,8 +5,14 @@ namespace Forge.SimCore;
 /// </summary>
 public static class RoadTier
 {
+    /// <summary>Highway tier in bits 4–5 (tier 2 in v1; design docs also label this as tier 3/4).</summary>
+    public const byte HighwayLevel = 2;
+
     /// <summary>Extract road level from tile RoadFlags bits 4–5 (0=dirt, 1=paved, 2=highway).</summary>
     public static byte ExtractLevel(byte roadFlags) => (byte)((roadFlags >> 4) & 0x03);
+
+    /// <summary>Whether the tier is highway class for ramp access rules.</summary>
+    public static bool IsHighwayTier(byte tier) => tier >= HighwayLevel;
 
     /// <summary>Capacity per lane in vehicles/hour (dirt 200, paved 800, highway 2200).</summary>
     public static float RoadCapacityForLevel(byte level) => level switch

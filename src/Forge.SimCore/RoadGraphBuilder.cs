@@ -34,7 +34,7 @@ public static class RoadGraphBuilder
         {
             int idx = tiles.Index(x, y);
             if (!isNode[idx]) continue;
-            nodeAt[idx] = graph.AddNode(x, y);
+            nodeAt[idx] = graph.AddNode(x, y, ClassifyNodeType(tiles, x, y));
         }
 
         // Phase 3: trace segments between nodes and emit CSR edges.
@@ -66,13 +66,14 @@ public static class RoadGraphBuilder
     }
 
     /// <summary>
-    /// Node if degree ≥ 3, dead-end (degree ≤ 1), or degree-2 corner (neighbors not opposite).
+    /// Node if degree ≥ 3, dead-end (degree ≤ 1), degree-2 corner, or highway/local tier boundary.
     /// </summary>
     internal static bool IsNodeTile(TileData tiles, int x, int y)
     {
         int degree = CountRoadNeighbors(tiles, x, y);
         if (degree <= 1) return true;
         if (degree >= 3) return true;
+        if (HasTierBoundary(tiles, x, y)) return true;
 
         // Degree 2: straight-through tiles are collapsed; corners remain nodes.
         Span<(int nx, int ny)> neighbors = stackalloc (int, int)[4];
@@ -91,6 +92,55 @@ public static class RoadGraphBuilder
         int dy2 = neighbors[1].ny - y;
         bool opposite = dx1 == -dx2 && dy1 == -dy2;
         return !opposite;
+    }
+
+    /// <summary>Classify graph node topology including highway ramp transitions (P1.4).</summary>
+    internal static RoadNodeType ClassifyNodeType(TileData tiles, int x, int y)
+    {
+        int degree = CountRoadNeighbors(tiles, x, y);
+        byte selfTier = RoadTier.ExtractLevel(tiles.RoadFlags[tiles.Index(x, y)]);
+        bool selfHighway = RoadTier.IsHighwayTier(selfTier);
+        bool hasHighwayNeighbor = false;
+        bool hasLowerNeighbor = false;
+
+        foreach (var (dx, dy) in Dirs)
+        {
+            int nx = x + dx;
+            int ny = y + dy;
+            if (!IsRoad(tiles, nx, ny)) continue;
+            byte neighborTier = RoadTier.ExtractLevel(tiles.RoadFlags[tiles.Index(nx, ny)]);
+            if (RoadTier.IsHighwayTier(neighborTier))
+                hasHighwayNeighbor = true;
+            else
+                hasLowerNeighbor = true;
+        }
+
+        bool tierBoundary = (selfHighway && hasLowerNeighbor) || (!selfHighway && hasHighwayNeighbor);
+        if (tierBoundary)
+        {
+            if (degree >= 3) return RoadNodeType.Ramp;
+            return RoadTier.IsHighwayTier(selfTier) ? RoadNodeType.HighwayOff : RoadNodeType.HighwayOn;
+        }
+
+        if (degree <= 1) return RoadNodeType.DeadEnd;
+        if (degree >= 3) return RoadNodeType.Intersection;
+        return RoadNodeType.Corner;
+    }
+
+    private static bool HasTierBoundary(TileData tiles, int x, int y)
+    {
+        byte selfTier = RoadTier.ExtractLevel(tiles.RoadFlags[tiles.Index(x, y)]);
+        foreach (var (dx, dy) in Dirs)
+        {
+            int nx = x + dx;
+            int ny = y + dy;
+            if (!IsRoad(tiles, nx, ny)) continue;
+            byte neighborTier = RoadTier.ExtractLevel(tiles.RoadFlags[tiles.Index(nx, ny)]);
+            if (RoadTier.IsHighwayTier(selfTier) != RoadTier.IsHighwayTier(neighborTier))
+                return true;
+        }
+
+        return false;
     }
 
     private static (int toX, int toY, int length, byte minLevel, float cost) TraceSegment(

@@ -25,6 +25,16 @@
 - [x] `RoadGraphBuilder`: segment cost multiplier — bridge ×1.15, tunnel ×1.25
 - [x] Tests: bridge/tunnel tiles increase segment travel cost
 
+## P1.4 — Highway ramp nodes (partial)
+
+- [x] `RoadNodeType` enum: Intersection, DeadEnd, Corner, Ramp, HighwayOn, HighwayOff
+- [x] Store node type on graph nodes during `RoadGraphBuilder` classification
+- [x] Tier-boundary heuristic: highway tile adjacent to lower tier → Ramp / HighwayOn / HighwayOff
+- [x] `PlaceRoad` rejects illegal highway merge (non-highway tile with 2+ highway neighbors)
+- [x] Tests: T-highway-local junction + illegal merge rejection
+- [ ] Dedicated ramp paint tool / `RoadFlags.Ramp` bit (deferred to P1.5 road toolbar UI)
+- [ ] Snapshot export of `nodeTypes[]` (deferred to P1.6)
+
 ## Verification
 
 ```bash

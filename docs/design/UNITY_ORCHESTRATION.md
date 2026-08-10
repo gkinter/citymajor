@@ -1,8 +1,13 @@
 # CityMajor Unity — Orchestration Tracker
 
+**Canonical:** Yes — this is the **source of truth** for Unity integration status, lane ownership, merge protocol, bootstrap inventory, and Play gate. Cathedral program docs link here; do not fork a second tracker.
+
+**Product platform:** **Unity 6 Editor + desktop/Steam player builds.** Web Next.js/R3F is archival/spike only. WASM (`Forge.SimWasm`) may remain as a **sim validation harness** sharing `Forge.SimCore` — it is not the player experience.
+
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `0518c61` — Cathedral program launch: OpenSpec + P1.1 road tiers + P2/P3 specs  
+**Integration worktree:** `~/citymajor/citymajor-unity-port-plan`  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
+**Cathedral:** [CATHEDRAL_PROGRAM.md](./CATHEDRAL_PROGRAM.md) · next sprint [CATHEDRAL_UNITY_SPRINT.md](./CATHEDRAL_UNITY_SPRINT.md)  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
 **Agent dispatch playbook:** [UNITY_AGENT_DISPATCH.md](./UNITY_AGENT_DISPATCH.md)
@@ -19,7 +24,7 @@
 | Zone paint | SB-4174 | ✅ Done + `SimHost.PaintZone` | — |
 | RCI HUD | SB-4175 | ✅ UI Toolkit `ResourcesHud` + pop growth + utility stress + cranes | — |
 | Bulldoze tool | — | ✅ `BulldozeTool` + `SimHost.Bulldoze` (`X`) | — |
-| Demand overlay | — | ✅ R/C/I + goods shortage + utility stress (web + Unity) | — |
+| Demand overlay | — | ✅ R/C/I + goods shortage + utility stress | — |
 | Tool mode HUD | — | ✅ `ToolModeHudController` — active paint/road/build/bulldoze | — |
 | Happiness meter | — | ✅ `HappinessMeterController` (left stack) | — |
 | Approval meter | — | ✅ `ApprovalMeterController` (top-right) | — |
@@ -33,11 +38,13 @@
 | Phase 2 rush curve | SB-4189 | ✅ `LifeSimMath.RushHourMultiplier` in SimCore + Unity | — |
 | Life layer v1.1 | — | ✅ Service overlay (`V`), utility stress (`U`), growth, construction props | — |
 | Life layer v1.5 | — | ✅ Ambient time-of-day + audio scaffold | — |
-| Social / trade stubs | SB-4183–4186 | ✅ `TradeStrip` + web `ResourcesHud` employment/trade/utilities parity | — |
+| Social / trade stubs | SB-4183–4186 | ✅ `TradeStrip` + employment/trade/utilities on HUD | — |
 | Phase 3 Steam facade | SB-4180 | ✅ `SteamNativePlatform` + rich presence + cloud save hooks | — |
 | Phase 3 achievements | SB-4181 | ✅ Catalog + toast + headless Windows build script | — |
 | Phase 3 Steam depot | SB-4180 | 🟡 Runbook: [DEPOT_UPLOAD_RUNBOOK.md](../steam/DEPOT_UPLOAD_RUNBOOK.md) — partner AppId + live upload pending | Agent |
-| **Sim Cathedral program** | SB-4200–4260 | 🆕 Post WP-E depth — [CATHEDRAL_PROGRAM.md](./CATHEDRAL_PROGRAM.md) · OpenSpec `openspec/` · first change P1.1 road tiers | Orchestrator |
+| **Sim Cathedral program** | SB-4200–4260 | 🟢 Sprint 1–2 sim depth landed — [CATHEDRAL_PROGRAM.md](./CATHEDRAL_PROGRAM.md) · OpenSpec `openspec/` | Orchestrator |
+| **Cathedral Unity sprint** | — | 🆕 UI/HUD + tools parity — [CATHEDRAL_UNITY_SPRINT.md](./CATHEDRAL_UNITY_SPRINT.md) | UI / Input / Rendering lanes |
+| Web R3F / WASM client | — | 📦 **Archival / harness only** — not shipped | — |
 
 ---
 
@@ -139,9 +146,9 @@ DemandOverlayController.cs ← R/C/I demand bars
 # Steam depot / headless player (Phase 3)
 ./scripts/build-steam-unity.sh
 
-# Full sim (CI)
+# Full sim (CI) — Unity native primary; WASM optional harness
 dotnet build src/Forge.SimCore/Forge.SimCore.csproj
-dotnet build src/Forge.SimWasm/Forge.SimWasm.csproj
+dotnet build src/Forge.SimWasm/Forge.SimWasm.csproj   # harness only — not player ship
 
 # Unity symlinks
 ./scripts/setup-unity.sh
@@ -153,7 +160,7 @@ dotnet build src/Forge.SimWasm/Forge.SimWasm.csproj
 
 | Layer | Technology | Rationale |
 |-------|------------|-----------|
-| **Simulation** | `Forge.SimCore` SoA + systems | Shared with WASM; scales to 10k households without Unity DOTS |
+| **Simulation** | `Forge.SimCore` SoA + systems | Shared with optional WASM harness; scales to 10k households without Unity DOTS |
 | **Sim thread** | Plain C# @ 8 Hz → `SimSnapshot` | Double-buffer pattern; Burst opt-in on hot loops later |
 | **Rendering** | URP + `Graphics.DrawMeshInstanced` | 5k buildings, 20–40 draws/chunk; Entities Graphics only if profiling demands |
 | **Overlays** | GL mesh passes (zones, roads) | No GameObject per tile |

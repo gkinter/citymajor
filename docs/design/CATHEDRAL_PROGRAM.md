@@ -2,30 +2,48 @@
 
 **Status:** Active engineering program  
 **Date:** 2026-08-10  
-**Branch:** `feat/cathedral-program-2026-08-10`  
-**Linear project:** CityMajor Sim Cathedral (create) · parent initiative: [SB-3708](https://linear.app/softblaze/issue/SB-3708)  
+**Branch:** `feat/unity-port-plan-2026-07-12` (integration)  
+**Platform (locked):** **Unity 6 Editor + desktop/Steam player builds** — this is the product  
+**Linear project:** CityMajor Sim Cathedral · parent initiative: [SB-3708](https://linear.app/softblaze/issue/SB-3708)  
 **OpenSpec:** [`openspec/specs/`](../../openspec/specs/) · first change archived: [`001-road-tier-and-graph-v2`](../../openspec/changes/archive/2026-08-10-001-road-tier-and-graph-v2/)
 
-**Related Tier 0/1 docs:** [`SIMULATION_ARCHITECTURE.md`](./SIMULATION_ARCHITECTURE.md) · [`SIM_FOUNDATION_CHARTER.md`](./SIM_FOUNDATION_CHARTER.md) · [`CITY_ECOSYSTEM_VISION.md`](./CITY_ECOSYSTEM_VISION.md) · [`SIM_V1_GAP_MATRIX.md`](./SIM_V1_GAP_MATRIX.md)  
+**Related Tier 0/1 docs:** [`UNITY_V1_SCOPE.md`](./UNITY_V1_SCOPE.md) · [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md) · [`SIMULATION_ARCHITECTURE.md`](./SIMULATION_ARCHITECTURE.md) · [`SIM_FOUNDATION_CHARTER.md`](./SIM_FOUNDATION_CHARTER.md) · [`CITY_ECOSYSTEM_VISION.md`](./CITY_ECOSYSTEM_VISION.md) · [`SIM_V1_GAP_MATRIX.md`](./SIM_V1_GAP_MATRIX.md)  
 **Domain specs:** [`AGENT_03_ECONOMY.md`](./AGENT_03_ECONOMY.md) · [`AGENT_04_TRANSPORT.md`](./AGENT_04_TRANSPORT.md) · [`AGENT_05_ZONING_BUILDINGS.md`](./AGENT_05_ZONING_BUILDINGS.md) · [`AGENT_06_SERVICES.md`](./AGENT_06_SERVICES.md) · [`AGENT_07_POLITICS.md`](./AGENT_07_POLITICS.md)
+
+---
+
+## 0. Platform mandate (Unity-first)
+
+| Surface | Role |
+|---------|------|
+| **Unity Editor + player builds** | **Shipped product** — all player UX, HUD, tools, overlays, Steam |
+| **`web/` Next.js + R3F** | **Archival / spike only** — not a ship target; no new player features |
+| **WASM (`Forge.SimWasm`)** | **Optional sim validation harness** — characterization / CI / smoke against the same `Forge.SimCore` snapshot contract |
+
+**Player experience is Unity.** Cathedral milestones that touch UI, tools, overlays, or Play acceptance land in `unity/CityMajor.Unity/` first. Web R3F panels that already exist may mirror snapshot fields for harness debugging, but they do **not** define product parity.
+
+**Orchestration:** [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md) is the **canonical** integration tracker (lanes, merge protocol, bootstrap inventory, Play gate).
+
+**Next sprint:** [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md) — Unity UI/HUD + tools parity.
 
 ---
 
 ## 1. Goal
 
-Close the gap between **Tier 1 architecture docs** and the **shipped player experience** at **v1 scale**:
+Close the gap between **Tier 1 architecture docs** and the **shipped Unity player experience** at **v1 scale**:
 
 | Parameter | Value |
 |-----------|-------|
 | Map | 256×256 tiles |
 | Households | ~10,000 |
 | Buildings | ~5,000 instanced |
-| Era arc | Frontier → Industrial (Unity: Modern era subset) |
-| FPS target | ≥30 integrated GPU |
+| Era arc | **Modern** (Unity v1); Frontier→Industrial content deferred / archival web kits |
+| FPS target | ≥30 integrated GPU (Editor + player builds) |
+| Ship surface | Unity 6 URP desktop (macOS / Windows / Linux) + Steam |
 
-The sim **engines** (~9K LOC under `Forge.Game/Simulation/`) are ahead of most indie city builders. The Cathedral program makes that depth **visible, testable, and truthful** for players — not a rewrite.
+The sim **engines** (~9K LOC under `Forge.Game/Simulation/` / `Forge.SimCore`) are ahead of most indie city builders. The Cathedral program makes that depth **visible, testable, and truthful** in the Unity client — not a rewrite, and not a browser ship.
 
-**Non-goals:** Photoreal rendering, skeletal NPCs, multiplayer (v2 project), 1M-tile open world (Tier 2).
+**Non-goals:** Photoreal rendering, skeletal NPCs, multiplayer (v2 project), 1M-tile open world (Tier 2), shipping the web R3F client.
 
 ---
 
@@ -39,9 +57,9 @@ The sim **engines** (~9K LOC under `Forge.Game/Simulation/`) are ahead of most i
 | **Population** | ~60% | ~40% | 10K pool, satisfaction/employment live; L2 sample only, no housing market |
 | **Services** | ~30% | ~25% | Coverage maps; `MISSING_SYSTEMS` depth (hydrants, EMS curves) not built |
 | **Governance** | ~40% | ~30% | Approval live; law effects shallow vs `POLITICAL_LAW_SYSTEM.md` |
-| **Client export** | ~50% | ~50% | Unity ahead of web; many snapshot fields don't drive UI |
+| **Client export** | ~55% | ~45% | Unity is the product UI; many snapshot fields still lack Unity HUD/overlay binding |
 
-**Read:** Beat Cities: Skylines on **economy/society/household depth** if exposed. On **roads/topology** — not yet; P1 required first.
+**Read:** Beat Cities: Skylines on **economy/society/household depth** if exposed in Unity. On **roads/topology** — P1 sim landed; Unity tool/overlay polish is the remaining player gap (see Unity sprint).
 
 ---
 
@@ -49,9 +67,10 @@ The sim **engines** (~9K LOC under `Forge.Game/Simulation/`) are ahead of most i
 
 ```text
 TIER 0 — Ship contracts (change rarely)
-  UNITY_V1_SCOPE.md          ← what Steam EA must ship
+  UNITY_V1_SCOPE.md          ← what Steam EA must ship (canonical platform)
+  UNITY_ORCHESTRATION.md     ← canonical Unity integration + lane protocol
   SIM_FOUNDATION_CHARTER.md  ← sim foundation program (WP-A–E complete)
-  WASM_SIM_BRIDGE.md         ← snapshot contract
+  WASM_SIM_BRIDGE.md         ← snapshot contract (harness / shared fields)
   CATHEDRAL_PROGRAM.md       ← THIS DOC — post-foundation depth program
 
 TIER 1 — Domain architecture (target behavior)
@@ -64,8 +83,9 @@ TIER 2 — Cathedral content (post-EA / optional depth)
   MISSING_SYSTEMS.md, EXPANDED_ZONES_EVENTS_SPORTS.md
   OPEN_WORLD_SCALE_PROPOSAL.md, GLOBAL_CITY_ARCHETYPES.md
 
-SUPERSEDED — banner only, no new work
-  MASTER_DEVELOPMENT_PLAN, AGENT_09 pixel, TECH_STACK Godot, WEB_V1 as primary ship
+SUPERSEDED / ARCHIVAL — banner only, no player-ship work
+  MASTER_DEVELOPMENT_PLAN, AGENT_09 pixel, TECH_STACK Godot
+  WEB_V1_SCOPE as primary ship · web R3F client as product surface
 ```
 
 ---
@@ -91,7 +111,8 @@ SUPERSEDED — banner only, no new work
 | **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` |
 | **P7.2** (partial) | ✅ Test isolation | SimHost serialize `49edba1` + instance-local SimplexNoise `b4be623`; unskip/flaky gate still open |
 
-**Sprint 2 plan:** [`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md)
+**Sprint 2 plan (closing):** [`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md) — P3.3 still open  
+**Sprint 3 plan (active next):** [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md) — Unity UI/HUD + tools parity
 
 ```mermaid
 flowchart TB
@@ -134,7 +155,7 @@ flowchart TB
   subgraph P7 [P7 Client Truth Layer]
     C1[Snapshot contract v2]
     C2[Acceptance test suite per pillar]
-    C3[Unity + web parity]
+    C3[Unity HUD/tools bind snapshot]
   end
 
   P1 --> P3
@@ -151,11 +172,11 @@ flowchart TB
 
 | Milestone | Deliverable | Spec ref | Acceptance |
 |-----------|-------------|----------|------------|
-| **P1.1** ✅ | `PlaceRoad(x,y,tier,flags)` + tier in `RoadFlags` | `TileData`, `AGENT_04` | Web toolbar tier changes sim capacity |
+| **P1.1** ✅ | `PlaceRoad(x,y,tier,flags)` + tier in `RoadFlags` | `TileData`, `AGENT_04` | Unity road tool tier changes sim capacity |
 | **P1.2** ✅ | `RoadGraphBuilder` v2: segment between intersections, not per-tile nodes | `SIMULATION_ARCHITECTURE` §4 | 4-way vs T-junction typed; capacity from tier table |
 | **P1.3** ✅ | One-way, bridge, tunnel flags affect cost/capacity | RoadFlags bits 6–7 | Bridge over water works in graph |
 | **P1.4** ✅ | Highway on/off ramp nodes | `RoadNode.NodeType` | Ramp-only highway access; no illegal merges |
-| **P1.5** ✅ | Full `TrafficSystem` default on Unity; lite on WASM; ramp + bridge/tunnel toolbar UX | `TrafficSystem.cs` + web toolbar | Home→work O-D; BPR on typed edges; ramp/bridge paint |
+| **P1.5** ✅ | Full `TrafficSystem` default on Unity; lite on WASM harness; ramp + bridge/tunnel paint UX | `TrafficSystem.cs` + Unity `RoadPaintTool` | Home→work O-D; BPR on typed edges; ramp/bridge paint |
 | **P1.6** ✅ | Export `edgeVolumes[]`, `travelTimes[]` to snapshot | `WASM_SIM_BRIDGE` | Vehicle speed ∝ congestion; overlay matches |
 
 ### P2 — Land, zoning & housing
@@ -207,18 +228,19 @@ flowchart TB
 | Milestone | Deliverable |
 |-----------|-------------|
 | **P6.1** | Law toggles apply budget/traffic/spawn multipliers |
-| **P6.2** | `ApplyEventEffectsToState` bridge (web + Unity) |
+| **P6.2** | `ApplyEventEffectsToState` bridge (Unity primary; WASM harness optional) |
 | **P6.3** | Herald buckets only fire when snapshot predicates true |
 | **P6.4** | Economic Control Spectrum slider (SB-3729) — **v2**, not EA |
 
-### P7 — Client truth layer
+### P7 — Client truth layer *(Unity = product UI)*
 
 | Milestone | Deliverable |
 |-----------|-------------|
 | **P7.1** | `SIM_SNAPSHOT_V2.md` — fields, cadence, ownership |
 | **P7.2** | Per-pillar characterization tests in `Forge.SimCore.Tests` |
-| **P7.3** | `acceptance/` Playwright + Unity menu verifies |
+| **P7.3** | Unity Play menu verifies ([`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md)); optional WASM smoke as harness only |
 | **P7.4** | Gap matrix auto-regenerated in CI (script diffs spec vs exports) |
+| **P7.5** | Unity HUD/tools parity for Cathedral snapshot fields (Sprint 3 — [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md)) |
 
 ---
 
@@ -265,15 +287,15 @@ flowchart TB
 
 | Project | Purpose |
 |---------|---------|
-| CityMajor Unity v1 — Modern Era Desktop | Ship EA shell (existing) |
-| **CityMajor Sim Cathedral** | **NEW** — P1–P7 epics |
-| CityMajor v1.5 — Depth & Retention | Merge cathedral milestones into sprints |
+| CityMajor Unity v1 — Modern Era Desktop | **Ship product** — EA shell + Steam |
+| **CityMajor Sim Cathedral** | P1–P7 epics (sim depth + Unity truth layer) |
+| CityMajor v1.5 — Depth & Retention | Merge cathedral milestones into Unity sprints |
 | CityMajor v2 — Multiplayer & Trade | Gate on Cathedral P3.5 + auth |
-| CityMajor Web v1 | Maintenance parity — P7.3 web slice only |
+| CityMajor Web v1 | **Archived** — no ship; harness / historical R3F spike only |
 
 ### Labels
 
-`pillar:infrastructure` · `pillar:housing` · `pillar:economy` · `pillar:population` · `pillar:services` · `pillar:governance` · `pillar:client` · `sim-core` · `unity` · `web` · `acceptance-test`
+`pillar:infrastructure` · `pillar:housing` · `pillar:economy` · `pillar:population` · `pillar:services` · `pillar:governance` · `pillar:client` · `sim-core` · `unity` · `acceptance-test` · `harness` (WASM/web validation only)
 
 ### Issue templates
 
@@ -330,3 +352,4 @@ openspec/
 | 2026-08-10 | **Sprint 2 planned** — P2.1 palette, P3.2–P3.4 economy depth, P4.1–P4.2 population truth, flaky-test gate ([`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md)) |
 | 2026-08-10 | **Sprint 2 mid-sync** — P2.1 (`a990636`), P3.2 (`45d8186`), P4.1 O-D (`99a6547`), P4.2 FW+commute sat (`76db8bf`/`f72dd3d`), test isolation (`49edba1`); remaining P3.3–P3.4 + P7.2 unskip gate |
 | 2026-08-10 | **Sprint 2 wave-2 sync** — P3.2 chain HUD (`746780c`), P3.4 friction (`a9e7878`), P1.5 ramp/bridge UI (`6084fad`/`b34942a`), congestion heatmap (`c8827bf`), O-D HUD (`ccf7f22`), mode choice (`571352a`), SimplexNoise (`b4be623`), P5 politics stub (`fb64bd9`); OpenSpec `001` archived; remaining **P3.3** + P7.2 unskip gate |
+| 2026-08-10 | **Unity-first mandate locked** — player experience = Unity Editor + builds; web R3F archival/spike; WASM optional harness; next sprint [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md); orchestration canonical [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md) |

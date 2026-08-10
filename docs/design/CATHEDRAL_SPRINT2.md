@@ -1,13 +1,17 @@
 # Cathedral Sprint 2 — Economy depth + population truth
 
-**Status:** Active sprint plan — wave-2 sync 2026-08-10  
+**Status:** Closing — wave-2 sync 2026-08-10; **next sprint is Unity-first**  
 **Dates:** 2026-08-11 → 2026-08-24 (2 weeks)  
-**Integration branch:** `feat/unity-port-plan-2026-07-12` (`citymajor-unity-port-plan`) @ `571352a`  
+**Integration branch:** `feat/unity-port-plan-2026-07-12` (`citymajor-unity-port-plan`)  
 **Charter:** [`CATHEDRAL_PROGRAM.md`](./CATHEDRAL_PROGRAM.md)  
+**Next sprint:** [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md) — Unity UI/HUD + tools parity (player experience)  
 **Linear:** SB-4211, SB-4222–4224, SB-4231–4232, SB-4262 (flaky-test gate)
 
+**Platform note:** Sprint 2 landed several **web** HUD/overlays as early mirrors of Cathedral snapshot fields. Those are **not** the ship surface — Unity binds the same fields in Sprint 3. WASM/web remain optional **sim validation harness** only.
+
 **Landed this sync:** P2.1 ✅ · P3.2 export+HUD ✅ · P3.4 friction ✅ · P4.1 O-D+HUD ✅ · P4.2 FW+commute sat ✅ · P4.5 mode choice ✅ · P1.5 ramp/bridge UI ✅ · congestion heatmap ✅ · SimplexNoise ✅ · P5 politics stub ✅ · OpenSpec `001` archived ✅ · **P7.2 Cathedral skip gate ✅**  
-**Still open:** P3.3 partition pricing depth
+**Still open:** P3.3 partition pricing depth (SimCore carry → Unity sprint)  
+**Hand-off:** Port / bind player-facing Sprint 2 surfaces in Unity — see U3.* in [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md)
 
 ---
 
@@ -67,7 +71,7 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 
 | Field | Value |
 |-------|-------|
-| **Owner** | Web + Unity overlay |
+| **Owner** | Overlay (web spike archival; Unity U3.3 is product) |
 | **Deliverable** | Read-only friction corridor overlay (high-friction corridors highlighted) |
 | **Acceptance** | Overlay matches `MeanInterZoneFriction` / `InterZoneTradeVolume` on snapshot |
 | **Depends** | P3.1 ✅ (shipped against existing friction fields; P3.3 depth still open) |
@@ -77,7 +81,7 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 
 | Field | Value |
 |-------|-------|
-| **Owner** | SimCore (population + traffic) + web HUD |
+| **Owner** | SimCore (population + traffic) + HUD (web spike; Unity U3.5 product) |
 | **Deliverable** | Replace gravity O-D with building-pair assignment for commuters; surface coverage in HUD |
 | **Acceptance** | ≥90% commuters have valid `homeBuildingId` + `workBuildingId` on snapshot |
 | **Depends** | P1.5 ✅ (typed-edge traffic) |
@@ -105,7 +109,7 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 
 | Field | Value |
 |-------|-------|
-| **Owner** | Web toolbar |
+| **Owner** | Input tools (web spike archival; Unity U3.1 product) |
 | **Deliverable** | Dedicated highway ramp paint tool + bridge/tunnel mode toggle |
 | **Landed** | `6084fad` ramp tool · `b34942a` bridge/tunnel toggle · `c8f9e52` ramp PlaceRoad fix |
 
@@ -150,7 +154,8 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **SimCore — economy** | `feat/cathedral-p3-market-*` | P3.3 partition export | `dotnet test --filter CathedralEconomy` |
 | **SimCore — population** | `feat/cathedral-p4-*` | P4.1–P4.5 (landed) | `dotnet test --filter CathedralPopulation` |
 | **Unity HUD** | `feat/cathedral-p3-chain-*` | P3.2 production chain panel (landed) | Play mode — building click shows chain |
-| **Web overlay** | `feat/cathedral-p3-friction-*` | P3.4 friction matrix overlay (landed) | `pnpm test` + smoke |
+| **Web overlay** (archival) | `feat/cathedral-p3-friction-*` | P3.4 friction matrix overlay (landed — not ship UX) | harness smoke only |
+| **Unity HUD** (Sprint 3) | `feat/cathedral-u3-*` | Bind Sprint 2 fields in Unity — [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md) | Play gate |
 | **Zone palette** | `feat/cathedral-p2-palette-*` | P2.1 brush + era gates (landed) | Zone paint + growth characterization |
 | **CI / tests** | `feat/cathedral-p7-tests-*` | P7.2 flaky gate | Full Cathedral filter green |
 
@@ -183,7 +188,7 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 - [x] `dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"` — all pass, zero skipped
 - [x] Goods panel / snapshot shows partition prices (export landed `45d8186`; UI spread still P3.3)
 - [x] Production-chain HUD with goods flow (`746780c`)
-- [x] Friction overlay renders on web (`a9e7878`)
+- [x] Friction overlay landed (web spike `a9e7878`; Unity U3.3 binds product UX)
 - [x] Snapshot: home/work building O-D (`99a6547`) + O-D HUD (`ccf7f22`)
 - [x] Commute time → satisfaction + FW travel times (`76db8bf` / `f72dd3d`)
 - [x] Mode-choice stub (`571352a`)

@@ -1,6 +1,7 @@
-# CityMajor — Agent Guide (Unity v1)
+# CityMajor — Agent Guide (Unity product)
 
-Unity 6 desktop mesh-3D city builder. **Locked v1 scope:** [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md).
+Unity 6 desktop mesh-3D city builder (**shipped product**). Web R3F is **not shipped**. **Locked v1 scope:** [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md).  
+**Canonical orchestration:** [`docs/design/UNITY_ORCHESTRATION.md`](docs/design/UNITY_ORCHESTRATION.md).
 
 ## Worktree rules (mandatory)
 
@@ -9,10 +10,11 @@ Never edit tracked files on `main`, `master`, `develop`, `production`, `prod`, o
 **Active Unity v1 worktree:** `~/citymajor/citymajor-unity-port-plan` → branch `feat/unity-port-plan-2026-07-12`.
 
 ```bash
-# Create a new isolated worktree for your task
+# Create a new isolated worktree for your task (prefer from integration tip)
 TOPIC=<short-kebab-slug>
 SLUG="feat/${TOPIC}-$(date +%Y-%m-%d)"
-git worktree add "../citymajor-${TOPIC}" -b "$SLUG"
+INTEG_TIP=$(git -C ../citymajor-unity-port-plan rev-parse HEAD)
+git worktree add "../citymajor-${TOPIC}" -b "$SLUG" "$INTEG_TIP"
 cd "../citymajor-${TOPIC}"
 ```
 
@@ -20,16 +22,16 @@ cd "../citymajor-${TOPIC}"
 - Verify before commit: `git rev-parse --abbrev-ref HEAD` must not be a protected branch.
 - After merge: `git worktree remove "../citymajor-${TOPIC}"` && `git branch -d "$SLUG"`.
 
-## Build & verify (Unity — primary)
+## Build & verify (Unity — product)
 
 | Command / action | Purpose |
 |------------------|---------|
 | Unity Hub → open `unity/CityMajor.Unity/` | Primary dev entry |
-| **Play** in Editor (`Assets/Scenes/Play.unity`) | Local play-test |
-| **File → Build Settings** → macOS / Win / Linux | Desktop builds (Phase 3+) |
+| **Play** in Editor (`Assets/Scenes/Play.unity`) | Local play-test (player experience) |
+| **File → Build Settings** → macOS / Win / Linux | Desktop player builds |
 | Symlink assets (once): see [`unity/README.md`](unity/README.md) | Link `base/data` + GLTF into Unity Assets |
 
-**Sim changes:** Edit `src/Forge.SimCore/` — Unity references it in-process. Re-run Play mode after C# sim changes.
+**Sim changes:** Edit `src/Forge.SimCore/` — Unity references it in-process. Re-run Play mode after C# sim changes. Rebuild DLL: `./scripts/build-simcore-for-unity.sh`.
 
 ### Unity MCP workflow
 
@@ -50,47 +52,46 @@ Full setup: [`docs/UNITY_MCP_SETUP.md`](docs/UNITY_MCP_SETUP.md)
 
 Full setup: [`docs/BLENDER_MCP_SETUP.md`](docs/BLENDER_MCP_SETUP.md)
 
-## Build & verify (web — maintenance mode)
+## Build & verify (web / WASM — harness only)
 
 | Command | Purpose |
 |---------|---------|
-| `pnpm dev` | Next.js dev server (`@citymajor/web`, port 3000) |
-| `pnpm build:wasm` | Publish C# `Forge.SimWasm` → `web/public/dotnet/` |
-| `pnpm dev:wasm` | `build:wasm` then `dev` (use after sim changes affecting web) |
-| `pnpm smoke:all` | HTTP + WebGL smoke (needs `pnpm dev` running) |
+| `pnpm build:wasm` | Publish `Forge.SimWasm` for optional snapshot/CI harness |
+| `pnpm smoke:all` | Historical browser smoke — **not** a ship gate for player UX |
+| `pnpm dev` | Local R3F spike only — archival |
 
-Web client receives **critical fixes only** — no new v1 features. See [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) (superseded banner).
+**Do not** treat `/play` as the product surface. WASM/web work may validate `Forge.SimCore` exports; **player experience is Unity**. See [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) (superseded / archival).
 
 ## Key paths
 
 ```
-unity/CityMajor.Unity/        → Unity 6 project (URP, UI Toolkit, Steam target)
+unity/CityMajor.Unity/        → Unity 6 project (URP, UI Toolkit, Steam) — PRODUCT
 unity/CityMajor.Unity/Assets/Scripts/  → Sim bridge, rendering, input, UI
 src/Forge.SimCore/            → Core simulation logic (Unity native target)
-src/Forge.SimWasm/            → WASM host (web maintenance only)
+src/Forge.SimWasm/            → Optional WASM harness (not player runtime)
 base/data/                    → Shared JSON content
-web/public/assets/gltf/modern/ → Modern era GLTF kits (v1 content)
-  ├── svc_modern_*.glb        → Service buildings
-  ├── com_modern_00.glb       → Commercial
-  ├── ind_modern_00.glb       → Industrial
-  └── res_*_modern_*.glb      → Residential (low/high)
-web/lib/gltf-catalog.ts       → Archetype → path mapping (reference for Unity import)
+web/public/assets/gltf/modern/ → Modern era GLTF kits (content host path for Unity)
+web/                            → Archival R3F spike (not shipped)
 docs/design/UNITY_V1_SCOPE.md → Locked Unity v1 charter (modern era, 256×256)
-docs/design/UNITY_PORT_MEGA_PLAN.md → Phased port plan
+docs/design/UNITY_ORCHESTRATION.md → Canonical Unity integration tracker
+docs/design/CATHEDRAL_UNITY_SPRINT.md → Next Cathedral sprint (Unity HUD/tools)
 docs/UNITY_MCP_SETUP.md       → Cursor ↔ Unity MCP setup
 ```
 
 ## Architecture reminders
 
-- Sim snapshots → GPU instanced meshes — not per-building GameObjects or React state.
+- Sim snapshots → GPU instanced meshes — not per-building GameObjects.
 - LOD: full GLTF → simplified mesh → instanced boxes → heatmap blocks.
 - Era filter: **modern only** for v1 — Frontier/Industrial/Postwar/Future deferred.
-- **Do not fork simulation logic.** One PR to `src/Forge.SimCore` updates Unity; web WASM wrapper stays thin.
+- **Do not fork simulation logic.** One PR to `src/Forge.SimCore` updates Unity; WASM harness stays thin.
+- Cathedral UI/tools land in Unity first ([`CATHEDRAL_UNITY_SPRINT.md`](docs/design/CATHEDRAL_UNITY_SPRINT.md)).
 
 ## Related docs
 
 - [`CLAUDE.md`](CLAUDE.md) — stack summary, monetization, architecture notes
 - [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md) — **canonical locked scope**
-- [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) — superseded web charter (maintenance reference)
+- [`docs/design/UNITY_ORCHESTRATION.md`](docs/design/UNITY_ORCHESTRATION.md) — **canonical** integration / lanes
+- [`docs/design/CATHEDRAL_PROGRAM.md`](docs/design/CATHEDRAL_PROGRAM.md) — sim depth program (Unity-first)
+- [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) — superseded archival web charter
 - [`docs/design/MASTER_GAME_CONCEPT.md`](docs/design/MASTER_GAME_CONCEPT.md) — sim depth, economy, narrative design
 - [`unity/README.md`](unity/README.md) — Unity project quick start

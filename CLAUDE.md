@@ -1,6 +1,8 @@
 # CityMajor
 
-Deep city-builder simulation — **Unity 6 desktop** mesh 3D (Cities: Skylines lite). Linear: [SB-3704](https://linear.app/softblaze/issue/SB-3704).
+Deep city-builder simulation — **Unity 6 desktop / Steam** mesh 3D (Cities: Skylines lite). Linear: [SB-3704](https://linear.app/softblaze/issue/SB-3704).
+
+**Product = Unity.** Player experience ships from the Unity Editor and player builds. The browser R3F client is **not shipped**.
 
 ## Stack
 
@@ -11,13 +13,16 @@ Deep city-builder simulation — **Unity 6 desktop** mesh 3D (Cities: Skylines l
 | **3D renderer** | URP + GPU instancing (chunked LOD) |
 | **Simulation** | **Forge.SimCore** native in-process (~9.4k LOC C#); dedicated sim thread |
 | **Backend** | API (saves, entitlements), LLM proxy with template fallback, Steam; Solana phase 2 |
-| **Assets** | Modular GLTF kits — **modern era** (`web/public/assets/gltf/modern/`) |
+| **Assets** | Modular GLTF kits — **modern era** (`web/public/assets/gltf/modern/` paths, consumed by Unity) |
 
-**Web client (`web/`):** Maintenance mode only — Next.js 16 + R3F + WASM. No new v1 features.
+**Web (`web/` Next.js + R3F):** **Archival / spike only** — historical browser prototype. No player-ship features.
+
+**WASM (`Forge.SimWasm`):** Optional **sim validation harness** (CI / smoke against shared snapshot contract). Not the player runtime.
 
 **Legacy:** Forge Engine (SDL2 + OpenGL) is reference only — not shipped.
 
-**Unity port:** [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md) · [`docs/design/UNITY_PORT_MEGA_PLAN.md`](docs/design/UNITY_PORT_MEGA_PLAN.md) · MCP: [`docs/UNITY_MCP_SETUP.md`](docs/UNITY_MCP_SETUP.md) · [`unity/README.md`](unity/README.md)
+**Unity port:** [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md) · [`docs/design/UNITY_ORCHESTRATION.md`](docs/design/UNITY_ORCHESTRATION.md) (canonical) · [`docs/design/UNITY_PORT_MEGA_PLAN.md`](docs/design/UNITY_PORT_MEGA_PLAN.md) · MCP: [`docs/UNITY_MCP_SETUP.md`](docs/UNITY_MCP_SETUP.md) · [`unity/README.md`](unity/README.md)  
+**Cathedral:** [`docs/design/CATHEDRAL_PROGRAM.md`](docs/design/CATHEDRAL_PROGRAM.md) · next sprint [`docs/design/CATHEDRAL_UNITY_SPRINT.md`](docs/design/CATHEDRAL_UNITY_SPRINT.md)
 
 ## Unity v1 scope (locked)
 
@@ -39,11 +44,11 @@ Deep city-builder simulation — **Unity 6 desktop** mesh 3D (Cities: Skylines l
 ## Key directories
 
 ```
-unity/            → Unity 6 desktop client (URP, UI Toolkit, Steam)
-src/Forge.*       → C# sim (Forge.SimCore — Unity native; Forge.SimWasm — web maintenance)
+unity/            → Unity 6 desktop client (URP, UI Toolkit, Steam) — **SHIPPED PRODUCT**
+src/Forge.*       → C# sim (Forge.SimCore — Unity native; Forge.SimWasm — optional harness)
 base/data/        → Shared JSON content (tech tree, events, laws)
-web/              → Web client (maintenance mode — R3F + WASM)
-docs/design/      → Game design (UNITY_V1_SCOPE, MASTER_GAME_CONCEPT, BUILDING_ARCHETYPE_3D, MESHY_*)
+web/              → Archival R3F spike + GLTF kit host paths (not shipped)
+docs/design/      → Game design (UNITY_V1_SCOPE, UNITY_ORCHESTRATION, CATHEDRAL_*, …)
 .cursor/mcp.json  → unity-mcp server config for Cursor
 ```
 

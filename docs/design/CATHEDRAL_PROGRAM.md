@@ -72,6 +72,20 @@ SUPERSEDED — banner only, no new work
 
 ## 4. Seven pillars (P1–P7)
 
+### 4.0 Milestone status (Sprint 1 complete)
+
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| **P1.1**–**P1.6** | ✅ Done | Road tiers, graph v2, bridge/tunnel, ramps, toolbar UX, snapshot export — OpenSpec `001-road-tier-and-graph-v2` |
+| **P2.2**–**P2.5** | ✅ Done | Density brush, rent model, Herald housing triggers, vacancy/rent burden snapshot |
+| **P3.1** | ✅ Done | Goods panel shortages/surpluses + prices in HUD |
+| **P2.1** | 🔲 Sprint 2 | Extended zone palette (office, mixed, park, ag) |
+| **P3.2**–**P3.4** | 🔲 Sprint 2 | Production chains, market-zone pricing, friction UI |
+| **P4.1**–**P4.2** | 🔲 Sprint 2 | Home/work O-D truth; commute → satisfaction |
+| **P7.2** (gate) | 🔲 Sprint 2 | Unskip / stabilize Cathedral characterization tests in CI |
+
+**Sprint 2 plan:** [`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md)
+
 ```mermaid
 flowchart TB
   subgraph P1 [P1 Infrastructure Truth]
@@ -130,29 +144,29 @@ flowchart TB
 
 | Milestone | Deliverable | Spec ref | Acceptance |
 |-----------|-------------|----------|------------|
-| **P1.1** | `PlaceRoad(x,y,tier,flags)` + tier in `RoadFlags` | `TileData`, `AGENT_04` | Web toolbar tier changes sim capacity |
-| **P1.2** | `RoadGraphBuilder` v2: segment between intersections, not per-tile nodes | `SIMULATION_ARCHITECTURE` §4 | 4-way vs T-junction typed; capacity from tier table |
-| **P1.3** | One-way, bridge, tunnel flags affect cost/capacity | RoadFlags bits 6–7 | Bridge over water works in graph |
-| **P1.4** | Highway on/off ramp nodes | `RoadNode.NodeType` | Ramp-only highway access; no illegal merges |
-| **P1.5** | Full `TrafficSystem` default on Unity; lite on WASM | `TrafficSystem.cs` | Home→work O-D; BPR on typed edges |
-| **P1.6** | Export `edgeVolumes[]`, `travelTimes[]` to snapshot | `WASM_SIM_BRIDGE` | Vehicle speed ∝ congestion; overlay matches |
+| **P1.1** ✅ | `PlaceRoad(x,y,tier,flags)` + tier in `RoadFlags` | `TileData`, `AGENT_04` | Web toolbar tier changes sim capacity |
+| **P1.2** ✅ | `RoadGraphBuilder` v2: segment between intersections, not per-tile nodes | `SIMULATION_ARCHITECTURE` §4 | 4-way vs T-junction typed; capacity from tier table |
+| **P1.3** ✅ | One-way, bridge, tunnel flags affect cost/capacity | RoadFlags bits 6–7 | Bridge over water works in graph |
+| **P1.4** ✅ | Highway on/off ramp nodes | `RoadNode.NodeType` | Ramp-only highway access; no illegal merges |
+| **P1.5** ✅ | Full `TrafficSystem` default on Unity; lite on WASM | `TrafficSystem.cs` | Home→work O-D; BPR on typed edges |
+| **P1.6** ✅ | Export `edgeVolumes[]`, `travelTimes[]` to snapshot | `WASM_SIM_BRIDGE` | Vehicle speed ∝ congestion; overlay matches |
 
 ### P2 — Land, zoning & housing
 
 | Milestone | Deliverable | Spec ref |
 |-----------|-------------|----------|
 | **P2.1** | Zone types: R-low/high, C, I, office, mixed, park, ag (modern-era subset) | `AGENT_05`, `EXPANDED_ZONES` |
-| **P2.2** | Density brush (low/med/high) affects spawn tier + HH cap | `ZoneDensity` in `TileData` |
-| **P2.3** | Housing market: rent = f(land value, supply, shortage); `rent_burden` per HH | `PopulationSystem`, events |
-| **P2.4** | Affordability → migration + `housing_crisis` events | Herald + politics |
-| **P2.5** | Construction states in UI (foundation → complete) | Partial in Unity |
+| **P2.2** ✅ | Density brush (low/med/high) affects spawn tier + HH cap | `ZoneDensity` in `TileData` |
+| **P2.3** ✅ | Housing market: rent = f(land value, supply, shortage); `rent_burden` per HH | `PopulationSystem`, events |
+| **P2.4** ✅ | Affordability → migration + `housing_crisis` events | Herald + politics |
+| **P2.5** ✅ | Construction states in UI (foundation → complete) | Partial in Unity |
 | **P2.6** | Decline/abandonment when demand negative + pollution/crime | `AGENT_05` decline formula |
 
 ### P3 — Economy & trade
 
 | Milestone | Deliverable | Spec ref |
 |-----------|-------------|----------|
-| **P3.1** | Goods panel: top shortages/surpluses, prices by good | `EconomySystem` |
+| **P3.1** ✅ | Goods panel: top shortages/surpluses, prices by good | `EconomySystem` |
 | **P3.2** | Production chain visibility (building → inputs/outputs) | `ProductionChain` |
 | **P3.3** | 8–16 market zones with partition pricing | `SIMULATION_ARCHITECTURE` §5 |
 | **P3.4** | Inter-zone trade friction matrix visible | WP-E complete |
@@ -307,3 +321,5 @@ openspec/
 | Date | Note |
 |------|------|
 | 2026-08-10 | Program charter + OpenSpec scaffold + Linear issue templates |
+| 2026-08-10 | **Sprint 1 complete** — P1.1–P1.6, P2.2–P2.5, P3.1 merged to integration (`b61c4b1`) |
+| 2026-08-10 | **Sprint 2 planned** — P2.1 palette, P3.2–P3.4 economy depth, P4.1–P4.2 population truth, flaky-test gate ([`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md)) |

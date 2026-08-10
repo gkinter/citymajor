@@ -738,26 +738,6 @@
     border-radius: 6px;
 }
 
-/* Bottom zoning palette (P2.1 / P2.2) — sits above demand overlay */
-.zoning-toolbar-root {
-    position: absolute;
-    bottom: 118px;
-    left: 50%;
-    translate: -50% 0;
-    flex-direction: row;
-    align-items: flex-end;
-}
-
-.zoning-toolbar {
-    flex-direction: row;
-    align-items: center;
-    padding: 6px 10px;
-    background-color: rgba(12, 16, 24, 0.9);
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.12);
-    border-radius: 6px;
-}
-
 .road-toolbar__label {
     font-size: 11px;
     color: rgba(200, 210, 225, 0.7);
@@ -802,6 +782,26 @@
     margin-left: 4px;
     margin-right: 8px;
     background-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Bottom zoning palette (P2.1 / P2.2) — sits above road toolbar */
+.zoning-toolbar-root {
+    position: absolute;
+    bottom: 156px;
+    left: 50%;
+    translate: -50% 0;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.zoning-toolbar {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 10px;
+    background-color: rgba(12, 16, 24, 0.9);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
 }
 
 .zoning-title {

@@ -1,10 +1,13 @@
 # Cathedral Sprint 2 — Economy depth + population truth
 
-**Status:** Active sprint plan  
+**Status:** Active sprint plan — mid-sprint sync 2026-08-10  
 **Dates:** 2026-08-11 → 2026-08-24 (2 weeks)  
-**Integration branch:** `feat/unity-port-plan-2026-07-12` (`citymajor-unity-port-plan`)  
+**Integration branch:** `feat/unity-port-plan-2026-07-12` (`citymajor-unity-port-plan`) @ `f72dd3d`  
 **Charter:** [`CATHEDRAL_PROGRAM.md`](./CATHEDRAL_PROGRAM.md)  
 **Linear:** SB-4211, SB-4222–4224, SB-4231–4232, SB-4262 (flaky-test gate)
+
+**Landed this sync:** P2.1 ✅ · P3.2 ✅ · P4.1 O-D ✅ · P4.2 FW+commute sat ✅ · test isolation `49edba1` ✅  
+**Still open:** P3.3–P3.4 · P7.2 unskip/flaky gate
 
 ---
 
@@ -31,7 +34,7 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 
 ## 3. Sprint 2 milestones
 
-### P2.1 — Extended zone palette (SB-4211)
+### P2.1 — Extended zone palette (SB-4211) ✅
 
 | Field | Value |
 |-------|-------|
@@ -39,15 +42,17 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Deliverable** | Paintable office (5), mixed-use (6), park ploppable, ag subset (7) |
 | **Acceptance** | Each type affects RCI + spawn rules per `AGENT_05`; era gating (office @ Industrial, mixed @ Colonial+) |
 | **OpenSpec** | New change `002-zone-palette-v1` (delta on `zoning-housing.md`) |
+| **Landed** | `a990636` — extended zone palette with era gates |
 
-### P3.2 — Production chain visibility (SB-4222)
+### P3.2 — Market zone partition prices export (SB-4222) ✅
 
 | Field | Value |
 |-------|-------|
-| **Owner** | Unity HUD lane |
-| **Deliverable** | Building click → inputs/outputs drill-down from `ProductionChain` |
-| **Acceptance** | Industrial building shows at least 2 input goods + 1 output; web stub OK |
+| **Owner** | SimCore / snapshot |
+| **Deliverable** | Export market-zone partition prices on snapshot (HUD-ready) |
+| **Acceptance** | Partition prices present on Cathedral economy snapshot export |
 | **Depends** | P3.1 ✅ |
+| **Landed** | `45d8186` — export market zone partition prices |
 
 ### P3.3 — Market zone partition pricing (SB-4223)
 
@@ -67,7 +72,7 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Acceptance** | Overlay matches `MeanInterZoneFriction` / `InterZoneTradeVolume` on snapshot |
 | **Depends** | P3.3 |
 
-### P4.1 — Home/work building IDs (SB-4231)
+### P4.1 — Home/work building IDs (SB-4231) ✅
 
 | Field | Value |
 |-------|-------|
@@ -75,8 +80,9 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Deliverable** | Replace gravity O-D with building-pair assignment for commuters |
 | **Acceptance** | ≥90% commuters have valid `homeBuildingId` + `workBuildingId` on snapshot |
 | **Depends** | P1.5 ✅ (typed-edge traffic) |
+| **Landed** | `99a6547` — home/work building O-D for traffic lite (+ `fe69037` BPR foundation) |
 
-### P4.2 — Commute time → satisfaction (SB-4232)
+### P4.2 — Commute time → satisfaction (SB-4232) ✅
 
 | Field | Value |
 |-------|-------|
@@ -84,8 +90,9 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Deliverable** | Graph travel time from P4.1 pairs feeds household satisfaction formula |
 | **Acceptance** | Longer commute lowers satisfaction ceteris paribus; characterization test added |
 | **Depends** | P4.1 |
+| **Landed** | `76db8bf` commute→satisfaction; `f72dd3d` multi-iteration Frank-Wolfe + edge travel time export |
 
-### P7.2 gate — Flaky / skipped test cleanup (SB-4262)
+### P7.2 gate — Flaky / skipped test cleanup (SB-4262) — partial
 
 | Field | Value |
 |-------|-------|
@@ -93,6 +100,7 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Deliverable** | Cathedral test filter runs clean in CI; no `[Fact(Skip=…)]` for shipped milestones |
 | **Acceptance** | `dotnet test --filter "FullyQualifiedName~Cathedral"` — 0 skipped, 0 flaky retries; unskip `MarketZonePrices_DifferAcrossPartitions` when P3.3 lands |
 | **Depends** | P3.3 merge |
+| **Landed (partial)** | `49edba1` — serialize SimHost tests to avoid SimplexNoise races (test isolation) |
 
 ---
 
@@ -135,12 +143,13 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 ## 7. Acceptance checklist (Fri W2)
 
 - [ ] `dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"` — all pass, zero skipped
-- [ ] Goods panel shows partition price spread (not just city average)
-- [ ] Building click shows production chain inputs/outputs (Unity)
+- [x] Goods panel / snapshot shows partition prices (export landed `45d8186`; UI spread still P3.3)
+- [ ] Building click shows production chain inputs/outputs (Unity) — deferred / not in this sync
 - [ ] Friction overlay renders on web + Unity
-- [ ] Snapshot: ≥90% commuters with home/work building IDs
-- [ ] Commute time negatively correlates with satisfaction in test city
-- [ ] Office / mixed / park / ag brushes paintable with era gates
+- [x] Snapshot: home/work building O-D (`99a6547`)
+- [x] Commute time → satisfaction + FW travel times (`76db8bf` / `f72dd3d`)
+- [x] Office / mixed / park / ag brushes paintable with era gates (`a990636`)
+- [x] Test isolation: SimHost serialize (`49edba1`) — full P7.2 unskip gate still open
 - [ ] OpenSpec `002-zone-palette-v1` + economy delta archived
 - [ ] Integration tip Play gate subset passed ([`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md))
 

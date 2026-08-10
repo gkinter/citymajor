@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using CityMajor.Core;
 using CityMajor.Rendering;
 using UnityEditor;
 using UnityEngine;
@@ -140,6 +142,49 @@ namespace CityMajor.Editor
             Debug.LogError($"[CityMajor] Achievements catalog verify: FAIL ({failures.Count} issue(s))");
         }
 
+        [MenuItem("CityMajor/Verify Rendering Parity")]
+        public static void VerifyRenderingParity()
+        {
+            var failures = new List<string>();
+
+            var instancerType = typeof(BuildingInstancer);
+            if (instancerType.GetField("boxLodDistance", BindingFlags.Instance | BindingFlags.NonPublic) == null)
+                failures.Add("BuildingInstancer missing boxLodDistance field (camera-distance box LOD)");
+
+            var cameraDistance = typeof(IsometricCameraController).GetProperty(
+                "Distance", BindingFlags.Instance | BindingFlags.Public);
+            if (cameraDistance == null || cameraDistance.PropertyType != typeof(float))
+                failures.Add("IsometricCameraController missing public float Distance property");
+
+            var demandUxml = Path.Combine(Application.dataPath, "UI", "DemandOverlay.uxml");
+            if (!File.Exists(demandUxml))
+                failures.Add($"DemandOverlay.uxml missing: {demandUxml}");
+            else
+            {
+                var demandText = File.ReadAllText(demandUxml);
+                if (!demandText.Contains("goods-row"))
+                    failures.Add("DemandOverlay.uxml missing goods-row (goods shortage bar)");
+                if (!demandText.Contains("util-row"))
+                    failures.Add("DemandOverlay.uxml missing util-row (utility stress)");
+            }
+
+            var tickerUxml = Path.Combine(Application.dataPath, "UI", "EventTicker.uxml");
+            if (!File.Exists(tickerUxml))
+                failures.Add($"EventTicker.uxml missing: {tickerUxml}");
+
+            if (failures.Count == 0)
+            {
+                Debug.Log(
+                    "[CityMajor] Rendering parity verify: PASS (box LOD, camera Distance, demand foundation, EventTicker)");
+                return;
+            }
+
+            foreach (var failure in failures)
+                Debug.LogError($"[CityMajor] Rendering parity verify: {failure}");
+
+            Debug.LogError($"[CityMajor] Rendering parity verify: FAIL ({failures.Count} issue(s))");
+        }
+
         [MenuItem("CityMajor/Run Preflight Checks")]
         public static void RunPreflightChecks()
         {
@@ -162,6 +207,7 @@ namespace CityMajor.Editor
 
             VerifyGltfCatalog();
             VerifyAchievementsCatalog();
+            VerifyRenderingParity();
 
             if (issues == 0)
                 Debug.Log("[CityMajor] Preflight: complete — enter Play and run SB-4176 checklist");

@@ -64,8 +64,13 @@
 - [ ] Cosmetic **vehicles** on roads after traffic builds
 - [ ] **Pedestrian dots** (green/amber/red tiers) near zones or households
 - [ ] `V` — service coverage GL quads
+- [ ] `U` — utility stress overlay (power/water strain tint)
 - [ ] `T` — edge traffic lines on congested roads
+- [ ] Bottom-center **demand strip** shows R/C/I + **goods shortage** bar + **utility stress** row
+- [ ] **Event ticker** (top) shows Herald headline from sim metrics (not static placeholder)
+- [ ] Zoom camera out (distance ≥ 200) — buildings switch to **box LOD** instanced cubes
 - [ ] Buildings **grow in** (scale staging) when new structures appear
+- [ ] Constructing buildings render at **partial height** with amber tint
 - [ ] Yellow **construction cranes** on low-condition buildings
 
 ---
@@ -97,6 +102,8 @@ Unity v1 quality is **not** fully automated in CI today. Use this split so agent
 |-------|------------|-------|-------|
 | `Forge.Engine.Tests` + `Forge.Game.Tests` | ✅ | `.github/workflows/unity-simcore.yml` | 833 + 110 tests on `ubuntu-latest` |
 | Modern GLTF catalog on disk | ✅ | `scripts/verify-unity-gltf-catalog.sh` + GHA | 12 keys; Editor: **CityMajor → Verify GLTF Catalog** |
+| Rendering parity (box LOD, demand foundation, ticker) | ✅ | Editor menu | **CityMajor → Verify Rendering Parity** |
+| Web vitest (sim-metrics, event-catalog, news-ticker, play-keyboard) | ✅ | `.github/workflows/unity-simcore.yml` | `pnpm test` in `web/` |
 | SimCore → Unity DLL copy | ✅ | Script | `./scripts/build-simcore-for-unity.sh` — **run after every SimHost change** |
 | Windows headless player build | ✅ | Script | `./scripts/build-steam-unity.sh` — needs `UNITY_PATH`; produces `Build/Steam/windows/CityMajor.exe` |
 | Web routes + WebGL smoke | ✅ | `.github/workflows/ci-smoke.yml` | **Web maintenance only** — does not load Unity `Play.unity` |
@@ -120,6 +127,8 @@ Unity v1 quality is **not** fully automated in CI today. Use this split so agent
 **CityMajor → Run Preflight Checks** — SimCore DLL + GLTF catalog before Play.
 
 **CityMajor → Verify GLTF Catalog** — asserts modern symlink + 12 shipped GLBs.
+
+**CityMajor → Verify Rendering Parity** — box LOD field, camera Distance, demand foundation UXML, EventTicker UXML.
 
 **CityMajor → Setup Play Scene** — adds `CityMajorBootstrap` if missing.
 

@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `6850f56` — wave 9 complete (web budget deepen, economy E key, NewsTicker tests)  
+**Integration tip:** `ba22005` — wave 10 complete (Verify Rendering Parity editor menu, play-keyboard vitest, SB-4176 checklist)  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 

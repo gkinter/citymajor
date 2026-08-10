@@ -117,6 +117,7 @@ public sealed partial class SimHost
         {
             SeedStarterCity();
             SeedStartingPopulation();
+            _population.BootstrapCommuterAssignments(_state);
             BootstrapServiceCoverage();
         }
 
@@ -491,6 +492,7 @@ public sealed partial class SimHost
         }
 
         _state.Population = totalPop > 0 ? totalPop : targetPopulation;
+        _population.BootstrapCommuterAssignments(_state);
     }
 
     public void RestoreResearchState(
@@ -755,7 +757,7 @@ public sealed partial class SimHost
             _state.Buildings.TypeId[slot] = (ushort)(typeBase + rng.Next(0, 20));
             _state.Buildings.Level[slot] = (byte)rng.Next(1, 5);
             _state.Buildings.State[slot] = 1;
-            _state.Buildings.Occupants[slot] = (ushort)rng.Next(1, 30);
+            _state.Buildings.Occupants[slot] = 0;
             _state.Buildings.MaxOccupants[slot] = 48;
             placed++;
         }

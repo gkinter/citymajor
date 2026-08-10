@@ -247,9 +247,11 @@ public sealed class PopulationSystem
             if (!buildings.IsActive(b)) continue;
             if (buildings.State[b] != 1) continue; // Only operational buildings
 
-            byte zoneType = GetBuildingZoneType(state, b);
-            if (zoneType is 3 or 4 or 5 or 6) // Commercial, industrial, office, mixed-use
-            {
+            if (!IsEmploymentBuilding(state, b))
+                continue;
+
+            byte zoneType = GetEmploymentZoneType(state, b);
+            if (zoneType == 0) continue;
                 int open = buildings.MaxOccupants[b] - buildings.Occupants[b];
                 if (open > 0)
                 {
@@ -263,7 +265,6 @@ public sealed class PopulationSystem
                     };
                     availableJobs.Add((b, open, reqEdu));
                 }
-            }
         }
 
         // Sort jobs by required education descending (best jobs first)
@@ -864,6 +865,91 @@ public sealed class PopulationSystem
     public void RefreshHousingSnapshotMetrics(WorldState state) => UpdateRentBurdenRollup(state);
 
     /// <summary>
+    /// Assign home/work buildings after bulk household seed (starter city, restore).
+    /// Cathedral P4.1 — ensures commuters have explicit O-D building IDs.
+    /// </summary>
+    public void BootstrapCommuterAssignments(WorldState state)
+    {
+        EnsureCapacity(state.Households.Capacity);
+        ClearBuildingOccupantCounts(state);
+
+        var hh = state.Households;
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+            if (hh.AgeGroup[i] != 1) continue;
+            if (hh.WorkBuildingId[i] == 0)
+                hh.Flags[i] = (byte)(hh.Flags[i] | 4);
+        }
+
+        AssignUnhousedHouseholds(state);
+        MatchEmployment(state);
+        AssignRemainingCommuters(state);
+    }
+
+    /// <summary>
+    /// Assign any still-unemployed working households to open jobs (ignores commute distance).
+    /// Used only during bootstrap so starter cities reach P4.1 coverage targets.
+    /// </summary>
+    private void AssignRemainingCommuters(WorldState state)
+    {
+        var hh = state.Households;
+        var buildings = state.Buildings;
+        var openJobs = new List<(int buildingId, int openSlots, int requiredEducation)>();
+
+        for (int b = 0; b < buildings.Capacity; b++)
+        {
+            if (!buildings.IsActive(b) || buildings.State[b] != 1) continue;
+
+            if (!IsEmploymentBuilding(state, b)) continue;
+
+            byte zoneType = GetEmploymentZoneType(state, b);
+            if (zoneType == 0) continue;
+
+            int open = buildings.MaxOccupants[b] - buildings.Occupants[b];
+            if (open <= 0) continue;
+
+            int reqEdu = zoneType switch
+            {
+                5 => 3,
+                3 => 1,
+                4 => 1,
+                6 => 2,
+                _ => 0,
+            };
+            openJobs.Add((b, open, reqEdu));
+        }
+
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+            if (hh.AgeGroup[i] != 1) continue;
+            if (hh.WorkBuildingId[i] != 0) continue;
+            if (hh.HomeBuildingId[i] == 0) continue;
+            if ((hh.Flags[i] & 4) == 0) continue;
+
+            byte edu = hh.Education[i];
+            for (int j = 0; j < openJobs.Count; j++)
+            {
+                var (bId, open, reqEdu) = openJobs[j];
+                if (edu < reqEdu || open <= 0) continue;
+
+                hh.WorkBuildingId[i] = (ushort)bId;
+                hh.Flags[i] = (byte)(hh.Flags[i] & ~4);
+                buildings.Occupants[bId]++;
+                hh.Income[i] = CalculateJobIncome(state, bId, edu);
+                openJobs[j] = (bId, open - 1, reqEdu);
+                break;
+            }
+        }
+    }
+
+    private static void ClearBuildingOccupantCounts(WorldState state)
+    {
+        Array.Clear(state.Buildings.Occupants, 0, state.Buildings.Capacity);
+    }
+
+    /// <summary>
     /// Recompute mean rent burden from household rent/income without mutating per-household trackers.
     /// Characterization tests use this to verify snapshot export matches rollup math.
     /// </summary>
@@ -1002,10 +1088,25 @@ public sealed class PopulationSystem
     private static byte GetBuildingZoneTypeStatic(WorldState state, int buildingId)
     {
         if (buildingId < 0 || buildingId >= state.Buildings.Capacity) return 0;
+
         int gx = state.Buildings.GridX[buildingId];
         int gy = state.Buildings.GridY[buildingId];
         if (!state.Tiles.InBounds(gx, gy)) return 0;
-        return state.Tiles.ZoneType[state.Tiles.Index(gx, gy)];
+
+        byte tileZone = state.Tiles.ZoneType[state.Tiles.Index(gx, gy)];
+        if (tileZone is 1 or 2 or 6)
+            return tileZone;
+
+        ushort typeId = state.Buildings.TypeId[buildingId];
+        byte typeZone = typeId switch
+        {
+            >= 100 and < 300 => 1,
+            >= 300 and < 400 => 3,
+            >= 400 and < 500 => 4,
+            _ => (byte)0,
+        };
+
+        return typeZone != 0 ? typeZone : tileZone;
     }
 
     // =========================================================================
@@ -1172,6 +1273,48 @@ public sealed class PopulationSystem
     private byte GetBuildingZoneType(WorldState state, int buildingId) =>
         GetBuildingZoneTypeStatic(state, buildingId);
 
+    private static bool IsResidentialBuilding(WorldState state, int buildingId)
+    {
+        if (buildingId < 0 || buildingId >= state.Buildings.Capacity) return false;
+        if (!state.Buildings.IsActive(buildingId)) return false;
+
+        byte tileZone = GetTileZone(state, buildingId);
+        if (tileZone is 1 or 2 or 6) return true;
+
+        ushort typeId = state.Buildings.TypeId[buildingId];
+        return typeId is >= 100 and < 300;
+    }
+
+    private static bool IsEmploymentBuilding(WorldState state, int buildingId)
+    {
+        if (buildingId < 0 || buildingId >= state.Buildings.Capacity) return false;
+        if (!state.Buildings.IsActive(buildingId)) return false;
+
+        ushort typeId = state.Buildings.TypeId[buildingId];
+        if (typeId is >= 300 and < 500) return true;
+
+        byte tileZone = GetTileZone(state, buildingId);
+        return tileZone is 3 or 4 or 5 or 6;
+    }
+
+    private static byte GetEmploymentZoneType(WorldState state, int buildingId)
+    {
+        ushort typeId = state.Buildings.TypeId[buildingId];
+        if (typeId is >= 300 and < 400) return 3;
+        if (typeId is >= 400 and < 500) return 4;
+
+        byte tileZone = GetTileZone(state, buildingId);
+        return tileZone is 3 or 4 or 5 or 6 ? tileZone : (byte)0;
+    }
+
+    private static byte GetTileZone(WorldState state, int buildingId)
+    {
+        int gx = state.Buildings.GridX[buildingId];
+        int gy = state.Buildings.GridY[buildingId];
+        if (!state.Tiles.InBounds(gx, gy)) return 0;
+        return state.Tiles.ZoneType[state.Tiles.Index(gx, gy)];
+    }
+
     private float CalculateBuildingDistance(WorldState state, int buildingA, int buildingB)
     {
         if (buildingA < 0 || buildingA >= state.Buildings.Capacity ||
@@ -1217,8 +1360,7 @@ public sealed class PopulationSystem
             if (!buildings.IsActive(b)) continue;
             if (buildings.State[b] != 1) continue;
 
-            byte zone = GetBuildingZoneType(state, b);
-            if (zone is not (1 or 2 or 6)) continue; // Not residential
+            if (!IsResidentialBuilding(state, b)) continue;
 
             if (buildings.Occupants[b] < buildings.MaxOccupants[b])
             {
@@ -1377,6 +1519,122 @@ public sealed class PopulationSystem
     {
         EnsureCapacity(householdIndex + 1);
         _headAge[householdIndex] = age;
+    }
+
+    // =========================================================================
+    // Commuter O-D audit (Cathedral P4.1)
+    // =========================================================================
+
+    /// <summary>Commuter assignment rollup for snapshot export and tests.</summary>
+    public readonly struct CommuterAudit
+    {
+        /// <summary>Working-age households with a workplace building.</summary>
+        public int WorkingCommuters { get; init; }
+        /// <summary>Working commuters with valid active home + work building IDs.</summary>
+        public int AssignedCommuters { get; init; }
+        public float Coverage =>
+            WorkingCommuters > 0 ? AssignedCommuters / (float)WorkingCommuters : 0f;
+    }
+
+    /// <summary>Aggregated home→work tile pair for traffic / debug export.</summary>
+    public readonly struct CommuteOdSampleRow
+    {
+        public int HomeTileX { get; init; }
+        public int HomeTileZ { get; init; }
+        public int WorkTileX { get; init; }
+        public int WorkTileZ { get; init; }
+        public int TripCount { get; init; }
+    }
+
+    /// <summary>
+    /// Count working commuters with explicit home/work building assignments.
+    /// A commuter is working-age with a workplace; assigned means both buildings are active.
+    /// </summary>
+    public CommuterAudit AuditCommuters(WorldState state)
+    {
+        var hh = state.Households;
+        var buildings = state.Buildings;
+        int working = 0;
+        int assigned = 0;
+
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+            if (hh.AgeGroup[i] != 1) continue;
+            if (hh.WorkBuildingId[i] == 0) continue;
+
+            working++;
+
+            ushort homeId = hh.HomeBuildingId[i];
+            ushort workId = hh.WorkBuildingId[i];
+            if (homeId == 0) continue;
+            if (homeId >= buildings.Capacity || workId >= buildings.Capacity) continue;
+            if (!buildings.IsActive(homeId) || !buildings.IsActive(workId)) continue;
+            if (buildings.State[homeId] != 1 || buildings.State[workId] != 1) continue;
+
+            assigned++;
+        }
+
+        return new CommuterAudit
+        {
+            WorkingCommuters = working,
+            AssignedCommuters = assigned,
+        };
+    }
+
+    /// <summary>
+    /// Aggregate O-D pairs by home/work tile for snapshot debug export.
+    /// </summary>
+    public CommuteOdSampleRow[] CollectCommuteOdSample(WorldState state, int limit = 16)
+    {
+        if (limit <= 0 || state.Households.Count == 0)
+            return [];
+
+        var counts = new Dictionary<(int hx, int hz, int wx, int wz), int>();
+        var hh = state.Households;
+        var buildings = state.Buildings;
+
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+            if (hh.AgeGroup[i] != 1) continue;
+            if (hh.WorkBuildingId[i] == 0 || hh.HomeBuildingId[i] == 0) continue;
+
+            int homeId = hh.HomeBuildingId[i];
+            int workId = hh.WorkBuildingId[i];
+            if (homeId >= buildings.Capacity || workId >= buildings.Capacity) continue;
+            if (!buildings.IsActive(homeId) || !buildings.IsActive(workId)) continue;
+            if (buildings.State[homeId] != 1 || buildings.State[workId] != 1) continue;
+
+            var key = (
+                buildings.GridX[homeId],
+                buildings.GridY[homeId],
+                buildings.GridX[workId],
+                buildings.GridY[workId]);
+
+            counts.TryGetValue(key, out int existing);
+            counts[key] = existing + 1;
+        }
+
+        if (counts.Count == 0)
+            return [];
+
+        var rows = new List<CommuteOdSampleRow>(counts.Count);
+        foreach (var kv in counts)
+        {
+            rows.Add(new CommuteOdSampleRow
+            {
+                HomeTileX = kv.Key.hx,
+                HomeTileZ = kv.Key.hz,
+                WorkTileX = kv.Key.wx,
+                WorkTileZ = kv.Key.wz,
+                TripCount = kv.Value,
+            });
+        }
+
+        rows.Sort((a, b) => b.TripCount.CompareTo(a.TripCount));
+        int count = Math.Min(limit, rows.Count);
+        return rows.GetRange(0, count).ToArray();
     }
 
     // =========================================================================

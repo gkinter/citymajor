@@ -58,7 +58,8 @@ public sealed class BuildingData
         Flags = new byte[capacity];
 
         _freeSlots = new Stack<int>(capacity);
-        for (int i = capacity - 1; i >= 0; i--)
+        // Slot 0 is reserved: household HomeBuildingId/WorkBuildingId use 0 as "none".
+        for (int i = capacity - 1; i >= 1; i--)
             _freeSlots.Push(i);
     }
 

@@ -15,6 +15,18 @@ public sealed class HouseholdPreviewDto
     public float Happiness { get; init; }
     /// <summary>Commute time in game minutes.</summary>
     public float CommuteMin { get; init; }
+    public int HomeBuildingId { get; init; }
+    public int WorkBuildingId { get; init; }
+}
+
+/// <summary>Aggregated home→work tile pair for traffic debug export.</summary>
+public sealed class CommuteOdSampleDto
+{
+    public int HomeTileX { get; init; }
+    public int HomeTileZ { get; init; }
+    public int WorkTileX { get; init; }
+    public int WorkTileZ { get; init; }
+    public int TripCount { get; init; }
 }
 
 /// <summary>Population L2 snapshot — top households sample for drill-down.</summary>
@@ -35,6 +47,7 @@ public sealed class PopulationL2Dto
         for (int i = 0; i < rows.Length; i++)
         {
             var row = rows[i];
+            int hhIdx = int.Parse(row.Id.AsSpan(3));
             households[i] = new HouseholdPreviewDto
             {
                 Id = row.Id,
@@ -42,6 +55,12 @@ public sealed class PopulationL2Dto
                 TileZ = row.TileZ,
                 Happiness = row.Happiness,
                 CommuteMin = row.CommuteMin,
+                HomeBuildingId = hhIdx >= 0 && hhIdx < state.Households.Capacity
+                    ? state.Households.HomeBuildingId[hhIdx]
+                    : 0,
+                WorkBuildingId = hhIdx >= 0 && hhIdx < state.Households.Capacity
+                    ? state.Households.WorkBuildingId[hhIdx]
+                    : 0,
             };
         }
 
@@ -100,6 +119,10 @@ public sealed class SimSnapshotDto
     public float ResidentialVacancy { get; init; } = 1f;
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
+    /// <summary>Share of working commuters with valid home + work building IDs (0–1).</summary>
+    public float CommuterCoverage { get; init; }
+    /// <summary>Top home→work tile pairs aggregated from household assignments.</summary>
+    public CommuteOdSampleDto[] CommuteOdSample { get; init; } = [];
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
@@ -116,6 +139,8 @@ public sealed class SimSnapshotDto
         var roadGraph = RoadGraphSnapshotDto.From(state.Roads);
         var traffic = CollectTraffic(state);
         var serviceCoverage = services is null ? [] : CollectServiceCoverage(state, services);
+        var commuterAudit = population?.AuditCommuters(state) ?? default;
+        var commuteOdSample = population?.CollectCommuteOdSample(state, limit: 16) ?? [];
 
         return new SimSnapshotDto
         {
@@ -161,7 +186,30 @@ public sealed class SimSnapshotDto
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,
             MarketZoneCount = state.MarketZoneCount,
+            CommuterCoverage = commuterAudit.Coverage,
+            CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),
         };
+    }
+
+    private static CommuteOdSampleDto[] ToCommuteOdSampleDtos(
+        PopulationSystem.CommuteOdSampleRow[] rows)
+    {
+        if (rows.Length == 0) return [];
+        var result = new CommuteOdSampleDto[rows.Length];
+        for (int i = 0; i < rows.Length; i++)
+        {
+            var row = rows[i];
+            result[i] = new CommuteOdSampleDto
+            {
+                HomeTileX = row.HomeTileX,
+                HomeTileZ = row.HomeTileZ,
+                WorkTileX = row.WorkTileX,
+                WorkTileZ = row.WorkTileZ,
+                TripCount = row.TripCount,
+            };
+        }
+
+        return result;
     }
 
     private static int[] CollectUnlockedTechIds(WorldState state)
@@ -510,6 +558,8 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(EconomySnapshotDto))]
 [JsonSerializable(typeof(HouseholdPreviewDto))]
 [JsonSerializable(typeof(HouseholdPreviewDto[]))]
+[JsonSerializable(typeof(CommuteOdSampleDto))]
+[JsonSerializable(typeof(CommuteOdSampleDto[]))]
 [JsonSerializable(typeof(PopulationL2Dto))]
 [JsonSerializable(typeof(Dictionary<int, float>))]
 [JsonSerializable(typeof(Dictionary<int, int>))]

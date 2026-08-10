@@ -223,12 +223,46 @@ public sealed class WasmTrafficLite
     }
 
     /// <summary>
-    /// Gravity-style O-D from zone building counts — WASM households lack home/work links.
+    /// O-D from household home/work building pairs (Cathedral P4.1).
+    /// Falls back to gravity only when no commuters are assigned yet.
     /// </summary>
     private void BuildLiteOdMatrix(WorldState state)
     {
         if (_odMatrix == null) return;
         Array.Clear(_odMatrix, 0, _odMatrix.Length);
+
+        var hh = state.Households;
+        var buildings = state.Buildings;
+        bool hasCommuters = false;
+
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+            if (hh.AgeGroup[i] != 1) continue;
+            if (hh.WorkBuildingId[i] == 0 || hh.HomeBuildingId[i] == 0) continue;
+
+            int homeId = hh.HomeBuildingId[i];
+            int workId = hh.WorkBuildingId[i];
+            if (homeId >= buildings.Capacity || workId >= buildings.Capacity) continue;
+            if (!buildings.IsActive(homeId) || !buildings.IsActive(workId)) continue;
+            if (buildings.State[homeId] != 1 || buildings.State[workId] != 1) continue;
+
+            int homeZone = GetZoneForTile(buildings.GridX[homeId], buildings.GridY[homeId]);
+            int workZone = GetZoneForTile(buildings.GridX[workId], buildings.GridY[workId]);
+
+            _odMatrix[homeZone * _totalZones + workZone] += 1f;
+            _odMatrix[workZone * _totalZones + homeZone] += 1f;
+            hasCommuters = true;
+        }
+
+        if (!hasCommuters)
+            BuildGravityOdMatrix(state);
+    }
+
+    /// <summary>Gravity-style O-D fallback before households receive home/work links.</summary>
+    private void BuildGravityOdMatrix(WorldState state)
+    {
+        if (_odMatrix == null) return;
 
         var zonePop = new float[_totalZones];
         var zoneJobs = new float[_totalZones];

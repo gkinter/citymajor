@@ -33,6 +33,7 @@ import {
   ENGINE_ZONE_TYPE,
   paintRoadBrush,
   paintZoneBrush,
+  upsertRoadTile,
 } from "@/lib/zoning";
 import { playPaintFeedback } from "@/lib/paint-feedback";
 import { tileZoneLabel } from "@/lib/zoning";
@@ -75,6 +76,8 @@ type CityCanvasProps = {
   onSimResources?: (resources: SimResources) => void;
   onSimApi?: (api: SimClientApi | null) => void;
   onZonePainted?: (zoneType: number) => void;
+  /** WASM rejected place_road (illegal highway merge). */
+  onPlaceRoadRejected?: () => void;
   /** Skip WASM SeedStarterCity — terrain-only start (see /play?empty=1). */
   skipStarterCity?: boolean;
 };
@@ -83,7 +86,7 @@ export type CityCanvasHandle = {
   resetCamera: () => void;
 };
 
-/** Encode road tier into roadFlags bits 4–5 (ToolSystem.cs); WASM PlaceRoad ignores tier. */
+/** Encode road tier into roadFlags bits 4–5 (ToolSystem.cs). */
 function roadFlagsForTier(roadTier: number | undefined): number {
   const tier = roadTier ?? 0;
   return ((tier & 0x03) << 4) | 0x01;
@@ -107,6 +110,7 @@ export const CityCanvas = forwardRef<CityCanvasHandle, CityCanvasProps>(function
   onSimResources,
   onSimApi,
   onZonePainted,
+  onPlaceRoadRejected,
   skipStarterCity = false,
 }: CityCanvasProps,
 ref,
@@ -161,6 +165,8 @@ ref,
   } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const bridgeRef = useRef<SimBridge | null>(null);
+  const onPlaceRoadRejectedRef = useRef(onPlaceRoadRejected);
+  onPlaceRoadRejectedRef.current = onPlaceRoadRejected;
   const gameSpeedRef = useRef(gameSpeed);
   gameSpeedRef.current = gameSpeed;
   const latestStats = useRef<FpsStats>({
@@ -246,6 +252,11 @@ ref,
     // `ready`) and any init-time errors reach the UI immediately.
     const unsubscribeSnapshot = bridge.onSnapshot(applySnapshot);
     const unsubscribeError = bridge.onError(handleWorkerFailure);
+    const unsubscribeCommandResult = bridge.onCommandResult((result) => {
+      if (result.command !== "place_road" || result.ok) return;
+      setRoads((prev) => upsertRoadTile(prev, result.tileX, result.tileZ, 0));
+      onPlaceRoadRejectedRef.current?.();
+    });
 
     (async () => {
       try {
@@ -267,6 +278,7 @@ ref,
       setBridgeReady(false);
       unsubscribeSnapshot();
       unsubscribeError();
+      unsubscribeCommandResult();
       bridge.dispose();
       bridgeRef.current = null;
     };

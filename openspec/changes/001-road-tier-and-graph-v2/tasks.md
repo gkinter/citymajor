@@ -32,8 +32,17 @@
 - [x] Tier-boundary heuristic: highway tile adjacent to lower tier → Ramp / HighwayOn / HighwayOff
 - [x] `PlaceRoad` rejects illegal highway merge (non-highway tile with 2+ highway neighbors)
 - [x] Tests: T-highway-local junction + illegal merge rejection
-- [ ] Dedicated ramp paint tool / `RoadFlags.Ramp` bit (deferred to P1.5 road toolbar UI)
+- [ ] Dedicated ramp paint tool / `RoadFlags.Ramp` bit (deferred to P1.6+ road toolbar UI)
 - [ ] Snapshot export of `nodeTypes[]` (deferred to P1.6)
+
+## P1.5 — Road toolbar UX (partial)
+
+- [x] `PlaceRoad` bool return wired WASM → worker → `sim-bridge` → caller
+- [x] HUD toast on illegal highway merge: "Illegal highway merge — use a ramp"
+- [x] Road tier labels: Local / Collector / Highway (tier 2 = highway)
+- [x] Vitest: `road-types` tier labels + merge toast constant
+- [ ] Dedicated ramp paint tool / bridge mode toggle (deferred to P1.6)
+- [ ] Highway tier disabled hint when paint would fail (optional; skipped — needs sim probe)
 
 ## Verification
 

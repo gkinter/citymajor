@@ -31,6 +31,16 @@ export type SimCommand =
   /** Herald council — instant RP grant (stub until full policy research hooks). */
   | { type: "research_boost"; points: number };
 
+/** Worker ack for commands that return a WASM bool (e.g. place_road rejection). */
+export type SimCommandResult =
+  | {
+      command: "place_road";
+      ok: boolean;
+      tileX: number;
+      tileZ: number;
+      reason?: string;
+    };
+
 export type ZoneSnapshot = {
   tileX: number;
   tileZ: number;
@@ -264,6 +274,8 @@ export interface SimBridge {
    * Returns an unsubscribe function.
    */
   onError(callback: (error: Error) => void): () => void;
+  /** WASM command bool results (place_road rejection, etc.). */
+  onCommandResult(callback: (result: SimCommandResult) => void): () => void;
   dispose(): void;
 }
 
@@ -312,6 +324,14 @@ type WorkerOutbound =
   | { type: "snapshot"; snapshot: SimSnapshot }
   | { type: "load_complete"; ok: boolean }
   | { type: "cmjr_blob"; base64: string }
+  | {
+      type: "command_result";
+      command: "place_road";
+      ok: boolean;
+      tileX: number;
+      tileZ: number;
+      reason?: string;
+    }
   | { type: "error"; message: string };
 
 const LOAD_SNAPSHOT_TIMEOUT_MS = 15_000;
@@ -324,6 +344,7 @@ export function createSimBridge(): SimBridge {
   let latestSnapshot: SimSnapshot | null = null;
   const listeners = new Set<(snapshot: SimSnapshot) => void>();
   const errorListeners = new Set<(error: Error) => void>();
+  const commandResultListeners = new Set<(result: SimCommandResult) => void>();
   let pendingLoad:
     | { resolve: () => void; reject: (error: Error) => void }
     | null = null;
@@ -333,6 +354,10 @@ export function createSimBridge(): SimBridge {
 
   const notifyError = (error: Error) => {
     for (const listener of errorListeners) listener(error);
+  };
+
+  const notifyCommandResult = (result: SimCommandResult) => {
+    for (const listener of commandResultListeners) listener(result);
   };
 
   const settlePendingLoad = (ok: boolean, error?: Error) => {
@@ -346,6 +371,16 @@ export function createSimBridge(): SimBridge {
   const handleWorkerOutbound = (msg: WorkerOutbound) => {
     if (msg.type === "snapshot") {
       notify(msg.snapshot);
+      return;
+    }
+    if (msg.type === "command_result") {
+      notifyCommandResult({
+        command: msg.command,
+        ok: msg.ok,
+        tileX: msg.tileX,
+        tileZ: msg.tileZ,
+        reason: msg.reason,
+      });
       return;
     }
     if (msg.type === "load_complete") {
@@ -596,6 +631,11 @@ export function createSimBridge(): SimBridge {
       return () => errorListeners.delete(callback);
     },
 
+    onCommandResult(callback) {
+      commandResultListeners.add(callback);
+      return () => commandResultListeners.delete(callback);
+    },
+
     dispose() {
       pendingLoad?.reject(new Error("Sim bridge disposed"));
       pendingLoad = null;
@@ -606,6 +646,7 @@ export function createSimBridge(): SimBridge {
       worker = null;
       listeners.clear();
       errorListeners.clear();
+      commandResultListeners.clear();
       latestSnapshot = null;
     },
   };
@@ -615,6 +656,7 @@ export function createSimBridge(): SimBridge {
 export function createSimBridgeStub(): SimBridge {
   const listeners = new Set<(snapshot: SimSnapshot) => void>();
   const errorListeners = new Set<(error: Error) => void>();
+  const commandResultListeners = new Set<(result: SimCommandResult) => void>();
 
   return {
     async init() {},
@@ -639,9 +681,14 @@ export function createSimBridgeStub(): SimBridge {
       errorListeners.add(callback);
       return () => errorListeners.delete(callback);
     },
+    onCommandResult(callback) {
+      commandResultListeners.add(callback);
+      return () => commandResultListeners.delete(callback);
+    },
     dispose() {
       listeners.clear();
       errorListeners.clear();
+      commandResultListeners.clear();
     },
   };
 }

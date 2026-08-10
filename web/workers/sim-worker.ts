@@ -28,6 +28,14 @@ type WorkerOutbound =
   | { type: "snapshot"; snapshot: SimSnapshot }
   | { type: "load_complete"; ok: boolean }
   | { type: "cmjr_blob"; base64: string }
+  | {
+      type: "command_result";
+      command: "place_road";
+      ok: boolean;
+      tileX: number;
+      tileZ: number;
+      reason?: string;
+    }
   | { type: "error"; message: string };
 
 const ctx: DedicatedWorkerGlobalScope =
@@ -125,7 +133,13 @@ type SimExports = {
   GetStatus?: () => string;
   PaintZone?: (x: number, y: number, zoneType: number, density?: number) => void;
   Bulldoze?: (x: number, y: number) => void;
-  PlaceRoad?: (x: number, y: number, tier?: number, bridge?: number, tunnel?: number) => void;
+  PlaceRoad?: (
+    x: number,
+    y: number,
+    tier?: number,
+    bridge?: number,
+    tunnel?: number,
+  ) => boolean;
   PlaceBuilding?: (x: number, y: number, typeId: number) => boolean;
   EnqueueResearch?: (techId: number) => boolean;
   SetLawActive?: (lawId: string, active: boolean) => boolean;
@@ -332,7 +346,13 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
         : undefined,
     PlaceRoad:
       typeof placeRoad === "function"
-        ? (placeRoad as (x: number, y: number, tier?: number) => void)
+        ? (placeRoad as (
+            x: number,
+            y: number,
+            tier?: number,
+            bridge?: number,
+            tunnel?: number,
+          ) => boolean)
         : undefined,
     PlaceBuilding:
       typeof placeBuilding === "function"
@@ -712,13 +732,37 @@ function roadFlagsForTier(tier: number, bridge = false, tunnel = false): number 
   return flags;
 }
 
-function placeRoadTile(tileX: number, tileZ: number, tier = 1, bridge = false, tunnel = false) {
+function placeRoadTile(
+  tileX: number,
+  tileZ: number,
+  tier = 1,
+  bridge = false,
+  tunnel = false,
+): boolean {
+  if (tileX < 0 || tileZ < 0 || tileX >= worldSize || tileZ >= worldSize) return false;
+  const placeFn = sim?.PlaceRoad;
+  if (!placeFn) {
+    const grid = ensureRoadGrid(worldSize);
+    grid[zoneIndex(tileX, tileZ)] = roadFlagsForTier(tier, bridge, tunnel);
+    publishSnapshot();
+    return true;
+  }
+  const placed = placeFn(tileX, tileZ, tier, bridge ? 1 : 0, tunnel ? 1 : 0);
+  if (!placed) {
+    post({
+      type: "command_result",
+      command: "place_road",
+      ok: false,
+      tileX,
+      tileZ,
+      reason: "illegal_highway_merge",
+    });
+    return false;
+  }
   const grid = ensureRoadGrid(worldSize);
-  if (tileX < 0 || tileZ < 0 || tileX >= worldSize || tileZ >= worldSize) return;
-  const roadFlags = roadFlagsForTier(tier, bridge, tunnel);
-  grid[zoneIndex(tileX, tileZ)] = roadFlags;
-  sim?.PlaceRoad?.(tileX, tileZ, tier, bridge ? 1 : 0, tunnel ? 1 : 0);
+  grid[zoneIndex(tileX, tileZ)] = roadFlagsForTier(tier, bridge, tunnel);
   publishSnapshot();
+  return true;
 }
 
 function placeBuildingTile(tileX: number, tileZ: number, typeId: number) {

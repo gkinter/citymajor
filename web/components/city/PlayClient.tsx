@@ -84,6 +84,7 @@ import { GltfPreloader } from "@/components/city/GltfPreloader";
 import type { HouseholdPreview } from "@/lib/population-l2";
 import {
   DEFAULT_ROAD_TIER,
+  ILLEGAL_HIGHWAY_MERGE_TOAST,
   type RoadTier,
 } from "@/lib/road-types";
 import {
@@ -181,6 +182,7 @@ export function PlayClient() {
     null,
   );
   const [cashCrisisToast, setCashCrisisToast] = useState<string | null>(null);
+  const [roadRejectToast, setRoadRejectToast] = useState<string | null>(null);
   const [residentialZonePainted, setResidentialZonePainted] = useState(false);
   const [buildMode, setBuildMode] = useState<BuildMode>("zone");
   const [buildTypeId, setBuildTypeId] = useState<number | null>(null);
@@ -502,6 +504,10 @@ export function PlayClient() {
     }
   }, []);
 
+  const handlePlaceRoadRejected = useCallback(() => {
+    setRoadRejectToast(ILLEGAL_HIGHWAY_MERGE_TOAST);
+  }, []);
+
   const handleToolChange = useCallback((tool: ZoningTool) => {
     setActiveTool(tool);
     setBuildOpen(false);
@@ -682,6 +688,7 @@ export function PlayClient() {
         onSimResources={handleSimResources}
         onSimApi={setSimApi}
         onZonePainted={handleZonePainted}
+        onPlaceRoadRejected={handlePlaceRoadRejected}
       />
       <ApprovalMoodOverlay approval={simResources?.approval} />
       <HudWordmark />
@@ -939,6 +946,14 @@ export function PlayClient() {
         message={cashCrisisToast}
         onDismiss={() => setCashCrisisToast(null)}
         style={{ top: researchUnlock ? 168 : 130 }}
+      />
+
+      <HudToast
+        message={roadRejectToast}
+        onDismiss={() => setRoadRejectToast(null)}
+        style={{
+          top: researchUnlock ? 206 : cashCrisisToast ? 168 : 130,
+        }}
       />
 
       <HeraldPanel

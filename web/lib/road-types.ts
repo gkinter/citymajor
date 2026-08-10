@@ -7,8 +7,12 @@ import {
   isContentUnlocked,
 } from "@/lib/tech-unlocks";
 
-/** Active road paint tier for /play (dirt → cobblestone → asphalt). */
+/** Active road paint tier for /play (local → collector → highway). */
 export type RoadTier = 0 | 1 | 2;
+
+/** HUD toast when WASM rejects an illegal highway merge (P1.4 ramp rules). */
+export const ILLEGAL_HIGHWAY_MERGE_TOAST =
+  "Illegal highway merge — use a ramp";
 
 export type RoadTierDefinition = {
   tier: RoadTier;
@@ -22,30 +26,30 @@ export type RoadTierDefinition = {
 
 /**
  * v1 road tiers — Frontier + Industrial eras only.
- * Keys: dirt_road (baseline), cobblestone_road, asphalt_road.
+ * Display: Local / Collector / Highway (content keys unchanged for tech unlocks).
  */
 export const ROAD_TIER_DEFINITIONS: readonly RoadTierDefinition[] = [
   {
     tier: 0,
     contentKey: "dirt_road",
-    label: "Dirt",
-    shortLabel: "Dirt",
+    label: "Local",
+    shortLabel: "Local",
     overlayColor: "#8b6914",
     era: "frontier",
   },
   {
     tier: 1,
     contentKey: "cobblestone_road",
-    label: "Cobblestone",
-    shortLabel: "Cobb",
+    label: "Collector",
+    shortLabel: "Coll",
     overlayColor: "#6b6560",
     era: "frontier",
   },
   {
     tier: 2,
     contentKey: "asphalt_road",
-    label: "Asphalt",
-    shortLabel: "Asph",
+    label: "Highway",
+    shortLabel: "Hwy",
     overlayColor: "#4a4f57",
     era: "industrial",
   },

@@ -9,6 +9,7 @@ namespace CityMajor.Input
     public sealed class RoadPaintTool : MonoBehaviour
     {
         [SerializeField] int brushRadius = 1;
+        [SerializeField] byte roadTier = 1;
         [SerializeField] bool roadMode;
 
         Camera _camera;
@@ -78,7 +79,7 @@ namespace CityMajor.Input
             {
                 if (dx * dx + dy * dy > brushRadius * brushRadius)
                     continue;
-                _sim.PlaceRoad(center.x + dx, center.y + dy);
+                _sim.PlaceRoad(center.x + dx, center.y + dy, roadTier);
             }
         }
     }

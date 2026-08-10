@@ -27,7 +27,7 @@ import {
   resourcesFromSnapshot,
 } from "@/lib/sim-bridge";
 import { estimateHealthcareCoverage } from "@/lib/sim-metrics";
-import type { ZoningTool, ZoneTile, RoadTile, TrafficTile, PaintBrushSize } from "@/lib/zoning";
+import type { ZoningTool, ZoneTile, RoadTile, TrafficTile, PaintBrushSize, ZoneDensityLevel } from "@/lib/zoning";
 import {
   brushTileOffsets,
   ENGINE_ZONE_TYPE,
@@ -59,6 +59,7 @@ function skyColorForApproval(approval: number | undefined): string {
 type CityCanvasProps = {
   activeTool: ZoningTool;
   brushSize: PaintBrushSize;
+  zoneDensity: ZoneDensityLevel;
   /** When set, tile clicks place this building type via WASM `place_building`. */
   buildTypeId?: number | null;
   /** Road tier for the road tool (0=dirt, 1=paved, 2=highway); encoded in local roadFlags. */
@@ -92,6 +93,7 @@ export const CityCanvas = forwardRef<CityCanvasHandle, CityCanvasProps>(function
 {
   activeTool,
   brushSize,
+  zoneDensity,
   buildTypeId,
   roadTier,
   gameSpeed,
@@ -369,13 +371,14 @@ ref,
             tileX,
             tileZ,
             zoneType,
+            density: zoneDensity,
           });
         }
       }
       playPaintFeedback("zone");
       onZonePainted?.(zoneType);
     },
-    [activeTool, brushSize, buildTypeId, roadTier, bridgeReady, simSource, onZonePainted],
+    [activeTool, brushSize, zoneDensity, buildTypeId, roadTier, bridgeReady, simSource, onZonePainted],
   );
 
   const handleHover = useCallback(

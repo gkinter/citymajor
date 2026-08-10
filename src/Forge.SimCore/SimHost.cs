@@ -209,7 +209,8 @@ public sealed partial class SimHost
         return UtilityCoverageExport.Sample(_state, step);
     }
 
-    public void PaintZone(int x, int y, byte zoneType)
+    /// <param name="density">0 = low (default); 1–3 = low / medium / high per TileData.ZoneDensity.</param>
+    public void PaintZone(int x, int y, byte zoneType, byte density = 0)
     {
         if (!IsInitialized || !_state.Tiles.InBounds(x, y)) return;
 
@@ -218,8 +219,17 @@ public sealed partial class SimHost
         if (_state.Tiles.TerrainType[idx] == (byte)TerrainId.Rock) return;
 
         _state.Tiles.ZoneType[idx] = zoneType;
-        _state.Tiles.ZoneDensity[idx] = zoneType == 0 ? (byte)0 : (byte)1;
+        _state.Tiles.ZoneDensity[idx] = zoneType == 0 ? (byte)0 : NormalizeZoneDensity(density);
     }
+
+    /// <summary>Map brush density to TileData encoding: low=1, medium=2, high=3.</summary>
+    internal static byte NormalizeZoneDensity(byte density) =>
+        density switch
+        {
+            0 or 1 => 1,
+            2 => 2,
+            _ => 3,
+        };
 
     public void Bulldoze(int x, int y)
     {

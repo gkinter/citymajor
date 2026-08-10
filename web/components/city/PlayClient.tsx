@@ -34,7 +34,7 @@ import {
 } from "@/lib/constants";
 import type { FpsStats } from "@/lib/types";
 import { PopulationGrowthTracker } from "@/lib/population-growth";
-import type { ZoningTool, PaintBrushSize } from "@/lib/zoning";
+import type { ZoningTool, PaintBrushSize, ZoneDensityLevel } from "@/lib/zoning";
 import { ApprovalMoodOverlay } from "@/components/city/ApprovalMoodOverlay";
 import { CityCanvas, type CityCanvasHandle } from "@/components/city/CityCanvas";
 import { CrisisWarningModal } from "@/components/city/CrisisWarningModal";
@@ -135,6 +135,7 @@ export function PlayClient() {
   const [emptyCity, setEmptyCity] = useState(() => readEmptyCityPref(urlEmpty));
   const [activeTool, setActiveTool] = useState<ZoningTool>("residential");
   const [brushSize, setBrushSize] = useState<PaintBrushSize>(1);
+  const [zoneDensity, setZoneDensity] = useState<ZoneDensityLevel>(1);
   const [gameSpeed, setGameSpeed] = useState<GameSpeedLevel>(1);
   const [qualityTier, setQualityTier] = useState<GraphicsQualityTier>(() =>
     readStoredQualityTier(),
@@ -664,6 +665,7 @@ export function PlayClient() {
         ref={cityCanvasRef}
         activeTool={canvasActiveTool}
         brushSize={brushSize}
+        zoneDensity={zoneDensity}
         buildTypeId={
           buildMode === "plop" || buildMode === "education" ? buildTypeId : null
         }
@@ -787,8 +789,10 @@ export function PlayClient() {
       <ZoningToolbar
         activeTool={activeTool}
         brushSize={brushSize}
+        zoneDensity={zoneDensity}
         onToolChange={handleToolChange}
         onBrushSizeChange={setBrushSize}
+        onZoneDensityChange={setZoneDensity}
         rci={resolveRci(simResources)}
         unlockedTechIds={simResources?.unlockedTechIds}
       />

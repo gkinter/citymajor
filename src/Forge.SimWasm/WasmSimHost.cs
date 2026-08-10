@@ -134,7 +134,8 @@ public sealed class WasmSimHost
         return PopulationL2Dto.From(_host.State, _host.Population);
     }
 
-    public void PaintZone(int x, int y, byte zoneType) => _host.PaintZone(x, y, zoneType);
+    public void PaintZone(int x, int y, byte zoneType, byte density = 0) =>
+        _host.PaintZone(x, y, zoneType, density);
 
     public void Bulldoze(int x, int y) => _host.Bulldoze(x, y);
 

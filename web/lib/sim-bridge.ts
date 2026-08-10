@@ -10,7 +10,7 @@ export type SimCommand =
   | { type: "tick"; deltaMs: number }
   | { type: "place_building"; tileX: number; tileZ: number; typeId: number }
   | { type: "place_road"; tileX: number; tileZ: number; tier?: number }
-  | { type: "zone_paint"; tileX: number; tileZ: number; zoneType: number }
+  | { type: "zone_paint"; tileX: number; tileZ: number; zoneType: number; density?: number }
   | { type: "bulldoze"; tileX: number; tileZ: number }
   | { type: "enqueue_research"; techId: number }
   | { type: "set_law_active"; lawId: string; active: boolean }

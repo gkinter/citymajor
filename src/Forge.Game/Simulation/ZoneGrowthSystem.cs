@@ -189,6 +189,7 @@ public sealed class ZoneGrowthSystem
                     float growthChance = demand * desirability * (1f + services * ServiceWeight)
                                         * (roadAccess * RoadAccessWeight + (1f - RoadAccessWeight))
                                         * GrowthBaseMultiplier
+                                        * GetDensityGrowthMult(tiles.ZoneDensity[idx])
                                         * GetZoneLawSpawnMult(state, zone);
 
                     growthChance = Math.Clamp(growthChance, 0f, 1f);
@@ -751,6 +752,14 @@ public sealed class ZoneGrowthSystem
         float adjusted = GetBaseConstructionDays(zoneType, level) / Math.Max(0.25f, lawSpeedMult);
         return Math.Clamp((int)Math.Ceiling(adjusted), 1, 30);
     }
+
+    /// <summary>Higher painted density slightly increases spawn probability.</summary>
+    internal static float GetDensityGrowthMult(byte density) => density switch
+    {
+        2 => 1.25f,
+        3 => 1.5f,
+        _ => 1f,
+    };
 
     private static float GetZoneLawSpawnMult(WorldState state, byte zoneType)
     {

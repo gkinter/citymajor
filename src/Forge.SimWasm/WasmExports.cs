@@ -42,9 +42,9 @@ public static partial class Program
     }
 
     [JSExport]
-    public static void PaintZone(int x, int y, int zoneType)
+    public static void PaintZone(int x, int y, int zoneType, int density = 0)
     {
-        _host?.PaintZone(x, y, (byte)zoneType);
+        _host?.PaintZone(x, y, (byte)zoneType, (byte)Math.Clamp(density, 0, 3));
     }
 
     [JSExport]

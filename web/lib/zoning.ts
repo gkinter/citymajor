@@ -13,8 +13,20 @@ export type ZoningTool =
   | "bulldoze"
   | "road";
 
-/** Supported paint brush diameters (tiles). */
-export const PAINT_BRUSH_SIZES = [1, 3] as const;
+/** Engine zone density bytes — mirrors TileData.ZoneDensity (low=1, med=2, high=3). */
+export const ZONE_DENSITY_LEVELS = [1, 2, 3] as const;
+export type ZoneDensityLevel = (typeof ZONE_DENSITY_LEVELS)[number];
+
+export const ZONE_DENSITY_LABELS: Record<ZoneDensityLevel, string> = {
+  1: "Low",
+  2: "Med",
+  3: "High",
+};
+
+export function nextZoneDensity(current: ZoneDensityLevel): ZoneDensityLevel {
+  const idx = ZONE_DENSITY_LEVELS.indexOf(current);
+  return ZONE_DENSITY_LEVELS[(idx + 1) % ZONE_DENSITY_LEVELS.length]!;
+}
 export type PaintBrushSize = (typeof PAINT_BRUSH_SIZES)[number];
 
 /** Engine zone type IDs keyed by toolbar tool. */

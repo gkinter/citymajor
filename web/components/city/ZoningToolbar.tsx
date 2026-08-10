@@ -16,10 +16,12 @@ import {
   isZoningDemandHigh,
   zoningDemandHint,
 } from "@/lib/zoning-economy";
-import type { PaintBrushSize, ZoningTool } from "@/lib/zoning";
+import type { PaintBrushSize, ZoningTool, ZoneDensityLevel } from "@/lib/zoning";
 import {
   nextBrushSize,
+  nextZoneDensity,
   ZONING_TOOLS,
+  ZONE_DENSITY_LABELS,
   zoningToolColor,
   zoningToolShortLabel,
 } from "@/lib/zoning";
@@ -35,8 +37,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 type ZoningToolbarProps = {
   activeTool: ZoningTool;
   brushSize: PaintBrushSize;
+  zoneDensity: ZoneDensityLevel;
   onToolChange: (tool: ZoningTool) => void;
   onBrushSizeChange: (size: PaintBrushSize) => void;
+  onZoneDensityChange: (density: ZoneDensityLevel) => void;
   /** Live RCI demand — drives tooltips and high-demand highlights. */
   rci?: RciDemand | null;
   /** WASM research indices — gates advanced zone tiers when omitted. */
@@ -50,8 +54,10 @@ function isZoneTierTool(tool: ZoningTool): tool is ZoneTierTool {
 export function ZoningToolbar({
   activeTool,
   brushSize,
+  zoneDensity,
   onToolChange,
   onBrushSizeChange,
+  onZoneDensityChange,
   rci = null,
   unlockedTechIds,
 }: ZoningToolbarProps) {
@@ -78,6 +84,10 @@ export function ZoningToolbar({
   const cycleBrush = useCallback(() => {
     onBrushSizeChange(nextBrushSize(brushSize));
   }, [brushSize, onBrushSizeChange]);
+
+  const cycleDensity = useCallback(() => {
+    onZoneDensityChange(nextZoneDensity(zoneDensity));
+  }, [zoneDensity, onZoneDensityChange]);
 
   const isToolUnlocked = useCallback(
     (tool: ZoningTool): boolean => {
@@ -153,6 +163,19 @@ export function ZoningToolbar({
             Brush {brushSize}×{brushSize}
           </button>
         ) : null}
+        <button
+          type="button"
+          data-testid="zone-density-toggle"
+          style={{
+            ...hudButton(false),
+            padding: "2px 8px",
+            fontSize: 11,
+          }}
+          title="Cycle zone density (low / med / high)"
+          onClick={cycleDensity}
+        >
+          Density {ZONE_DENSITY_LABELS[zoneDensity]}
+        </button>
         <button
           type="button"
           style={{

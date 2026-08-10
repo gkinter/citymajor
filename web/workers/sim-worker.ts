@@ -113,7 +113,7 @@ type SimExports = {
   Tick: (dt: number) => number;
   GetRenderSnapshot: () => string;
   GetStatus?: () => string;
-  PaintZone?: (x: number, y: number, zoneType: number) => void;
+  PaintZone?: (x: number, y: number, zoneType: number, density?: number) => void;
   Bulldoze?: (x: number, y: number) => void;
   PlaceRoad?: (x: number, y: number, tier?: number) => void;
   PlaceBuilding?: (x: number, y: number, typeId: number) => boolean;
@@ -309,7 +309,12 @@ function resolveExports(raw: Record<string, unknown>): SimExports {
         : undefined,
     PaintZone:
       typeof paintZone === "function"
-        ? (paintZone as (x: number, y: number, zoneType: number) => void)
+        ? (paintZone as (
+            x: number,
+            y: number,
+            zoneType: number,
+            density?: number,
+          ) => void)
         : undefined,
     Bulldoze:
       typeof bulldoze === "function"
@@ -666,11 +671,16 @@ function publishResourceUpdate() {
   post({ type: "snapshot", snapshot });
 }
 
-function paintZone(tileX: number, tileZ: number, zoneType: number) {
+function paintZone(
+  tileX: number,
+  tileZ: number,
+  zoneType: number,
+  density = 1,
+) {
   const grid = ensureZoneGrid(worldSize);
   if (tileX < 0 || tileZ < 0 || tileX >= worldSize || tileZ >= worldSize) return;
   grid[zoneIndex(tileX, tileZ)] = zoneType;
-  sim?.PaintZone?.(tileX, tileZ, zoneType);
+  sim?.PaintZone?.(tileX, tileZ, zoneType, density);
   publishSnapshot();
 }
 
@@ -905,7 +915,12 @@ function handleCommand(command: SimCommand) {
       placeRoadTile(command.tileX, command.tileZ, command.tier);
       break;
     case "zone_paint":
-      paintZone(command.tileX, command.tileZ, command.zoneType);
+      paintZone(
+        command.tileX,
+        command.tileZ,
+        command.zoneType,
+        command.density ?? 1,
+      );
       break;
     case "bulldoze":
       bulldozeTile(command.tileX, command.tileZ);

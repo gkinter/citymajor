@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Forge.Engine.Simulation;
 using Forge.Game.Simulation;
 using Forge.SimCore;
@@ -6,13 +7,25 @@ namespace Forge.SimWasm;
 
 /// <summary>
 /// Lightweight BPR traffic for browser WASM (SB-3685 partial).
-/// P4.1: single-iteration static assignment on free-flow paths + BPR edge times.
+/// P4.1: household home/work O-D (gravity fallback) + BPR edge times.
 /// P4.2: multi-iteration Frank-Wolfe at
 /// <see cref="WasmConfig.TrafficLiteInterval"/> — never every 8 Hz sim tick.
+/// P4 mode choice: simple 3-mode MNL (car/transit/walk) replaces flat 65% car.
 /// </summary>
 public sealed class WasmTrafficLite
 {
-    private const float DefaultCarShare = 0.65f;
+    // -------------------------------------------------------------------------
+    // Simple MNL stub (car / transit / walk) — ASC calibrated so mid-range
+    // distances (~10–20 tiles) yield ~65% car, matching the former flat share.
+    // -------------------------------------------------------------------------
+    private const float BetaTime = -0.025f;
+    private const float AscCar = 0.5f;
+    private const float AscTransit = 0.0f;
+    private const float AscWalk = -0.2f;
+    private const float CarSpeedTilesPerMin = 2.0f;
+    private const float TransitSpeedTilesPerMin = 1.2f;
+    private const float WalkSpeedTilesPerMin = 0.15f;
+    private const float MaxWalkMinutes = 60f;
 
     private int _zoneSize;
     private int _zonesPerAxis;
@@ -46,6 +59,15 @@ public sealed class WasmTrafficLite
 
     /// <summary>BPR travel time per road edge after assignment (parallel to graph edge index).</summary>
     public float[] EdgeTravelTimes { get; private set; } = Array.Empty<float>();
+
+    /// <summary>City-wide car mode share after last assignment (0–1).</summary>
+    public float CarModeShare { get; private set; } = 0.65f;
+
+    /// <summary>City-wide transit mode share after last assignment (0–1).</summary>
+    public float TransitModeShare { get; private set; }
+
+    /// <summary>City-wide walk mode share after last assignment (0–1).</summary>
+    public float WalkModeShare { get; private set; }
 
     /// <summary>Set O-D zone grid resolution; invalidates cached zone layout when changed.</summary>
     public void Configure(int zoneCount)
@@ -407,9 +429,57 @@ public sealed class WasmTrafficLite
         }
     }
 
+    /// <summary>
+    /// Simple 3-mode multinomial logit on zone distance (tiles).
+    /// P(j) = exp(V_j) / Σ exp(V_k); V = ASC + β_time · travel_minutes.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ComputeLiteModeShares(
+        float distanceTiles,
+        out float pCar,
+        out float pTransit,
+        out float pWalk)
+    {
+        float dist = Math.Max(1f, distanceTiles);
+        float carTime = dist / CarSpeedTilesPerMin;
+        float transitTime = dist / TransitSpeedTilesPerMin;
+        float walkTime = dist / WalkSpeedTilesPerMin;
+
+        float vCar = BetaTime * carTime + AscCar;
+        float vTransit = BetaTime * transitTime + AscTransit;
+        float vWalk = walkTime > MaxWalkMinutes
+            ? -100f
+            : BetaTime * walkTime + AscWalk;
+
+        float maxV = Math.Max(vCar, Math.Max(vTransit, vWalk));
+        float expCar = MathF.Exp(vCar - maxV);
+        float expTransit = MathF.Exp(vTransit - maxV);
+        float expWalk = MathF.Exp(vWalk - maxV);
+        float sum = expCar + expTransit + expWalk;
+
+        if (sum <= 0f)
+        {
+            pCar = 0.65f;
+            pTransit = 0.25f;
+            pWalk = 0.10f;
+            return;
+        }
+
+        float inv = 1f / sum;
+        pCar = expCar * inv;
+        pTransit = expTransit * inv;
+        pWalk = expWalk * inv;
+    }
+
     private void AssignAllOrNothing(WorldState state, float[] targetVolume, float[] edgeTimes)
     {
-        if (_odMatrix == null || _zoneCentroidNode == null) return;
+        if (_odMatrix == null || _zoneCentroidNode == null || _zoneDistanceCache == null)
+            return;
+
+        float totalCar = 0f;
+        float totalTransit = 0f;
+        float totalWalk = 0f;
+        float totalTrips = 0f;
 
         for (int origin = 0; origin < _totalZones; origin++)
         {
@@ -423,7 +493,15 @@ public sealed class WasmTrafficLite
                 float trips = _odMatrix[origin * _totalZones + dest];
                 if (trips <= 0) continue;
 
-                float carTrips = trips * DefaultCarShare;
+                float distance = _zoneDistanceCache[origin * _totalZones + dest];
+                ComputeLiteModeShares(distance, out float pCar, out float pTransit, out float pWalk);
+
+                totalCar += trips * pCar;
+                totalTransit += trips * pTransit;
+                totalWalk += trips * pWalk;
+                totalTrips += trips;
+
+                float carTrips = trips * pCar;
                 if (carTrips < 0.01f) continue;
 
                 int destNode = _zoneCentroidNode[dest];
@@ -436,6 +514,20 @@ public sealed class WasmTrafficLite
                         targetVolume[edgeIdx] += carTrips;
                 }
             }
+        }
+
+        if (totalTrips > 0f)
+        {
+            float inv = 1f / totalTrips;
+            CarModeShare = totalCar * inv;
+            TransitModeShare = totalTransit * inv;
+            WalkModeShare = totalWalk * inv;
+        }
+        else
+        {
+            CarModeShare = 0f;
+            TransitModeShare = 0f;
+            WalkModeShare = 0f;
         }
     }
 

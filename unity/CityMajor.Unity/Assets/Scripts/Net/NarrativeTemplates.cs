@@ -43,7 +43,7 @@ namespace CityMajor.Net
 
         const float RciExtremeDemand = 0.65f;
         const float GoodsShortageThreshold = 0.35f;
-        const float LowHappinessApproval = 45f;
+        const float LowHappinessApproval = 40f;
         const float ProsperityApproval = 70f;
         const long ProsperityFunds = 500_000;
 

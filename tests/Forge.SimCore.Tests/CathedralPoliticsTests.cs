@@ -1,4 +1,6 @@
 using System.Text.Json;
+using Forge.Engine.Simulation;
+using Forge.Game.Simulation;
 using Forge.SimCore;
 using Forge.SimWasm;
 using Xunit;
@@ -11,6 +13,22 @@ namespace Forge.SimCore.Tests;
 /// </summary>
 public sealed class CathedralPoliticsTests
 {
+    private const string ApprovalUnrestEventsJson = """
+    [
+      {
+        "id": "approval_unrest",
+        "name": "Approval Unrest",
+        "category": "political",
+        "era_min": "frontier",
+        "severity": 2,
+        "base_probability": 0,
+        "duration_months": 6,
+        "effects": { "happiness": -8, "approvalRatingPenalty": -5 },
+        "description": "Mayor approval slipped below the unrest threshold."
+      }
+    ]
+    """;
+
     [Fact]
     public void ApplyApprovalDelta_MovesSnapshotApproval()
     {
@@ -54,10 +72,35 @@ public sealed class CathedralPoliticsTests
         Assert.InRange(approval.GetSingle(), 0f, 100f);
     }
 
-    [Fact(Skip = "P5.5 Herald snapshot predicates not hard-gated yet")]
+    [Fact]
     public void HeraldUnrestBucket_RequiresApprovalBelowThreshold()
     {
-        // Placeholder: assert sim-metrics / Herald unrest only when approval < 40.
+        // Snapshot predicate: unrest only when approval < 40 (Politics escalation band).
+        Assert.True(ApprovalHeraldSystem.IsUnrestBucket(39f));
+        Assert.False(ApprovalHeraldSystem.IsUnrestBucket(40f));
+        Assert.False(ApprovalHeraldSystem.IsUnrestBucket(60f));
+
+        var state = new WorldState(32);
+        var events = new EventSystem(seed: 11);
+        events.LoadDefinitionsFromJson(ApprovalUnrestEventsJson);
+        var herald = new ApprovalHeraldSystem();
+
+        // Healthy approval — must not fire unrest Herald (no false positive).
+        state.ApprovalRating = 0.55f;
+        herald.MonthlyTick(state, events);
+        herald.MonthlyTick(state, events);
+        Assert.False(
+            events.IsEventTypeActive(ApprovalHeraldSystem.UnrestEventTypeId),
+            "Expected no approval_unrest Herald when approval ≥ 40%.");
+
+        // Sustained low approval — unrest Herald after consecutive months.
+        state.ApprovalRating = 0.35f;
+        herald.MonthlyTick(state, events);
+        Assert.False(events.IsEventTypeActive(ApprovalHeraldSystem.UnrestEventTypeId));
+        herald.MonthlyTick(state, events);
+        Assert.True(
+            events.IsEventTypeActive(ApprovalHeraldSystem.UnrestEventTypeId),
+            "Expected approval_unrest Herald when approval stays below 40%.");
     }
 
     [Fact(Skip = "P5.6 faction/council seats not exported on WASM status")]

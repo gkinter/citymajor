@@ -13,8 +13,8 @@ export const RCI_EXTREME_DEMAND = 0.65;
 /** Goods shortage index at or above this value (0..1) triggers economy_shortage Herald bucket. */
 export const GOODS_SHORTAGE_THRESHOLD = 0.35;
 
-/** Mayor approval below this percent maps to the happiness_low Herald bucket. */
-export const LOW_HAPPINESS_APPROVAL = 45;
+/** Mayor approval below this percent maps to the happiness_low Herald bucket (Politics escalation band). */
+export const LOW_HAPPINESS_APPROVAL = 40;
 
 /** Approval + treasury thresholds for prosperity_high stories. */
 export const PROSPERITY_APPROVAL = 70;

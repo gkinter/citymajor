@@ -11,6 +11,26 @@ import {
 const balancedHealthcare = 0.5;
 
 describe("deriveNarrativeBucket", () => {
+  it("maps approval below 40 to happiness_low unrest bucket", () => {
+    expect(
+      deriveNarrativeBucket({
+        healthcareCoverage: balancedHealthcare,
+        approval: 39,
+        cityFunds: 100_000,
+      }),
+    ).toBe("happiness_low");
+  });
+
+  it("does not select happiness_low when approval is at or above 40", () => {
+    expect(
+      deriveNarrativeBucket({
+        healthcareCoverage: balancedHealthcare,
+        approval: 40,
+        cityFunds: 100_000,
+      }),
+    ).not.toBe("happiness_low");
+  });
+
   it("maps goodsShortageIndex >= 0.35 to economy_shortage", () => {
     expect(
       deriveNarrativeBucket({

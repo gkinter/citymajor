@@ -886,6 +886,28 @@
     "description": "Vacancy has collapsed while residential demand stays hot — families compete for every available unit and rents climb block by block."
   },
   {
+    "id": "approval_unrest",
+    "name": "Approval Unrest",
+    "category": "political",
+    "era_min": "frontier",
+    "severity": 2,
+    "base_probability": 0,
+    "duration_months": 6,
+    "effects": {
+      "happiness": -8,
+      "approvalRatingPenalty": -5,
+      "civic_engagement": 0.15,
+      "trust": -0.1
+    },
+    "trigger_conditions": {
+      "approval_below": 40
+    },
+    "cascade_events": [
+      "protest"
+    ],
+    "description": "Mayor approval has slipped below the unrest threshold — citizens air grievances in the streets and the Daily Herald runs dissent coverage."
+  },
+  {
     "id": "baby_boom",
     "name": "Baby Boom",
     "category": "social",

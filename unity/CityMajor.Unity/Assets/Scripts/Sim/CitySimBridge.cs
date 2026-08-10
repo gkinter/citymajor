@@ -65,7 +65,8 @@ namespace CityMajor.Sim
             _ => 0,
         };
 
-        public void PaintZone(int tileX, int tileY, ZonePaintTool.ZoneKind kind)
+        /// <param name="density">0 = default low; 1–3 = low / medium / high (SimHost.PaintZone).</param>
+        public void PaintZone(int tileX, int tileY, ZonePaintTool.ZoneKind kind, byte density = 0)
         {
             if (_grid != null)
                 _grid.SetZone(tileX, tileY, kind);
@@ -77,17 +78,21 @@ namespace CityMajor.Sim
                 return;
             }
 
-            _simHost.PaintZone(tileX, tileY, EngineZoneType(kind));
+            _simHost.PaintZone(tileX, tileY, EngineZoneType(kind), density);
             PublishFromSimHost();
         }
 
-        public void PlaceRoad(int tileX, int tileY, byte tier = 1)
+        /// <param name="bridge">Cathedral P1.3 — mark tile as bridge (graph cost ×1.15).</param>
+        /// <param name="tunnel">Cathedral P1.3 — mark tile as tunnel (graph cost ×1.25).</param>
+        public bool PlaceRoad(int tileX, int tileY, byte tier = 1, bool bridge = false, bool tunnel = false)
         {
             if (!_simCoreReady)
-                return;
+                return false;
 
-            _simHost.PlaceRoad(tileX, tileY, tier);
-            PublishFromSimHost();
+            var ok = _simHost.PlaceRoad(tileX, tileY, tier, bridge, tunnel);
+            if (ok)
+                PublishFromSimHost();
+            return ok;
         }
 
         /// <summary>Clears zone, buildings, and roads on tile (Forge desktop bulldoze parity).</summary>
@@ -272,6 +277,8 @@ namespace CityMajor.Sim
                 UtilityStressIndex = snap.UtilityStressIndex,
                 BlackoutFraction = snap.BlackoutFraction,
                 WaterShortageFraction = snap.WaterShortageFraction,
+                MeanRentBurden = snap.MeanRentBurden,
+                ResidentialVacancy = snap.ResidentialVacancy,
                 TimeOfDay = timeOfDay,
                 RushMultiplier = LifeSimMath.RushHourMultiplier(timeOfDay),
                 HouseholdCount = households.Length,

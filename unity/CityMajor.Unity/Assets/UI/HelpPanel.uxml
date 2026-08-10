@@ -12,6 +12,8 @@
             <ui:Label class="help-section" text="Zoning &amp; tools" />
             <ui:Label class="help-line" text="1 — Residential · 2 — Commercial · 3 — Industrial" />
             <ui:Label class="help-line" text="4 — Road paint · 0 — Erase zone · X — Bulldoze · B — Build / plop" />
+            <ui:Label class="help-line" text="Road inspector — Paint Bridge / Paint Tunnel (Cathedral P1.3 flags)" />
+            <ui:Label class="help-line" text="Zone inspector — Zone Density 0–3 (Cathedral P2.2)" />
             <ui:Label class="help-section" text="Panels" />
             <ui:Label class="help-line" text="R — Research · H — Herald · C — Citizens · L — Laws" />
             <ui:Label class="help-line" text="P — Blueprint · E — Trade · F1 — Help · Esc — Close panel" />

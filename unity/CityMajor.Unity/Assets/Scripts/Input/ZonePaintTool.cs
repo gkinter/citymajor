@@ -15,6 +15,8 @@ namespace CityMajor.Input
 
     [SerializeField] ZoneKind activeZone = ZoneKind.Residential;
     [SerializeField] int brushRadius = 2;
+    /// <summary>0 = SimHost default low; 1–3 = low / medium / high (Cathedral P2.2).</summary>
+    [SerializeField] byte zoneDensity;
 
     public string ActiveZoneLabel() => activeZone switch
     {
@@ -91,7 +93,7 @@ namespace CityMajor.Input
         var x = center.x + dx;
         var y = center.y + dy;
         _grid.SetZone(x, y, activeZone);
-        _sim?.PaintZone(x, y, activeZone);
+        _sim?.PaintZone(x, y, activeZone, zoneDensity);
       }
 
       if (_sim != null && !_sim.UsesForgeSimCore)
@@ -99,5 +101,7 @@ namespace CityMajor.Input
     }
 
     public void SetActiveZone(ZoneKind zone) => activeZone = zone;
+
+    public void SetZoneDensity(byte density) => zoneDensity = density;
   }
 }

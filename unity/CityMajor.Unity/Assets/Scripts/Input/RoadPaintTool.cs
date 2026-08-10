@@ -5,11 +5,14 @@ namespace CityMajor.Input
 {
     /// <summary>
     /// Paint roads into Forge.SimCore via CitySimBridge. Key 4 toggles road brush.
+    /// Inspector: <see cref="paintBridge"/> / <see cref="paintTunnel"/> map to Cathedral P1.3 RoadFlags.
     /// </summary>
     public sealed class RoadPaintTool : MonoBehaviour
     {
         [SerializeField] int brushRadius = 1;
         [SerializeField] byte roadTier = 1;
+        [SerializeField] bool paintBridge;
+        [SerializeField] bool paintTunnel;
         [SerializeField] bool roadMode;
 
         Camera _camera;
@@ -18,8 +21,16 @@ namespace CityMajor.Input
         bool _painting;
 
         public bool RoadModeActive => roadMode;
+        public bool PaintBridge => paintBridge;
+        public bool PaintTunnel => paintTunnel;
 
         public void SetRoadMode(bool active) => roadMode = active;
+
+        public void SetBridgeTunnel(bool bridge, bool tunnel)
+        {
+            paintBridge = bridge;
+            paintTunnel = tunnel;
+        }
 
         public void Configure(Camera cityCamera, ZoneGrid grid, CitySimBridge sim)
         {
@@ -79,7 +90,7 @@ namespace CityMajor.Input
             {
                 if (dx * dx + dy * dy > brushRadius * brushRadius)
                     continue;
-                _sim.PlaceRoad(center.x + dx, center.y + dy, roadTier);
+                _sim.PlaceRoad(center.x + dx, center.y + dy, roadTier, paintBridge, paintTunnel);
             }
         }
     }

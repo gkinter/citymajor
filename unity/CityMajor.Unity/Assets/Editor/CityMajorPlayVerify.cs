@@ -41,7 +41,9 @@ namespace CityMajor.Editor
         {
             Debug.Log(
                 "[CityMajor] SB-4176 Play gate: open CityMajor → Open Play Verification Checklist. " +
-                "Rebuild SimCore after SimHost edits: ./scripts/build-simcore-for-unity.sh");
+                "Rebuild SimCore after SimHost edits: ./scripts/build-simcore-for-unity.sh. " +
+                "Cathedral P1–P4: RoadPaintTool Paint Bridge/Tunnel + ZonePaintTool density; " +
+                "CitySimState MeanRentBurden / ResidentialVacancy (F1 Help).");
         }
 
         [MenuItem("CityMajor/Verify GLTF Catalog")]

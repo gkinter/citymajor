@@ -42,6 +42,12 @@ namespace CityMajor.Sim
         public float BlackoutFraction;
         public float WaterShortageFraction;
 
+        /// <summary>Cathedral P2 — mean rent / income burden (0–1+).</summary>
+        public float MeanRentBurden;
+
+        /// <summary>Cathedral P2 — residential vacancy fraction (1 = fully vacant).</summary>
+        public float ResidentialVacancy;
+
         /// <summary>Sim hour 0–24 (from SimSnapshot.TimeOfDay).</summary>
         public float TimeOfDay;
 

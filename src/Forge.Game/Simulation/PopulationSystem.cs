@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using Forge.Engine.Data;
 using Forge.Engine.Simulation;
+using Forge.SimCore;
 
 namespace Forge.Game.Simulation;
 
@@ -714,9 +715,14 @@ public sealed class PopulationSystem
         if (hh.AgeGroup[idx] == 2) return 80f; // Retired: no commute
         if (hh.WorkBuildingId[idx] == 0) return 50f; // No work
 
-        float distance = CalculateBuildingDistance(state, hh.HomeBuildingId[idx], hh.WorkBuildingId[idx]);
-        // Under 10 tiles = excellent, 50+ = terrible
-        return Math.Clamp(100f - distance * 1.8f, 0f, 100f);
+        float travelCost = CommuteTravelTime.CalculateTravelCost(
+            state,
+            hh.HomeBuildingId[idx],
+            hh.WorkBuildingId[idx],
+            state.RoadEdgeTravelTimes);
+
+        // Same tuning as legacy Euclidean formula (cost units ≈ tile hops on free-flow roads).
+        return Math.Clamp(100f - travelCost * 1.8f, 0f, 100f);
     }
 
     private float CalculateServicesSatisfaction(WorldState state, int idx)

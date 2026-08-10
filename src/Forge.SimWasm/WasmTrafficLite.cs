@@ -370,6 +370,27 @@ public sealed class WasmTrafficLite
             float cap = _edgeCapacity[e];
             EdgeCongestion[e] = cap > 0 ? _edgeVolume[e] / cap : 0f;
         }
+
+        PublishEdgeTravelTimes(state);
+    }
+
+    private void PublishEdgeTravelTimes(WorldState state)
+    {
+        if (_edgeCount == 0 || _edgeFreeFlow == null || _edgeVolume == null || _edgeCapacity == null)
+        {
+            state.RoadEdgeTravelTimes = null;
+            return;
+        }
+
+        var times = state.RoadEdgeTravelTimes;
+        if (times == null || times.Length < _edgeCount)
+            times = state.RoadEdgeTravelTimes = new float[_edgeCount];
+
+        for (int e = 0; e < _edgeCount; e++)
+        {
+            times[e] = TrafficBpr.CalculateTravelTime(
+                _edgeFreeFlow[e], _edgeVolume[e], _edgeCapacity[e]);
+        }
     }
 
     private void AssignAllOrNothing(WorldState state, float[] targetVolume, float[] edgeTimes)

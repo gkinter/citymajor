@@ -86,6 +86,12 @@ public sealed class WorldState
     public float MeanTrafficDensity { get; set; }
 
     /// <summary>
+    /// BPR travel times per directed road-graph edge (WasmTrafficLite / TrafficSystem order).
+    /// Populated after each traffic assignment tick; null before the first run.
+    /// </summary>
+    public float[]? RoadEdgeTravelTimes { get; set; }
+
+    /// <summary>
     /// Multiplier on road edge capacity from active traffic ordinances (1.0 = neutral).
     /// Written by SimHost when laws toggle; read by WasmTrafficLite.
     /// </summary>

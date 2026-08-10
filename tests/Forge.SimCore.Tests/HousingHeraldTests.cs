@@ -114,6 +114,7 @@ public sealed class HousingHeraldTests
         Assert.True(host.GetSnapshot().MeanRentBurden > HousingHeraldSystem.HousingCrisisBurdenThreshold);
         Assert.True(host.Events.IsEventTypeActive("housing_crisis"),
             "Expected housing_crisis Herald after sustained high mean rent burden.");
+        Assert.Contains(host.GetActiveEvents(), e => e.TypeId == "housing_crisis");
     }
 
     [Fact]
@@ -140,6 +141,7 @@ public sealed class HousingHeraldTests
                 < HousingHeraldSystem.HousingShortageVacancyThreshold);
         Assert.True(host.Events.IsEventTypeActive("housing_shortage"),
             "Expected housing_shortage Herald when vacancy is tight and residential demand is high.");
+        Assert.Contains(host.GetActiveEvents(), e => e.TypeId == "housing_shortage");
     }
 
     private static SimHost CreateSimHostWithData()

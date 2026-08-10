@@ -5,7 +5,10 @@ using UnityEngine.UIElements;
 
 namespace CityMajor.UI
 {
-    /// <summary>Bottom news ticker — Herald-template headline from live sim bucket (mirrors web NewsTicker).</summary>
+    /// <summary>
+    /// Bottom news ticker — prefers live sim Herald events
+    /// (housing_crisis, housing_shortage, approval_unrest), else metric bucket (mirrors web NewsTicker).
+    /// </summary>
     public sealed class EventTickerController : MonoBehaviour
     {
         const string TickerPath = "Assets/UI/EventTicker.uxml";
@@ -65,9 +68,12 @@ namespace CityMajor.UI
                 return;
 
             var snap = _sim?.LatestSnapshot;
-            if (snap != null)
+            if (snap != null || (_sim?.LatestActiveEvents?.Length ?? 0) > 0)
             {
-                var evt = NarrativeTemplates.FromSnapshot(snap, state);
+                var evt = NarrativeTemplates.FromActiveEventsOrSnapshot(
+                    _sim.LatestActiveEvents,
+                    snap,
+                    state);
                 _line.text = string.IsNullOrEmpty(evt.Headline) ? IdleMessage : evt.Headline;
                 return;
             }

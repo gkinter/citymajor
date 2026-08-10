@@ -97,6 +97,9 @@ public sealed class WasmSimHost
     public float ResidentialVacancy => _host.State?.ResidentialVacancy ?? 1f;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
+    /// <summary>Faction id per council seat (length <see cref="PoliticsSystem.CouncilSeatCount"/>).</summary>
+    public int[] CouncilSeats => CollectCouncilSeats();
+
     public RoadGraphSnapshotDto RoadGraphSnapshot
     {
         get
@@ -119,6 +122,16 @@ public sealed class WasmSimHost
             if (_host.State.IsTechUnlocked(i)) ids.Add(i);
         }
         return ids.ToArray();
+    }
+
+    public int[] CollectCouncilSeats()
+    {
+        var politics = _host.Politics;
+        if (politics is null) return [];
+        var seats = new int[PoliticsSystem.CouncilSeatCount];
+        for (int i = 0; i < seats.Length; i++)
+            seats[i] = politics.CouncilSeats[i];
+        return seats;
     }
 
     public void Init(int worldSize = WasmConfig.DefaultWorldSize, bool skipStarterCity = false)
@@ -315,6 +328,8 @@ public sealed class WasmStatusDto
     public float ResidentialVacancy { get; init; } = 1f;
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
+    /// <summary>Faction id per council seat (length 9).</summary>
+    public int[] CouncilSeats { get; init; } = [];
 
     public static WasmStatusDto From(WasmSimHost host) => new()
     {
@@ -406,6 +421,7 @@ public sealed class WasmStatusDto
         MeanRentBurden = host.MeanRentBurden,
         ResidentialVacancy = host.ResidentialVacancy,
         MarketZoneCount = host.MarketZoneCount,
+        CouncilSeats = host.CouncilSeats,
     };
 }
 

@@ -127,6 +127,8 @@ public sealed class SimSnapshotDto
     public float CommuterCoverage { get; init; }
     /// <summary>Top home→work tile pairs aggregated from household assignments.</summary>
     public CommuteOdSampleDto[] CommuteOdSample { get; init; } = [];
+    /// <summary>Faction id per council seat (length 9).</summary>
+    public int[] CouncilSeats { get; init; } = [];
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
@@ -197,7 +199,17 @@ public sealed class SimSnapshotDto
             MarketZoneCount = state.MarketZoneCount,
             CommuterCoverage = commuterAudit.Coverage,
             CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),
+            CouncilSeats = CollectCouncilSeats(state),
         };
+    }
+
+    private static int[] CollectCouncilSeats(WorldState state)
+    {
+        var src = state.CouncilSeats;
+        var seats = new int[src.Length];
+        for (int i = 0; i < src.Length; i++)
+            seats[i] = src[i];
+        return seats;
     }
 
     private static CommuteOdSampleDto[] ToCommuteOdSampleDtos(

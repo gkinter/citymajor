@@ -56,6 +56,7 @@ public sealed partial class SimHost
     public LawSystem Laws => _laws;
     public ResearchSystem Research => _research;
     public TradeSystem Trade => _trade;
+    public PoliticsSystem Politics => _politics;
 
     public long TickCount => _state?.TickCount ?? 0;
     public int WorldSize => _config?.WorldSize ?? WasmConfig.DefaultWorldSize;
@@ -122,6 +123,8 @@ public sealed partial class SimHost
         }
 
         RecomputeLawEffects();
+        // PoliticsSystem owns seat assignment; mirror onto WorldState for snapshot/WASM export (P5.6).
+        Array.Copy(_politics.CouncilSeats, _state.CouncilSeats, PoliticsSystem.CouncilSeatCount);
         IsInitialized = true;
     }
 

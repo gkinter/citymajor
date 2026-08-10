@@ -3,6 +3,7 @@
 import type {
   ActiveEventSnapshot,
   EconomySnapshot,
+  FrictionCorridorSnapshot,
   GoodFlow,
   GoodImbalance,
   MarketZonePriceSpread,
@@ -146,6 +147,7 @@ type WasmStatus = {
   goodsSurplusIndex?: number;
   interZoneTradeVolume?: number;
   meanInterZoneFriction?: number;
+  goodsTransportCostIndex?: number;
   roadGraph?: {
     nodeCount?: number;
     nodeTypes?: number[];
@@ -159,6 +161,11 @@ type WasmStatus = {
   };
   meanRentBurden?: number;
   residentialVacancy?: number;
+  frictionCorridors?: Array<{
+    tileX?: number;
+    tileZ?: number;
+    friction?: number;
+  }>;
   commuterCoverage?: number;
   commuteOdSample?: unknown;
 };
@@ -491,6 +498,24 @@ function parseServiceCoverage(
   return tiles.length > 0 ? tiles : undefined;
 }
 
+function parseFrictionCorridors(
+  raw: unknown,
+): FrictionCorridorSnapshot[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const tiles: FrictionCorridorSnapshot[] = [];
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null) continue;
+    const t = item as Record<string, unknown>;
+    if (typeof t.tileX !== "number" || typeof t.tileZ !== "number") continue;
+    tiles.push({
+      tileX: t.tileX,
+      tileZ: t.tileZ,
+      friction: typeof t.friction === "number" ? t.friction : 0,
+    });
+  }
+  return tiles.length > 0 ? tiles : undefined;
+}
+
 function parseGoodImbalances(raw: unknown): GoodImbalance[] {
   if (!Array.isArray(raw)) return [];
   const rows: GoodImbalance[] = [];
@@ -605,6 +630,7 @@ function readStatus(): Pick<
   | "goodsSurplusIndex"
   | "interZoneTradeVolume"
   | "meanInterZoneFriction"
+  | "goodsTransportCostIndex"
   | "marketZoneCount"
   | "meanRentBurden"
   | "residentialVacancy"
@@ -679,6 +705,7 @@ function readStatus(): Pick<
       goodsSurplusIndex: parsed.goodsSurplusIndex,
       interZoneTradeVolume: parsed.interZoneTradeVolume,
       meanInterZoneFriction: parsed.meanInterZoneFriction,
+      goodsTransportCostIndex: parsed.goodsTransportCostIndex,
       marketZoneCount: parsed.marketZoneCount,
       meanRentBurden: parsed.meanRentBurden,
       residentialVacancy: parsed.residentialVacancy,
@@ -766,6 +793,8 @@ function readSnapshot(): SimSnapshot {
       parsed.interZoneTradeVolume ?? status?.interZoneTradeVolume,
     meanInterZoneFriction:
       parsed.meanInterZoneFriction ?? status?.meanInterZoneFriction,
+    goodsTransportCostIndex:
+      parsed.goodsTransportCostIndex ?? status?.goodsTransportCostIndex,
     marketZoneCount: parsed.marketZoneCount ?? status?.marketZoneCount,
     roadGraph: parsed.roadGraph ?? status?.roadGraph,
     meanRentBurden: parsed.meanRentBurden ?? status?.meanRentBurden,
@@ -781,6 +810,7 @@ function readSnapshot(): SimSnapshot {
     roads: mergeRoads(parsed.roads, roadsGrid),
     traffic: parsed.traffic ?? [],
     serviceCoverage: parseServiceCoverage(parsed.serviceCoverage),
+    frictionCorridors: parseFrictionCorridors(parsed.frictionCorridors),
   };
 }
 

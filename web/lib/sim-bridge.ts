@@ -104,6 +104,13 @@ export type TrafficSnapshot = {
   density: number;
 };
 
+/** Sparse market-zone boundary friction heat (0–1) — Cathedral P3.4. */
+export type FrictionCorridorSnapshot = {
+  tileX: number;
+  tileZ: number;
+  friction: number;
+};
+
 /** Per-tile service coverage on zoned land (0–1 each). */
 export type ServiceCoverageSnapshot = {
   tileX: number;
@@ -288,6 +295,8 @@ export type SimResources = {
   interZoneTradeVolume?: number;
   /** WASM — weighted mean trade friction for inter-zone transfers (≥1.0). */
   meanInterZoneFriction?: number;
+  /** WASM — composite 0–1 goods transport cost (friction + congestion). */
+  goodsTransportCostIndex?: number;
   /** WASM — active Leontief market partitions (1–16). */
   marketZoneCount?: number;
   /** WASM — mean household rent burden (rent / income, 0–1+). */
@@ -314,6 +323,7 @@ export function resourcesFromSnapshot(snapshot: SimSnapshot): SimResources {
     roads: _roads,
     traffic: _traffic,
     serviceCoverage: _serviceCoverage,
+    frictionCorridors: _frictionCorridors,
     roadGraph: _roadGraph,
     ...resources
   } = snapshot;
@@ -332,6 +342,8 @@ export type SimSnapshot = SimResources & {
   traffic?: TrafficSnapshot[];
   /** Sparse zoned tiles with health/police/fire/education coverage (0–1). */
   serviceCoverage?: ServiceCoverageSnapshot[];
+  /** Sparse market-zone boundary friction samples (0–1). */
+  frictionCorridors?: FrictionCorridorSnapshot[];
 };
 
 export interface SimBridge {

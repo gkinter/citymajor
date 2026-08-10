@@ -639,7 +639,135 @@ public sealed class EconomySystem
         state.GoodsSurplusIndex = ComputeSurplusIndex();
         state.InterZoneTradeVolume = LastInterZoneTradeVolume;
         state.MeanInterZoneFriction = LastMeanInterZoneFriction;
+        state.GoodsTransportCostIndex = ComputeGoodsTransportCostIndex(
+            LastMeanInterZoneFriction, state.MeanTrafficDensity);
         state.MarketZoneCount = ActiveZoneCount;
+    }
+
+    /// <summary>
+    /// Composite 0–1 goods transport cost pressure from mean inter-zone friction and congestion.
+    /// </summary>
+    public static float ComputeGoodsTransportCostIndex(
+        float meanInterZoneFriction, float meanTrafficDensity)
+    {
+        float frictionPressure = Math.Clamp((meanInterZoneFriction - 1f) / 0.5f, 0f, 1f);
+        float congestion = Math.Clamp(meanTrafficDensity, 0f, 1f);
+        return Math.Clamp(frictionPressure * 0.65f + congestion * 0.35f, 0f, 1f);
+    }
+
+    /// <summary>
+    /// Sparse market-zone boundary samples for the P3.4 friction corridor heatmap.
+    /// Intensity is pair friction scaled by <paramref name="meanInterZoneFriction"/>.
+    /// </summary>
+    public FrictionCorridorSample[] CollectFrictionCorridors(
+        int worldSize, float meanInterZoneFriction, float[]? trafficDensity = null, int stride = 2)
+    {
+        if (ActiveZoneCount <= 1 || worldSize <= 1) return [];
+
+        int divisions = (int)MathF.Ceiling(MathF.Sqrt(ActiveZoneCount));
+        int zoneSize = Math.Max(1, worldSize / divisions);
+        float meanScale = Math.Clamp((meanInterZoneFriction - 1f) / 0.25f, 0.35f, 1.5f);
+        stride = Math.Max(1, stride);
+
+        var list = new List<FrictionCorridorSample>(256);
+        for (int d = 1; d < divisions; d++)
+        {
+            int boundary = d * zoneSize;
+            if (boundary <= 0 || boundary >= worldSize) continue;
+
+            // Vertical corridor (east–west zone split)
+            for (int y = 0; y < worldSize; y += stride)
+            {
+                TryAddCorridorTile(list, boundary - 1, y, worldSize, divisions, meanScale, trafficDensity);
+                TryAddCorridorTile(list, boundary, y, worldSize, divisions, meanScale, trafficDensity);
+            }
+
+            // Horizontal corridor (north–south zone split)
+            for (int x = 0; x < worldSize; x += stride)
+            {
+                TryAddCorridorTile(list, x, boundary - 1, worldSize, divisions, meanScale, trafficDensity);
+                TryAddCorridorTile(list, x, boundary, worldSize, divisions, meanScale, trafficDensity);
+            }
+        }
+
+        return list.ToArray();
+    }
+
+    private void TryAddCorridorTile(
+        List<FrictionCorridorSample> list,
+        int x,
+        int y,
+        int worldSize,
+        int divisions,
+        float meanScale,
+        float[]? trafficDensity)
+    {
+        if (x < 0 || y < 0 || x >= worldSize || y >= worldSize) return;
+
+        int zone = GetMarketZoneForTile(x, y, worldSize);
+        float maxPair = 1f;
+
+        if (x + 1 < worldSize)
+        {
+            int zr = GetMarketZoneForTile(x + 1, y, worldSize);
+            if (zr != zone)
+                maxPair = Math.Max(maxPair, GetTradeFriction(zone, zr, divisions));
+        }
+
+        if (x > 0)
+        {
+            int zl = GetMarketZoneForTile(x - 1, y, worldSize);
+            if (zl != zone)
+                maxPair = Math.Max(maxPair, GetTradeFriction(zone, zl, divisions));
+        }
+
+        if (y + 1 < worldSize)
+        {
+            int zb = GetMarketZoneForTile(x, y + 1, worldSize);
+            if (zb != zone)
+                maxPair = Math.Max(maxPair, GetTradeFriction(zone, zb, divisions));
+        }
+
+        if (y > 0)
+        {
+            int zt = GetMarketZoneForTile(x, y - 1, worldSize);
+            if (zt != zone)
+                maxPair = Math.Max(maxPair, GetTradeFriction(zone, zt, divisions));
+        }
+
+        if (maxPair <= 1.001f) return;
+
+        float heat = Math.Clamp((maxPair - 1f) / 0.4f, 0f, 1f) * meanScale;
+        if (trafficDensity is not null)
+        {
+            int idx = y * worldSize + x;
+            if ((uint)idx < (uint)trafficDensity.Length)
+            {
+                float traffic = Math.Clamp(trafficDensity[idx], 0f, 1f);
+                if (traffic > 0.01f)
+                    heat = Math.Clamp(heat * (1f + 0.5f * traffic), 0f, 1f);
+            }
+        }
+
+        heat = Math.Clamp(heat, 0f, 1f);
+        if (heat < 0.05f) return;
+
+        list.Add(new FrictionCorridorSample(x, y, heat));
+    }
+
+    /// <summary>Sparse friction corridor sample for overlay export.</summary>
+    public readonly struct FrictionCorridorSample
+    {
+        public int TileX { get; }
+        public int TileZ { get; }
+        public float Friction { get; }
+
+        public FrictionCorridorSample(int tileX, int tileZ, float friction)
+        {
+            TileX = tileX;
+            TileZ = tileZ;
+            Friction = friction;
+        }
     }
 
     // =========================================================================

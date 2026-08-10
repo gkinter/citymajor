@@ -110,6 +110,9 @@ public sealed class SimSnapshot
     /// <summary>Weighted mean trade friction for executed inter-zone transfers (≥1.0).</summary>
     public float MeanInterZoneFriction { get; init; }
 
+    /// <summary>Composite 0–1 goods transport cost pressure (friction + congestion).</summary>
+    public float GoodsTransportCostIndex { get; init; }
+
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
 
@@ -312,6 +315,7 @@ public sealed class SimSnapshot
             GoodsSurplusIndex = state.GoodsSurplusIndex,
             InterZoneTradeVolume = state.InterZoneTradeVolume,
             MeanInterZoneFriction = state.MeanInterZoneFriction,
+            GoodsTransportCostIndex = state.GoodsTransportCostIndex,
             MarketZoneCount = state.MarketZoneCount,
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,

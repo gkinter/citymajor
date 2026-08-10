@@ -342,6 +342,20 @@ function FoundationMetrics({ resources }: { resources: SimResources }) {
             </span>
           </li>
         ) : null}
+        {resources.goodsTransportCostIndex !== undefined ? (
+          <li
+            className="hud-economy-trade__row"
+            title="Trade friction × goods move slowly between districts; improve roads or add warehouses."
+          >
+            <span className="hud-economy-trade__label">Transport cost</span>
+            <span className="hud-economy-trade__value">
+              {Math.round(resources.goodsTransportCostIndex * 100)}%
+              {resources.meanInterZoneFriction !== undefined
+                ? ` · ×${resources.meanInterZoneFriction.toFixed(2)}`
+                : ""}
+            </span>
+          </li>
+        ) : null}
         {resources.marketZoneCount !== undefined && resources.marketZoneCount > 1 ? (
           <li className="hud-economy-trade__row">
             <span className="hud-economy-trade__label">Market zones</span>

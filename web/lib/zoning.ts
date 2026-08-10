@@ -62,6 +62,13 @@ export type TrafficTile = {
   density: number;
 };
 
+/** Sparse market-zone boundary friction heat (0–1) for P3.4 overlay. */
+export type FrictionCorridorTile = {
+  tileX: number;
+  tileZ: number;
+  friction: number;
+};
+
 export const ZONING_TOOLS: {
   id: ZoningTool;
   label: string;

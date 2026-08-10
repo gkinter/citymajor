@@ -135,4 +135,53 @@ public sealed class CathedralEconomyTests
         Assert.NotEmpty(snapshot.Flows);
         Assert.Contains(snapshot.Flows, row => row.Name == "Food" && row.Production == 20f);
     }
+
+    [Fact]
+    public void GoodsTransportCostIndex_RisesWithFrictionAndCongestion()
+    {
+        float local = EconomySystem.ComputeGoodsTransportCostIndex(1.0f, 0f);
+        float friction = EconomySystem.ComputeGoodsTransportCostIndex(1.25f, 0f);
+        float congested = EconomySystem.ComputeGoodsTransportCostIndex(1.25f, 0.8f);
+
+        Assert.Equal(0f, local, 3);
+        Assert.True(friction > local + 0.2f,
+            $"Friction should raise transport cost. local={local:F3} friction={friction:F3}");
+        Assert.True(congested > friction,
+            $"Congestion should raise transport cost further. friction={friction:F3} congested={congested:F3}");
+        Assert.InRange(congested, 0f, 1f);
+    }
+
+    [Fact]
+    public void FrictionCorridors_ExportHighFrictionBoundaries_WhenMultiZone()
+    {
+        var economy = new EconomySystem();
+        economy.SetActiveZoneCount(4);
+
+        var corridors = economy.CollectFrictionCorridors(
+            worldSize: 64,
+            meanInterZoneFriction: 1.2f,
+            trafficDensity: null,
+            stride: 2);
+
+        Assert.NotEmpty(corridors);
+        Assert.All(corridors, sample =>
+        {
+            Assert.InRange(sample.Friction, 0.05f, 1f);
+            Assert.InRange(sample.TileX, 0, 63);
+            Assert.InRange(sample.TileZ, 0, 63);
+        });
+
+        var dto = SimSnapshotDto.From(
+            new SimSnapshot { TickCount = 1 },
+            new WorldState(64)
+            {
+                MeanInterZoneFriction = 1.2f,
+                GoodsTransportCostIndex = 0.4f,
+                MarketZoneCount = 4,
+            },
+            economy: economy);
+
+        Assert.NotEmpty(dto.FrictionCorridors);
+        Assert.Equal(0.4f, dto.GoodsTransportCostIndex, 3);
+    }
 }

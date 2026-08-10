@@ -11,7 +11,7 @@ import {
   visibleBuildingCount,
 } from "@/lib/chunks";
 import { getLoadedChunkCount } from "@/lib/chunk-load-state";
-import type { RoadTile, TrafficTile, ZoneTile } from "@/lib/zoning";
+import type { RoadTile, TrafficTile, FrictionCorridorTile, ZoneTile } from "@/lib/zoning";
 import type { CitizenDotPick } from "@/lib/population-l2";
 import type { ActiveEventSnapshot, EraProgress, ServiceCoverageSnapshot, ServiceViewMode } from "@/lib/sim-bridge";
 import { BuildingInstances } from "./BuildingInstances";
@@ -21,6 +21,7 @@ import { TilePicker } from "./TilePicker";
 import { RoadOverlay } from "./RoadOverlay";
 import { ZoneOverlay } from "./ZoneOverlay";
 import { TrafficOverlay } from "./TrafficOverlay";
+import { FrictionOverlay } from "./FrictionOverlay";
 import { ServiceCoverageOverlay } from "./ServiceCoverageOverlay";
 import { EventMarkers } from "./EventMarkers";
 import { EraLandmarkPlaceholder } from "./EraLandmarkPlaceholder";
@@ -35,6 +36,8 @@ type CitySceneProps = {
   roads: RoadTile[];
   traffic: TrafficTile[];
   showTrafficOverlay: boolean;
+  frictionCorridors: FrictionCorridorTile[];
+  showFrictionOverlay: boolean;
   serviceCoverage: ServiceCoverageSnapshot[];
   serviceViewMode: ServiceViewMode;
   pickedTile: PickResult;
@@ -63,6 +66,8 @@ export function CityScene({
   roads,
   traffic,
   showTrafficOverlay,
+  frictionCorridors,
+  showFrictionOverlay,
   serviceCoverage,
   serviceViewMode,
   pickedTile,
@@ -155,6 +160,10 @@ export function CityScene({
       <TerrainChunks chunks={chunks} pickedTile={pickedTile} />
       <RoadOverlay roads={roads} />
       <TrafficOverlay traffic={traffic} visible={showTrafficOverlay} />
+      <FrictionOverlay
+        corridors={frictionCorridors}
+        visible={showFrictionOverlay}
+      />
       {serviceViewMode === "off" ? (
         <ZoneOverlay zones={zones} />
       ) : (

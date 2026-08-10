@@ -115,10 +115,14 @@ public sealed class SimSnapshotDto
     public float GoodsSurplusIndex { get; init; }
     public float InterZoneTradeVolume { get; init; }
     public float MeanInterZoneFriction { get; init; } = 1f;
+    /// <summary>Composite 0–1 goods transport cost (friction + congestion).</summary>
+    public float GoodsTransportCostIndex { get; init; }
     public float MeanRentBurden { get; init; }
     public float ResidentialVacancy { get; init; } = 1f;
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
+    /// <summary>Sparse market-zone boundary friction samples (0–1 heat).</summary>
+    public FrictionCorridorDto[] FrictionCorridors { get; init; } = [];
     /// <summary>Share of working commuters with valid home + work building IDs (0–1).</summary>
     public float CommuterCoverage { get; init; }
     /// <summary>Top home→work tile pairs aggregated from household assignments.</summary>
@@ -141,6 +145,7 @@ public sealed class SimSnapshotDto
         var roadGraph = RoadGraphSnapshotDto.From(state.Roads, edgeVolumes, edgeTravelTimes);
         var traffic = CollectTraffic(state);
         var serviceCoverage = services is null ? [] : CollectServiceCoverage(state, services);
+        var frictionCorridors = CollectFrictionCorridors(state, economy);
         var commuterAudit = population?.AuditCommuters(state) ?? default;
         var commuteOdSample = population?.CollectCommuteOdSample(state, limit: 16) ?? [];
 
@@ -164,6 +169,7 @@ public sealed class SimSnapshotDto
             RoadGraph = roadGraph,
             Traffic = traffic,
             ServiceCoverage = serviceCoverage,
+            FrictionCorridors = frictionCorridors,
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
             Economy = EconomySnapshotDto.From(economy),
             PopulationL2 = PopulationL2Dto.From(state, population),
@@ -185,6 +191,7 @@ public sealed class SimSnapshotDto
             GoodsSurplusIndex = state.GoodsSurplusIndex,
             InterZoneTradeVolume = state.InterZoneTradeVolume,
             MeanInterZoneFriction = state.MeanInterZoneFriction,
+            GoodsTransportCostIndex = state.GoodsTransportCostIndex,
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,
             MarketZoneCount = state.MarketZoneCount,
@@ -349,6 +356,33 @@ public sealed class SimSnapshotDto
         return list.ToArray();
     }
 
+    private static FrictionCorridorDto[] CollectFrictionCorridors(
+        WorldState state, EconomySystem? economy)
+    {
+        if (economy is null || economy.ActiveZoneCount <= 1) return [];
+
+        var samples = economy.CollectFrictionCorridors(
+            state.Tiles.Size,
+            state.MeanInterZoneFriction,
+            state.Tiles.Traffic,
+            stride: 2);
+
+        if (samples.Length == 0) return [];
+
+        var list = new FrictionCorridorDto[samples.Length];
+        for (int i = 0; i < samples.Length; i++)
+        {
+            list[i] = new FrictionCorridorDto
+            {
+                TileX = samples[i].TileX,
+                TileZ = samples[i].TileZ,
+                Friction = samples[i].Friction,
+            };
+        }
+
+        return list;
+    }
+
 }
 
 public sealed class BuildingDto
@@ -459,6 +493,15 @@ public sealed class TrafficDto
     public int TileX { get; init; }
     public int TileZ { get; init; }
     public float Density { get; init; }
+}
+
+/// <summary>Sparse market-zone boundary friction heat for P3.4 overlay.</summary>
+public sealed class FrictionCorridorDto
+{
+    public int TileX { get; init; }
+    public int TileZ { get; init; }
+    /// <summary>Normalized corridor friction (0–1).</summary>
+    public float Friction { get; init; }
 }
 
 public sealed class ServiceCoverageDto
@@ -619,6 +662,8 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(RoadGraphSnapshotDto))]
 [JsonSerializable(typeof(TrafficDto))]
 [JsonSerializable(typeof(TrafficDto[]))]
+[JsonSerializable(typeof(FrictionCorridorDto))]
+[JsonSerializable(typeof(FrictionCorridorDto[]))]
 [JsonSerializable(typeof(ServiceCoverageDto))]
 [JsonSerializable(typeof(ServiceCoverageDto[]))]
 [JsonSerializable(typeof(UtilityCoverageDto))]

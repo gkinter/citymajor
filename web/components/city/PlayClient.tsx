@@ -27,6 +27,7 @@ import type {
 } from "@/lib/sim-bridge";
 import {
   EMPTY_CITY_STORAGE_KEY,
+  FRICTION_OVERLAY_STORAGE_KEY,
   GRAPHICS_QUALITY_STORAGE_KEY,
   TRAFFIC_OVERLAY_STORAGE_KEY,
   parseStoredQualityTier,
@@ -59,6 +60,7 @@ import { HUD_ZONE, HUD_Z, hudActionButton } from "@/lib/hud-theme";
 import { HudWordmark } from "@/components/city/HudWordmark";
 import { QualityToolbar } from "@/components/city/QualityToolbar";
 import { TrafficOverlayToggle } from "@/components/city/TrafficOverlayToggle";
+import { FrictionOverlayToggle } from "@/components/city/FrictionOverlayToggle";
 import { DemandOverlay } from "@/components/city/DemandOverlay";
 import { ResourcesHud } from "@/components/city/ResourcesHud";
 import { HappinessMeter } from "@/components/city/HappinessMeter";
@@ -125,6 +127,11 @@ function readStoredTrafficOverlay(): boolean {
   return stored !== "off";
 }
 
+function readStoredFrictionOverlay(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(FRICTION_OVERLAY_STORAGE_KEY) === "on";
+}
+
 function readEmptyCityPref(urlEmpty: boolean): boolean {
   if (typeof window === "undefined") return urlEmpty;
   if (urlEmpty) return true;
@@ -144,6 +151,9 @@ export function PlayClient() {
   );
   const [showTrafficOverlay, setShowTrafficOverlay] = useState(() =>
     readStoredTrafficOverlay(),
+  );
+  const [showFrictionOverlay, setShowFrictionOverlay] = useState(() =>
+    readStoredFrictionOverlay(),
   );
   const [serviceViewMode, setServiceViewMode] = useState<ServiceViewMode>("off");
   const [stats, setStats] = useState<FpsStats>({
@@ -263,6 +273,14 @@ export function PlayClient() {
     setShowTrafficOverlay(enabled);
     window.localStorage.setItem(
       TRAFFIC_OVERLAY_STORAGE_KEY,
+      enabled ? "on" : "off",
+    );
+  }, []);
+
+  const handleFrictionOverlayToggle = useCallback((enabled: boolean) => {
+    setShowFrictionOverlay(enabled);
+    window.localStorage.setItem(
+      FRICTION_OVERLAY_STORAGE_KEY,
       enabled ? "on" : "off",
     );
   }, []);
@@ -691,6 +709,7 @@ export function PlayClient() {
         gameSpeed={gameSpeed}
         qualityTier={qualityTier}
         showTrafficOverlay={showTrafficOverlay}
+        showFrictionOverlay={showFrictionOverlay}
         serviceViewMode={serviceViewMode}
         skipStarterCity={emptyCity}
         activeEvents={simResources?.activeEvents}
@@ -753,6 +772,10 @@ export function PlayClient() {
       <TrafficOverlayToggle
         enabled={showTrafficOverlay}
         onToggle={handleTrafficOverlayToggle}
+      />
+      <FrictionOverlayToggle
+        enabled={showFrictionOverlay}
+        onToggle={handleFrictionOverlayToggle}
       />
       <ServicesToolbar
         viewMode={serviceViewMode}

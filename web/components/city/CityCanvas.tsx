@@ -28,7 +28,7 @@ import {
 } from "@/lib/sim-bridge";
 import { estimateHealthcareCoverage } from "@/lib/sim-metrics";
 import { resolveTrafficOverlayTiles } from "@/lib/congestion-heatmap";
-import type { ZoningTool, ZoneTile, RoadTile, TrafficTile, PaintBrushSize, ZoneDensityLevel } from "@/lib/zoning";
+import type { ZoningTool, ZoneTile, RoadTile, TrafficTile, FrictionCorridorTile, PaintBrushSize, ZoneDensityLevel } from "@/lib/zoning";
 import {
   brushTileOffsets,
   ENGINE_ZONE_TYPE,
@@ -74,6 +74,7 @@ type CityCanvasProps = {
   onEventMarkerClick?: (event: ActiveEventSnapshot) => void;
   onCitizenDotClick?: (pick: CitizenDotPick) => void;
   showTrafficOverlay?: boolean;
+  showFrictionOverlay?: boolean;
   serviceViewMode: ServiceViewMode;
   onStats: (stats: FpsStats) => void;
   onSimResources?: (resources: SimResources) => void;
@@ -118,6 +119,7 @@ export const CityCanvas = forwardRef<CityCanvasHandle, CityCanvasProps>(function
   onEventMarkerClick,
   onCitizenDotClick,
   showTrafficOverlay = true,
+  showFrictionOverlay = false,
   serviceViewMode,
   onStats,
   onSimResources,
@@ -145,6 +147,9 @@ ref,
   const [zones, setZones] = useState<ZoneTile[]>([]);
   const [roads, setRoads] = useState<RoadTile[]>([]);
   const [traffic, setTraffic] = useState<TrafficTile[]>([]);
+  const [frictionCorridors, setFrictionCorridors] = useState<FrictionCorridorTile[]>(
+    [],
+  );
   const [serviceCoverage, setServiceCoverage] = useState<ServiceCoverageSnapshot[]>(
     [],
   );
@@ -213,6 +218,13 @@ ref,
           })),
         ),
       );
+      setFrictionCorridors(
+        (snapshot.frictionCorridors ?? []).map((t) => ({
+          tileX: t.tileX,
+          tileZ: t.tileZ,
+          friction: t.friction,
+        })),
+      );
       setServiceCoverage(snapshot.serviceCoverage ?? []);
       const resources = resourcesFromSnapshot(snapshot);
       setSimResources(resources);
@@ -260,6 +272,7 @@ ref,
       setZones([]);
       setRoads([]);
       setTraffic([]);
+      setFrictionCorridors([]);
       setServiceCoverage([]);
       setSimResources(null);
     };
@@ -541,6 +554,8 @@ ref,
               roads={roads}
               traffic={traffic}
               showTrafficOverlay={showTrafficOverlay}
+              frictionCorridors={frictionCorridors}
+              showFrictionOverlay={showFrictionOverlay}
               serviceCoverage={serviceCoverage}
               serviceViewMode={serviceViewMode}
               pickedTile={pickedTile}

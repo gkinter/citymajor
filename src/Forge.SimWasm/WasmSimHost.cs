@@ -92,6 +92,7 @@ public sealed class WasmSimHost
     public float GoodsSurplusIndex => _host.State?.GoodsSurplusIndex ?? 0f;
     public float InterZoneTradeVolume => _host.State?.InterZoneTradeVolume ?? 0f;
     public float MeanInterZoneFriction => _host.State?.MeanInterZoneFriction ?? 1f;
+    public float GoodsTransportCostIndex => _host.State?.GoodsTransportCostIndex ?? 0f;
     public float MeanRentBurden => _host.State?.MeanRentBurden ?? 0f;
     public float ResidentialVacancy => _host.State?.ResidentialVacancy ?? 1f;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
@@ -306,6 +307,8 @@ public sealed class WasmStatusDto
     public float GoodsSurplusIndex { get; init; }
     public float InterZoneTradeVolume { get; init; }
     public float MeanInterZoneFriction { get; init; } = 1f;
+    /// <summary>Composite 0–1 goods transport cost (friction + congestion).</summary>
+    public float GoodsTransportCostIndex { get; init; }
     /// <summary>Segment-graph node types (parallel arrays, Cathedral P1.6).</summary>
     public RoadGraphSnapshotDto RoadGraph { get; init; } = new();
     public float MeanRentBurden { get; init; }
@@ -398,6 +401,7 @@ public sealed class WasmStatusDto
         GoodsSurplusIndex = host.GoodsSurplusIndex,
         InterZoneTradeVolume = host.InterZoneTradeVolume,
         MeanInterZoneFriction = host.MeanInterZoneFriction,
+        GoodsTransportCostIndex = host.GoodsTransportCostIndex,
         RoadGraph = host.RoadGraphSnapshot,
         MeanRentBurden = host.MeanRentBurden,
         ResidentialVacancy = host.ResidentialVacancy,

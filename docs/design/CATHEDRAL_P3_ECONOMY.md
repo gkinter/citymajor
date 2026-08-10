@@ -20,7 +20,7 @@ Make the **goods economy legible** in HUD: top shortages/surpluses with prices, 
 | P3.1 | Goods panel data contract (top 5 + prices) | **Partial** — names + magnitude in `EconomySnapshotDto`; prices not exported |
 | P3.2 | Market zone partition count on snapshot | **Partial** — `ActiveZoneCount` in `EconomySystem`; export stub `MarketZoneCount` |
 | P3.3 | Per-zone price spread visible (partition prices differ) | **Not implemented** — prices differ in sim when zones imbalanced; no export/test |
-| P3.4 | Inter-zone friction on snapshot + HUD | **Live** — `MeanInterZoneFriction`, `InterZoneTradeVolume` |
+| P3.4 | Inter-zone friction on snapshot + HUD | **Live** — `MeanInterZoneFriction`, `InterZoneTradeVolume`, `GoodsTransportCostIndex`, friction corridor overlay |
 | P3.5 | Traffic delay → goods delivery lag | **Not implemented** — cross-link P1 |
 | P3.6 | Bilateral trade routes | **v2 boundary** — `TradeSystem.CreateTradeRoute` exists; player-facing routes deferred |
 
@@ -112,9 +112,11 @@ Panel shows **top 5 shortages** and **top 5 surpluses**, each row includes `city
 
 **HUD copy:** “Trade friction ×1.12 — goods move slowly between districts; improve roads or add warehouses.”
 
-**Live metrics:** `WorldState.MeanInterZoneFriction`, `InterZoneTradeVolume` — published in `PublishImbalancesTo`.
+**Live metrics:** `WorldState.MeanInterZoneFriction`, `InterZoneTradeVolume`, `GoodsTransportCostIndex` — published in `PublishImbalancesTo`.
 
-**Test coverage:** `InterZoneTradeTests` (not Cathedral-prefixed).
+**Overlay:** sparse `FrictionCorridors[]` along market-zone boundaries (toggle on `/play`); heat scales with pair friction × mean inter-zone friction, boosted by road congestion.
+
+**Test coverage:** `InterZoneTradeTests` (not Cathedral-prefixed) · `CathedralEconomyTests` friction / corridor exports.
 
 ---
 

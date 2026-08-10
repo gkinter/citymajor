@@ -177,6 +177,12 @@ public sealed class WorldState
     /// <summary>Weighted mean trade friction for executed inter-zone transfers (≥1.0).</summary>
     public float MeanInterZoneFriction { get; set; }
 
+    /// <summary>
+    /// Composite 0–1 goods transport cost pressure (inter-zone friction + road congestion).
+    /// Cathedral P3.4 — HUD / friction overlay.
+    /// </summary>
+    public float GoodsTransportCostIndex { get; set; }
+
     /// <summary>Active Leontief market partitions (1–16), from <see cref="EconomySystem.ActiveZoneCount"/>.</summary>
     public int MarketZoneCount { get; set; } = 1;
 

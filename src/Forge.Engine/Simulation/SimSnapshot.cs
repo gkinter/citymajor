@@ -310,7 +310,7 @@ public sealed class SimSnapshot
             InterZoneTradeVolume = state.InterZoneTradeVolume,
             MeanInterZoneFriction = state.MeanInterZoneFriction,
             MarketZoneCount = state.MarketZoneCount,
-            MeanRentBurden = 0f, // TODO P2.3: PopulationSystem mean rent burden rollup
+            MeanRentBurden = state.MeanRentBurden,
             // Research / Technology
             ResearchPoints = state.ResearchPoints,
             ResearchRate = state.ResearchRate,

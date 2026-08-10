@@ -6,7 +6,7 @@ namespace Forge.SimCore.Tests;
 /// <summary>Characterization tests for Cathedral P2 housing / rent burden (pinned before implementation).</summary>
 public sealed class CathedralHousingTests
 {
-    [Fact(Skip = "P2.3 not implemented")]
+    [Fact]
     public void RentBurden_Increases_WhenResidentialDemandHighAndSupplyLow()
     {
         var host = new SimHost();
@@ -31,7 +31,7 @@ public sealed class CathedralHousingTests
             "Expected elevated rent burden when housing supply lags population demand.");
     }
 
-    [Fact(Skip = "P2.3 not implemented")]
+    [Fact]
     public void MigrationOut_WhenRentBurdenAboveThreshold()
     {
         var host = new SimHost();

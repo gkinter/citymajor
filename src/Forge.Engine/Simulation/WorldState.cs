@@ -156,6 +156,9 @@ public sealed class WorldState
     /// <summary>City-wide shortage pressure (0–1) for Herald / HUD buckets.</summary>
     public float GoodsShortageIndex { get; set; }
 
+    /// <summary>Mean household rent burden (monthly rent / income) rolled up by PopulationSystem.</summary>
+    public float MeanRentBurden { get; set; }
+
     /// <summary>City-wide surplus pressure (0–1) for Herald / HUD buckets.</summary>
     public float GoodsSurplusIndex { get; set; }
 

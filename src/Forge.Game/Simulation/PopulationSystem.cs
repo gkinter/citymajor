@@ -61,12 +61,31 @@ public sealed class PopulationSystem
     private const float WealthThreshold_Upper = 3.0f;
     // Above Upper = Wealthy (4)
 
+    // Housing market — rent burden (Cathedral P2.3)
+    private const float BaseRentConstant = 200f;
+    private const float BaseRentLandMultiplier = 1800f;
+    private const float VacancyNormalization = 0.15f;
+    private const float GoodsShortageRentWeight = 0.25f;
+    private const float RentBurdenAffordThreshold = 0.45f;
+    private const float HighRentBurdenThreshold = 0.55f;
+    private const int HighRentBurdenEmigrationMonths = 3;
+    private const float HighRentBurdenEmigrationBonus = 0.25f;
+    private const float PhysicalHousingWeight = 0.55f;
+    private const float AffordHousingWeight = 0.45f;
+    private const float RentAttractivenessBase = 1.2f;
+
     // =========================================================================
     // Per-household tracking for emigration dissatisfaction duration
     // =========================================================================
 
     private byte[] _monthsUnhappy;
     private int _monthsUnhappyCapacity;
+
+    private byte[] _monthsHighBurden;
+    private int _monthsHighBurdenCapacity;
+
+    private float[] _rentBurden;
+    private int _rentBurdenCapacity;
 
     // Per-household age in game years (more granular than AgeGroup)
     // Stored externally because HouseholdData.AgeGroup is only 3 buckets
@@ -79,6 +98,9 @@ public sealed class PopulationSystem
     /// <summary>Net population change from the most recent MonthlyTick (births + immigration − deaths − emigration).</summary>
     public int LastMonthlyPopulationGrowth { get; private set; }
 
+    /// <summary>Mean household rent burden (rent / monthly income) from the latest monthly rollup.</summary>
+    public float MeanRentBurden { get; private set; }
+
     /// <summary>
     /// Create a new PopulationSystem with the given RNG seed.
     /// </summary>
@@ -86,6 +108,8 @@ public sealed class PopulationSystem
     {
         _rngState = seed == 0 ? 1 : seed;
         _monthsUnhappy = Array.Empty<byte>();
+        _monthsHighBurden = Array.Empty<byte>();
+        _rentBurden = Array.Empty<float>();
         _headAge = Array.Empty<byte>();
     }
 
@@ -145,6 +169,9 @@ public sealed class PopulationSystem
         EnsureCapacity(state.Households.Capacity);
 
         int populationBefore = state.Population;
+
+        AssignUnhousedHouseholds(state);
+        UpdateRentBurdenRollup(state);
 
         AgeHouseholds(state);
         int deaths = CalculateDeaths(state);
@@ -469,7 +496,8 @@ public sealed class PopulationSystem
         // Scale base with city size (log scale)
         float sizeScale = 1f + (float)Math.Log(Math.Max(1, state.Population / 1000f), 2);
         float rawRate = BaseImmigrationPerMonth * sizeScale *
-                        jobAvailability * housingAvailability * reputation * taxMod;
+                        jobAvailability * housingAvailability * reputation * taxMod *
+                        GetRentAttractivenessModifier();
 
         int count = (int)rawRate;
         // Fractional part becomes probability for +1
@@ -545,6 +573,9 @@ public sealed class PopulationSystem
                     // Check for matching jobs — if no job matches education, higher chance
                     if ((hh.Flags[i] & 4) != 0) // Unemployed
                         leaveProbability += 0.2f;
+
+                    if (_monthsHighBurden[i] >= HighRentBurdenEmigrationMonths)
+                        leaveProbability += HighRentBurdenEmigrationBonus;
 
                     if (NextRandomFloat() < leaveProbability)
                     {
@@ -645,19 +676,35 @@ public sealed class PopulationSystem
     {
         var hh = state.Households;
         ushort homeId = hh.HomeBuildingId[idx];
-        if (homeId == 0) return 5f; // Homeless
 
-        if (homeId >= state.Buildings.Capacity || !state.Buildings.IsActive(homeId))
-            return 20f;
+        float physicalScore;
+        if (homeId == 0)
+        {
+            physicalScore = 5f;
+        }
+        else if (homeId >= state.Buildings.Capacity || !state.Buildings.IsActive(homeId))
+        {
+            physicalScore = 20f;
+        }
+        else
+        {
+            float condition = state.Buildings.Condition[homeId] / 255f;
+            float level = state.Buildings.Level[homeId] / 5f;
+            float overcrowding = state.Buildings.MaxOccupants[homeId] > 0
+                ? 1f - (float)state.Buildings.Occupants[homeId] / state.Buildings.MaxOccupants[homeId] * 0.5f
+                : 0.5f;
 
-        // Housing quality based on building condition and level
-        float condition = state.Buildings.Condition[homeId] / 255f;
-        float level = state.Buildings.Level[homeId] / 5f;
-        float overcrowding = state.Buildings.MaxOccupants[homeId] > 0
-            ? 1f - (float)state.Buildings.Occupants[homeId] / state.Buildings.MaxOccupants[homeId] * 0.5f
-            : 0.5f;
+            physicalScore = Math.Clamp(condition * 40f + level * 30f + overcrowding * 30f, 0f, 100f);
+        }
 
-        return Math.Clamp((condition * 40f + level * 30f + overcrowding * 30f), 0f, 100f);
+        float burden = GetHouseholdRentBurden(state, idx);
+        float affordScore = Math.Clamp(1f - burden / RentBurdenAffordThreshold, 0f, 1f) * 100f;
+        float housingSat = PhysicalHousingWeight * physicalScore + AffordHousingWeight * affordScore;
+
+        if (burden > RentBurdenAffordThreshold)
+            housingSat = Math.Max(0f, housingSat - 15f);
+
+        return Math.Clamp(housingSat, 0f, 100f);
     }
 
     private float CalculateCommuteSatisfaction(WorldState state, int idx)
@@ -754,6 +801,171 @@ public sealed class PopulationSystem
         float cosmopolitan = (state.CulturalDna[3] + 1f) / 2f; // -1..1 -> 0..1
         float innovation = (state.CulturalDna[0] + 1f) / 2f;
         return Math.Clamp((cosmopolitan * 50f + innovation * 50f), 0f, 100f);
+    }
+
+    // =========================================================================
+    // Housing market — rent burden (Cathedral P2.3)
+    // =========================================================================
+
+    private void AssignUnhousedHouseholds(WorldState state)
+    {
+        var hh = state.Households;
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+            if (hh.HomeBuildingId[i] != 0) continue;
+            AssignHousing(state, i);
+        }
+    }
+
+    private void UpdateRentBurdenRollup(WorldState state)
+    {
+        EnsureCapacity(state.Households.Capacity);
+
+        float supplyFactor = CalculateSupplyFactor(state);
+        float goodsFactor = CalculateGoodsFactor(state);
+        float marketBaseRent = CalculateMarketBaseRent(state) * supplyFactor * goodsFactor;
+
+        var hh = state.Households;
+        double burdenSum = 0d;
+        int burdenCount = 0;
+
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+
+            float burden = CalculateHouseholdRentBurden(state, i, supplyFactor, goodsFactor, marketBaseRent);
+            _rentBurden[i] = burden;
+
+            if (burden > HighRentBurdenThreshold)
+                _monthsHighBurden[i]++;
+            else
+                _monthsHighBurden[i] = 0;
+
+            if (hh.HomeBuildingId[i] != 0)
+            {
+                burdenSum += burden;
+                burdenCount++;
+            }
+            else if (burden > 0f)
+            {
+                // Homeless households still face market rent pressure (included in city mean).
+                burdenSum += burden;
+                burdenCount++;
+            }
+        }
+
+        MeanRentBurden = burdenCount > 0 ? (float)(burdenSum / burdenCount) : 0f;
+        state.MeanRentBurden = MeanRentBurden;
+    }
+
+    private float GetHouseholdRentBurden(WorldState state, int householdIndex)
+    {
+        float supplyFactor = CalculateSupplyFactor(state);
+        float goodsFactor = CalculateGoodsFactor(state);
+        float marketBaseRent = CalculateMarketBaseRent(state) * supplyFactor * goodsFactor;
+        return CalculateHouseholdRentBurden(state, householdIndex, supplyFactor, goodsFactor, marketBaseRent);
+    }
+
+    private float CalculateHouseholdRentBurden(
+        WorldState state,
+        int householdIndex,
+        float supplyFactor,
+        float goodsFactor,
+        float marketBaseRent)
+    {
+        var hh = state.Households;
+        float monthlyRent = CalculateHouseholdMonthlyRent(
+            state, householdIndex, supplyFactor, goodsFactor, marketBaseRent);
+        float monthlyIncome = Math.Max(hh.Income[householdIndex], 1);
+        return monthlyRent / monthlyIncome;
+    }
+
+    private float CalculateHouseholdMonthlyRent(
+        WorldState state,
+        int householdIndex,
+        float supplyFactor,
+        float goodsFactor,
+        float marketBaseRent)
+    {
+        var hh = state.Households;
+        ushort homeId = hh.HomeBuildingId[householdIndex];
+        if (homeId == 0)
+            return marketBaseRent;
+
+        if (homeId >= state.Buildings.Capacity || !state.Buildings.IsActive(homeId))
+            return marketBaseRent;
+
+        int gx = state.Buildings.GridX[homeId];
+        int gy = state.Buildings.GridY[homeId];
+        if (!state.Tiles.InBounds(gx, gy))
+            return marketBaseRent;
+
+        float baseRent = CalculateBaseRentAtTile(state, gx, gy);
+        float levelMod = 0.85f + 0.05f * state.Buildings.Level[homeId];
+        return baseRent * supplyFactor * goodsFactor * levelMod;
+    }
+
+    private static float CalculateBaseRentAtTile(WorldState state, int tileX, int tileY)
+    {
+        float landValue = state.Tiles.LandValue[state.Tiles.Index(tileX, tileY)];
+        return BaseRentConstant + BaseRentLandMultiplier * landValue;
+    }
+
+    private static float CalculateMarketBaseRent(WorldState state)
+    {
+        float totalLandValue = 0f;
+        int count = 0;
+        var tiles = state.Tiles;
+
+        for (int i = 0; i < tiles.Count; i++)
+        {
+            if (tiles.ZoneType[i] == 0) continue;
+            totalLandValue += tiles.LandValue[i];
+            count++;
+        }
+
+        float avgLandValue = count > 0 ? totalLandValue / count : 0.35f;
+        return BaseRentConstant + BaseRentLandMultiplier * avgLandValue;
+    }
+
+    private static float CalculateSupplyFactor(WorldState state)
+    {
+        int totalCapacity = 0;
+        int totalOccupants = 0;
+        var buildings = state.Buildings;
+
+        for (int b = 0; b < buildings.Capacity; b++)
+        {
+            if (!buildings.IsActive(b)) continue;
+            byte zone = GetBuildingZoneTypeStatic(state, b);
+            if (zone is 1 or 2 or 6)
+            {
+                totalCapacity += buildings.MaxOccupants[b];
+                totalOccupants += buildings.Occupants[b];
+            }
+        }
+
+        if (totalCapacity == 0)
+            return 2f;
+
+        float vacancy = 1f - (float)totalOccupants / totalCapacity;
+        return Math.Clamp(vacancy / VacancyNormalization, 0.5f, 2f);
+    }
+
+    private static float CalculateGoodsFactor(WorldState state) =>
+        1f + GoodsShortageRentWeight * Math.Clamp(state.GoodsShortageIndex, 0f, 1f);
+
+    private float GetRentAttractivenessModifier() =>
+        Math.Clamp(RentAttractivenessBase - MeanRentBurden, 0.3f, 1.5f);
+
+    private static byte GetBuildingZoneTypeStatic(WorldState state, int buildingId)
+    {
+        if (buildingId < 0 || buildingId >= state.Buildings.Capacity) return 0;
+        int gx = state.Buildings.GridX[buildingId];
+        int gy = state.Buildings.GridY[buildingId];
+        if (!state.Tiles.InBounds(gx, gy)) return 0;
+        return state.Tiles.ZoneType[state.Tiles.Index(gx, gy)];
     }
 
     // =========================================================================
@@ -917,14 +1129,8 @@ public sealed class PopulationSystem
         return 500f + avgLandValue * 2000f + state.PropertyTaxRate * 1000f;
     }
 
-    private byte GetBuildingZoneType(WorldState state, int buildingId)
-    {
-        if (buildingId < 0 || buildingId >= state.Buildings.Capacity) return 0;
-        int gx = state.Buildings.GridX[buildingId];
-        int gy = state.Buildings.GridY[buildingId];
-        if (!state.Tiles.InBounds(gx, gy)) return 0;
-        return state.Tiles.ZoneType[state.Tiles.Index(gx, gy)];
-    }
+    private byte GetBuildingZoneType(WorldState state, int buildingId) =>
+        GetBuildingZoneTypeStatic(state, buildingId);
 
     private float CalculateBuildingDistance(WorldState state, int buildingA, int buildingB)
     {
@@ -1010,6 +1216,8 @@ public sealed class PopulationSystem
         }
 
         _monthsUnhappy[idx] = 0;
+        _monthsHighBurden[idx] = 0;
+        _rentBurden[idx] = 0f;
         _headAge[idx] = 0;
         hh.Free(idx);
     }
@@ -1055,6 +1263,24 @@ public sealed class PopulationSystem
                 Array.Copy(_monthsUnhappy, newArr, Math.Min(_monthsUnhappy.Length, capacity));
             _monthsUnhappy = newArr;
             _monthsUnhappyCapacity = capacity;
+        }
+
+        if (_monthsHighBurdenCapacity < capacity)
+        {
+            var newArr = new byte[capacity];
+            if (_monthsHighBurden.Length > 0)
+                Array.Copy(_monthsHighBurden, newArr, Math.Min(_monthsHighBurden.Length, capacity));
+            _monthsHighBurden = newArr;
+            _monthsHighBurdenCapacity = capacity;
+        }
+
+        if (_rentBurdenCapacity < capacity)
+        {
+            var newArr = new float[capacity];
+            if (_rentBurden.Length > 0)
+                Array.Copy(_rentBurden, newArr, Math.Min(_rentBurden.Length, capacity));
+            _rentBurden = newArr;
+            _rentBurdenCapacity = capacity;
         }
 
         if (_headAgeCapacity < capacity)

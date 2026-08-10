@@ -123,6 +123,15 @@ public sealed class TrafficSystem
     /// <summary>City-wide cycle mode share (0.0-1.0).</summary>
     public float CycleModeShare { get; private set; }
 
+    /// <summary>Restore city-wide mode shares from a snapshot (save/load).</summary>
+    public void RestoreModeShares(float car, float transit, float walk, float cycle = 0f)
+    {
+        CarModeShare = Math.Clamp(car, 0f, 1f);
+        TransitModeShare = Math.Clamp(transit, 0f, 1f);
+        WalkModeShare = Math.Clamp(walk, 0f, 1f);
+        CycleModeShare = Math.Clamp(cycle, 0f, 1f);
+    }
+
     /// <summary>Number of traffic zones.</summary>
     public int ZoneCount => _totalZones;
 

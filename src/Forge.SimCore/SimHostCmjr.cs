@@ -14,7 +14,10 @@ public sealed partial class SimHost
     {
         if (!IsInitialized) return "{}";
 
-        var snap = GetSnapshot();
+        // Capture without RefreshHousingSnapshotMetrics: Layer-C restore seeds households
+        // sparsely, so a re-rollup would wipe MeanRentBurden restored by ApplySnapshotDto.
+        // Live HUD still refreshes via GetSnapshot(); month tick keeps the aggregate fresh.
+        var snap = SimSnapshot.CaptureFrom(_state);
         var (edgeVolumes, edgeTravelTimes) = CollectTrafficEdgeExport();
         var (carShare, transitShare, walkShare) = CollectModeShares();
         var dto = SimSnapshotDto.From(
@@ -140,6 +143,12 @@ public sealed partial class SimHost
             dto.QueueProgress,
             dto.EurekaBonuses,
             dto.BranchingChoices);
+
+        _population.RestoreMeanRentBurden(dto.MeanRentBurden, _state);
+        _politics.RestoreCouncilSeats(dto.CouncilSeats, _state);
+        _traffic.RestoreModeShares(dto.CarModeShare, dto.TransitModeShare, dto.WalkModeShare);
+        _fullTraffic?.RestoreModeShares(
+            dto.CarModeShare, dto.TransitModeShare, dto.WalkModeShare);
 
         ResetTickAccumulators();
         RebuildServicesAfterLoad();

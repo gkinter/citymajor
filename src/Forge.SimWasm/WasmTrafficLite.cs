@@ -69,6 +69,14 @@ public sealed class WasmTrafficLite
     /// <summary>City-wide walk mode share after last assignment (0–1).</summary>
     public float WalkModeShare { get; private set; }
 
+    /// <summary>Restore city-wide mode shares from a snapshot (save/load).</summary>
+    public void RestoreModeShares(float car, float transit, float walk)
+    {
+        CarModeShare = Math.Clamp(car, 0f, 1f);
+        TransitModeShare = Math.Clamp(transit, 0f, 1f);
+        WalkModeShare = Math.Clamp(walk, 0f, 1f);
+    }
+
     /// <summary>Set O-D zone grid resolution; invalidates cached zone layout when changed.</summary>
     public void Configure(int zoneCount)
     {

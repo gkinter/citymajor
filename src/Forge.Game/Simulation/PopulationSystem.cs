@@ -102,6 +102,13 @@ public sealed class PopulationSystem
     /// <summary>Mean household rent burden (rent / monthly income) from the latest monthly rollup.</summary>
     public float MeanRentBurden { get; private set; }
 
+    /// <summary>Restore mean rent burden after snapshot load (before the next monthly rollup).</summary>
+    public void RestoreMeanRentBurden(float burden, WorldState state)
+    {
+        MeanRentBurden = float.IsFinite(burden) ? Math.Max(0f, burden) : 0f;
+        state.MeanRentBurden = MeanRentBurden;
+    }
+
     /// <summary>
     /// Create a new PopulationSystem with the given RNG seed.
     /// </summary>

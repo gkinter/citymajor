@@ -4,7 +4,7 @@
 **Date:** 2026-08-10  
 **Branch:** `feat/cathedral-program-2026-08-10`  
 **Linear project:** CityMajor Sim Cathedral (create) · parent initiative: [SB-3708](https://linear.app/softblaze/issue/SB-3708)  
-**OpenSpec:** [`openspec/specs/`](../../openspec/specs/) · first change: [`001-road-tier-and-graph-v2`](../../openspec/changes/001-road-tier-and-graph-v2/)
+**OpenSpec:** [`openspec/specs/`](../../openspec/specs/) · first change archived: [`001-road-tier-and-graph-v2`](../../openspec/changes/archive/2026-08-10-001-road-tier-and-graph-v2/)
 
 **Related Tier 0/1 docs:** [`SIMULATION_ARCHITECTURE.md`](./SIMULATION_ARCHITECTURE.md) · [`SIM_FOUNDATION_CHARTER.md`](./SIM_FOUNDATION_CHARTER.md) · [`CITY_ECOSYSTEM_VISION.md`](./CITY_ECOSYSTEM_VISION.md) · [`SIM_V1_GAP_MATRIX.md`](./SIM_V1_GAP_MATRIX.md)  
 **Domain specs:** [`AGENT_03_ECONOMY.md`](./AGENT_03_ECONOMY.md) · [`AGENT_04_TRANSPORT.md`](./AGENT_04_TRANSPORT.md) · [`AGENT_05_ZONING_BUILDINGS.md`](./AGENT_05_ZONING_BUILDINGS.md) · [`AGENT_06_SERVICES.md`](./AGENT_06_SERVICES.md) · [`AGENT_07_POLITICS.md`](./AGENT_07_POLITICS.md)
@@ -76,15 +76,20 @@ SUPERSEDED — banner only, no new work
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| **P1.1**–**P1.6** | ✅ Done | Road tiers, graph v2, bridge/tunnel, ramps, toolbar UX, snapshot export — OpenSpec `001-road-tier-and-graph-v2` |
+| **P1.1**–**P1.6** | ✅ Done | Road tiers, graph v2, bridge/tunnel, ramps, toolbar UX, snapshot export — OpenSpec `001` archived |
+| **P1.5 UX** | ✅ Done | Dedicated ramp paint + bridge/tunnel toolbar toggle — `6084fad` / `b34942a` / `c8f9e52` |
 | **P2.1** | ✅ Done | Extended zone palette (office, mixed, park, ag) — `a990636` |
 | **P2.2**–**P2.5** | ✅ Done | Density brush, rent model, Herald housing triggers, vacancy/rent burden snapshot |
 | **P3.1** | ✅ Done | Goods panel shortages/surpluses + prices in HUD |
-| **P3.2** | ✅ Done | Market zone partition prices export — `45d8186` |
-| **P3.3**–**P3.4** | 🔲 Sprint 2 | Market-zone pricing depth, friction UI |
-| **P4.1** | ✅ Done | Home/work building O-D for traffic lite — `99a6547` |
+| **P3.2** | ✅ Done | Partition prices export + production-chain HUD — `45d8186` / `746780c` |
+| **P3.3** | 🔲 Sprint 2 | Market-zone pricing depth (8–16 partitions + unskip test) |
+| **P3.4** | ✅ Done | Inter-zone friction overlay — `a9e7878` |
+| **P4.1** | ✅ Done | Home/work building O-D for traffic lite — `99a6547` · O-D HUD `ccf7f22` |
 | **P4.2** | ✅ Done | Frank-Wolfe + graph commute → satisfaction — `76db8bf` / `f72dd3d` |
-| **P7.2** (partial) | ✅ Test isolation | SimHost collection serialize (`49edba1`); unskip/flaky gate still open |
+| **P4.5** | ✅ Done | Mode-choice stub (simple MNL) — `571352a` |
+| **P5 stub** | ✅ Done | Politics foundation stub — approval characterization — `fb64bd9` |
+| **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` |
+| **P7.2** (partial) | ✅ Test isolation | SimHost serialize `49edba1` + instance-local SimplexNoise `b4be623`; unskip/flaky gate still open |
 
 **Sprint 2 plan:** [`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md)
 
@@ -150,7 +155,7 @@ flowchart TB
 | **P1.2** ✅ | `RoadGraphBuilder` v2: segment between intersections, not per-tile nodes | `SIMULATION_ARCHITECTURE` §4 | 4-way vs T-junction typed; capacity from tier table |
 | **P1.3** ✅ | One-way, bridge, tunnel flags affect cost/capacity | RoadFlags bits 6–7 | Bridge over water works in graph |
 | **P1.4** ✅ | Highway on/off ramp nodes | `RoadNode.NodeType` | Ramp-only highway access; no illegal merges |
-| **P1.5** ✅ | Full `TrafficSystem` default on Unity; lite on WASM | `TrafficSystem.cs` | Home→work O-D; BPR on typed edges |
+| **P1.5** ✅ | Full `TrafficSystem` default on Unity; lite on WASM; ramp + bridge/tunnel toolbar UX | `TrafficSystem.cs` + web toolbar | Home→work O-D; BPR on typed edges; ramp/bridge paint |
 | **P1.6** ✅ | Export `edgeVolumes[]`, `travelTimes[]` to snapshot | `WASM_SIM_BRIDGE` | Vehicle speed ∝ congestion; overlay matches |
 
 ### P2 — Land, zoning & housing
@@ -169,9 +174,9 @@ flowchart TB
 | Milestone | Deliverable | Spec ref |
 |-----------|-------------|----------|
 | **P3.1** ✅ | Goods panel: top shortages/surpluses, prices by good | `EconomySystem` |
-| **P3.2** ✅ | Market zone partition prices export (snapshot) | `EconomySystem` / `45d8186` |
+| **P3.2** ✅ | Partition prices export + production-chain HUD | `EconomySystem` / `45d8186` / `746780c` |
 | **P3.3** | 8–16 market zones with partition pricing | `SIMULATION_ARCHITECTURE` §5 |
-| **P3.4** | Inter-zone trade friction matrix visible | WP-E complete |
+| **P3.4** ✅ | Inter-zone trade friction matrix visible | WP-E / `a9e7878` |
 | **P3.5** | Bilateral trade routes (v2): partner city, contract, freight time | `TradeSystem`, SB-3728 |
 | **P3.6** | Traffic delays → goods delivery latency → industrial throughput | Cross-pillar with P1 |
 
@@ -179,11 +184,11 @@ flowchart TB
 
 | Milestone | Deliverable |
 |-----------|-------------|
-| **P4.1** ✅ | Full home/work building IDs on all commuters (not gravity O-D) |
+| **P4.1** ✅ | Full home/work building IDs on all commuters (not gravity O-D); O-D HUD sample |
 | **P4.2** ✅ | Commute time from graph → satisfaction (FW + edge travel times) |
 | **P4.3** | Employment matching visible (unemployment by zone) |
 | **P4.4** | L2 export at scale (top 50–100 HH) + pick on map |
-| **P4.5** | Mode choice stub: car vs transit weight from `TransitPreference` |
+| **P4.5** ✅ | Mode choice stub: car vs transit weight from `TransitPreference` — `571352a` |
 
 ### P5 — Services & emergencies
 
@@ -192,6 +197,7 @@ flowchart TB
 
 | Milestone | Deliverable |
 |-----------|-------------|
+| **P5 stub** ✅ | Politics foundation stub (approval characterization) — see [`CATHEDRAL_P5_POLITICS.md`](./CATHEDRAL_P5_POLITICS.md) / `fb64bd9` |
 | **P5.1** | Utilities L0 balance surfaced in HUD |
 | **P5.2** | Emergency response time model (distance + traffic) |
 | **P5.3** | Fire v1 (spread + hydrant coverage) |
@@ -291,7 +297,7 @@ OpenSpec **complements Linear** — it does not replace prioritization or cycles
 openspec/
   config.yaml
   specs/                    # implemented truth (7 domain files)
-    infrastructure.md
+    infrastructure.md       # P1.1–P1.6 requirements (merged from 001)
     zoning-housing.md
     economy-trade.md
     population.md
@@ -299,11 +305,8 @@ openspec/
     governance.md
     snapshot-contract.md
   changes/
-    001-road-tier-and-graph-v2/
-      proposal.md
-      design.md
-      tasks.md
-      specs/infrastructure.delta.md
+    archive/
+      2026-08-10-001-road-tier-and-graph-v2/   # P1.1–P1.6 — archived
 ```
 
 **Workflow:** Each sprint milestone = one OpenSpec change → PR → archive merges delta into `openspec/specs/`.
@@ -326,3 +329,4 @@ openspec/
 | 2026-08-10 | **Sprint 1 complete** — P1.1–P1.6, P2.2–P2.5, P3.1 merged to integration (`b61c4b1`) |
 | 2026-08-10 | **Sprint 2 planned** — P2.1 palette, P3.2–P3.4 economy depth, P4.1–P4.2 population truth, flaky-test gate ([`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md)) |
 | 2026-08-10 | **Sprint 2 mid-sync** — P2.1 (`a990636`), P3.2 (`45d8186`), P4.1 O-D (`99a6547`), P4.2 FW+commute sat (`76db8bf`/`f72dd3d`), test isolation (`49edba1`); remaining P3.3–P3.4 + P7.2 unskip gate |
+| 2026-08-10 | **Sprint 2 wave-2 sync** — P3.2 chain HUD (`746780c`), P3.4 friction (`a9e7878`), P1.5 ramp/bridge UI (`6084fad`/`b34942a`), congestion heatmap (`c8827bf`), O-D HUD (`ccf7f22`), mode choice (`571352a`), SimplexNoise (`b4be623`), P5 politics stub (`fb64bd9`); OpenSpec `001` archived; remaining **P3.3** + P7.2 unskip gate |

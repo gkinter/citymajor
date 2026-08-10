@@ -7,7 +7,8 @@ using UnityEngine.UIElements;
 namespace CityMajor.UI
 {
     /// <summary>
-    /// Pop / funds / hour HUD (top-left). RCI demand lives in <see cref="DemandOverlayController"/>.
+    /// Pop / funds / hour / utilities / EMS Services HUD (top-left).
+    /// RCI demand lives in <see cref="DemandOverlayController"/>.
     /// </summary>
     public sealed class ResourcesHudController : MonoBehaviour
     {
@@ -21,6 +22,7 @@ namespace CityMajor.UI
         Label _timeValue;
         VisualElement _utilitiesRow;
         Label _utilitiesValue;
+        Label _emsValue;
         Label _cranesLabel;
         readonly PopulationGrowthTracker _growthTracker = new();
 
@@ -87,6 +89,7 @@ namespace CityMajor.UI
             _timeValue = root.Q<Label>("time-value");
             _utilitiesRow = root.Q<VisualElement>("utilities-row");
             _utilitiesValue = root.Q<Label>("utilities-value");
+            _emsValue = root.Q<Label>("ems-value");
             _cranesLabel = root.Q<Label>("cranes-label");
         }
 
@@ -117,6 +120,7 @@ namespace CityMajor.UI
 
             ApplyGrowthLabel();
             ApplyUtilities(state);
+            ApplyServices(state);
             ApplyCranes(state);
         }
 
@@ -140,6 +144,28 @@ namespace CityMajor.UI
                 _utilitiesRow.EnableInClassList("hud-utilities-row--warn", stressClass == "warn");
                 _utilitiesRow.EnableInClassList("hud-utilities-row--stress", stressClass == "stress");
             }
+        }
+
+        void ApplyServices(CitySimState state)
+        {
+            if (_emsValue == null)
+                return;
+
+            _emsValue.text = FormatEmergencyResponseMinutes(state.MeanEmergencyResponseMinutes);
+            _emsValue.tooltip =
+                "Mean fire/EMS response minutes over sampled zoned tiles (road distance + traffic).";
+        }
+
+        /// <summary>Compact HUD readout, e.g. <c>4.3m</c> / <c>30m</c> (mirrors web emergency-response.ts).</summary>
+        internal static string FormatEmergencyResponseMinutes(float minutes)
+        {
+            if (float.IsNaN(minutes) || float.IsInfinity(minutes) || minutes < 0f)
+                return "—";
+            if (minutes >= 100f)
+                return $"{Mathf.RoundToInt(minutes)}m";
+            if (minutes >= 10f)
+                return $"{minutes:0}m";
+            return $"{minutes:0.0}m";
         }
 
         void ApplyCranes(CitySimState state)

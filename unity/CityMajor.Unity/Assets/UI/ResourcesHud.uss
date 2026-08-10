@@ -153,6 +153,28 @@
     color: rgb(255, 112, 112);
 }
 
+.hud-services-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    background-color: rgba(20, 24, 34, 0.65);
+    border-width: 1px;
+    border-color: rgba(240, 160, 96, 0.28);
+}
+
+.hud-ems-label {
+    min-width: 28px;
+    color: rgba(240, 160, 96, 0.95);
+    -unity-font-style: bold;
+}
+
+.hud-ems-value {
+    flex-grow: 1;
+    color: rgb(240, 200, 160);
+}
+
 .hud-cranes {
     margin-top: 4px;
     -unity-font-style: bold;

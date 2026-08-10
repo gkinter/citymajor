@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Forge.SimCore;
 using Forge.SimWasm;
 using Xunit;
@@ -106,5 +107,25 @@ public sealed class CathedralModeChoiceTests
         var auditAfter = host.Population.AuditCommuters(host.State);
         Assert.Equal(auditBefore.AssignedCommuters, auditAfter.AssignedCommuters);
         Assert.True(auditAfter.Coverage >= 0.9f);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsModeShares()
+    {
+        var host = new SimHost();
+        host.Init(64);
+        for (int i = 0; i < 8; i++)
+            host.Tick(WasmConfig.TrafficLiteInterval);
+
+        var (car, transit, walk) = host.CollectModeShares();
+        Assert.InRange(car + transit + walk, 0.999f, 1.001f);
+
+        var snapDto = JsonSerializer.Deserialize(
+            host.GetSnapshotJson(),
+            SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(snapDto);
+        Assert.Equal(car, snapDto!.CarModeShare, precision: 4);
+        Assert.Equal(transit, snapDto.TransitModeShare, precision: 4);
+        Assert.Equal(walk, snapDto.WalkModeShare, precision: 4);
     }
 }

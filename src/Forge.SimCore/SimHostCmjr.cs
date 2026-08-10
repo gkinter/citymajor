@@ -16,9 +16,11 @@ public sealed partial class SimHost
 
         var snap = GetSnapshot();
         var (edgeVolumes, edgeTravelTimes) = CollectTrafficEdgeExport();
+        var (carShare, transitShare, walkShare) = CollectModeShares();
         var dto = SimSnapshotDto.From(
             snap, _state, _events, _economy, _services, _population, _research,
-            edgeVolumes, edgeTravelTimes);
+            edgeVolumes, edgeTravelTimes,
+            carShare, transitShare, walkShare);
         return JsonSerializer.Serialize(dto, SnapshotJsonContext.Default.SimSnapshotDto);
     }
 
@@ -27,6 +29,20 @@ public sealed partial class SimHost
         if (_useFullTraffic && _fullTraffic is not null)
             return (_fullTraffic.EdgeVolumes, _fullTraffic.EdgeTravelTimes);
         return (_traffic.EdgeVolumes, _traffic.EdgeTravelTimes);
+    }
+
+    /// <summary>City-wide car/transit/walk shares from active traffic model (0–1).</summary>
+    public (float Car, float Transit, float Walk) CollectModeShares()
+    {
+        if (_useFullTraffic && _fullTraffic is not null)
+        {
+            return (
+                _fullTraffic.CarModeShare,
+                _fullTraffic.TransitModeShare,
+                _fullTraffic.WalkModeShare);
+        }
+
+        return (_traffic.CarModeShare, _traffic.TransitModeShare, _traffic.WalkModeShare);
     }
 
     /// <summary>Per-edge assignment export for snapshot/status (P1.6 / P4.2).</summary>

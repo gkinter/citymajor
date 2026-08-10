@@ -129,6 +129,12 @@ public sealed class SimSnapshotDto
     public CommuteOdSampleDto[] CommuteOdSample { get; init; } = [];
     /// <summary>Faction id per council seat (length 9).</summary>
     public int[] CouncilSeats { get; init; } = [];
+    /// <summary>City-wide car mode share from traffic assignment (0–1).</summary>
+    public float CarModeShare { get; init; }
+    /// <summary>City-wide transit mode share from traffic assignment (0–1).</summary>
+    public float TransitModeShare { get; init; }
+    /// <summary>City-wide walk mode share from traffic assignment (0–1).</summary>
+    public float WalkModeShare { get; init; }
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
@@ -139,7 +145,10 @@ public sealed class SimSnapshotDto
         PopulationSystem? population = null,
         ResearchSystem? research = null,
         float[]? edgeVolumes = null,
-        float[]? edgeTravelTimes = null)
+        float[]? edgeTravelTimes = null,
+        float carModeShare = 0f,
+        float transitModeShare = 0f,
+        float walkModeShare = 0f)
     {
         var buildings = CollectBuildings(state);
         var zones = CollectZones(state);
@@ -200,6 +209,9 @@ public sealed class SimSnapshotDto
             CommuterCoverage = commuterAudit.Coverage,
             CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),
             CouncilSeats = CollectCouncilSeats(state),
+            CarModeShare = carModeShare,
+            TransitModeShare = transitModeShare,
+            WalkModeShare = walkModeShare,
         };
     }
 

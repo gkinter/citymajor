@@ -17,6 +17,7 @@ import {
   parseCommuteOdSample,
   parseCommuterCoverage,
 } from "../lib/commute-od";
+import { parseModeShare } from "../lib/mode-share";
 import { parsePopulationL2 } from "../lib/population-l2";
 
 type WorkerInbound =
@@ -168,6 +169,9 @@ type WasmStatus = {
   }>;
   commuterCoverage?: number;
   commuteOdSample?: unknown;
+  carModeShare?: number;
+  transitModeShare?: number;
+  walkModeShare?: number;
 };
 
 type SimExports = {
@@ -636,6 +640,9 @@ function readStatus(): Pick<
   | "residentialVacancy"
   | "commuterCoverage"
   | "commuteOdSample"
+  | "carModeShare"
+  | "transitModeShare"
+  | "walkModeShare"
 > | null {
   if (!sim?.GetStatus) return null;
   try {
@@ -711,6 +718,9 @@ function readStatus(): Pick<
       residentialVacancy: parsed.residentialVacancy,
       commuterCoverage: parseCommuterCoverage(parsed.commuterCoverage),
       commuteOdSample: parseCommuteOdSample(parsed.commuteOdSample),
+      carModeShare: parseModeShare(parsed.carModeShare),
+      transitModeShare: parseModeShare(parsed.transitModeShare),
+      walkModeShare: parseModeShare(parsed.walkModeShare),
     };
   } catch {
     return null;
@@ -805,6 +815,12 @@ function readSnapshot(): SimSnapshot {
       status?.commuterCoverage,
     commuteOdSample:
       parseCommuteOdSample(parsed.commuteOdSample) ?? status?.commuteOdSample,
+    carModeShare:
+      parseModeShare(parsed.carModeShare) ?? status?.carModeShare,
+    transitModeShare:
+      parseModeShare(parsed.transitModeShare) ?? status?.transitModeShare,
+    walkModeShare:
+      parseModeShare(parsed.walkModeShare) ?? status?.walkModeShare,
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),

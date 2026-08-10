@@ -318,6 +318,12 @@ export type SimResources = {
   commuterCoverage?: number;
   /** WASM — top home→work tile pairs aggregated from household assignments. */
   commuteOdSample?: CommuteOdSample[];
+  /** WASM — city-wide car mode share from WasmTrafficLite (0–1). */
+  carModeShare?: number;
+  /** WASM — city-wide transit mode share from WasmTrafficLite (0–1). */
+  transitModeShare?: number;
+  /** WASM — city-wide walk mode share from WasmTrafficLite (0–1). */
+  walkModeShare?: number;
 };
 
 export type LawPreview = {

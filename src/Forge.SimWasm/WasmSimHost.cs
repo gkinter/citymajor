@@ -84,6 +84,8 @@ public sealed class WasmSimHost
             : _host.ComputeAverageCoverage(_host.Services.EducationCoverage);
     public float EmploymentRate => _host.State?.EmploymentRate ?? 0f;
     public float MeanTrafficDensity => _host.State?.MeanTrafficDensity ?? 0f;
+    public (float Car, float Transit, float Walk) ModeShares =>
+        _host.IsInitialized ? _host.CollectModeShares() : (0f, 0f, 0f);
     public int ConstructingBuildingCount => _host.State?.ConstructingBuildingCount ?? 0;
     public float PowerCoverageFraction => _host.State?.PowerCoverageFraction ?? 1f;
     public float WaterCoverageFraction => _host.State?.WaterCoverageFraction ?? 1f;
@@ -312,6 +314,12 @@ public sealed class WasmStatusDto
     /// <summary>Share of working-age households with a workplace (0–1).</summary>
     public float EmploymentRate { get; init; }
     public float MeanTrafficDensity { get; init; }
+    /// <summary>City-wide car mode share from WasmTrafficLite (0–1).</summary>
+    public float CarModeShare { get; init; }
+    /// <summary>City-wide transit mode share from WasmTrafficLite (0–1).</summary>
+    public float TransitModeShare { get; init; }
+    /// <summary>City-wide walk mode share from WasmTrafficLite (0–1).</summary>
+    public float WalkModeShare { get; init; }
     public int ConstructingBuildingCount { get; init; }
     public float PowerCoverageFraction { get; init; } = 1f;
     public float WaterCoverageFraction { get; init; } = 1f;
@@ -331,98 +339,106 @@ public sealed class WasmStatusDto
     /// <summary>Faction id per council seat (length 9).</summary>
     public int[] CouncilSeats { get; init; } = [];
 
-    public static WasmStatusDto From(WasmSimHost host) => new()
+    public static WasmStatusDto From(WasmSimHost host)
     {
-        Initialized = host.IsInitialized,
-        Tick = host.TickCount,
-        TickCount = host.TickCount,
-        Population = host.Population,
-        HouseholdCount = host.HouseholdCount,
-        PopulationGrowthRate = host.PopulationGrowthRate,
-        CityFunds = host.CityFunds,
-        Era = host.Era,
-        EraName = WasmEraDeriver.EraName(host.Era),
-        EraProgress = host.EraProgress,
-        ResidentialDemand = host.ResidentialDemand,
-        CommercialDemand = host.CommercialDemand,
-        IndustrialDemand = host.IndustrialDemand,
-        Approval = host.ApprovalRating * 100f,
-        Happiness = host.Happiness,
-        MonthlyIncome = host.MonthlyIncome,
-        MonthlyExpenses = host.MonthlyExpenses,
-        BuildingCount = host.BuildingCount,
-        ResearchPoints = host.ResearchPoints,
-        ResearchRate = host.ResearchRate,
-        EventDefinitionCount = host.EventDefinitionCount,
-        LawDefinitionCount = host.LawDefinitionCount,
-        ActiveLawCount = host.ActiveLawCount,
-        SampleLaw = host.GetSampleLawPreview(),
-        ActiveEvents = host.ActiveEvents,
-        TechCount = host.UnlockedTechCount,
-        CurrentResearchId = host.CurrentResearchId,
-        CurrentResearchProgress = host.CurrentResearchProgress,
-        CurrentResearchMonthsRemaining = host.CurrentResearchMonthsRemaining,
-        UnlockedTechIds = host.CollectUnlockedTechIds(),
-        TrafficMode = host.TrafficMode.ToString().ToLowerInvariant(),
-        TickIntervals = new TickIntervalsDto
+        var modeShares = host.ModeShares;
+        return new()
         {
-            GameDaySeconds = WasmConfig.GameDayInterval,
-            GameMonthSeconds = WasmConfig.GameMonthInterval,
-            TrafficLiteSeconds = WasmConfig.TrafficLiteInterval,
-            TrafficLiteEdgeBatchSeconds = WasmConfig.TrafficLiteEdgeBatchInterval,
-            TrafficStubSeconds = WasmConfig.TrafficStubInterval,
-        },
-        TrafficLite = new TrafficLiteInfoDto
-        {
-            ZoneCount = WasmConfig.TrafficLiteZoneCount,
-            FrankWolfeIterations = WasmConfig.TrafficLiteFrankWolfeIterations,
-            EdgeBatchCount = WasmConfig.TrafficLiteEdgeBatchCount,
-        },
-        Systems =
-        [
-            "EconomySystem",
-            "PopulationSystem",
-            "WasmTrafficLite (64-zone BPR Frank-Wolfe)",
-            "ServiceSystem",
-            "ZoneGrowthSystem",
-            "BudgetSystem",
-            "PoliticsSystem",
-            "EventSystem",
-            "LawSystem",
-            "ResearchSystem",
-            "CulturalDNASystem",
-            "TradeSystem (global market, PartnerCityId=-1)",
-        ],
-        Stubbed =
-        [
-            "TrafficSystem full (500 zones — desktop only; WASM uses lite mode)",
-        ],
-        HealthcareCoverage = host.HealthcareCoverage,
-        PoliceCoverage = host.PoliceCoverage,
-        FireCoverage = host.FireCoverage,
-        EducationCoverage = host.EducationCoverage,
-        Economy = host.EconomySnapshot,
-        MonthlyExportValue = host.MonthlyExportValue,
-        MonthlyImportCost = host.MonthlyImportCost,
-        TradeBalance = host.TradeBalance,
-        PopulationL2 = host.GetPopulationL2Export(),
-        EmploymentRate = host.EmploymentRate,
-        MeanTrafficDensity = host.MeanTrafficDensity,
-        ConstructingBuildingCount = host.ConstructingBuildingCount,
-        PowerCoverageFraction = host.PowerCoverageFraction,
-        WaterCoverageFraction = host.WaterCoverageFraction,
-        UtilityStressIndex = host.UtilityStressIndex,
-        GoodsShortageIndex = host.GoodsShortageIndex,
-        GoodsSurplusIndex = host.GoodsSurplusIndex,
-        InterZoneTradeVolume = host.InterZoneTradeVolume,
-        MeanInterZoneFriction = host.MeanInterZoneFriction,
-        GoodsTransportCostIndex = host.GoodsTransportCostIndex,
-        RoadGraph = host.RoadGraphSnapshot,
-        MeanRentBurden = host.MeanRentBurden,
-        ResidentialVacancy = host.ResidentialVacancy,
-        MarketZoneCount = host.MarketZoneCount,
-        CouncilSeats = host.CouncilSeats,
-    };
+            Initialized = host.IsInitialized,
+            Tick = host.TickCount,
+            TickCount = host.TickCount,
+            Population = host.Population,
+            HouseholdCount = host.HouseholdCount,
+            PopulationGrowthRate = host.PopulationGrowthRate,
+            CityFunds = host.CityFunds,
+            Era = host.Era,
+            EraName = WasmEraDeriver.EraName(host.Era),
+            EraProgress = host.EraProgress,
+            ResidentialDemand = host.ResidentialDemand,
+            CommercialDemand = host.CommercialDemand,
+            IndustrialDemand = host.IndustrialDemand,
+            Approval = host.ApprovalRating * 100f,
+            Happiness = host.Happiness,
+            MonthlyIncome = host.MonthlyIncome,
+            MonthlyExpenses = host.MonthlyExpenses,
+            BuildingCount = host.BuildingCount,
+            ResearchPoints = host.ResearchPoints,
+            ResearchRate = host.ResearchRate,
+            EventDefinitionCount = host.EventDefinitionCount,
+            LawDefinitionCount = host.LawDefinitionCount,
+            ActiveLawCount = host.ActiveLawCount,
+            SampleLaw = host.GetSampleLawPreview(),
+            ActiveEvents = host.ActiveEvents,
+            TechCount = host.UnlockedTechCount,
+            CurrentResearchId = host.CurrentResearchId,
+            CurrentResearchProgress = host.CurrentResearchProgress,
+            CurrentResearchMonthsRemaining = host.CurrentResearchMonthsRemaining,
+            UnlockedTechIds = host.CollectUnlockedTechIds(),
+            TrafficMode = host.TrafficMode.ToString().ToLowerInvariant(),
+            TickIntervals = new TickIntervalsDto
+            {
+                GameDaySeconds = WasmConfig.GameDayInterval,
+                GameMonthSeconds = WasmConfig.GameMonthInterval,
+                TrafficLiteSeconds = WasmConfig.TrafficLiteInterval,
+                TrafficLiteEdgeBatchSeconds = WasmConfig.TrafficLiteEdgeBatchInterval,
+                TrafficStubSeconds = WasmConfig.TrafficStubInterval,
+            },
+            TrafficLite = new TrafficLiteInfoDto
+            {
+                ZoneCount = WasmConfig.TrafficLiteZoneCount,
+                FrankWolfeIterations = WasmConfig.TrafficLiteFrankWolfeIterations,
+                EdgeBatchCount = WasmConfig.TrafficLiteEdgeBatchCount,
+            },
+            Systems =
+            [
+                "EconomySystem",
+                "PopulationSystem",
+                "WasmTrafficLite (64-zone BPR Frank-Wolfe)",
+                "ServiceSystem",
+                "ZoneGrowthSystem",
+                "BudgetSystem",
+                "PoliticsSystem",
+                "EventSystem",
+                "LawSystem",
+                "ResearchSystem",
+                "CulturalDNASystem",
+                "TradeSystem (global market, PartnerCityId=-1)",
+            ],
+            Stubbed =
+            [
+                "TrafficSystem full (500 zones — desktop only; WASM uses lite mode)",
+            ],
+            HealthcareCoverage = host.HealthcareCoverage,
+            PoliceCoverage = host.PoliceCoverage,
+            FireCoverage = host.FireCoverage,
+            EducationCoverage = host.EducationCoverage,
+            Economy = host.EconomySnapshot,
+            MonthlyExportValue = host.MonthlyExportValue,
+            MonthlyImportCost = host.MonthlyImportCost,
+            TradeBalance = host.TradeBalance,
+            PopulationL2 = host.GetPopulationL2Export(),
+            EmploymentRate = host.EmploymentRate,
+            MeanTrafficDensity = host.MeanTrafficDensity,
+            CarModeShare = modeShares.Car,
+            TransitModeShare = modeShares.Transit,
+            WalkModeShare = modeShares.Walk,
+            ConstructingBuildingCount = host.ConstructingBuildingCount,
+            PowerCoverageFraction = host.PowerCoverageFraction,
+            WaterCoverageFraction = host.WaterCoverageFraction,
+            UtilityStressIndex = host.UtilityStressIndex,
+            GoodsShortageIndex = host.GoodsShortageIndex,
+            GoodsSurplusIndex = host.GoodsSurplusIndex,
+            InterZoneTradeVolume = host.InterZoneTradeVolume,
+            MeanInterZoneFriction = host.MeanInterZoneFriction,
+            GoodsTransportCostIndex = host.GoodsTransportCostIndex,
+            RoadGraph = host.RoadGraphSnapshot,
+            MeanRentBurden = host.MeanRentBurden,
+            ResidentialVacancy = host.ResidentialVacancy,
+            MarketZoneCount = host.MarketZoneCount,
+            CouncilSeats = host.CouncilSeats,
+        };
+    }
+
 }
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]

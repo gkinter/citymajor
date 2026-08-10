@@ -7,6 +7,10 @@ import {
   topCommuteOdPairs,
 } from "@/lib/commute-od";
 import {
+  formatModeShareTriplet,
+  hasModeShares,
+} from "@/lib/mode-share";
+import {
   economyFromRciFallback,
   formatGoodName,
   formatGoodPrice,
@@ -401,12 +405,14 @@ function hasTransportMetrics(resources: SimResources | null): resources is SimRe
     resources.commuterCoverage !== undefined ||
     (resources.commuteOdSample !== undefined &&
       resources.commuteOdSample.length > 0) ||
-    resources.meanTrafficDensity !== undefined
+    resources.meanTrafficDensity !== undefined ||
+    hasModeShares(resources)
   );
 }
 
 function TransportMetrics({ resources }: { resources: SimResources }) {
   const odPairs = topCommuteOdPairs(resources.commuteOdSample, 5);
+  const showModeShares = hasModeShares(resources);
 
   return (
     <section className="hud-economy-section" aria-label="Transport">
@@ -425,6 +431,21 @@ function TransportMetrics({ resources }: { resources: SimResources }) {
             <span className="hud-economy-trade__label">Mean traffic</span>
             <span className="hud-economy-trade__value">
               {Math.round(resources.meanTrafficDensity * 100)}% density
+            </span>
+          </li>
+        ) : null}
+        {showModeShares ? (
+          <li
+            className="hud-economy-trade__row"
+            title="City-wide trip mode shares from WasmTrafficLite MNL (car / transit / walk)."
+          >
+            <span className="hud-economy-trade__label">Mode share</span>
+            <span className="hud-economy-trade__value">
+              {formatModeShareTriplet(
+                resources.carModeShare ?? 0,
+                resources.transitModeShare ?? 0,
+                resources.walkModeShare ?? 0,
+              )}
             </span>
           </li>
         ) : null}

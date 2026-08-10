@@ -34,7 +34,7 @@
 - [ ] `0` — erase zones
 - [ ] `X` — bulldoze mode (clears zones, buildings, roads on tile)
 - [ ] `4` — road mode; roads appear in overlay + traffic tint after sim ticks
-- [ ] RoadPaintTool inspector — optional **Paint Bridge** / **Paint Tunnel** (Cathedral P1.3)
+- [ ] RoadPaintTool inspector — optional **Paint Bridge** / **Paint Tunnel** (P1.3) / **Paint Ramp** (P1.5)
 - [ ] ZonePaintTool inspector — **Zone Density** 0–3 paints through `CitySimBridge.PaintZone`
 - [ ] MMB — camera pan
 

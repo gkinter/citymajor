@@ -103,9 +103,36 @@ public sealed class CathedralPoliticsTests
             "Expected approval_unrest Herald when approval stays below 40%.");
     }
 
-    [Fact(Skip = "P5.6 faction/council seats not exported on WASM status")]
+    [Fact]
     public void WasmStatus_ExportsCouncilSeats()
     {
-        // Placeholder: status.councilSeats length == PoliticsSystem.CouncilSeatCount.
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        Assert.Equal(PoliticsSystem.CouncilSeatCount, host.Politics.CouncilSeats.Length);
+        Assert.Equal(PoliticsSystem.CouncilSeatCount, host.State!.CouncilSeats.Length);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("councilSeats", out var seats));
+        Assert.Equal(JsonValueKind.Array, seats.ValueKind);
+        Assert.Equal(PoliticsSystem.CouncilSeatCount, seats.GetArrayLength());
+
+        var expected = new int[PoliticsSystem.CouncilSeatCount];
+        for (int i = 0; i < expected.Length; i++)
+            expected[i] = host.Politics.CouncilSeats[i];
+
+        var actual = new int[seats.GetArrayLength()];
+        int idx = 0;
+        foreach (var seat in seats.EnumerateArray())
+        {
+            Assert.Equal(JsonValueKind.Number, seat.ValueKind);
+            Assert.InRange(seat.GetInt32(), 0, PoliticsSystem.FactionCount - 1);
+            actual[idx++] = seat.GetInt32();
+        }
+
+        Assert.Equal(expected, actual);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(expected, dto.CouncilSeats);
     }
 }

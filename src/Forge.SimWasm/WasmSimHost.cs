@@ -77,6 +77,12 @@ public sealed class WasmSimHost
     public float IndustrialDemand => _economy?.IndustrialDemand ?? 0f;
     public float ApprovalRating => _state?.ApprovalRating ?? 0f;
     public float Happiness => _state?.Happiness ?? 0f;
+    /// <summary>Working-age unemployment rate (0–1) from PopulationSystem.</summary>
+    public float UnemploymentRate =>
+        _population is null || _state is null ? 0f : _population.GetUnemploymentRate(_state);
+    /// <summary>Open job slots / capacity (0–1) from PopulationSystem.</summary>
+    public float JobVacancyRate =>
+        _population is null || _state is null ? 0f : _population.GetJobVacancyRate(_state);
     public long MonthlyIncome => _state?.Income.Total ?? 0;
     public long MonthlyExpenses => _state?.Expenses.Total ?? 0;
     public int BuildingCount => _state?.Buildings.Count ?? 0;
@@ -1096,6 +1102,10 @@ public sealed class WasmStatusDto
     public float IndustrialDemand { get; init; }
     public float Approval { get; init; }
     public float Happiness { get; init; }
+    /// <summary>Working-age unemployment rate (0–1).</summary>
+    public float UnemploymentRate { get; init; }
+    /// <summary>Open job slots / capacity (0–1).</summary>
+    public float JobVacancy { get; init; }
     public long MonthlyIncome { get; init; }
     public long MonthlyExpenses { get; init; }
     public int BuildingCount { get; init; }
@@ -1153,6 +1163,8 @@ public sealed class WasmStatusDto
         IndustrialDemand = host.IndustrialDemand,
         Approval = host.ApprovalRating * 100f,
         Happiness = host.Happiness,
+        UnemploymentRate = host.UnemploymentRate,
+        JobVacancy = host.JobVacancyRate,
         MonthlyIncome = host.MonthlyIncome,
         MonthlyExpenses = host.MonthlyExpenses,
         BuildingCount = host.BuildingCount,
@@ -1230,6 +1242,10 @@ public sealed class SimSnapshotDto
     /// <summary>Mayor approval percent (0–100).</summary>
     public float Approval { get; init; }
     public float Happiness { get; init; }
+    /// <summary>Working-age unemployment rate (0–1).</summary>
+    public float UnemploymentRate { get; init; }
+    /// <summary>Open job slots / capacity (0–1).</summary>
+    public float JobVacancy { get; init; }
     public long MonthlyIncome { get; init; }
     public long MonthlyExpenses { get; init; }
     public BuildingDto[] Buildings { get; init; } = [];
@@ -1280,6 +1296,8 @@ public sealed class SimSnapshotDto
             IndustrialDemand = economy?.IndustrialDemand ?? 0f,
             Approval = state.ApprovalRating * 100f,
             Happiness = state.Happiness,
+            UnemploymentRate = population?.GetUnemploymentRate(state) ?? 0f,
+            JobVacancy = population?.GetJobVacancyRate(state) ?? 0f,
             MonthlyIncome = state.Income.Total,
             MonthlyExpenses = state.Expenses.Total,
             Buildings = buildings,

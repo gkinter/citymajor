@@ -54,6 +54,8 @@ type WasmStatus = {
   unlockedTechIds?: number[];
   approval?: number;
   happiness?: number;
+  unemploymentRate?: number;
+  jobVacancy?: number;
   monthlyIncome?: number;
   monthlyExpenses?: number;
   buildingCount?: number;
@@ -452,6 +454,8 @@ function readStatus(): Pick<
   | "unlockedTechIds"
   | "approval"
   | "happiness"
+  | "unemploymentRate"
+  | "jobVacancy"
   | "monthlyIncome"
   | "monthlyExpenses"
   | "buildingCount"
@@ -511,6 +515,8 @@ function readStatus(): Pick<
       unlockedTechIds: parsed.unlockedTechIds,
       approval: parsed.approval,
       happiness: parsed.happiness,
+      unemploymentRate: parsed.unemploymentRate,
+      jobVacancy: parsed.jobVacancy,
       monthlyIncome: parsed.monthlyIncome,
       monthlyExpenses: parsed.monthlyExpenses,
       buildingCount: parsed.buildingCount,
@@ -575,6 +581,8 @@ function readSnapshot(): SimSnapshot {
     unlockedTechIds: parsed.unlockedTechIds ?? status?.unlockedTechIds,
     approval: parsed.approval ?? status?.approval,
     happiness: parsed.happiness ?? status?.happiness,
+    unemploymentRate: parsed.unemploymentRate ?? status?.unemploymentRate,
+    jobVacancy: parsed.jobVacancy ?? status?.jobVacancy,
     monthlyIncome: parsed.monthlyIncome ?? status?.monthlyIncome,
     monthlyExpenses: parsed.monthlyExpenses ?? status?.monthlyExpenses,
     eraProgress: parsed.eraProgress ?? status?.eraProgress,

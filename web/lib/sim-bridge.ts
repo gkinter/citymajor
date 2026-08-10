@@ -152,6 +152,10 @@ export type SimResources = {
   taxRate?: number;
   /** City happiness (0–1). */
   happiness?: number;
+  /** Working-age unemployment rate (0–1) from PopulationSystem. */
+  unemploymentRate?: number;
+  /** Open job slots / capacity (0–1) from PopulationSystem. */
+  jobVacancy?: number;
   /** WASM GetStatus — building pool count; used to detect growth without full render diff. */
   buildingCount?: number;
   /** Current-month income / expense totals from BudgetSystem ledgers. */

@@ -14,7 +14,9 @@
     "verify:tech-unlocks": "node --experimental-strip-types ./scripts/verify-tech-unlocks.mts",
     "verify:build-catalog": "node --experimental-strip-types ./scripts/verify-build-catalog.mts",
     "perf:gate": "node ./scripts/perf-gate.mjs",
-    "generate:gltf-placeholders": "node ./scripts/generate-placeholder-gltf.mjs"
+    "generate:gltf-placeholders": "node ./scripts/generate-placeholder-gltf.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@citymajor/sim-types": "workspace:*",
@@ -35,6 +37,7 @@
     "@types/react-dom": "^19.1.2",
     "@types/three": "^0.175.0",
     "playwright": "^1.51.1",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   }
 }

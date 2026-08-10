@@ -200,6 +200,59 @@ public sealed class PopulationSystem
     }
 
     // =========================================================================
+    // Employment stats (HUD / WASM export)
+    // =========================================================================
+
+    /// <summary>
+    /// Share of working-age households without a workplace (0–1).
+    /// Working age = AgeGroup 1. Empty labor force returns 0.
+    /// </summary>
+    public float GetUnemploymentRate(WorldState state)
+    {
+        int unemployed = 0, laborForce = 0;
+        var hh = state.Households;
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+            if (hh.AgeGroup[i] != 1) continue;
+            laborForce++;
+            if (hh.WorkBuildingId[i] == 0 || (hh.Flags[i] & 4) != 0)
+                unemployed++;
+        }
+
+        return laborForce > 0 ? (float)unemployed / laborForce : 0f;
+    }
+
+    /// <summary>
+    /// Open job slots / total job capacity on commercial, industrial, office,
+    /// and mixed-use buildings (0–1). No job capacity returns 0.
+    /// </summary>
+    public float GetJobVacancyRate(WorldState state)
+    {
+        int totalJobs = 0;
+        int filledJobs = 0;
+        var buildings = state.Buildings;
+
+        for (int b = 0; b < buildings.Capacity; b++)
+        {
+            if (!buildings.IsActive(b)) continue;
+            if (buildings.State[b] != 1) continue;
+
+            byte zone = GetBuildingZoneType(state, b);
+            if (zone is 3 or 4 or 5 or 6)
+            {
+                totalJobs += buildings.MaxOccupants[b];
+                filledJobs += buildings.Occupants[b];
+            }
+        }
+
+        if (totalJobs <= 0) return 0f;
+        float open = totalJobs - filledJobs;
+        if (open <= 0f) return 0f;
+        return Math.Clamp(open / totalJobs, 0f, 1f);
+    }
+
+    // =========================================================================
     // Employment matching
     // =========================================================================
 

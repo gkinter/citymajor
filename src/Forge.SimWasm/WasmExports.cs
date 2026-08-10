@@ -54,9 +54,9 @@ public static partial class Program
     }
 
     [JSExport]
-    public static void PlaceRoad(int x, int y)
+    public static void PlaceRoad(int x, int y, int tier = 1)
     {
-        _host?.PlaceRoad(x, y);
+        _host?.PlaceRoad(x, y, (byte)Math.Clamp(tier, 0, 2));
     }
 
     [JSExport]

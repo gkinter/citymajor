@@ -9,7 +9,7 @@ export type GameSpeedLevel = 0 | 1 | 2 | 4;
 export type SimCommand =
   | { type: "tick"; deltaMs: number }
   | { type: "place_building"; tileX: number; tileZ: number; typeId: number }
-  | { type: "place_road"; tileX: number; tileZ: number }
+  | { type: "place_road"; tileX: number; tileZ: number; tier?: number }
   | { type: "zone_paint"; tileX: number; tileZ: number; zoneType: number }
   | { type: "bulldoze"; tileX: number; tileZ: number }
   | { type: "enqueue_research"; techId: number }

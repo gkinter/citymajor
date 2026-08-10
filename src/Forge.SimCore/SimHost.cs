@@ -248,7 +248,7 @@ public sealed partial class SimHost
         }
     }
 
-    public void PlaceRoad(int x, int y)
+    public void PlaceRoad(int x, int y, byte tier = 1)
     {
         if (!IsInitialized || !_state.Tiles.InBounds(x, y)) return;
 
@@ -256,7 +256,8 @@ public sealed partial class SimHost
         byte terrain = _state.Tiles.TerrainType[idx];
         if (terrain == (byte)TerrainId.Water || terrain == (byte)TerrainId.Rock) return;
 
-        _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y);
+        tier = (byte)Math.Clamp(tier, (byte)0, (byte)2);
+        _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y, tier);
         _roadsNeedRebuild = true;
 
         RefreshRoadFlagsAt(x - 1, y);
@@ -1076,14 +1077,15 @@ public sealed partial class SimHost
             1f - constructionCost * 0.2f, 0.25f, 3f);
     }
 
-    private byte ComputeRoadFlags(int x, int y)
+    private byte ComputeRoadFlags(int x, int y, byte tier)
     {
         byte connections = 0;
         if (HasRoadAt(x, y - 1)) connections |= 0x01;
         if (HasRoadAt(x + 1, y)) connections |= 0x02;
         if (HasRoadAt(x, y + 1)) connections |= 0x04;
         if (HasRoadAt(x - 1, y)) connections |= 0x08;
-        return connections != 0 ? connections : (byte)0x01;
+        if (connections == 0) connections = 0x01;
+        return (byte)(connections | ((tier & 0x03) << 4));
     }
 
     private bool HasRoadAt(int x, int y)
@@ -1097,7 +1099,8 @@ public sealed partial class SimHost
         if (!_state.Tiles.InBounds(x, y)) return;
         int idx = _state.Tiles.Index(x, y);
         if (_state.Tiles.RoadFlags[idx] == 0) return;
-        _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y);
+        byte tier = RoadTier.ExtractLevel(_state.Tiles.RoadFlags[idx]);
+        _state.Tiles.RoadFlags[idx] = ComputeRoadFlags(x, y, tier);
     }
 
     private void ClearNeighborRoadConnections(int cx, int cy)
@@ -1154,7 +1157,11 @@ public sealed partial class SimHost
                 int to = _state.Roads.GetNodeAt(nx, ny);
                 if (to < 0) continue;
 
-                edges.Add((from, to, 1f, 1));
+                byte flagsA = tiles.RoadFlags[tiles.Index(x, y)];
+                byte flagsB = tiles.RoadFlags[tiles.Index(nx, ny)];
+                byte level = RoadTier.EdgeLevelFromTiles(flagsA, flagsB);
+                float cost = RoadTier.RoadTravelCostForLevel(level);
+                edges.Add((from, to, cost, level));
             }
         }
 

@@ -333,6 +333,7 @@ ref,
               type: "place_road",
               tileX: pick.tileX + dx,
               tileZ: pick.tileZ + dz,
+              tier: roadTier ?? 0,
             });
           }
         }

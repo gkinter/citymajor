@@ -2,7 +2,10 @@
  * @vitest-environment jsdom
  */
 import { describe, expect, it, vi } from "vitest";
-import { handlePlayKeyboardShortcut } from "@/lib/play-keyboard";
+import {
+  handlePlayKeyboardShortcut,
+  isPanelToggleShortcutKey,
+} from "@/lib/play-keyboard";
 
 function keyEvent(key: string, target?: EventTarget): KeyboardEvent {
   return {
@@ -15,6 +18,21 @@ function keyEvent(key: string, target?: EventTarget): KeyboardEvent {
     preventDefault: vi.fn(),
   } as unknown as KeyboardEvent;
 }
+
+describe("isPanelToggleShortcutKey", () => {
+  it("treats E / ? as panel toggles that must work while panels are open", () => {
+    expect(isPanelToggleShortcutKey({ key: "e" })).toBe(true);
+    expect(isPanelToggleShortcutKey({ key: "E" })).toBe(true);
+    expect(isPanelToggleShortcutKey({ key: "?" })).toBe(true);
+  });
+
+  it("does not treat tool hotkeys as panel toggles", () => {
+    expect(isPanelToggleShortcutKey({ key: "b" })).toBe(false);
+    expect(isPanelToggleShortcutKey({ key: "z" })).toBe(false);
+    expect(isPanelToggleShortcutKey({ key: "r" })).toBe(false);
+    expect(isPanelToggleShortcutKey({ key: "Escape" })).toBe(false);
+  });
+});
 
 describe("handlePlayKeyboardShortcut", () => {
   it("toggles economy panel on E when handler is wired", () => {
@@ -31,6 +49,20 @@ describe("handlePlayKeyboardShortcut", () => {
     expect(consumed).toBe(true);
     expect(onToggleEconomy).toHaveBeenCalledOnce();
     expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("invokes economy toggle on each E press (open then close)", () => {
+    const onToggleEconomy = vi.fn();
+    const handlers = {
+      onToggleBuildMenu: vi.fn(),
+      onEnterZoneMode: vi.fn(),
+      onSelectRoad: vi.fn(),
+      onToggleEconomy,
+    };
+
+    expect(handlePlayKeyboardShortcut(keyEvent("e"), handlers)).toBe(true);
+    expect(handlePlayKeyboardShortcut(keyEvent("E"), handlers)).toBe(true);
+    expect(onToggleEconomy).toHaveBeenCalledTimes(2);
   });
 
   it("ignores E when economy handler is not provided", () => {

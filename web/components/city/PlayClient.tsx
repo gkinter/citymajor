@@ -100,7 +100,10 @@ import {
   isEducationBuildTypeId,
   type EducationBuildTypeId,
 } from "@/lib/education-buildings";
-import { handlePlayKeyboardShortcut } from "@/lib/play-keyboard";
+import {
+  handlePlayKeyboardShortcut,
+  isPanelToggleShortcutKey,
+} from "@/lib/play-keyboard";
 import { HelpPanel } from "@/components/city/HelpPanel";
 import { isChunkDebugEnabled } from "@/lib/debug-flags";
 
@@ -633,7 +636,8 @@ export function PlayClient() {
         supportsZoneBytes: stats.simSource === "wasm",
       };
 
-      if (event.key === "?") {
+      // E / ? must fire while panels are open so a second press can close them.
+      if (isPanelToggleShortcutKey(event)) {
         handlePlayKeyboardShortcut(event, handlers);
         return;
       }

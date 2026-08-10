@@ -100,6 +100,16 @@ export function isEditableKeyboardTarget(target: EventTarget | null): boolean {
   return target.isContentEditable;
 }
 
+/**
+ * Panel-toggle shortcuts must still run while slide-outs are open so a second
+ * press can close (e.g. E for Economy, ? for Help). Other hotkeys stay blocked.
+ */
+export function isPanelToggleShortcutKey(event: Pick<KeyboardEvent, "key">): boolean {
+  if (event.key === "?") return true;
+  const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+  return key === "e";
+}
+
 /** Map digit keys 1–7 to visible zone tiers in toolbar order. */
 export function zoneTierForDigitKey(
   key: string,

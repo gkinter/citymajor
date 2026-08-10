@@ -632,6 +632,13 @@
     color: rgb(255, 154, 168);
 }
 
+.herald-event-count {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(255, 199, 89);
+    margin-top: 2px;
+}
+
 .herald-bucket {
     font-size: 10px;
     color: rgba(180, 190, 210, 0.55);

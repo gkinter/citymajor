@@ -1,13 +1,15 @@
 using System.Collections;
 using CityMajor.Net;
 using CityMajor.Sim;
+using Forge.SimWasm;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace CityMajor.UI
 {
     /// <summary>
-    /// The Daily Herald slide panel. Toggle with H. Fetches narrative API or uses local templates.
+    /// The Daily Herald slide panel. Toggle with H. Prefers live SimHost priority events
+    /// (housing_crisis / housing_shortage / approval_unrest), else narrative API / templates.
     /// </summary>
     public sealed class HeraldPanelController : MonoBehaviour
     {
@@ -23,6 +25,7 @@ namespace CityMajor.UI
         Label _reason;
         Label _headline;
         Label _story;
+        Label _eventCount;
         VisualElement _optionsRoot;
         Button _closeBtn;
 
@@ -32,8 +35,37 @@ namespace CityMajor.UI
 
         public void Configure(CitySimBridge sim)
         {
+            if (_sim != null)
+                _sim.OnStateChanged -= OnStateChanged;
+
             _sim = sim;
             EnsureUi();
+
+            if (_sim != null)
+            {
+                _sim.OnStateChanged += OnStateChanged;
+                OnStateChanged(_sim.State);
+            }
+        }
+
+        void OnStateChanged(CitySimState _) => RefreshEventCountBadge();
+
+        void RefreshEventCountBadge()
+        {
+            if (_eventCount == null)
+                return;
+
+            var count = SimActiveEventHeadlines.ResolveCount(_sim?.LatestActiveEvents);
+            var badge = SimActiveEventHeadlines.FormatCountBadge(count);
+            if (badge == null)
+            {
+                _eventCount.text = "";
+                _eventCount.style.display = DisplayStyle.None;
+                return;
+            }
+
+            _eventCount.text = SimActiveEventHeadlines.FormatCountLabel(count);
+            _eventCount.style.display = DisplayStyle.Flex;
         }
 
         void Update()
@@ -47,6 +79,9 @@ namespace CityMajor.UI
 
         void OnDestroy()
         {
+            if (_sim != null)
+                _sim.OnStateChanged -= OnStateChanged;
+
             if (_fetchRoutine != null)
                 StopCoroutine(_fetchRoutine);
         }
@@ -88,9 +123,20 @@ namespace CityMajor.UI
             _story = root.Q<Label>("herald-story");
             _optionsRoot = root.Q<VisualElement>("herald-options");
             _closeBtn = root.Q<Button>("herald-close");
+            _eventCount = root.Q<Label>("herald-event-count");
+
+            if (_eventCount == null && _subtitle?.parent != null)
+            {
+                _eventCount = new Label { name = "herald-event-count" };
+                _eventCount.AddToClassList("herald-event-count");
+                _eventCount.style.display = DisplayStyle.None;
+                _subtitle.parent.Add(_eventCount);
+            }
 
             if (_closeBtn != null)
                 _closeBtn.clicked += () => SetOpen(false);
+
+            RefreshEventCountBadge();
         }
 
         void SetOpen(bool open)
@@ -113,6 +159,14 @@ namespace CityMajor.UI
 
             var snap = _sim?.LatestSnapshot;
             var state = _sim?.State ?? default;
+            var active = _sim?.LatestActiveEvents;
+
+            if (SimActiveEventHeadlines.TryGetPriorityEvent(active, out var priority))
+            {
+                _linkedEventId = priority.EventId;
+                ShowSimPriorityEvent(priority);
+                return;
+            }
 
             if (snap == null)
             {
@@ -121,6 +175,54 @@ namespace CityMajor.UI
             }
 
             _fetchRoutine = StartCoroutine(HeraldApiClient.FetchEventCoroutine(snap, state, OnFetchComplete));
+        }
+
+        void ShowSimPriorityEvent(ActiveEventDto priority)
+        {
+            _fetchRoutine = null;
+            RefreshEventCountBadge();
+
+            var narrative = NarrativeTemplates.FromSimEvent(priority.TypeId);
+            var headline = SimActiveEventHeadlines.FormatPriorityHeadline(priority);
+
+            if (_title != null)
+                _title.text = "The Daily Herald";
+
+            if (_subtitle != null)
+                _subtitle.text = SimActiveEventHeadlines.FormatCountLabel(
+                    SimActiveEventHeadlines.ResolveCount(_sim?.LatestActiveEvents));
+
+            if (_status != null)
+            {
+                _status.text = $"Live sim event · {priority.Phase}";
+                _status.style.display = DisplayStyle.Flex;
+            }
+
+            if (_bucket != null)
+            {
+                _bucket.text = $"{priority.TypeId.Replace('_', ' ')} · sim";
+                _bucket.style.display = DisplayStyle.Flex;
+            }
+
+            if (_reason != null)
+            {
+                _reason.text = $"Story driver: {priority.TypeId}";
+                _reason.style.display = DisplayStyle.Flex;
+            }
+
+            if (_headline != null)
+            {
+                _headline.text = string.IsNullOrEmpty(headline) ? narrative.Headline : headline;
+                _headline.style.display = DisplayStyle.Flex;
+            }
+
+            if (_story != null)
+            {
+                _story.text = narrative.Body;
+                _story.style.display = DisplayStyle.Flex;
+            }
+
+            RebuildOptions(narrative);
         }
 
         void OnFetchComplete(HeraldApiClient.FetchResult result)
@@ -152,16 +254,20 @@ namespace CityMajor.UI
 
             if (_subtitle != null)
             {
+                var countLabel = SimActiveEventHeadlines.FormatCountLabel(
+                    SimActiveEventHeadlines.ResolveCount(_sim?.LatestActiveEvents));
                 if (result.QuotaRemaining.HasValue)
-                    _subtitle.text = $"narrative remaining today: {result.QuotaRemaining.Value}";
+                    _subtitle.text = $"{countLabel} · narrative remaining today: {result.QuotaRemaining.Value}";
                 else if (result.UsedFallback)
                 {
                     var shortageLine = NarrativeTemplates.FormatGoodsShortageLine(goodsShortage);
-                    _subtitle.text = $"offline template edition · {shortageLine}";
+                    _subtitle.text = $"{countLabel} · offline template · {shortageLine}";
                 }
                 else
-                    _subtitle.text = "narrative remaining today: …";
+                    _subtitle.text = $"{countLabel} · narrative remaining today: …";
             }
+
+            RefreshEventCountBadge();
 
             if (_status != null)
             {

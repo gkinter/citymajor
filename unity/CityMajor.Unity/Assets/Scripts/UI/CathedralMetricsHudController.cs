@@ -222,7 +222,8 @@ namespace CityMajor.UI
                 $"Modes  Car {car} · Transit {transit} · Walk {walk}\n" +
                 $"Approval     {approval}\n" +
                 $"Power {power} · Water {water}\n" +
-                $"Goods  {goods}";
+                $"Goods  {goods}\n" +
+                $"Events [{state.ActiveEventCount}]";
         }
 
         static string Pct(float fraction) =>

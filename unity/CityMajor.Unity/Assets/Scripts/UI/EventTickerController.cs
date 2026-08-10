@@ -68,13 +68,13 @@ namespace CityMajor.UI
                 return;
 
             var snap = _sim?.LatestSnapshot;
-            if (snap != null || (_sim?.LatestActiveEvents?.Length ?? 0) > 0)
+            var active = _sim?.LatestActiveEvents;
+            var count = SimActiveEventHeadlines.ResolveCount(active);
+            if (snap != null || count > 0)
             {
-                var evt = NarrativeTemplates.FromActiveEventsOrSnapshot(
-                    _sim.LatestActiveEvents,
-                    snap,
-                    state);
-                _line.text = string.IsNullOrEmpty(evt.Headline) ? IdleMessage : evt.Headline;
+                var evt = NarrativeTemplates.FromActiveEventsOrSnapshot(active, snap, state);
+                var headline = string.IsNullOrEmpty(evt.Headline) ? IdleMessage : evt.Headline;
+                _line.text = count > 0 ? $"[{count}] {headline}" : headline;
                 return;
             }
 

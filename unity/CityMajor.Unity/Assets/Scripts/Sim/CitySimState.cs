@@ -91,5 +91,8 @@ namespace CityMajor.Sim
         public string SampleLawId;
         public string SampleLawName;
         public bool SampleLawActive;
+
+        /// <summary>Cathedral P6 — live EventSystem count for Herald / ticker.</summary>
+        public int ActiveEventCount;
     }
 }

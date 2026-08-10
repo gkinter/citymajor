@@ -332,6 +332,10 @@ namespace CityMajor.Sim
             LatestUtilityCoverage = _simHost.GetUtilityCoverageSample(step: 8);
             LatestRoadGraph = BuildLatestRoadGraph();
             LatestActiveEvents = _simHost.GetActiveEvents();
+            // Keep count on CitySimState for UGUI / badge consumers.
+            var published = State;
+            published.ActiveEventCount = LatestActiveEvents?.Length ?? 0;
+            State = published;
 
             LatestSnapshot = snap;
             SyncGridFromSnapshot(snap);

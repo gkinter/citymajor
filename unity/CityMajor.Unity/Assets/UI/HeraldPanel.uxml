@@ -5,6 +5,7 @@
             <ui:VisualElement>
                 <ui:Label name="herald-title" class="panel-title" text="The Daily Herald" />
                 <ui:Label name="herald-subtitle" class="panel-subtitle" text="narrative remaining today: …" />
+                <ui:Label name="herald-event-count" class="herald-event-count" text="" style="display: none;" />
             </ui:VisualElement>
             <ui:Button name="herald-close" class="panel-close" text="✕" />
         </ui:VisualElement>

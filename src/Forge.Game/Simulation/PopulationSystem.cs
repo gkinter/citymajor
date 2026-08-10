@@ -857,6 +857,46 @@ public sealed class PopulationSystem
 
         MeanRentBurden = burdenCount > 0 ? (float)(burdenSum / burdenCount) : 0f;
         state.MeanRentBurden = MeanRentBurden;
+        state.ResidentialVacancy = HousingHeraldSystem.CalculateCityVacancy(state);
+    }
+
+    /// <summary>Refresh housing snapshot fields before WASM / render export.</summary>
+    public void RefreshHousingSnapshotMetrics(WorldState state) => UpdateRentBurdenRollup(state);
+
+    /// <summary>
+    /// Recompute mean rent burden from household rent/income without mutating per-household trackers.
+    /// Characterization tests use this to verify snapshot export matches rollup math.
+    /// </summary>
+    public float AuditMeanRentBurden(WorldState state)
+    {
+        float supplyFactor = CalculateSupplyFactor(state);
+        float goodsFactor = CalculateGoodsFactor(state);
+        float marketBaseRent = CalculateMarketBaseRent(state) * supplyFactor * goodsFactor;
+
+        var hh = state.Households;
+        double burdenSum = 0d;
+        int burdenCount = 0;
+
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+
+            float burden = CalculateHouseholdRentBurden(
+                state, i, supplyFactor, goodsFactor, marketBaseRent);
+
+            if (hh.HomeBuildingId[i] != 0)
+            {
+                burdenSum += burden;
+                burdenCount++;
+            }
+            else if (burden > 0f)
+            {
+                burdenSum += burden;
+                burdenCount++;
+            }
+        }
+
+        return burdenCount > 0 ? (float)(burdenSum / burdenCount) : 0f;
     }
 
     private float GetHouseholdRentBurden(WorldState state, int householdIndex)

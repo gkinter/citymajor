@@ -159,6 +159,9 @@ public sealed class WorldState
     /// <summary>Mean household rent burden (monthly rent / income) rolled up by PopulationSystem.</summary>
     public float MeanRentBurden { get; set; }
 
+    /// <summary>City-wide residential vacancy proxy (0–1): 1 − occupied capacity / total capacity.</summary>
+    public float ResidentialVacancy { get; set; } = 1f;
+
     /// <summary>City-wide surplus pressure (0–1) for Herald / HUD buckets.</summary>
     public float GoodsSurplusIndex { get; set; }
 

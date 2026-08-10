@@ -181,7 +181,15 @@ public sealed partial class SimHost
         if (!IsInitialized)
             throw new InvalidOperationException("SimHost is not initialized.");
 
+        _population.RefreshHousingSnapshotMetrics(_state);
         return SimSnapshot.CaptureFrom(_state);
+    }
+
+    /// <summary>Keep WASM status housing fields aligned with the latest household assignments.</summary>
+    public void RefreshHousingSnapshotMetrics()
+    {
+        if (!IsInitialized) return;
+        _population.RefreshHousingSnapshotMetrics(_state);
     }
 
     /// <summary>Top household sample for citizen drill-down (Unity Citizen panel, WASM L2 export).</summary>

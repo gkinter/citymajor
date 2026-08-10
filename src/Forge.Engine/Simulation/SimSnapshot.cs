@@ -113,8 +113,11 @@ public sealed class SimSnapshot
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
 
-    /// <summary>Mean household rent burden (rent / income). TODO P2.3 — export when rent model lands.</summary>
+    /// <summary>Mean household rent burden (rent / income).</summary>
     public float MeanRentBurden { get; init; }
+
+    /// <summary>City-wide residential vacancy proxy (0–1).</summary>
+    public float ResidentialVacancy { get; init; } = 1f;
 
     // --- Research / Technology data ---
 
@@ -311,6 +314,7 @@ public sealed class SimSnapshot
             MeanInterZoneFriction = state.MeanInterZoneFriction,
             MarketZoneCount = state.MarketZoneCount,
             MeanRentBurden = state.MeanRentBurden,
+            ResidentialVacancy = state.ResidentialVacancy,
             // Research / Technology
             ResearchPoints = state.ResearchPoints,
             ResearchRate = state.ResearchRate,

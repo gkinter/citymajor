@@ -96,6 +96,8 @@ public sealed class SimSnapshotDto
     public float GoodsSurplusIndex { get; init; }
     public float InterZoneTradeVolume { get; init; }
     public float MeanInterZoneFriction { get; init; } = 1f;
+    public float MeanRentBurden { get; init; }
+    public float ResidentialVacancy { get; init; } = 1f;
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
@@ -154,6 +156,8 @@ public sealed class SimSnapshotDto
             GoodsSurplusIndex = state.GoodsSurplusIndex,
             InterZoneTradeVolume = state.InterZoneTradeVolume,
             MeanInterZoneFriction = state.MeanInterZoneFriction,
+            MeanRentBurden = state.MeanRentBurden,
+            ResidentialVacancy = state.ResidentialVacancy,
         };
     }
 

@@ -1,3 +1,4 @@
+using Forge.Game.Simulation;
 using Forge.SimCore;
 using Xunit;
 
@@ -6,6 +7,25 @@ namespace Forge.SimCore.Tests;
 /// <summary>Characterization tests for Cathedral P2 housing / rent burden (pinned before implementation).</summary>
 public sealed class CathedralHousingTests
 {
+    [Fact]
+    public void MeanRentBurden_MatchesManualRollupFromSeededHouseholds()
+    {
+        var host = new SimHost();
+        host.Init(64);
+
+        for (int i = 0; i < 90; i++)
+            host.Tick(1.0);
+
+        var snap = host.GetSnapshot();
+        float manual = host.Population.AuditMeanRentBurden(host.State);
+        float expectedVacancy = HousingHeraldSystem.CalculateCityVacancy(host.State);
+
+        Assert.Equal(manual, snap.MeanRentBurden, precision: 4);
+        Assert.Equal(manual, host.State.MeanRentBurden, precision: 4);
+        Assert.Equal(expectedVacancy, snap.ResidentialVacancy, precision: 4);
+        Assert.Equal(expectedVacancy, host.State.ResidentialVacancy, precision: 4);
+    }
+
     [Fact]
     public void RentBurden_Increases_WhenResidentialDemandHighAndSupplyLow()
     {

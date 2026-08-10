@@ -130,6 +130,8 @@ type WasmStatus = {
     nodeTileX?: number[];
     nodeTileZ?: number[];
   };
+  meanRentBurden?: number;
+  residentialVacancy?: number;
 };
 
 type SimExports = {
@@ -532,6 +534,8 @@ function readStatus(): Pick<
   | "goodsSurplusIndex"
   | "interZoneTradeVolume"
   | "meanInterZoneFriction"
+  | "meanRentBurden"
+  | "residentialVacancy"
 > | null {
   if (!sim?.GetStatus) return null;
   try {
@@ -601,6 +605,8 @@ function readStatus(): Pick<
       goodsSurplusIndex: parsed.goodsSurplusIndex,
       interZoneTradeVolume: parsed.interZoneTradeVolume,
       meanInterZoneFriction: parsed.meanInterZoneFriction,
+      meanRentBurden: parsed.meanRentBurden,
+      residentialVacancy: parsed.residentialVacancy,
     };
   } catch {
     return null;
@@ -684,6 +690,9 @@ function readSnapshot(): SimSnapshot {
     meanInterZoneFriction:
       parsed.meanInterZoneFriction ?? status?.meanInterZoneFriction,
     roadGraph: parsed.roadGraph ?? status?.roadGraph,
+    meanRentBurden: parsed.meanRentBurden ?? status?.meanRentBurden,
+    residentialVacancy:
+      parsed.residentialVacancy ?? status?.residentialVacancy,
     buildings: parsed.buildings ?? [],
     zones: mergeZones(parsed.zones, grid),
     roads: mergeRoads(parsed.roads, roadsGrid),

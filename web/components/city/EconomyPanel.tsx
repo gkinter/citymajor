@@ -274,6 +274,8 @@ function hasFoundationMetrics(resources: SimResources | null): resources is SimR
     resources.employmentRate !== undefined ||
     resources.interZoneTradeVolume !== undefined ||
     resources.residentialDemand !== undefined ||
+    resources.meanRentBurden !== undefined ||
+    resources.residentialVacancy !== undefined ||
     hasMonthlyBudget(resources)
   );
 }
@@ -339,6 +341,22 @@ function FoundationMetrics({ resources }: { resources: SimResources }) {
               R {formatDemand(resources.residentialDemand)} · C{" "}
               {formatDemand(resources.commercialDemand ?? 0)} · I{" "}
               {formatDemand(resources.industrialDemand ?? 0)}
+            </span>
+          </li>
+        ) : null}
+        {resources.meanRentBurden !== undefined ? (
+          <li className="hud-economy-trade__row">
+            <span className="hud-economy-trade__label">Rent burden</span>
+            <span className="hud-economy-trade__value">
+              {Math.round(resources.meanRentBurden * 100)}% mean
+            </span>
+          </li>
+        ) : null}
+        {resources.residentialVacancy !== undefined ? (
+          <li className="hud-economy-trade__row">
+            <span className="hud-economy-trade__label">Housing vacancy</span>
+            <span className="hud-economy-trade__value">
+              {Math.round(resources.residentialVacancy * 100)}%
             </span>
           </li>
         ) : null}

@@ -88,6 +88,8 @@ unity/**/[Ll]ogs/
 unity/**/[Uu]ser[Ss]ettings/
 unity/**/*.csproj
 unity/**/*.sln
+# Accidental nested Unity project (Hub "My project") — keep local Library, never track
+unity/CityMajor.Unity/My project/
 *.pidb
 *.pdb
 *.mdb

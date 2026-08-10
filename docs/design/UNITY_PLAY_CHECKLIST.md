@@ -4,6 +4,8 @@
 **Scene:** `unity/CityMajor.Unity/Assets/Scenes/Play.unity`  
 **Linear:** [SB-4176](https://linear.app/softblaze/issue/SB-4176)
 
+**Fast smoke first:** [UNITY_PLAY_SMOKE.md](./UNITY_PLAY_SMOKE.md) — open scene → Play → road → zone → buildings → HUD → FPS (**CityMajor → Smoke**).
+
 ---
 
 ## Prerequisites
@@ -121,6 +123,8 @@ Unity v1 quality is **not** fully automated in CI today. Use this split so agent
 ---
 
 ## Editor menu
+
+**CityMajor → Smoke → …** — fast Play Mode smoke (see [UNITY_PLAY_SMOKE.md](./UNITY_PLAY_SMOKE.md)).
 
 **CityMajor → Open Play Verification Checklist** — opens this doc in the OS default viewer.
 

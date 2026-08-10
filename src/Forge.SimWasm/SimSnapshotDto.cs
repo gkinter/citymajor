@@ -135,6 +135,10 @@ public sealed class SimSnapshotDto
     public float TransitModeShare { get; init; }
     /// <summary>City-wide walk mode share from traffic assignment (0–1).</summary>
     public float WalkModeShare { get; init; }
+    /// <summary>Transit route count (0 until a transit graph exists).</summary>
+    public int TransitLineCount { get; init; }
+    /// <summary>Bus/transit coverage proxy (0–1), derived from line count.</summary>
+    public float BusCoverage { get; init; }
 
     public static SimSnapshotDto From(
         SimSnapshot snap,
@@ -212,6 +216,8 @@ public sealed class SimSnapshotDto
             CarModeShare = carModeShare,
             TransitModeShare = transitModeShare,
             WalkModeShare = walkModeShare,
+            TransitLineCount = state.TransitLineCount,
+            BusCoverage = state.BusCoverage,
         };
     }
 

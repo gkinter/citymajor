@@ -86,6 +86,18 @@ public sealed class WorldState
     public float MeanTrafficDensity { get; set; }
 
     /// <summary>
+    /// Count of transit lines (bus/rail routes). Stub: 0 until a transit graph exists.
+    /// Feeds <see cref="BusCoverage"/> for WasmTrafficLite mode choice.
+    /// </summary>
+    public int TransitLineCount { get; set; }
+
+    /// <summary>
+    /// City-wide bus/transit coverage proxy (0–1). Derived from
+    /// <see cref="TransitLineCount"/> when lines are present; 0 when none.
+    /// </summary>
+    public float BusCoverage { get; set; }
+
+    /// <summary>
     /// BPR travel times per directed road-graph edge (WasmTrafficLite / TrafficSystem order).
     /// Populated after each traffic assignment tick; null before the first run.
     /// </summary>

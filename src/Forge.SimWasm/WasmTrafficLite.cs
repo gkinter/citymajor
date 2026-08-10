@@ -11,6 +11,8 @@ namespace Forge.SimWasm;
 /// P4.2: multi-iteration Frank-Wolfe at
 /// <see cref="WasmConfig.TrafficLiteInterval"/> — never every 8 Hz sim tick.
 /// P4 mode choice: simple 3-mode MNL (car/transit/walk) replaces flat 65% car.
+/// P4.3: transit ASC sensitive to <see cref="WorldState.BusCoverage"/> /
+/// <see cref="WorldState.TransitLineCount"/> (0 stub until a transit graph exists).
 /// </summary>
 public sealed class WasmTrafficLite
 {
@@ -22,10 +24,15 @@ public sealed class WasmTrafficLite
     private const float AscCar = 0.5f;
     private const float AscTransit = 0.0f;
     private const float AscWalk = -0.2f;
+    /// <summary>Positive ASC boost per unit bus coverage (0–1).</summary>
+    private const float GammaCoverage = 1.5f;
     private const float CarSpeedTilesPerMin = 2.0f;
     private const float TransitSpeedTilesPerMin = 1.2f;
     private const float WalkSpeedTilesPerMin = 0.15f;
     private const float MaxWalkMinutes = 60f;
+
+    /// <summary>Line count that maps to full <see cref="WorldState.BusCoverage"/> (1.0).</summary>
+    public const int BusCoverageRefLines = 8;
 
     private int _zoneSize;
     private int _zonesPerAxis;
@@ -90,12 +97,30 @@ public sealed class WasmTrafficLite
         if (_totalZones == 0 || state.Roads.NodeCount == 0 || _edgeCount == 0)
             return;
 
+        RefreshBusCoverage(state);
         BuildLiteOdMatrix(state);
         ApplyRushHourToOd(state);
         RunFrankWolfeAssignment(state);
         UpdateTileTraffic(state);
         UpdateMeanTrafficDensity(state);
     }
+
+    /// <summary>
+    /// Derive <see cref="WorldState.BusCoverage"/> from transit line count.
+    /// No transit graph yet → count stays 0 → coverage 0 (explicit stub).
+    /// </summary>
+    public static void RefreshBusCoverage(WorldState state)
+    {
+        int lines = Math.Max(0, state.TransitLineCount);
+        state.TransitLineCount = lines;
+        state.BusCoverage = DeriveBusCoverage(lines);
+    }
+
+    /// <summary>Map transit line count → 0–1 coverage (0 lines → 0).</summary>
+    public static float DeriveBusCoverage(int transitLineCount) =>
+        transitLineCount <= 0
+            ? 0f
+            : Math.Clamp(transitLineCount / (float)BusCoverageRefLines, 0f, 1f);
 
     /// <summary>
     /// Cheap BPR refresh on a rotating subset of edges — called between full lite ticks
@@ -431,11 +456,24 @@ public sealed class WasmTrafficLite
 
     /// <summary>
     /// Simple 3-mode multinomial logit on zone distance (tiles).
-    /// P(j) = exp(V_j) / Σ exp(V_k); V = ASC + β_time · travel_minutes.
+    /// P(j) = exp(V_j) / Σ exp(V_k); V = ASC + β_time · travel_minutes
+    /// (+ γ · busCoverage on transit).
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ComputeLiteModeShares(
         float distanceTiles,
+        out float pCar,
+        out float pTransit,
+        out float pWalk) =>
+        ComputeLiteModeShares(distanceTiles, busCoverage: 0f, out pCar, out pTransit, out pWalk);
+
+    /// <summary>
+    /// MNL with bus coverage sensitivity — higher coverage raises transit ASC.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ComputeLiteModeShares(
+        float distanceTiles,
+        float busCoverage,
         out float pCar,
         out float pTransit,
         out float pWalk)
@@ -444,9 +482,10 @@ public sealed class WasmTrafficLite
         float carTime = dist / CarSpeedTilesPerMin;
         float transitTime = dist / TransitSpeedTilesPerMin;
         float walkTime = dist / WalkSpeedTilesPerMin;
+        float coverage = Math.Clamp(busCoverage, 0f, 1f);
 
         float vCar = BetaTime * carTime + AscCar;
-        float vTransit = BetaTime * transitTime + AscTransit;
+        float vTransit = BetaTime * transitTime + AscTransit + GammaCoverage * coverage;
         float vWalk = walkTime > MaxWalkMinutes
             ? -100f
             : BetaTime * walkTime + AscWalk;
@@ -480,6 +519,7 @@ public sealed class WasmTrafficLite
         float totalTransit = 0f;
         float totalWalk = 0f;
         float totalTrips = 0f;
+        float busCoverage = Math.Clamp(state.BusCoverage, 0f, 1f);
 
         for (int origin = 0; origin < _totalZones; origin++)
         {
@@ -494,7 +534,8 @@ public sealed class WasmTrafficLite
                 if (trips <= 0) continue;
 
                 float distance = _zoneDistanceCache[origin * _totalZones + dest];
-                ComputeLiteModeShares(distance, out float pCar, out float pTransit, out float pWalk);
+                ComputeLiteModeShares(
+                    distance, busCoverage, out float pCar, out float pTransit, out float pWalk);
 
                 totalCar += trips * pCar;
                 totalTransit += trips * pTransit;

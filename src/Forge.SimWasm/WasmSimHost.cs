@@ -84,6 +84,8 @@ public sealed class WasmSimHost
             : _host.ComputeAverageCoverage(_host.Services.EducationCoverage);
     public float EmploymentRate => _host.State?.EmploymentRate ?? 0f;
     public float MeanTrafficDensity => _host.State?.MeanTrafficDensity ?? 0f;
+    public int TransitLineCount => _host.State?.TransitLineCount ?? 0;
+    public float BusCoverage => _host.State?.BusCoverage ?? 0f;
     public (float Car, float Transit, float Walk) ModeShares =>
         _host.IsInitialized ? _host.CollectModeShares() : (0f, 0f, 0f);
     public int ConstructingBuildingCount => _host.State?.ConstructingBuildingCount ?? 0;
@@ -320,6 +322,10 @@ public sealed class WasmStatusDto
     public float TransitModeShare { get; init; }
     /// <summary>City-wide walk mode share from WasmTrafficLite (0–1).</summary>
     public float WalkModeShare { get; init; }
+    /// <summary>Transit route count (0 until a transit graph exists).</summary>
+    public int TransitLineCount { get; init; }
+    /// <summary>Bus/transit coverage proxy (0–1).</summary>
+    public float BusCoverage { get; init; }
     public int ConstructingBuildingCount { get; init; }
     public float PowerCoverageFraction { get; init; } = 1f;
     public float WaterCoverageFraction { get; init; } = 1f;
@@ -422,6 +428,8 @@ public sealed class WasmStatusDto
             CarModeShare = modeShares.Car,
             TransitModeShare = modeShares.Transit,
             WalkModeShare = modeShares.Walk,
+            TransitLineCount = host.TransitLineCount,
+            BusCoverage = host.BusCoverage,
             ConstructingBuildingCount = host.ConstructingBuildingCount,
             PowerCoverageFraction = host.PowerCoverageFraction,
             WaterCoverageFraction = host.WaterCoverageFraction,

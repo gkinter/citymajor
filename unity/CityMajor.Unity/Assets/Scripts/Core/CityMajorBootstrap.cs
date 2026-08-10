@@ -140,6 +140,14 @@ namespace CityMajor.Core
             tradeUi.transform.SetParent(root.transform, false);
             tradeUi.AddComponent<TradeStripController>().Configure(sim);
 
+            var economyPoliticsUi = new GameObject("CityMajor_EconomyPoliticsUi");
+            economyPoliticsUi.transform.SetParent(root.transform, false);
+            var economyPanel = economyPoliticsUi.AddComponent<EconomyPanelController>();
+            economyPanel.Configure(sim);
+            var politicsPanel = economyPoliticsUi.AddComponent<PoliticsPanelController>();
+            politicsPanel.Configure(sim);
+            economyPoliticsUi.AddComponent<SimPanelToolbarController>().Configure(economyPanel, politicsPanel);
+
             var buildUi = new GameObject("CityMajor_BuildUi");
             buildUi.transform.SetParent(root.transform, false);
             buildUi.AddComponent<BuildPanelController>().Configure(sim, buildPlop);

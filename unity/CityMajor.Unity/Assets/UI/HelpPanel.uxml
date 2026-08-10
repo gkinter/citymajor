@@ -17,7 +17,9 @@
             <ui:Label class="help-line" text="Road toolbar — Local / Collector / Highway · Ramp · Bridge / Tunnel (PlaceRoad)" />
             <ui:Label class="help-section" text="Panels" />
             <ui:Label class="help-line" text="R — Research · H — Herald · C — Citizens · L — Laws" />
-            <ui:Label class="help-line" text="P — Blueprint · E — Trade · F1 — Help · Esc — Close panel" />
+            <ui:Label class="help-line" text="E — Economy (goods / production) · G — Politics (approval / council)" />
+            <ui:Label class="help-line" text="P — Blueprint · F1 — Help · Esc — Close panel" />
+            <ui:Label class="help-line" text="Bottom toolbar — Economy / Politics buttons" />
             <ui:Label class="help-section" text="Overlays" />
             <ui:Label class="help-line" text="V — Service coverage · U — Utility stress · T — Edge traffic heat" />
             <ui:Label class="help-line" text="Bottom-center demand — R/C/I + goods shortage + utility stress" />

@@ -4,7 +4,11 @@ using UnityEngine.UIElements;
 
 namespace CityMajor.UI
 {
-    /// <summary>Read-only trade routes strip (v2 scaffold). Toggle with E.</summary>
+    /// <summary>
+    /// Read-only trade routes strip (v2 scaffold).
+    /// Keyboard toggle moved to <see cref="EconomyPanelController"/> (E).
+    /// Open via UI close/open API if wired; Esc still closes while open.
+    /// </summary>
     public sealed class TradeStripController : MonoBehaviour
     {
         const string PanelPath = "Assets/UI/TradeStrip.uxml";
@@ -38,9 +42,6 @@ namespace CityMajor.UI
 
         void Update()
         {
-            if (UnityEngine.Input.GetKeyDown(KeyCode.E))
-                SetOpen(!_open);
-
             if (_open && UnityEngine.Input.GetKeyDown(KeyCode.Escape))
                 SetOpen(false);
         }

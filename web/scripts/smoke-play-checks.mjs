@@ -728,6 +728,28 @@ async function assertEconomyPanel(page, tag) {
 }
 
 /**
+ * Economy panel toggles via E keyboard shortcut (play-keyboard parity).
+ * @param {import('playwright').Page} page
+ * @param {string} tag
+ */
+async function assertEconomyKeyboardShortcut(page, tag) {
+  const economyPanel = page.getByLabel("City economy");
+
+  await page.keyboard.press("Escape");
+  await economyPanel.waitFor({ state: "hidden", timeout: 3_000 }).catch(() => {});
+
+  await page.locator("canvas").first().click({ position: { x: 120, y: 120 } });
+  await page.keyboard.press("e");
+  await economyPanel.waitFor({ state: "visible", timeout: 8_000 });
+  await economyPanel.locator('[aria-label="Shortages"]').waitFor({ state: "visible" });
+  pass(tag, "economy panel opens via E keyboard shortcut");
+
+  await page.keyboard.press("e");
+  await economyPanel.waitFor({ state: "hidden", timeout: 5_000 });
+  pass(tag, "economy panel closes via E keyboard shortcut");
+}
+
+/**
  * Citizens HUD panel opens and shows seeded household count from WASM status.
  * @param {import('playwright').Page} page
  * @param {string} tag
@@ -1796,6 +1818,7 @@ export async function runPlayChecks(page, options = {}) {
   await waitForWasmSim(page, tag);
   await assertEraQuestPanel(page, tag);
   await assertEconomyPanel(page, tag);
+  await assertEconomyKeyboardShortcut(page, tag);
   await assertCitizenPanel(page, tag);
   await assertCitizenDotsRender(page, tag);
   await assertLawPanel(page, tag);

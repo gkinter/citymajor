@@ -7,6 +7,23 @@ Complete [UNITY_PLAY_CHECKLIST.md](../design/UNITY_PLAY_CHECKLIST.md) before upl
 
 ---
 
+## 0. Readiness snapshot (2026-08-10)
+
+| Gate | Status | Notes |
+|------|--------|-------|
+| `SteamNativePlatform` + cloud save hooks | ✅ Code complete | `unity/CityMajor.Unity/Assets/Scripts/Platform/` |
+| Achievements catalog (12 × `CM_*`) | ✅ | `StreamingAssets/achievements-v1.json`; Editor: **CityMajor → Verify Achievements Catalog** |
+| Headless Windows build script | ✅ | `./scripts/build-steam-unity.sh` + GHA `unity-steam-build.yml` |
+| `app_build_template.vdf` | ✅ | `docs/steam/app_build_template.vdf` — placeholders only |
+| SB-4176 Play checklist | 🟡 Human gate | [UNITY_PLAY_CHECKLIST.md](../design/UNITY_PLAY_CHECKLIST.md) |
+| **Partner App ID** | ⛔ **Blocked** | `SteamAppConfig.AppId` and `steam_appid.txt` still **480** (Spacewar dev stub) |
+| Steamworks.NET + `STEAMWORKS_NET` define | 🟡 Per machine | `./scripts/setup-steamworks-unity.sh` + Editor menu |
+| First `steamcmd` depot upload | ⛔ **Blocked** | Requires real App ID + depot ID from partner site |
+
+**Unblock depot upload:** create CityMajor app on [partner.steamgames.com](https://partner.steamgames.com), set `SteamAppConfig.AppId` + `steam_appid.txt` to `YOUR_APP_ID` (do not commit real ID), register 12 achievements (§3.4), then §4.
+
+---
+
 ## 1. Prerequisites
 
 | Item | Location | Notes |

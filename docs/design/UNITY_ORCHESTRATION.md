@@ -15,7 +15,7 @@
 |-------|--------|--------|-------|
 | Phase 1 scaffold + MCP | SB-4171 | ✅ Done | — |
 | Forge.SimCore bridge | SB-4172 | ✅ `SimHost` + foundation deepen (employment/trade on snapshot, rush OD) — see [SIM_FOUNDATION_CHARTER.md](./SIM_FOUNDATION_CHARTER.md) | — |
-| GLTF instancing | SB-4173 | 🟡 gltfast + catalog + box LOD @ zoom ≥200; CI verifies 12 GLBs | Agent |
+| GLTF instancing | SB-4173 | 🟡 gltfast + catalog + box LOD @ zoom ≥200; CI + `setup-unity.sh` verify 12 GLBs; Editor reimport on first open | Agent |
 | Zone paint | SB-4174 | ✅ Done + `SimHost.PaintZone` | — |
 | RCI HUD | SB-4175 | ✅ UI Toolkit `ResourcesHud` + pop growth + utility stress + cranes | — |
 | Bulldoze tool | — | ✅ `BulldozeTool` + `SimHost.Bulldoze` (`X`) | — |

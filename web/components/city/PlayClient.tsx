@@ -17,6 +17,10 @@ import {
   type CashCrisisKind,
 } from "@/lib/sim-metrics";
 import { narrativeFromSimEvent } from "@/lib/event-catalog";
+import {
+  formatActiveEventCountBadge,
+  resolveActiveEventCount,
+} from "@/lib/active-event-count";
 import { heraldOptionToSimCommands } from "@/lib/herald-option-commands";
 import { narrativeFromEraTransition } from "@/lib/era-narrative";
 import type {
@@ -944,13 +948,27 @@ export function PlayClient() {
         <HeraldButton
           embedded
           quotaLabel={entitlementsError ? "!" : formatQuota(quotaRemaining)}
+          eventCountLabel={formatActiveEventCountBadge(
+            resolveActiveEventCount(
+              simResources?.activeEventCount,
+              simResources?.activeEvents,
+            ),
+          )}
           disabled={heraldDisabled}
           title={
             entitlementsError
               ? entitlementsError
               : heraldDisabled
                 ? "Daily narrative quota exhausted"
-                : "Open the Daily Herald"
+                : (() => {
+                    const n = resolveActiveEventCount(
+                      simResources?.activeEventCount,
+                      simResources?.activeEvents,
+                    );
+                    return n > 0
+                      ? `Open the Daily Herald (${n} active event${n === 1 ? "" : "s"})`
+                      : "Open the Daily Herald";
+                  })()
           }
           onClick={() => {
             if (!heraldDisabled) openHerald();

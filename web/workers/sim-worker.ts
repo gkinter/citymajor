@@ -93,6 +93,7 @@ type WasmStatus = {
     tileX?: number;
     tileY?: number;
   }>;
+  activeEventCount?: number;
   healthcareCoverage?: number;
   policeCoverage?: number;
   fireCoverage?: number;
@@ -612,6 +613,7 @@ function readStatus(): Pick<
   | "buildingCount"
   | "eraProgress"
   | "activeEvents"
+  | "activeEventCount"
   | "healthcareCoverage"
   | "policeCoverage"
   | "fireCoverage"
@@ -690,6 +692,10 @@ function readStatus(): Pick<
       buildingCount: parsed.buildingCount,
       eraProgress,
       activeEvents: parseActiveEvents(parsed.activeEvents),
+      activeEventCount:
+        typeof parsed.activeEventCount === "number"
+          ? parsed.activeEventCount
+          : undefined,
       healthcareCoverage: parsed.healthcareCoverage,
       policeCoverage: parsed.policeCoverage,
       fireCoverage: parsed.fireCoverage,
@@ -773,6 +779,10 @@ function readSnapshot(): SimSnapshot {
     eraProgress: parsed.eraProgress ?? status?.eraProgress,
     activeEvents:
       parseActiveEvents(parsed.activeEvents) ?? status?.activeEvents,
+    activeEventCount:
+      typeof parsed.activeEventCount === "number"
+        ? parsed.activeEventCount
+        : status?.activeEventCount,
     healthcareCoverage:
       parsed.healthcareCoverage ?? status?.healthcareCoverage,
     policeCoverage: parsed.policeCoverage ?? status?.policeCoverage,

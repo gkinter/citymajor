@@ -30,6 +30,11 @@ namespace CityMajor.Sim
         public SimSnapshot LatestSnapshot { get; private set; }
         public ServiceCoverageDto[] LatestServiceCoverage { get; private set; } = Array.Empty<ServiceCoverageDto>();
         public UtilityCoverageDto[] LatestUtilityCoverage { get; private set; } = Array.Empty<UtilityCoverageDto>();
+        /// <summary>
+        /// P4.2 road graph + edge volumes / travel times from <see cref="SimHost.GetTrafficEdgeExport"/>.
+        /// Empty when sim core is offline or the graph has no edges.
+        /// </summary>
+        public RoadGraphSnapshotDto LatestRoadGraph { get; private set; } = new();
 
         public bool Paused { get; set; }
         public float TimeScale { get; set; } = 1f;
@@ -285,11 +290,26 @@ namespace CityMajor.Sim
 
             LatestServiceCoverage = _simHost.GetServiceCoverageSample(step: 8);
             LatestUtilityCoverage = _simHost.GetUtilityCoverageSample(step: 8);
+            LatestRoadGraph = BuildLatestRoadGraph();
 
             LatestSnapshot = snap;
             SyncGridFromSnapshot(snap);
             OnSnapshotChanged?.Invoke(snap);
             Publish();
+        }
+
+        RoadGraphSnapshotDto BuildLatestRoadGraph()
+        {
+            if (!_simCoreReady || _simHost?.State?.Roads == null)
+                return new RoadGraphSnapshotDto();
+
+            var (edgeVolumes, edgeTravelTimes) = _simHost.GetTrafficEdgeExport();
+            // Prefer WorldState.RoadEdgeTravelTimes when the traffic system has published
+            // them (same source commute satisfaction uses); fall back to export arrays.
+            var travelTimes = _simHost.State.RoadEdgeTravelTimes is { Length: > 0 } times
+                ? times
+                : edgeTravelTimes;
+            return RoadGraphSnapshotDto.From(_simHost.State.Roads, edgeVolumes, travelTimes);
         }
 
         void SyncGridFromSnapshot(SimSnapshot snap)

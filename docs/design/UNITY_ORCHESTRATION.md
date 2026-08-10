@@ -1,7 +1,7 @@
 # CityMajor Unity — Orchestration Tracker
 
 **Branch:** `feat/unity-port-plan-2026-07-12`  
-**Integration tip:** `57b41f2` — wave 7 complete (Unity demand foundation, Herald LLM context, sim-metrics tests)  
+**Integration tip:** `16b68e8` — wave 8 complete (EventTicker herald, building box LOD, CI vitest)  
 **Epic:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 Modern Era Desktop  
 **MCP:** `CityMajor.Unity@959bbec5` (Unity 6000.5.3f1) — `refresh_unity` OK; `read_console`/`execute_code` may timeout if bridge wedged (restart editor)
 
@@ -15,7 +15,7 @@
 |-------|--------|--------|-------|
 | Phase 1 scaffold + MCP | SB-4171 | ✅ Done | — |
 | Forge.SimCore bridge | SB-4172 | ✅ `SimHost` + foundation deepen (employment/trade on snapshot, rush OD) — see [SIM_FOUNDATION_CHARTER.md](./SIM_FOUNDATION_CHARTER.md) | — |
-| GLTF instancing | SB-4173 | 🟡 gltfast + catalog wired — constructing buildings render at partial height; CI verifies 12 GLBs | Agent |
+| GLTF instancing | SB-4173 | 🟡 gltfast + catalog + box LOD @ zoom ≥200; CI verifies 12 GLBs | Agent |
 | Zone paint | SB-4174 | ✅ Done + `SimHost.PaintZone` | — |
 | RCI HUD | SB-4175 | ✅ UI Toolkit `ResourcesHud` + pop growth + utility stress + cranes | — |
 | Bulldoze tool | — | ✅ `BulldozeTool` + `SimHost.Bulldoze` (`X`) | — |
@@ -220,7 +220,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `HappinessMeterController` | — | Left-stack happiness bar |
 | `BudgetPanelController` | — | Top-right economy strip |
 | `ApprovalMeterController` | — | Top-right mayor approval |
-| `EventTickerController` | — | Bottom HUD ticker |
+| `EventTickerController` | — | Bottom HUD ticker — Herald headline from sim bucket |
 | `TimeControlsController` | `Space`, `5`/`6`/`7` | Pause + 1×/2×/4× speed |
 | `ToolModeHudController` | — | Active tool indicator (zone/road/build/bulldoze) |
 

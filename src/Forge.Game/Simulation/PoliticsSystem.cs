@@ -674,6 +674,15 @@ public sealed class PoliticsSystem
 
         // Approval consequences
         ApplyApprovalConsequences(state, approval);
+
+        // Keep WorldState council seats in sync for WASM / snapshot export (P5.6 stub).
+        Array.Copy(CouncilSeats, state.CouncilSeats, CouncilSeatCount);
+    }
+
+    /// <summary>Copy initialized council seats onto <paramref name="state"/> (boot / tests).</summary>
+    public void SyncCouncilToWorld(WorldState state)
+    {
+        Array.Copy(CouncilSeats, state.CouncilSeats, CouncilSeatCount);
     }
 
     /// <summary>

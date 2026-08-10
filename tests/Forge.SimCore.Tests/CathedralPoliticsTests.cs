@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Forge.Game.Simulation;
 using Forge.SimCore;
 using Forge.SimWasm;
 using Xunit;
@@ -54,15 +55,66 @@ public sealed class CathedralPoliticsTests
         Assert.InRange(approval.GetSingle(), 0f, 100f);
     }
 
-    [Fact(Skip = "P5.5 Herald snapshot predicates not hard-gated yet")]
+    [Fact]
     public void HeraldUnrestBucket_RequiresApprovalBelowThreshold()
     {
-        // Placeholder: assert sim-metrics / Herald unrest only when approval < 40.
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        // Neutral RCI / goods so approval alone drives the unrest bucket.
+        const float healthcare = 0.5f;
+        const float zeroDemand = 0f;
+        const float zeroGoods = 0f;
+
+        float approvalPct = host.State!.ApprovalRating * 100f;
+        float lift = HeraldNarrativePredicates.LowHappinessApproval - approvalPct + 10f;
+        if (lift > 0f)
+            host.ApplyApprovalDelta(lift);
+
+        var calm = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.False(HeraldNarrativePredicates.IsUnrestApproval(calm.Approval));
+        Assert.NotEqual(
+            HeraldNarrativeBucket.HappinessLow,
+            HeraldNarrativePredicates.DeriveBucket(
+                healthcare,
+                calm.Approval,
+                Math.Max(0L, calm.CityFunds),
+                zeroDemand,
+                zeroDemand,
+                zeroDemand,
+                zeroGoods));
+
+        float drop = calm.Approval - HeraldNarrativePredicates.LowHappinessApproval + 5f;
+        host.ApplyApprovalDelta(-drop);
+
+        var unrest = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.True(HeraldNarrativePredicates.IsUnrestApproval(unrest.Approval));
+        Assert.Equal(
+            HeraldNarrativeBucket.HappinessLow,
+            HeraldNarrativePredicates.DeriveBucket(
+                healthcare,
+                unrest.Approval,
+                Math.Max(0L, unrest.CityFunds),
+                zeroDemand,
+                zeroDemand,
+                zeroDemand,
+                zeroGoods));
     }
 
-    [Fact(Skip = "P5.6 faction/council seats not exported on WASM status")]
+    [Fact]
     public void WasmStatus_ExportsCouncilSeats()
     {
-        // Placeholder: status.councilSeats length == PoliticsSystem.CouncilSeatCount.
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State!);
+        Assert.Equal(PoliticsSystem.CouncilSeatCount, dto.CouncilSeats.Length);
+        Assert.All(dto.CouncilSeats, seat =>
+            Assert.InRange(seat, 0, PoliticsSystem.FactionCount - 1));
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("councilSeats", out var seats));
+        Assert.Equal(JsonValueKind.Array, seats.ValueKind);
+        Assert.Equal(PoliticsSystem.CouncilSeatCount, seats.GetArrayLength());
     }
 }

@@ -22,8 +22,8 @@ Pin the **mayor approval loop** as the politics foundation: happiness / services
 | **P5.2** | `ApplyApprovalDelta` Herald bridge characterization | P6.2 partial | **Live** — `SimHost.ApplyApprovalDelta` / WASM export |
 | **P5.3** | Law toggles → budget / traffic / spawn multipliers | P6.1 | **Partial** — `LawEffectsTests`; spawn hooks shallow |
 | **P5.4** | `ApplyEventEffectsToState` parity (web + Unity) | P6.2 | **Partial** — WASM day tick applies aggregate happiness/approval |
-| **P5.5** | Herald buckets only when snapshot predicates true | P6.3 | **Not implemented** — templates fire without hard sim gates |
-| **P5.6** | Faction / council seat export on status | AGENT_07 Phase 2 | **Deferred** — seats live in `PoliticsSystem`; not on WASM JSON |
+| **P5.5** | Herald buckets only when snapshot predicates true | P6.3 | **Live** — `HeraldNarrativePredicates` (+ web `sim-metrics` / Unity templates) |
+| **P5.6** | Faction / council seat export on status | AGENT_07 Phase 2 | **Stub live** — `councilSeats` on snapshot + WASM status; faction HUD deferred |
 | **P5.7** | Economic Control Spectrum slider | P6.4 / SB-3729 | **v2 boundary** |
 
 ---
@@ -87,19 +87,19 @@ Herald / WASM deltas use **percentage points** via `ApplyApprovalDelta(deltaPerc
 | Snapshot `approval` | 0–100 | `SimSnapshotDto.From` |
 | Native `SimSnapshot.ApprovalRating` | 0–1 | Desktop / Unity bridge |
 
-### 4.2 Target (P5.6 — deferred)
+### 4.2 Live stub (P5.6)
 
 ```typescript
 interface PoliticsStatusStub {
   approval: number;           // 0–100
-  corruptionIndex?: number;   // 0–100
-  protestPhase?: string;      // None…Riot
-  councilSeats?: number[];    // faction id per seat (length 9)
+  councilSeats: number[];     // faction id per seat (length 9)
+  corruptionIndex?: number;   // 0–100 — HUD follow-on
+  protestPhase?: string;      // None…Riot — HUD follow-on
   nextElectionYear?: number;
 }
 ```
 
-Keep payload &lt;200 bytes/tick until HUD consumes seats.
+`councilSeats` exports on `SimSnapshotDto` + `WasmStatusDto` (boot-synced from `PoliticsSystem`). Keep payload lean until Politics HUD consumes optional fields.
 
 ---
 
@@ -118,8 +118,8 @@ Web Herald options emit `approval_event` with `approvalDelta` (`herald-option-co
 | `ApplyApprovalDelta_MovesSnapshotApproval` | Delta percent → 0–1 snapshot | **Pinned** (`CathedralPoliticsTests`) |
 | `SnapshotDto_Approval_IsPercentScale` | DTO / JSON scale 0–100 | **Pinned** (same scale as WASM `GetStatus`) |
 | `GetSnapshotJson_IncludesApprovalField` | JSON contract field present | **Pinned** |
-| `HeraldUnrestBucket_RequiresApprovalBelowThreshold` | Bucket gated on snapshot | Skip until P5.5 |
-| `WasmStatus_ExportsCouncilSeats` | Council seats on WASM | Skip until P5.6 |
+| `HeraldUnrestBucket_RequiresApprovalBelowThreshold` | Bucket gated on snapshot | **Pinned** (approval &lt; 45%) |
+| `WasmStatus_ExportsCouncilSeats` | Council seats on snapshot / status | **Pinned** (length 9 stub) |
 
 Unit math already covered in `Forge.Game.Tests/PoliticsSystemTests` (weights, elections, clout).
 

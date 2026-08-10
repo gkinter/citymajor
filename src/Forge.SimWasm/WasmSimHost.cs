@@ -97,6 +97,10 @@ public sealed class WasmSimHost
     public float ResidentialVacancy => _host.State?.ResidentialVacancy ?? 1f;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
+    /// <summary>Faction id per council seat (boot-synced from PoliticsSystem).</summary>
+    public byte[] StateCouncilSeats =>
+        _host.State?.CouncilSeats ?? new byte[PoliticsSystem.CouncilSeatCount];
+
     public RoadGraphSnapshotDto RoadGraphSnapshot
     {
         get
@@ -266,6 +270,8 @@ public sealed class WasmStatusDto
     public float IndustrialDemand { get; init; }
     public float Approval { get; init; }
     public float Happiness { get; init; }
+    /// <summary>Faction id per council seat (length 9 — PoliticsSystem.CouncilSeatCount).</summary>
+    public int[] CouncilSeats { get; init; } = [];
     public long MonthlyIncome { get; init; }
     public long MonthlyExpenses { get; init; }
     public int BuildingCount { get; init; }
@@ -333,6 +339,7 @@ public sealed class WasmStatusDto
         IndustrialDemand = host.IndustrialDemand,
         Approval = host.ApprovalRating * 100f,
         Happiness = host.Happiness,
+        CouncilSeats = CopyCouncilSeats(host),
         MonthlyIncome = host.MonthlyIncome,
         MonthlyExpenses = host.MonthlyExpenses,
         BuildingCount = host.BuildingCount,
@@ -407,6 +414,16 @@ public sealed class WasmStatusDto
         ResidentialVacancy = host.ResidentialVacancy,
         MarketZoneCount = host.MarketZoneCount,
     };
+
+    static int[] CopyCouncilSeats(WasmSimHost host)
+    {
+        var raw = host.StateCouncilSeats;
+        var seats = new int[PoliticsSystem.CouncilSeatCount];
+        int n = Math.Min(raw.Length, seats.Length);
+        for (int i = 0; i < n; i++)
+            seats[i] = raw[i];
+        return seats;
+    }
 }
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
@@ -431,4 +448,5 @@ public sealed class WasmStatusDto
 [JsonSerializable(typeof(EraProgressGate))]
 [JsonSerializable(typeof(EraProgressGate[]))]
 [JsonSerializable(typeof(string[]))]
+[JsonSerializable(typeof(int[]))]
 internal partial class JsonContext : JsonSerializerContext;

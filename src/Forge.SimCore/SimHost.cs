@@ -101,6 +101,7 @@ public sealed partial class SimHost
 
         CulturalDNASystem.ApplyPreset(_state, "western_european");
         _lastCulturalDnaYear = _state.Year;
+        _politics.SyncCouncilToWorld(_state);
 
         if (_initOptions.UnityModernProfile)
         {

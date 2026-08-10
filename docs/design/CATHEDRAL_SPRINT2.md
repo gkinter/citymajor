@@ -6,8 +6,8 @@
 **Charter:** [`CATHEDRAL_PROGRAM.md`](./CATHEDRAL_PROGRAM.md)  
 **Linear:** SB-4211, SB-4222–4224, SB-4231–4232, SB-4262 (flaky-test gate)
 
-**Landed this sync:** P2.1 ✅ · P3.2 ✅ · P4.1 O-D ✅ · P4.2 FW+commute sat ✅ · test isolation `49edba1` ✅  
-**Still open:** P3.3–P3.4 · P7.2 unskip/flaky gate
+**Landed this sync:** P2.1 ✅ · P3.2 ✅ · P4.1 O-D ✅ · P4.2 FW+commute sat ✅ · test isolation `49edba1` ✅ · **P7.2 Cathedral skip gate ✅**  
+**Still open:** P3.3–P3.4 depth / friction UI polish
 
 ---
 
@@ -92,15 +92,22 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Depends** | P4.1 |
 | **Landed** | `76db8bf` commute→satisfaction; `f72dd3d` multi-iteration Frank-Wolfe + edge travel time export |
 
-### P7.2 gate — Flaky / skipped test cleanup (SB-4262) — partial
+### P7.2 gate — Flaky / skipped test cleanup (SB-4262) ✅
 
 | Field | Value |
 |-------|-------|
 | **Owner** | Orchestrator (CI lane) |
 | **Deliverable** | Cathedral test filter runs clean in CI; no `[Fact(Skip=…)]` for shipped milestones |
-| **Acceptance** | `dotnet test --filter "FullyQualifiedName~Cathedral"` — 0 skipped, 0 flaky retries; unskip `MarketZonePrices_DifferAcrossPartitions` when P3.3 lands |
-| **Depends** | P3.3 merge |
-| **Landed (partial)** | `49edba1` — serialize SimHost tests to avoid SimplexNoise races (test isolation) |
+| **Acceptance** | `dotnet test --filter "FullyQualifiedName~Cathedral"` — 0 skipped, 0 flaky retries |
+| **Depends** | P3.3 merge (MarketZonePrices already green) |
+| **Landed** | Test isolation `49edba1`; P7.2 unskip — Herald P5.5 predicates + council-seat export stub (0 Cathedral `Skip=`) |
+
+**Remaining deferrals (documented, no Skip attributes):**
+
+| Item | Why not a Skip | Tracking |
+|------|----------------|----------|
+| **P5.7 Economic Control Spectrum** | No characterization test yet — **v2 boundary** | [`CATHEDRAL_P5_POLITICS.md`](./CATHEDRAL_P5_POLITICS.md) §2 |
+| Full faction HUD / protest polish | Seats export stubbed on snapshot + WASM status; UI still Phase 2 | P5.6 follow-on when Politics HUD ships |
 
 ---
 
@@ -142,14 +149,14 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 
 ## 7. Acceptance checklist (Fri W2)
 
-- [ ] `dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"` — all pass, zero skipped
+- [x] `dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"` — all pass, zero skipped
 - [x] Goods panel / snapshot shows partition prices (export landed `45d8186`; UI spread still P3.3)
 - [ ] Building click shows production chain inputs/outputs (Unity) — deferred / not in this sync
 - [ ] Friction overlay renders on web + Unity
 - [x] Snapshot: home/work building O-D (`99a6547`)
 - [x] Commute time → satisfaction + FW travel times (`76db8bf` / `f72dd3d`)
 - [x] Office / mixed / park / ag brushes paintable with era gates (`a990636`)
-- [x] Test isolation: SimHost serialize (`49edba1`) — full P7.2 unskip gate still open
+- [x] Test isolation: SimHost serialize (`49edba1`) + P7.2 unskip gate (0 Cathedral `Skip=`; P5.7 ECS remains v2 defer)
 - [ ] OpenSpec `002-zone-palette-v1` + economy delta archived
 - [ ] Integration tip Play gate subset passed ([`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md))
 

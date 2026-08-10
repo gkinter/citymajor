@@ -79,6 +79,8 @@ public sealed class SimSnapshotDto
     public float IndustrialDemand { get; init; }
     /// <summary>Mayor approval percent (0–100).</summary>
     public float Approval { get; init; }
+    /// <summary>Faction id per council seat (length <see cref="PoliticsSystem.CouncilSeatCount"/>).</summary>
+    public int[] CouncilSeats { get; init; } = [];
     public float Happiness { get; init; }
     public long MonthlyIncome { get; init; }
     public long MonthlyExpenses { get; init; }
@@ -160,6 +162,7 @@ public sealed class SimSnapshotDto
             CommercialDemand = economy?.CommercialDemand ?? 0f,
             IndustrialDemand = economy?.IndustrialDemand ?? 0f,
             Approval = state.ApprovalRating * 100f,
+            CouncilSeats = CopyCouncilSeats(state),
             Happiness = state.Happiness,
             MonthlyIncome = state.Income.Total,
             MonthlyExpenses = state.Expenses.Total,
@@ -198,6 +201,15 @@ public sealed class SimSnapshotDto
             CommuterCoverage = commuterAudit.Coverage,
             CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),
         };
+    }
+
+    private static int[] CopyCouncilSeats(WorldState state)
+    {
+        var seats = new int[PoliticsSystem.CouncilSeatCount];
+        int n = Math.Min(state.CouncilSeats.Length, seats.Length);
+        for (int i = 0; i < n; i++)
+            seats[i] = state.CouncilSeats[i];
+        return seats;
     }
 
     private static CommuteOdSampleDto[] ToCommuteOdSampleDtos(
@@ -684,4 +696,5 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(PopulationL2Dto))]
 [JsonSerializable(typeof(Dictionary<int, float>))]
 [JsonSerializable(typeof(Dictionary<int, int>))]
+[JsonSerializable(typeof(int[]))]
 internal partial class SnapshotJsonContext : JsonSerializerContext;

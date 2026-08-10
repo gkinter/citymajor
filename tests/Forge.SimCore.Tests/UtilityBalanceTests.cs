@@ -5,7 +5,6 @@ using Xunit;
 
 namespace Forge.SimCore.Tests;
 
-[Collection("SimHost")]
 public sealed class UtilityBalanceTests
 {
     private const uint ServicePowerPlant = 1u << 7;

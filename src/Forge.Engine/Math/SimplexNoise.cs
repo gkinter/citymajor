@@ -4,11 +4,10 @@ namespace Forge.Engine.Math;
 /// Simplex noise implementation for terrain generation. Produces smooth,
 /// natural-looking height maps, moisture maps, and resource distribution.
 /// </summary>
-public static class SimplexNoise
+public sealed class SimplexNoise
 {
-    // Permutation table (shuffled 0-255, doubled to avoid wrapping)
-    private static readonly byte[] Perm = new byte[512];
-    private static readonly byte[] Perm12 = new byte[512];
+    private readonly byte[] _perm = new byte[512];
+    private readonly byte[] _perm12 = new byte[512];
 
     private static readonly int[][] Grad3 =
     [
@@ -17,13 +16,9 @@ public static class SimplexNoise
         [0, 1, 1], [0, -1, 1], [0, 1, -1], [0, -1, -1],
     ];
 
-    static SimplexNoise()
-    {
-        Seed(42);
-    }
+    public SimplexNoise(int seed) => Seed(seed);
 
-    /// <summary>Initialize the permutation table with a seed.</summary>
-    public static void Seed(int seed)
+    private void Seed(int seed)
     {
         var rng = new Random(seed);
         var p = new byte[256];
@@ -38,15 +33,15 @@ public static class SimplexNoise
 
         for (int i = 0; i < 512; i++)
         {
-            Perm[i] = p[i & 255];
-            Perm12[i] = (byte)(Perm[i] % 12);
+            _perm[i] = p[i & 255];
+            _perm12[i] = (byte)(_perm[i] % 12);
         }
     }
 
     /// <summary>
     /// 2D simplex noise. Returns value in approximately [-1, 1].
     /// </summary>
-    public static float Noise2D(float x, float y)
+    public float Noise2D(float x, float y)
     {
         const float F2 = 0.3660254037844386f;  // (sqrt(3) - 1) / 2
         const float G2 = 0.21132486540518713f; // (3 - sqrt(3)) / 6
@@ -72,9 +67,9 @@ public static class SimplexNoise
 
         int ii = i & 255;
         int jj = j & 255;
-        int gi0 = Perm12[ii + Perm[jj]];
-        int gi1 = Perm12[ii + i1 + Perm[jj + j1]];
-        int gi2 = Perm12[ii + 1 + Perm[jj + 1]];
+        int gi0 = _perm12[ii + _perm[jj]];
+        int gi1 = _perm12[ii + i1 + _perm[jj + j1]];
+        int gi2 = _perm12[ii + 1 + _perm[jj + 1]];
 
         float n0, n1, n2;
 
@@ -97,7 +92,7 @@ public static class SimplexNoise
     /// Fractal Brownian Motion (FBM) using simplex noise.
     /// Combines multiple octaves for natural-looking terrain.
     /// </summary>
-    public static float Fbm(float x, float y, int octaves = 6, float lacunarity = 2f, float persistence = 0.5f)
+    public float Fbm(float x, float y, int octaves = 6, float lacunarity = 2f, float persistence = 0.5f)
     {
         float value = 0;
         float amplitude = 1;
@@ -118,9 +113,8 @@ public static class SimplexNoise
     /// <summary>
     /// Generate a heightmap for the given world size. Returns values in [0, 1].
     /// </summary>
-    public static float[] GenerateHeightmap(int size, int seed, float scale = 0.005f, int octaves = 6)
+    public float[] GenerateHeightmap(int size, float scale = 0.005f, int octaves = 6)
     {
-        Seed(seed);
         var map = new float[size * size];
 
         for (int y = 0; y < size; y++)

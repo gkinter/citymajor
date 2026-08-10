@@ -9,7 +9,6 @@ namespace Forge.SimCore.Tests;
 /// Characterization tests for the sim foundation loop (economy → traffic → trade).
 /// Pins behavior so deepen passes cannot silently regress.
 /// </summary>
-[Collection("SimHost")]
 public sealed class SimFoundationTests
 {
     [Fact]

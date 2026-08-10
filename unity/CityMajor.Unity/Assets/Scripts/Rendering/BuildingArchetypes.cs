@@ -93,6 +93,9 @@ namespace CityMajor.Rendering
             ZonePaintTool.ZoneKind.Residential => "res_low_modern_00",
             ZonePaintTool.ZoneKind.Commercial => "com_modern_00",
             ZonePaintTool.ZoneKind.Industrial => "ind_modern_00",
+            ZonePaintTool.ZoneKind.Office => "com_modern_00",
+            ZonePaintTool.ZoneKind.Mixed => "res_low_modern_00",
+            ZonePaintTool.ZoneKind.Agricultural => "ind_modern_00",
             _ => null,
         };
 
@@ -102,6 +105,9 @@ namespace CityMajor.Rendering
             ZonePaintTool.ZoneKind.Residential => ResLowStart,
             ZonePaintTool.ZoneKind.Commercial => ComStart,
             ZonePaintTool.ZoneKind.Industrial => IndStart,
+            ZonePaintTool.ZoneKind.Office => ComStart,
+            ZonePaintTool.ZoneKind.Mixed => ResLowStart,
+            ZonePaintTool.ZoneKind.Agricultural => IndStart,
             _ => 0,
         };
     }

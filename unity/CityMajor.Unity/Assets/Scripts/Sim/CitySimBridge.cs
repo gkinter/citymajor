@@ -42,6 +42,46 @@ namespace CityMajor.Sim
 
         public bool UsesForgeSimCore => _simCoreReady;
 
+        /// <summary>Top goods shortages/surpluses from live EconomySystem (Cathedral P3).</summary>
+        public bool TryGetGoodImbalances(
+            out EconomySystem.GoodImbalanceEntry[] shortages,
+            out EconomySystem.GoodImbalanceEntry[] surpluses,
+            int topN = 5)
+        {
+            shortages = Array.Empty<EconomySystem.GoodImbalanceEntry>();
+            surpluses = Array.Empty<EconomySystem.GoodImbalanceEntry>();
+            if (!_simCoreReady || _simHost?.Economy == null)
+                return false;
+
+            var (shortRows, surplusRows) = _simHost.Economy.GetTopImbalances(topN);
+            shortages = shortRows ?? Array.Empty<EconomySystem.GoodImbalanceEntry>();
+            surpluses = surplusRows ?? Array.Empty<EconomySystem.GoodImbalanceEntry>();
+            return true;
+        }
+
+        /// <summary>Top production vs demand flows for the economy panel (Cathedral P3.2).</summary>
+        public EconomySystem.GoodFlowEntry[] GetTopGoodFlows(int topN = 8)
+        {
+            if (!_simCoreReady || _simHost?.Economy == null)
+                return Array.Empty<EconomySystem.GoodFlowEntry>();
+
+            return _simHost.Economy.GetTopGoodFlows(topN)
+                   ?? Array.Empty<EconomySystem.GoodFlowEntry>();
+        }
+
+        /// <summary>Council seat faction ids from the latest snapshot (9 seats).</summary>
+        public byte[] GetCouncilSeats()
+        {
+            var seats = LatestSnapshot.CouncilSeats;
+            if (seats != null && seats.Length > 0)
+                return seats;
+
+            if (_simCoreReady && _simHost?.Politics?.CouncilSeats != null)
+                return (byte[])_simHost.Politics.CouncilSeats.Clone();
+
+            return Array.Empty<byte>();
+        }
+
         public void Configure(int mapSize)
         {
             _mapSize = mapSize;

@@ -9,7 +9,18 @@ export type GameSpeedLevel = 0 | 1 | 2 | 4;
 export type SimCommand =
   | { type: "tick"; deltaMs: number }
   | { type: "place_building"; tileX: number; tileZ: number; typeId: number }
-  | { type: "place_road"; tileX: number; tileZ: number; tier?: number; bridge?: boolean; tunnel?: boolean; ramp?: boolean }
+  | {
+      type: "place_road";
+      tileX: number;
+      tileZ: number;
+      tier?: number;
+      /** RoadFlags.Bridge (bit 6) — mutually exclusive with tunnel/ramp. */
+      bridge?: boolean;
+      /** RoadFlags.Tunnel (bit 7) — mutually exclusive with bridge/ramp. */
+      tunnel?: boolean;
+      /** RoadFlags.Ramp (bits 6+7 = 0xC0). */
+      ramp?: boolean;
+    }
   | { type: "zone_paint"; tileX: number; tileZ: number; zoneType: number; density?: number }
   | { type: "bulldoze"; tileX: number; tileZ: number }
   | { type: "enqueue_research"; techId: number }

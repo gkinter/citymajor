@@ -47,7 +47,7 @@
 - [x] Road tier labels: Local / Collector / Highway (tier 2 = highway)
 - [x] Vitest: `road-types` tier labels + merge toast constant
 - [x] Dedicated ramp paint tool (`RoadFlags.Ramp` = 0xC0 structure bits)
-- [ ] Bridge mode toggle (deferred)
+- [x] Bridge/tunnel mode toggle on `RoadTypeToolbar` → `place_road` bridge/tunnel flags
 - [ ] Highway tier disabled hint when paint would fail (optional; skipped — needs sim probe)
 
 ## Verification

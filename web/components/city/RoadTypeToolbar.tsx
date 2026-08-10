@@ -12,6 +12,7 @@ import {
   isRampToolUnlocked,
   isRoadTierUnlocked,
   RAMP_OVERLAY_COLOR,
+  type RoadElevationMode,
   type RoadToolId,
   type RoadTier,
 } from "@/lib/road-types";
@@ -19,12 +20,36 @@ import {
 type RoadTypeToolbarProps = {
   activeRoadTool: RoadToolId;
   onSelect: (tool: RoadToolId) => void;
+  elevationMode?: RoadElevationMode;
+  onElevationChange?: (mode: RoadElevationMode) => void;
   unlockedTechIds?: number[];
 };
+
+const ELEVATION_OPTIONS: ReadonlyArray<{
+  mode: Exclude<RoadElevationMode, "none">;
+  label: string;
+  shortLabel: string;
+  color: string;
+}> = [
+  {
+    mode: "bridge",
+    label: "Bridge",
+    shortLabel: "Bridge",
+    color: "#5b8def",
+  },
+  {
+    mode: "tunnel",
+    label: "Tunnel",
+    shortLabel: "Tunnel",
+    color: "#8b6b4a",
+  },
+];
 
 export function RoadTypeToolbar({
   activeRoadTool,
   onSelect,
+  elevationMode = "none",
+  onElevationChange,
   unlockedTechIds,
 }: RoadTypeToolbarProps) {
   const tiers = useMemo(() => getPlayableRoadTiers(), []);
@@ -129,6 +154,62 @@ export function RoadTypeToolbar({
         Ramp
         {!rampUnlocked ? " 🔒" : null}
       </button>
+      {onElevationChange ? (
+        <>
+          <span
+            style={{
+              width: 1,
+              alignSelf: "stretch",
+              background: HUD_COLORS.border,
+              opacity: 0.5,
+              margin: "0 4px",
+            }}
+            aria-hidden
+          />
+          {ELEVATION_OPTIONS.map(({ mode, label, shortLabel, color }) => {
+            const active = !rampActive && elevationMode === mode;
+            return (
+              <button
+                key={mode}
+                type="button"
+                data-testid={`road-elevation-${mode}`}
+                style={{
+                  ...hudButton(active, rampActive),
+                  minWidth: 72,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  opacity: rampActive ? 0.45 : 1,
+                }}
+                aria-pressed={active}
+                disabled={rampActive}
+                title={
+                  rampActive
+                    ? "Exit ramp tool to paint bridge/tunnel"
+                    : active
+                      ? `Clear ${label.toLowerCase()} mode`
+                      : `Paint ${label.toLowerCase()} roads`
+                }
+                onClick={() => {
+                  onElevationChange(active ? "none" : mode);
+                }}
+              >
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 2,
+                    background: color,
+                    flexShrink: 0,
+                  }}
+                  aria-hidden
+                />
+                {shortLabel}
+              </button>
+            );
+          })}
+        </>
+      ) : null}
     </div>
   );
 }

@@ -85,9 +85,11 @@ import { resolveRci } from "@/lib/zoning-economy";
 import { GltfPreloader } from "@/components/city/GltfPreloader";
 import type { HouseholdPreview } from "@/lib/population-l2";
 import {
+  DEFAULT_ROAD_ELEVATION,
   DEFAULT_ROAD_TOOL,
   ILLEGAL_HIGHWAY_MERGE_TOAST,
   resolveRampPaintTier,
+  type RoadElevationMode,
   type RoadToolId,
 } from "@/lib/road-types";
 import {
@@ -198,6 +200,9 @@ export function PlayClient() {
   const [buildMode, setBuildMode] = useState<BuildMode>("zone");
   const [buildTypeId, setBuildTypeId] = useState<number | null>(null);
   const [roadTool, setRoadTool] = useState<RoadToolId>(DEFAULT_ROAD_TOOL);
+  const [roadElevation, setRoadElevation] = useState<RoadElevationMode>(
+    DEFAULT_ROAD_ELEVATION,
+  );
   const [transitMode, setTransitMode] = useState<TransitModeId>(
     DEFAULT_TRANSIT_MODE,
   );
@@ -574,6 +579,10 @@ export function PlayClient() {
     setBuildOpen(false);
   }, []);
 
+  const handleRoadElevationChange = useCallback((mode: RoadElevationMode) => {
+    setRoadElevation(mode);
+  }, []);
+
   const handleTransitModeSelect = useCallback((modeId: TransitModeId) => {
     setTransitMode(modeId);
     setBuildMode("road");
@@ -706,6 +715,7 @@ export function PlayClient() {
             : undefined
         }
         roadRamp={buildMode === "road" && roadTool === "ramp"}
+        roadElevation={buildMode === "road" ? roadElevation : undefined}
         gameSpeed={gameSpeed}
         qualityTier={qualityTier}
         showTrafficOverlay={showTrafficOverlay}
@@ -856,6 +866,8 @@ export function PlayClient() {
           <RoadTypeToolbar
             activeRoadTool={roadTool}
             onSelect={handleRoadToolSelect}
+            elevationMode={roadElevation}
+            onElevationChange={handleRoadElevationChange}
             unlockedTechIds={simResources?.unlockedTechIds}
           />
           <TransportToolbar

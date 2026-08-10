@@ -38,6 +38,11 @@ import {
 } from "@/lib/zoning";
 import { playPaintFeedback } from "@/lib/paint-feedback";
 import { tileZoneLabel } from "@/lib/zoning";
+import {
+  DEFAULT_ROAD_ELEVATION,
+  roadElevationFlags,
+  type RoadElevationMode,
+} from "@/lib/road-types";
 import { CityScene } from "./CityScene";
 import { AdaptiveDpr } from "./AdaptiveDpr";
 import { CityPostProcessing } from "./CityPostProcessing";
@@ -68,6 +73,8 @@ type CityCanvasProps = {
   roadTier?: number;
   /** Dedicated ramp connector paint (sets RoadFlags.Ramp, P1.5). */
   roadRamp?: boolean;
+  /** Bridge/tunnel paint mode for PlaceRoad (RoadFlags bits 6–7). */
+  roadElevation?: RoadElevationMode;
   gameSpeed: GameSpeedLevel;
   qualityTier: GraphicsQualityTier;
   activeEvents?: ActiveEventSnapshot[];
@@ -113,6 +120,7 @@ export const CityCanvas = forwardRef<CityCanvasHandle, CityCanvasProps>(function
   buildTypeId,
   roadTier,
   roadRamp = false,
+  roadElevation = DEFAULT_ROAD_ELEVATION,
   gameSpeed,
   qualityTier,
   activeEvents,
@@ -366,7 +374,14 @@ ref,
       }
 
       if (activeTool === "road") {
-        const roadFlags = roadFlagsForPaint(roadTier, roadRamp);
+        const { bridge: asBridge, tunnel: asTunnel } =
+          roadElevationFlags(roadElevation);
+        const roadFlags = roadFlagsForPaint(
+          roadTier,
+          roadRamp,
+          asBridge,
+          asTunnel,
+        );
         setRoads((prev) =>
           paintRoadBrush(prev, pick.tileX, pick.tileZ, roadFlags, brushSize),
         );
@@ -378,6 +393,8 @@ ref,
               tileZ: pick.tileZ + dz,
               tier: roadTier ?? 0,
               ramp: roadRamp || undefined,
+              bridge: roadRamp ? undefined : asBridge || undefined,
+              tunnel: roadRamp ? undefined : asTunnel || undefined,
             });
           }
         }
@@ -420,7 +437,18 @@ ref,
       playPaintFeedback("zone");
       onZonePainted?.(zoneType);
     },
-    [activeTool, brushSize, zoneDensity, buildTypeId, roadTier, roadRamp, bridgeReady, simSource, onZonePainted],
+    [
+      activeTool,
+      brushSize,
+      zoneDensity,
+      buildTypeId,
+      roadTier,
+      roadRamp,
+      roadElevation,
+      bridgeReady,
+      simSource,
+      onZonePainted,
+    ],
   );
 
   const handleHover = useCallback(

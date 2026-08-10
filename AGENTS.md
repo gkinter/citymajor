@@ -1,7 +1,10 @@
 # CityMajor — Agent Guide (Unity product)
 
-Unity 6 desktop mesh-3D city builder (**shipped product**). Web R3F is **not shipped**. **Locked v1 scope:** [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md).  
-**Canonical orchestration:** [`docs/design/UNITY_ORCHESTRATION.md`](docs/design/UNITY_ORCHESTRATION.md).
+Unity 6 desktop mesh-3D city builder (**shipped product since 2026-07-12**). Web R3F is an **archival harness only** — not shipped. **Locked v1 scope:** [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md).  
+**Canonical orchestration:** [`docs/design/UNITY_ORCHESTRATION.md`](docs/design/UNITY_ORCHESTRATION.md).  
+**Web archival charter:** [`docs/design/WEB_ARCHIVAL.md`](docs/design/WEB_ARCHIVAL.md).
+
+**Linear:** [SB-4170](https://linear.app/softblaze/issue/SB-4170) = Unity v1 desktop (product). [SB-3704](https://linear.app/softblaze/issue/SB-3704) = Jul 2026 web/WASM R3F spike (historical only). Unity has been the product surface since **2026-07-12** — not a new Aug 10 decision.
 
 ## Worktree rules (mandatory)
 
@@ -21,6 +24,17 @@ cd "../citymajor-${TOPIC}"
 - One task = one worktree. Never share a working directory across parallel agents.
 - Verify before commit: `git rev-parse --abbrev-ref HEAD` must not be a protected branch.
 - After merge: `git worktree remove "../citymajor-${TOPIC}"` && `git branch -d "$SLUG"`.
+
+## Remote / default branch note
+
+`origin/HEAD` may still point at the Jul web spike (`feat/wasm-r3f-integration-2026-07-04`) or stale `main`. **Do not** treat that as the product default. Work from `feat/unity-port-plan-2026-07-12`.
+
+**Do not** change `origin/HEAD` without explicit user approval. Recommended when approved:
+
+```bash
+git remote set-head origin feat/unity-port-plan-2026-07-12
+# or merge Unity integration into main
+```
 
 ## Build & verify (Unity — product)
 
@@ -52,7 +66,7 @@ Full setup: [`docs/UNITY_MCP_SETUP.md`](docs/UNITY_MCP_SETUP.md)
 
 Full setup: [`docs/BLENDER_MCP_SETUP.md`](docs/BLENDER_MCP_SETUP.md)
 
-## Build & verify (web / WASM — harness only)
+## Build & verify (web / WASM — archival harness only)
 
 | Command | Purpose |
 |---------|---------|
@@ -60,7 +74,7 @@ Full setup: [`docs/BLENDER_MCP_SETUP.md`](docs/BLENDER_MCP_SETUP.md)
 | `pnpm smoke:all` | Historical browser smoke — **not** a ship gate for player UX |
 | `pnpm dev` | Local R3F spike only — archival |
 
-**Do not** treat `/play` as the product surface. WASM/web work may validate `Forge.SimCore` exports; **player experience is Unity**. See [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) (superseded / archival).
+**Do not** treat `/play` as the product surface. WASM/web work may validate `Forge.SimCore` exports; **player experience is Unity**. See [`docs/design/WEB_ARCHIVAL.md`](docs/design/WEB_ARCHIVAL.md) and superseded [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md).
 
 ## Key paths
 
@@ -71,9 +85,10 @@ src/Forge.SimCore/            → Core simulation logic (Unity native target)
 src/Forge.SimWasm/            → Optional WASM harness (not player runtime)
 base/data/                    → Shared JSON content
 web/public/assets/gltf/modern/ → Modern era GLTF kits (content host path for Unity)
-web/                            → Archival R3F spike (not shipped)
+web/                            → Archival R3F harness (not shipped)
 docs/design/UNITY_V1_SCOPE.md → Locked Unity v1 charter (modern era, 256×256)
 docs/design/UNITY_ORCHESTRATION.md → Canonical Unity integration tracker
+docs/design/WEB_ARCHIVAL.md   → Web frozen as harness — agents must not ship web UX
 docs/design/CATHEDRAL_UNITY_SPRINT.md → Next Cathedral sprint (Unity HUD/tools)
 docs/UNITY_MCP_SETUP.md       → Cursor ↔ Unity MCP setup
 ```
@@ -91,7 +106,8 @@ docs/UNITY_MCP_SETUP.md       → Cursor ↔ Unity MCP setup
 - [`CLAUDE.md`](CLAUDE.md) — stack summary, monetization, architecture notes
 - [`docs/design/UNITY_V1_SCOPE.md`](docs/design/UNITY_V1_SCOPE.md) — **canonical locked scope**
 - [`docs/design/UNITY_ORCHESTRATION.md`](docs/design/UNITY_ORCHESTRATION.md) — **canonical** integration / lanes
+- [`docs/design/WEB_ARCHIVAL.md`](docs/design/WEB_ARCHIVAL.md) — web = archival harness only
 - [`docs/design/CATHEDRAL_PROGRAM.md`](docs/design/CATHEDRAL_PROGRAM.md) — sim depth program (Unity-first)
-- [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) — superseded archival web charter
+- [`docs/design/WEB_V1_SCOPE.md`](docs/design/WEB_V1_SCOPE.md) — superseded archival web charter (SB-3704 spike)
 - [`docs/design/MASTER_GAME_CONCEPT.md`](docs/design/MASTER_GAME_CONCEPT.md) — sim depth, economy, narrative design
 - [`unity/README.md`](unity/README.md) — Unity project quick start

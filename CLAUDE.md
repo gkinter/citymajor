@@ -1,8 +1,10 @@
 # CityMajor
 
-Deep city-builder simulation — **Unity 6 desktop / Steam** mesh 3D (Cities: Skylines lite). Linear: [SB-3704](https://linear.app/softblaze/issue/SB-3704).
+Deep city-builder simulation — **Unity 6 desktop / Steam** mesh 3D (Cities: Skylines lite).
 
-**Product = Unity.** Player experience ships from the Unity Editor and player builds. The browser R3F client is **not shipped**.
+**Product = Unity since 2026-07-12** ([SB-4170](https://linear.app/softblaze/issue/SB-4170) Unity v1 desktop). This is not a new Aug 2026 decision — Unity has been the shipped product surface since the Jul 12 port plan. [SB-3704](https://linear.app/softblaze/issue/SB-3704) was the Jul web/WASM R3F spike only.
+
+**Active worktree:** `~/citymajor/citymajor-unity-port-plan` → branch `feat/unity-port-plan-2026-07-12`.
 
 ## Stack
 
@@ -15,7 +17,7 @@ Deep city-builder simulation — **Unity 6 desktop / Steam** mesh 3D (Cities: Sk
 | **Backend** | API (saves, entitlements), LLM proxy with template fallback, Steam; Solana phase 2 |
 | **Assets** | Modular GLTF kits — **modern era** (`web/public/assets/gltf/modern/` paths, consumed by Unity) |
 
-**Web (`web/` Next.js + R3F):** **Archival / spike only** — historical browser prototype. No player-ship features.
+**Web (`web/` Next.js + R3F):** **Archival harness only** — historical browser prototype ([`docs/design/WEB_ARCHIVAL.md`](docs/design/WEB_ARCHIVAL.md)). No player-ship features. SB-3704 spike is frozen.
 
 **WASM (`Forge.SimWasm`):** Optional **sim validation harness** (CI / smoke against shared snapshot contract). Not the player runtime.
 
@@ -47,10 +49,15 @@ Deep city-builder simulation — **Unity 6 desktop / Steam** mesh 3D (Cities: Sk
 unity/            → Unity 6 desktop client (URP, UI Toolkit, Steam) — **SHIPPED PRODUCT**
 src/Forge.*       → C# sim (Forge.SimCore — Unity native; Forge.SimWasm — optional harness)
 base/data/        → Shared JSON content (tech tree, events, laws)
-web/              → Archival R3F spike + GLTF kit host paths (not shipped)
-docs/design/      → Game design (UNITY_V1_SCOPE, UNITY_ORCHESTRATION, CATHEDRAL_*, …)
+web/              → Archival R3F harness + GLTF kit host paths (not shipped)
+docs/design/      → Game design (UNITY_V1_SCOPE, UNITY_ORCHESTRATION, WEB_ARCHIVAL, CATHEDRAL_*, …)
 .cursor/mcp.json  → unity-mcp server config for Cursor
 ```
+
+## Agent / remote defaults
+
+- Prefer the Unity integration tip above — do **not** follow web-first `AGENTS.md` on stale `main` or `origin/HEAD` when it still points at the Jul web spike.
+- **Do not** change `origin/HEAD` without explicit user approval. Recommended (when approved): `git remote set-head origin feat/unity-port-plan-2026-07-12`, or merge Unity to `main`.
 
 ## Architecture notes
 

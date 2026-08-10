@@ -314,6 +314,8 @@ export type SimResources = {
   meanRentBurden?: number;
   /** WASM — city-wide residential vacancy proxy (0–1). */
   residentialVacancy?: number;
+  /** WASM — mean fire/EMS response minutes over sampled zoned tiles (P5.2). */
+  meanEmergencyResponseMinutes?: number;
   /** WASM — share of working commuters with valid home + work building IDs (0–1). */
   commuterCoverage?: number;
   /** WASM — top home→work tile pairs aggregated from household assignments. */

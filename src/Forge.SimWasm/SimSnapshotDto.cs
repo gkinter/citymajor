@@ -119,6 +119,8 @@ public sealed class SimSnapshotDto
     public float GoodsTransportCostIndex { get; init; }
     public float MeanRentBurden { get; init; }
     public float ResidentialVacancy { get; init; } = 1f;
+    /// <summary>Mean fire/EMS response minutes over sampled zoned tiles (P5.2).</summary>
+    public float MeanEmergencyResponseMinutes { get; init; } = 30f;
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Sparse market-zone boundary friction samples (0–1 heat).</summary>
@@ -209,6 +211,7 @@ public sealed class SimSnapshotDto
             GoodsTransportCostIndex = state.GoodsTransportCostIndex,
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,
+            MeanEmergencyResponseMinutes = state.MeanEmergencyResponseMinutes,
             MarketZoneCount = state.MarketZoneCount,
             CommuterCoverage = commuterAudit.Coverage,
             CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),

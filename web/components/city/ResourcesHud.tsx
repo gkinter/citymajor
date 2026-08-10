@@ -10,6 +10,7 @@ import {
 import { detectCashCrisis, LOW_HAPPINESS_APPROVAL } from "@/lib/sim-metrics";
 import type { SimResources } from "@/lib/sim-bridge";
 import { formatGrowthPerMonth } from "@/lib/population-growth";
+import { formatEmergencyResponseMinutes } from "@/lib/emergency-response";
 
 function formatFunds(cityFunds: number): string {
   const abs = Math.abs(cityFunds);
@@ -287,6 +288,21 @@ export function ResourcesHud({
             >
               ⚡ {Math.round((resources.powerCoverageFraction ?? 0) * 100)}% · 💧{" "}
               {Math.round((resources.waterCoverageFraction ?? 0) * 100)}%
+            </span>
+          </div>
+        ) : null}
+
+        {resources?.meanEmergencyResponseMinutes !== undefined ? (
+          <div
+            className="hud-resources__stat"
+            title="Mean fire/EMS response minutes over sampled zoned tiles (road distance + traffic)."
+            data-testid="resources-ems-response"
+          >
+            <span className="hud-resources__label">EMS</span>
+            <span className="hud-resources__value">
+              {formatEmergencyResponseMinutes(
+                resources.meanEmergencyResponseMinutes,
+              )}
             </span>
           </div>
         ) : null}

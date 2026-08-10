@@ -19,7 +19,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 | ID | Deliverable | Current state |
 |----|-------------|---------------|
 | **P5.1** | Utilities L0 balance on WASM status + HUD % | **Live** — `WorldState.PowerCoverageFraction` / `WaterCoverageFraction` → `WasmStatusDto` + ResourcesHud `Util` line |
-| **P5.2** | Emergency response time = distance + traffic | **Live** — `EmergencyResponseTime` + `ServiceSystem.CalculateFireResponseTime` use road graph / BPR edge times |
+| **P5.2** | Emergency response time = distance + traffic | **Live** — `EmergencyResponseTime` + mean minutes on `WasmStatusDto` / Resources+Economy HUD |
 | **P5.3** | Fire v1 (spread + hydrant coverage) | **Not started** (post-EA Phase 5b) |
 
 ---
@@ -72,6 +72,7 @@ Worker maps the same keys onto `SimResources`; ResourcesHud renders when either 
 - `SimSnapshotDto` mirrors `WorldState` utility fields
 - L0 tick without plants drops coverage below 1; plants restore local coverage
 - Emergency response minutes rise with road-graph distance and BPR congestion (`EmergencyResponseTime_UsesDistancePlusTraffic`)
+- `GetStatus` exports `meanEmergencyResponseMinutes` below the no-station default when a fire station covers zoned tiles
 
 ### 4.3 P5.2 response formula
 
@@ -81,9 +82,17 @@ responseMinutes =
   + crewReadiness
 ```
 
-`pathCost` uses Dijkstra on `WorldState.Roads` with `RoadEdgeTravelTimes` when present; otherwise free-flow edge costs; Euclidean tile distance as last resort. `ServiceSystem.CalculateFireResponseTime` forwards to `EmergencyResponseTime`.
+`pathCost` uses Dijkstra on `WorldState.Roads` with `RoadEdgeTravelTimes` when present; otherwise free-flow edge costs; Euclidean tile distance as last resort. `ServiceSystem.CalculateFireResponseTime` forwards to `EmergencyResponseTime`. City-wide mean is sampled on a stride during `DailyTick` and exported as `meanEmergencyResponseMinutes` for ResourcesHud (`EMS`) and Economy Services.
 
----
+### 4.4 Live (P5.2 HUD)
+
+```json
+{
+  "meanEmergencyResponseMinutes": 4.2
+}
+```
+
+Worker maps the key onto `SimResources`; ResourcesHud shows `EMS 4.2m` when present.
 
 ## 5. Out of scope (this stub)
 

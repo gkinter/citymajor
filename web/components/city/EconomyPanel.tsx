@@ -10,6 +10,7 @@ import {
   formatModeShareTriplet,
   hasModeShares,
 } from "@/lib/mode-share";
+import { formatEmergencyResponseMinutes } from "@/lib/emergency-response";
 import {
   economyFromRciFallback,
   formatGoodName,
@@ -410,6 +411,59 @@ function hasTransportMetrics(resources: SimResources | null): resources is SimRe
   );
 }
 
+function hasServicesMetrics(resources: SimResources | null): resources is SimResources {
+  if (!resources) return false;
+  return (
+    resources.meanEmergencyResponseMinutes !== undefined ||
+    resources.fireCoverage !== undefined ||
+    resources.policeCoverage !== undefined
+  );
+}
+
+function formatCoveragePct(coverage: number): string {
+  return `${Math.round(Math.min(1, Math.max(0, coverage)) * 100)}%`;
+}
+
+function ServicesMetrics({ resources }: { resources: SimResources }) {
+  return (
+    <section className="hud-economy-section" aria-label="Services">
+      <div style={{ ...sectionTitle, color: "#f0a060" }}>Services</div>
+      <ul className="hud-economy-trade">
+        {resources.meanEmergencyResponseMinutes !== undefined ? (
+          <li
+            className="hud-economy-trade__row"
+            data-testid="economy-ems-response"
+            title="Mean fire/EMS response minutes over sampled zoned tiles (road distance + traffic)."
+          >
+            <span className="hud-economy-trade__label">EMS response</span>
+            <span className="hud-economy-trade__value">
+              {formatEmergencyResponseMinutes(
+                resources.meanEmergencyResponseMinutes,
+              )}
+            </span>
+          </li>
+        ) : null}
+        {resources.fireCoverage !== undefined ||
+        resources.policeCoverage !== undefined ? (
+          <li className="hud-economy-trade__row">
+            <span className="hud-economy-trade__label">Coverage</span>
+            <span className="hud-economy-trade__value">
+              F{" "}
+              {resources.fireCoverage !== undefined
+                ? formatCoveragePct(resources.fireCoverage)
+                : "—"}{" "}
+              · P{" "}
+              {resources.policeCoverage !== undefined
+                ? formatCoveragePct(resources.policeCoverage)
+                : "—"}
+            </span>
+          </li>
+        ) : null}
+      </ul>
+    </section>
+  );
+}
+
 function TransportMetrics({ resources }: { resources: SimResources }) {
   const odPairs = topCommuteOdPairs(resources.commuteOdSample, 5);
   const showModeShares = hasModeShares(resources);
@@ -624,6 +678,10 @@ export function EconomyPanel({ open, onClose, resources }: EconomyPanelProps) {
 
         {hasFoundationMetrics(resources) ? (
           <FoundationMetrics resources={resources} />
+        ) : null}
+
+        {hasServicesMetrics(resources) ? (
+          <ServicesMetrics resources={resources} />
         ) : null}
 
         {hasTransportMetrics(resources) ? (

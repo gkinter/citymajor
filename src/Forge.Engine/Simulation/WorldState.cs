@@ -149,6 +149,12 @@ public sealed class WorldState
     /// <summary>Composite utility stress (0 = healthy, 1 = severe shortage).</summary>
     public float UtilityStressIndex { get; set; }
 
+    /// <summary>
+    /// Mean fire/EMS response minutes over sampled zoned tiles (Cathedral P5.2).
+    /// Default matches <c>EmergencyResponseTime.NoStationResponseMinutes</c>.
+    /// </summary>
+    public float MeanEmergencyResponseMinutes { get; set; } = 30f;
+
     // =========================================================================
     // Goods economy imbalance (persisted after daily economy tick)
     // =========================================================================

@@ -99,6 +99,10 @@ public sealed class WasmSimHost
     public float GoodsTransportCostIndex => _host.State?.GoodsTransportCostIndex ?? 0f;
     public float MeanRentBurden => _host.State?.MeanRentBurden ?? 0f;
     public float ResidentialVacancy => _host.State?.ResidentialVacancy ?? 1f;
+    /// <summary>Mean fire/EMS response minutes over sampled zoned tiles.</summary>
+    public float MeanEmergencyResponseMinutes =>
+        _host.State?.MeanEmergencyResponseMinutes
+        ?? EmergencyResponseTime.NoStationResponseMinutes;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
     /// <summary>Faction id per council seat (length <see cref="PoliticsSystem.CouncilSeatCount"/>).</summary>
@@ -340,6 +344,8 @@ public sealed class WasmStatusDto
     public RoadGraphSnapshotDto RoadGraph { get; init; } = new();
     public float MeanRentBurden { get; init; }
     public float ResidentialVacancy { get; init; } = 1f;
+    /// <summary>Mean fire/EMS response minutes over sampled zoned tiles (P5.2).</summary>
+    public float MeanEmergencyResponseMinutes { get; init; } = 30f;
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Faction id per council seat (length 9).</summary>
@@ -442,6 +448,7 @@ public sealed class WasmStatusDto
             RoadGraph = host.RoadGraphSnapshot,
             MeanRentBurden = host.MeanRentBurden,
             ResidentialVacancy = host.ResidentialVacancy,
+            MeanEmergencyResponseMinutes = host.MeanEmergencyResponseMinutes,
             MarketZoneCount = host.MarketZoneCount,
             CouncilSeats = host.CouncilSeats,
         };

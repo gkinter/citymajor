@@ -260,6 +260,36 @@ public sealed class ServiceSystem
         UpdateServiceCoverageTiles(state);
         UpdatePerTileFireRisk(state);
         UpdatePerTileCrime(state);
+        UpdateMeanEmergencyResponse(state);
+    }
+
+    /// <summary>
+    /// Sample zoned tiles (every <paramref name="sampleStride"/>-th) and average
+    /// fire/EMS response minutes (road-graph + BPR). Writes
+    /// <see cref="WorldState.MeanEmergencyResponseMinutes"/>.
+    /// </summary>
+    public void UpdateMeanEmergencyResponse(WorldState state, int sampleStride = 8)
+    {
+        int stride = Math.Max(1, sampleStride);
+        var tiles = state.Tiles;
+        double sum = 0;
+        int count = 0;
+        int seen = 0;
+
+        for (int y = 0; y < tiles.Size; y++)
+        for (int x = 0; x < tiles.Size; x++)
+        {
+            int idx = tiles.Index(x, y);
+            if (tiles.ZoneType[idx] == 0) continue;
+            if ((seen++ % stride) != 0) continue;
+
+            sum += CalculateFireResponseTime(state, x, y);
+            count++;
+        }
+
+        state.MeanEmergencyResponseMinutes = count == 0
+            ? EmergencyResponseTime.NoStationResponseMinutes
+            : (float)(sum / count);
     }
 
     // =========================================================================

@@ -134,6 +134,36 @@ public sealed class CathedralUtilitiesTests
         Assert.Equal(farCongested, viaServices, precision: 3);
     }
 
+    [Fact]
+    public void SnapshotJson_ExportsMeanEmergencyResponseMinutes()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        // Corridor + fire station so mean response is below the no-station default.
+        for (int x = 8; x <= 24; x++)
+            host.PlaceRoad(x, 10);
+        PlaceBuilding(host.State!, 10, 11, ServiceFire);
+        for (int x = 12; x <= 20; x++)
+            host.State!.Tiles.ZoneType[host.State.Tiles.Index(x, 11)] = 1;
+
+        host.Tick(1.0);
+        host.Services!.UpdateMeanEmergencyResponse(host.State!);
+
+        float mean = host.State.MeanEmergencyResponseMinutes;
+        Assert.True(mean > 0f && mean < EmergencyResponseTime.NoStationResponseMinutes,
+            $"expected mean response below no-station default, got {mean:F2}");
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty(
+            "meanEmergencyResponseMinutes", out var minutes));
+        Assert.Equal(JsonValueKind.Number, minutes.ValueKind);
+        Assert.Equal(mean, minutes.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(mean, dto.MeanEmergencyResponseMinutes, precision: 3);
+    }
+
     private static float[] CaptureFreeFlowEdgeCosts(RoadGraph graph)
     {
         var costs = new float[graph.EdgeCount];

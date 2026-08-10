@@ -18,6 +18,7 @@ import {
   parseCommuterCoverage,
 } from "../lib/commute-od";
 import { parseModeShare } from "../lib/mode-share";
+import { parseEmergencyResponseMinutes } from "../lib/emergency-response";
 import { parsePopulationL2 } from "../lib/population-l2";
 
 type WorkerInbound =
@@ -162,6 +163,7 @@ type WasmStatus = {
   };
   meanRentBurden?: number;
   residentialVacancy?: number;
+  meanEmergencyResponseMinutes?: number;
   frictionCorridors?: Array<{
     tileX?: number;
     tileZ?: number;
@@ -638,6 +640,7 @@ function readStatus(): Pick<
   | "marketZoneCount"
   | "meanRentBurden"
   | "residentialVacancy"
+  | "meanEmergencyResponseMinutes"
   | "commuterCoverage"
   | "commuteOdSample"
   | "carModeShare"
@@ -716,6 +719,9 @@ function readStatus(): Pick<
       marketZoneCount: parsed.marketZoneCount,
       meanRentBurden: parsed.meanRentBurden,
       residentialVacancy: parsed.residentialVacancy,
+      meanEmergencyResponseMinutes: parseEmergencyResponseMinutes(
+        parsed.meanEmergencyResponseMinutes,
+      ),
       commuterCoverage: parseCommuterCoverage(parsed.commuterCoverage),
       commuteOdSample: parseCommuteOdSample(parsed.commuteOdSample),
       carModeShare: parseModeShare(parsed.carModeShare),
@@ -810,6 +816,9 @@ function readSnapshot(): SimSnapshot {
     meanRentBurden: parsed.meanRentBurden ?? status?.meanRentBurden,
     residentialVacancy:
       parsed.residentialVacancy ?? status?.residentialVacancy,
+    meanEmergencyResponseMinutes:
+      parseEmergencyResponseMinutes(parsed.meanEmergencyResponseMinutes) ??
+      status?.meanEmergencyResponseMinutes,
     commuterCoverage:
       parseCommuterCoverage(parsed.commuterCoverage) ??
       status?.commuterCoverage,

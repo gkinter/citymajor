@@ -22,5 +22,16 @@
             </ui:VisualElement>
             <ui:Label name="i-value" class="rci-value" text="0" />
         </ui:VisualElement>
+        <ui:VisualElement name="goods-row" class="foundation-row foundation-row--divider">
+            <ui:Label class="foundation-label" text="Goods" />
+            <ui:VisualElement class="goods-track">
+                <ui:VisualElement name="goods-fill" class="goods-fill" />
+            </ui:VisualElement>
+            <ui:Label name="goods-value" class="goods-value" text="0%" />
+        </ui:VisualElement>
+        <ui:VisualElement name="util-row" class="foundation-row util-row">
+            <ui:Label class="foundation-label" text="Util" />
+            <ui:Label name="util-value" class="util-value" text="⚡ 0% · 💧 0%" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

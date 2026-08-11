@@ -221,7 +221,7 @@ namespace CityMajor.UI
                 var healthPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanHealthSatisfaction) * 100f);
                 _parkValue.text = $"🌳 {accessPct}% · ❤️ {healthPct}%";
                 _parkValue.tooltip =
-                    "Mean park / exercise access and mean household health satisfaction. Painted park zones and park buildings raise health and leisure (Tier-2 park amenity parity — not only land value).";
+                    "Mean park / exercise access and mean household health satisfaction. Painted parks and hospitals raise HealthSatisfaction, which feeds P4 happiness / immigration / emigration (Tier-2 park amenity → population outcomes).";
             }
         }
 

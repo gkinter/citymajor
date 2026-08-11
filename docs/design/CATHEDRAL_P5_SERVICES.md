@@ -10,7 +10,7 @@
 
 ## 1. Goal
 
-Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind. Ship **Tier-2 wildfire / arson rings** — drought fuel spread + high-crime ignition clusters. Ship **Tier-2 aerial / lookout / fire rating** — lookout spark mitigation, aerial suppression, city fire safety rating → insurance premium. Ship **Tier-2 education depth** — household education progression under school coverage + research RP mult + Edu HUD. Ship **Tier-2 park amenity parity** — painted park zones boost health/exercise (not only land value) + Park HUD.
+Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind. Ship **Tier-2 wildfire / arson rings** — drought fuel spread + high-crime ignition clusters. Ship **Tier-2 aerial / lookout / fire rating** — lookout spark mitigation, aerial suppression, city fire safety rating → insurance premium. Ship **Tier-2 education depth** — household education progression under school coverage + research RP mult + Edu HUD. Ship **Tier-2 park amenity parity** — painted park zones boost health/exercise (not only land value) + Park HUD. Ship **Tier-2 health → P4** — `HealthSatisfaction` feeds household satisfaction / migration so parks + hospitals change city outcomes.
 
 ---
 
@@ -27,6 +27,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 | **Tier-2** | Aerial / lookout / fire rating | **Live** — lookout spark cut + aerial suppression + `FireSafetyRating` / `FireInsurancePremiumMult` + Fire HUD 🔭/✈️/⭐ |
 | **Tier-2** | Education depth | **Live** — `EducationProgression` HH level-ups under school coverage + `MeanEducationLevel` / `EducationCoverageFraction` + Edu HUD 🎓 |
 | **Tier-2** | Park amenity parity | **Live** — `ParkAmenity` painted zones + buildings raise health/leisure; `MeanParkAccess` / `ParkAccessFraction` / `MeanHealthSatisfaction` + Park HUD 🌳 |
+| **Tier-2** | Health → P4 outcomes | **Live** — `HealthSatisfaction` weight in `CalculateSatisfaction` + mean-health immigration mod → happiness / emigration / immigration |
 
 ---
 
@@ -215,6 +216,17 @@ Worker maps the key onto `SimResources`; ResourcesHud shows `EMS 4.2m` when pres
 - Unity ResourcesHud Park line: `🌳 {access%} · ❤️ {health%}`
 
 `CathedralUtilitiesTests` pins painted-zone access, health-score lift, HH tick, and snapshot export.
+
+### 4.12 Live (Tier-2 health → P4 satisfaction / migration)
+
+Park + hospital coverage already write `HouseholdData.HealthSatisfaction` and `MeanHealthSatisfaction`. This milestone closes the loop into **population outcomes**:
+
+- `PopulationSystem.CalculateSatisfaction` weights `HealthSatisfaction` at **0.05** (services/leisure trimmed so weights still sum to 1.0)
+- Staggered `Tick` maps that score into `Happiness` bytes → emigration threshold path unchanged
+- `CalculateImmigration` multiplies by mean-health attractiveness (**0.55–1.45**, neutral ~1.0 at 128/255)
+- Unity Park HUD tooltip notes the P4 coupling
+
+`PopulationSystemTests` + `CathedralUtilitiesTests` pin higher health → higher satisfaction, park tick → satisfaction lift, and higher mean health → more immigrants.
 
 ## 5. Out of scope (this stub)
 

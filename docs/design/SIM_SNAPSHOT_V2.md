@@ -158,7 +158,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | EducationCoverageFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH under school coverage |
 | MeanParkAccess | ✅ | ✅ | ✅ | WorldState | Tier-2 park / exercise access (0–1) |
 | ParkAccessFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH with park access |
-| MeanHealthSatisfaction | ✅ | ✅ | ✅ | WorldState | Tier-2 mean HealthSatisfaction (0–1) |
+| MeanHealthSatisfaction | ✅ | ✅ | ✅ | WorldState | Tier-2 mean HealthSatisfaction (0–1); feeds P4 sat / immigration |
 | ServiceCoverage[] | — | ✅ | overlay via services | ServiceSystem | Sparse zoned tiles |
 | CouncilSeats | ✅ `byte[]` | ✅ `int[]` | via bridge getter | Politics | Length 9 |
 
@@ -277,4 +277,5 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **Tier-2 aerial / lookout / fire rating** — `LookoutTowerCount` / `AerialFirefightingAvailable` / `FireSafetyRating` / `FireInsurancePremiumMult` on E+W+U |
 | 2026-08-11 | **Tier-2 education depth** — `MeanEducationLevel` / `EducationCoverageFraction` on E+W+U; HH progression under school coverage |
 | 2026-08-11 | **Tier-2 park amenity parity** — `MeanParkAccess` / `ParkAccessFraction` / `MeanHealthSatisfaction` on E+W+U; painted parks boost health/exercise |
+| 2026-08-11 | **Tier-2 health → P4** — `MeanHealthSatisfaction` / HH HealthSatisfaction feed satisfaction weight + immigration attractiveness |
 | 2026-08-11 | **WASM_SIM_BRIDGE / sim-types TS refresh** — `@citymajor/sim-types` `simSnapshot.ts` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts` match tip DTO (closes former §6 gap #1) |

@@ -13,7 +13,7 @@ namespace Forge.SimCore.Tests;
 /// P5.2 emergency response time (SB-4242), P5.3 fire response v1,
 /// P5.4 EMS survival curve (Phase 5b), Tier-2 hospital capacity,
 /// Tier-2 wildfire / arson rings, aerial / lookout / fire rating,
-/// Tier-2 education depth, and Tier-2 park amenity parity.
+/// Tier-2 education depth, Tier-2 park amenity parity, and P4 health→satisfaction/migration.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -914,6 +914,42 @@ public sealed class CathedralUtilitiesTests
         Assert.Equal(host.State.MeanParkAccess, snap.MeanParkAccess, precision: 3);
         Assert.Equal(host.State.ParkAccessFraction, snap.ParkAccessFraction, precision: 3);
         Assert.Equal(host.State.MeanHealthSatisfaction, snap.MeanHealthSatisfaction, precision: 3);
+    }
+
+    [Fact]
+    public void HealthSatisfaction_FeedsP4SatisfactionAfterParkAmenity()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 10, 10, serviceFlags: 0);
+        int work = PlaceBuilding(host.State!, 16, 10, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(11, 10)] = ParkAmenity.ZonePark;
+
+        int slot = host.State.Households.Allocate();
+        Assert.True(slot >= 0);
+        var hh = host.State.Households;
+        hh.HomeBuildingId[slot] = (ushort)home;
+        hh.WorkBuildingId[slot] = (ushort)work;
+        hh.MemberCount[slot] = 2;
+        hh.AgeGroup[slot] = 1;
+        hh.Education[slot] = 1;
+        hh.WealthLevel[slot] = 2;
+        hh.Income[slot] = 1800;
+        hh.Flags[slot] = 1; // active, employed
+        hh.HealthSatisfaction[slot] = 40;
+        hh.LeisureSatisfaction[slot] = 128;
+
+        float satLow = host.Population.CalculateSatisfaction(host.State, slot);
+
+        for (int i = 0; i < 14; i++)
+            ParkAmenity.Tick(host.State, days: 1f);
+
+        Assert.True(host.State.Households.HealthSatisfaction[slot] > 40);
+        float satHigh = host.Population.CalculateSatisfaction(host.State, slot);
+        Assert.True(satHigh > satLow,
+            $"park→health should raise P4 satisfaction (low={satLow:F1}, high={satHigh:F1})");
+        Assert.True(host.State.MeanHealthSatisfaction > 40f / 255f);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

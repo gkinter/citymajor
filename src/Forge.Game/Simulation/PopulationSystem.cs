@@ -44,11 +44,13 @@ public sealed class PopulationSystem
     private const float WeightEmployment = 0.20f;
     private const float WeightHousing = 0.15f;
     private const float WeightCommute = 0.12f;
-    private const float WeightServices = 0.12f;
+    private const float WeightServices = 0.09f; // tile coverage; HH health is WeightHealth
     private const float WeightSafety = 0.10f;
     private const float WeightEnvironment = 0.08f;
     private const float WeightEducation = 0.08f;
-    private const float WeightLeisure = 0.05f;
+    private const float WeightLeisure = 0.03f;
+    /// <summary>Park + hospital HealthSatisfaction → P4 happiness / migration.</summary>
+    private const float WeightHealth = 0.05f;
     private const float WeightTaxFairness = 0.05f;
     private const float WeightCultural = 0.05f;
 
@@ -248,7 +250,7 @@ public sealed class PopulationSystem
     /// <summary>
     /// Calculate satisfaction for a single household on a 0-100 scale.
     /// Factors: employment, housing, commute, services, safety,
-    /// environment, education, leisure, tax fairness, cultural fit.
+    /// environment, education, leisure, health (park/hospital), tax fairness, cultural fit.
     /// </summary>
     public float CalculateSatisfaction(WorldState state, int householdIndex)
     {
@@ -263,6 +265,8 @@ public sealed class PopulationSystem
         float environment = CalculateEnvironmentSatisfaction(state, householdIndex);
         float education = CalculateEducationSatisfaction(state, householdIndex);
         float leisure = hh.LeisureSatisfaction[householdIndex] / 2.55f;
+        // ParkAmenity + hospital coverage blend into HealthSatisfaction (0–255 → 0–100).
+        float health = hh.HealthSatisfaction[householdIndex] / 2.55f;
         float taxFairness = CalculateTaxFairnessSatisfaction(state, householdIndex);
         float cultural = CalculateCulturalSatisfaction(state, householdIndex);
 
@@ -275,6 +279,7 @@ public sealed class PopulationSystem
             environment * WeightEnvironment +
             education * WeightEducation +
             leisure * WeightLeisure +
+            health * WeightHealth +
             taxFairness * WeightTaxFairness +
             cultural * WeightCultural;
 
@@ -537,7 +542,7 @@ public sealed class PopulationSystem
 
     /// <summary>
     /// Calculate immigration for the month.
-    /// rate = base * job_availability * housing_availability * reputation * tax_modifier
+    /// rate = base * job_availability * housing_availability * reputation * health * tax_modifier
     /// Base: 5 households/month, scales with city size.
     /// </summary>
     public int CalculateImmigration(WorldState state)
@@ -548,11 +553,13 @@ public sealed class PopulationSystem
         float housingAvailability = GetHousingAvailabilityModifier(state);
         float reputation = Math.Clamp(state.Happiness * 2f, 0f, 2f); // 0-2
         float taxMod = GetTaxAttractivenessModifier(state);
+        float healthMod = GetHealthAttractivenessModifier(state);
 
         // Scale base with city size (log scale)
         float sizeScale = 1f + (float)Math.Log(Math.Max(1, state.Population / 1000f), 2);
         float rawRate = BaseImmigrationPerMonth * sizeScale *
                         jobAvailability * housingAvailability * reputation * taxMod *
+                        healthMod *
                         GetRentAttractivenessModifier() *
                         Math.Clamp(state.EventImmigrationMult, 0.25f, 3f);
 
@@ -1173,6 +1180,18 @@ public sealed class PopulationSystem
     // =========================================================================
     // Modifier helpers
     // =========================================================================
+
+    /// <summary>
+    /// Immigration attractiveness from mean HH health (park + hospital blend).
+    /// Uses live household mean so unset snapshot aggregates stay neutral (~1.0 at 128/255).
+    /// 0.55 at health=0 → 1.45 at health=1.
+    /// </summary>
+    private float GetHealthAttractivenessModifier(WorldState state)
+    {
+        float health = Math.Clamp(ParkAmenity.MeanHealthSatisfaction(state), 0f, 1f);
+        state.MeanHealthSatisfaction = health;
+        return Math.Clamp(0.55f + health * 0.9f, 0.55f, 1.45f);
+    }
 
     /// <summary>Get healthcare modifier for births (0.5-1.5).</summary>
     private float GetHealthcareModifier(WorldState state)

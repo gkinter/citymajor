@@ -120,6 +120,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **Tier-2 fire rating** | ✅ Done | Lookout / aerial / fire safety rating → insurance premium + Fire HUD |
 | **Tier-2 education** | ✅ Done | HH education progression under schools + Edu HUD 🎓 |
 | **Tier-2 park amenity** | ✅ Done | Park zones boost health/exercise + Park HUD 🌳 |
+| **Tier-2 health→P4** | ✅ Done | `HealthSatisfaction` → satisfaction / immigration / emigration |
 | **P6.1**–**P6.3** / **P5.6** | ✅ Done | Law spawn mults · Event*Mult bridge · Herald predicates · council seats |
 | **P7.5** | ✅ Done | Unity Cathedral HUD Event*Mult + WASM DTO export (Sprint 3 parity close) |
 | **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` · mode share `370e944` · unemployment HUD `e70ed78` |
@@ -229,7 +230,7 @@ flowchart TB
 ### P5 — Services & emergencies
 
 **Phase 5a (EA):** Utilities L0 balance, coverage overlays, response time = distance + traffic.  
-**Phase 5b:** Fire spread, hydrants (P5.3 ✅), EMS survival curve (P5.4 ✅), hospital capacity Tier-2 ✅, wildfire / arson rings Tier-2 ✅, aerial / lookout / fire rating Tier-2 ✅, education depth Tier-2 ✅, park amenity parity Tier-2 ✅.
+**Phase 5b:** Fire spread, hydrants (P5.3 ✅), EMS survival curve (P5.4 ✅), hospital capacity Tier-2 ✅, wildfire / arson rings Tier-2 ✅, aerial / lookout / fire rating Tier-2 ✅, education depth Tier-2 ✅, park amenity parity Tier-2 ✅, health → P4 satisfaction/migration Tier-2 ✅.
 
 | Milestone | Deliverable |
 |-----------|-------------|
@@ -243,6 +244,7 @@ flowchart TB
 | **Tier-2 fire rating** ✅ | Lookout / aerial / `FireSafetyRating` → insurance premium + Fire HUD 🔭/✈️/⭐ |
 | **Tier-2 education** ✅ | HH education progression under schools — `EducationProgression` + Edu HUD 🎓 |
 | **Tier-2 park amenity** ✅ | Painted park zones + buildings raise health/exercise — `ParkAmenity` + Park HUD 🌳 |
+| **Tier-2 health→P4** ✅ | `HealthSatisfaction` weight in satisfaction + mean-health immigration mod → emigration via Happiness |
 
 ### P6 — Governance
 
@@ -402,3 +404,4 @@ openspec/
 | 2026-08-11 | **WASM_SIM_BRIDGE / sim-types TS refresh** — tip `SimSnapshotDto` contract in `@citymajor/sim-types` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts`; closes SIM_SNAPSHOT_V2 §6 #1 |
 | 2026-08-11 | **Tier-2 education depth** — `EducationProgression` HH level-ups under school coverage; `MeanEducationLevel` / `EducationCoverageFraction` + research RP mult + Edu HUD 🎓 |
 | 2026-08-11 | **Tier-2 park amenity parity** — `ParkAmenity` painted zones raise health/exercise (not only land value); `MeanParkAccess` / `ParkAccessFraction` / `MeanHealthSatisfaction` + Park HUD 🌳 |
+| 2026-08-11 | **Tier-2 health → P4** — `HealthSatisfaction` feeds `CalculateSatisfaction` + mean-health immigration attractiveness; Park HUD notes migration coupling |

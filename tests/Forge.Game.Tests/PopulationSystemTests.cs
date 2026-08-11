@@ -95,6 +95,93 @@ public class PopulationSystemTests
     }
 
     [Fact]
+    public void Satisfaction_HigherHealthSatisfaction_RaisesScore()
+    {
+        var state = CreateTestWorld();
+        var system = new PopulationSystem(seed: 100);
+
+        int slot = AddHousehold(state, system,
+            homeBuilding: 0, workBuilding: 1, income: 1500);
+
+        state.Households.HealthSatisfaction[slot] = 40;
+        float satLow = system.CalculateSatisfaction(state, slot);
+
+        state.Households.HealthSatisfaction[slot] = 220;
+        float satHigh = system.CalculateSatisfaction(state, slot);
+
+        Assert.True(satHigh > satLow,
+            $"higher HealthSatisfaction should raise P4 satisfaction (low={satLow:F1}, high={satHigh:F1})");
+        // WeightHealth=0.05 × Δ(~70.6 on 0–100 scale) ≈ 3.5 points
+        Assert.True(satHigh - satLow > 2f,
+            $"expected material health delta, got {satHigh - satLow:F2}");
+    }
+
+    [Fact]
+    public void CalculateImmigration_HigherMeanHealth_AttractsMoreImmigrants()
+    {
+        var state = CreateTestWorld();
+        state.Population = 2000;
+        state.Happiness = 0.7f;
+
+        // Seed many residential slots so housing does not clamp either run.
+        state.Buildings.MaxOccupants[0] = 500;
+
+        var lowHealth = new PopulationSystem(seed: 77);
+        for (int i = 0; i < 40; i++)
+        {
+            int slot = AddHousehold(state, lowHealth, members: 2, homeBuilding: 0);
+            state.Households.HealthSatisfaction[slot] = 20;
+        }
+
+        int immigrantsLow = lowHealth.CalculateImmigration(state);
+
+        // Reset pool occupancy so housing capacity matches the low-health run.
+        var stateHigh = CreateTestWorld();
+        stateHigh.Population = 2000;
+        stateHigh.Happiness = 0.7f;
+        stateHigh.Buildings.MaxOccupants[0] = 500;
+        var highHealth = new PopulationSystem(seed: 77);
+        for (int i = 0; i < 40; i++)
+        {
+            int slot = AddHousehold(stateHigh, highHealth, members: 2, homeBuilding: 0);
+            stateHigh.Households.HealthSatisfaction[slot] = 240;
+        }
+
+        int immigrantsHigh = highHealth.CalculateImmigration(stateHigh);
+
+        Assert.True(immigrantsHigh > immigrantsLow,
+            $"higher mean health should attract more immigrants (low={immigrantsLow}, high={immigrantsHigh})");
+        Assert.True(stateHigh.MeanHealthSatisfaction > state.MeanHealthSatisfaction);
+    }
+
+    [Fact]
+    public void Tick_LowHealthSatisfaction_LowersHappinessTowardEmigrationBand()
+    {
+        var state = CreateTestWorld();
+        var system = new PopulationSystem(seed: 100);
+
+        int slot = AddHousehold(state, system,
+            homeBuilding: 0, workBuilding: 1, income: 1500);
+        state.Households.HealthSatisfaction[slot] = 10;
+        state.Households.LeisureSatisfaction[slot] = 128;
+
+        // Process enough stagger buckets to refresh this household.
+        for (int t = 0; t < 30; t++)
+            system.Tick(state, t);
+
+        byte happinessLowHealth = state.Households.Happiness[slot];
+
+        state.Households.HealthSatisfaction[slot] = 250;
+        for (int t = 0; t < 30; t++)
+            system.Tick(state, t);
+
+        byte happinessHighHealth = state.Households.Happiness[slot];
+
+        Assert.True(happinessHighHealth > happinessLowHealth,
+            $"health should lift Happiness bytes (low={happinessLowHealth}, high={happinessHighHealth})");
+    }
+
+    [Fact]
     public void Satisfaction_EmployedHousehold_ReturnsReasonableValue()
     {
         var state = CreateTestWorld();

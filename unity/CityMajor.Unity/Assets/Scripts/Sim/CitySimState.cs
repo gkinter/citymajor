@@ -88,6 +88,18 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — free hospital beds for EMS diversion.</summary>
         public int AvailableHospitalBeds;
 
+        /// <summary>Tier-2 — drought / wildfire risk index (0–1).</summary>
+        public float WildfireRiskIndex;
+
+        /// <summary>Tier-2 — forest / park / ag tiles currently burning.</summary>
+        public int ActiveWildfireTileCount;
+
+        /// <summary>Tier-2 — mean arson risk from crime excess (0–1).</summary>
+        public float ArsonRiskIndex;
+
+        /// <summary>Tier-2 — high-crime building-fire cluster / arson ring.</summary>
+        public bool ArsonRingActive;
+
         /// <summary>Cathedral P2 — mean rent / income burden (0–1+).</summary>
         public float MeanRentBurden;
 

@@ -11,7 +11,8 @@ namespace Forge.SimCore.Tests;
 /// <summary>
 /// Characterization tests for Cathedral P5.1 utilities foundation (SB-4987),
 /// P5.2 emergency response time (SB-4242), P5.3 fire response v1,
-/// P5.4 EMS survival curve (Phase 5b), and Tier-2 hospital capacity.
+/// P5.4 EMS survival curve (Phase 5b), Tier-2 hospital capacity,
+/// and Tier-2 wildfire / arson rings.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -427,6 +428,132 @@ public sealed class CathedralUtilitiesTests
         var snap = host.GetSnapshot();
         Assert.Equal(0.4f, snap.HospitalBedOccupancyFraction, precision: 3);
         Assert.Equal(12, snap.AvailableHospitalBeds);
+    }
+
+    [Fact]
+    public void Wildfire_DroughtRisk_HeatwaveAndDrySummer()
+    {
+        var state = new WorldState(32, maxBuildings: 4);
+        state.WeatherCondition = 0;
+        state.Month = 1; // winter/spring-ish depending on map — force mild via precip
+        state.Precipitation = 0.5f;
+        Assert.Equal(WildfireArson.BaseDroughtRisk, WildfireArson.CalculateDroughtRisk(state), precision: 3);
+
+        state.Month = 7; // summer (Season == 1)
+        state.Precipitation = 0.05f;
+        Assert.Equal(WildfireArson.DrySummerDroughtRisk, WildfireArson.CalculateDroughtRisk(state), precision: 3);
+
+        state.WeatherCondition = 6; // heatwave wins
+        Assert.Equal(WildfireArson.HeatwaveDroughtRisk, WildfireArson.CalculateDroughtRisk(state), precision: 3);
+    }
+
+    [Fact]
+    public void Wildfire_SpreadsAcrossFuel_StopsAtRoadFirebreak()
+    {
+        var state = new WorldState(32, maxBuildings: 8);
+        // Forest strip: (5,10)-(7,10), road firebreak at x=8, more forest at (9,10)
+        for (int x = 5; x <= 9; x++)
+        {
+            if (x == 8) continue;
+            state.Tiles.TerrainType[state.Tiles.Index(x, 10)] = WildfireArson.TerrainForest;
+        }
+
+        state.Tiles.RoadFlags[state.Tiles.Index(8, 10)] = 1; // firebreak
+
+        Assert.True(WildfireArson.TryIgniteWildfireTile(state, 5, 10));
+        // One hop per tick (burners snapshotted) — two ticks reach the firebreak edge.
+        WildfireArson.TickWildfire(state, hours: 1f, rng: new AlwaysLowRandom());
+        Assert.True(WildfireArson.IsWildfireBurning(state, 6, 10), "should spread along fuel");
+        WildfireArson.TickWildfire(state, hours: 1f, rng: new AlwaysLowRandom());
+        Assert.True(WildfireArson.IsWildfireBurning(state, 7, 10), "should reach firebreak edge");
+        Assert.False(WildfireArson.IsWildfireBurning(state, 9, 10), "road firebreak must stop spread");
+        // Third tick still cannot cross the road.
+        WildfireArson.TickWildfire(state, hours: 1f, rng: new AlwaysLowRandom());
+        Assert.False(WildfireArson.IsWildfireBurning(state, 9, 10), "road firebreak must hold");
+    }
+
+    [Fact]
+    public void Wildfire_EdgeIgnitesAdjacentBuilding()
+    {
+        var state = new WorldState(32, maxBuildings: 8);
+        state.Tiles.TerrainType[state.Tiles.Index(10, 10)] = WildfireArson.TerrainForest;
+        int house = PlaceBuilding(state, 11, 10, serviceFlags: 0);
+
+        Assert.True(WildfireArson.TryIgniteWildfireTile(state, 10, 10));
+        WildfireArson.TickWildfire(state, hours: 10f, rng: new AlwaysLowRandom());
+
+        Assert.True(FireResponse.IsBurning(state.Buildings, house),
+            "wildfire edge should ignite adjacent building");
+    }
+
+    [Fact]
+    public void Arson_HighCrimeIgnites_AndDetectsRing()
+    {
+        var state = new WorldState(32, maxBuildings: 8);
+        int a = PlaceBuilding(state, 10, 10, serviceFlags: 0);
+        int b = PlaceBuilding(state, 12, 10, serviceFlags: 0);
+        state.Tiles.Crime[state.Tiles.Index(10, 10)] = 0.9f;
+        state.Tiles.Crime[state.Tiles.Index(12, 10)] = 0.9f;
+        state.Tiles.ZoneType[state.Tiles.Index(10, 10)] = 1;
+        state.Tiles.ZoneType[state.Tiles.Index(12, 10)] = 1;
+
+        Assert.True(WildfireArson.ArsonRiskFromCrime(0.9f) > 0f);
+        Assert.Equal(0f, WildfireArson.ArsonRiskFromCrime(0.2f), precision: 3);
+
+        int ignited = WildfireArson.TickArson(state, hours: 10f, rng: new AlwaysLowRandom());
+        Assert.Equal(2, ignited);
+        Assert.True(FireResponse.IsBurning(state.Buildings, a));
+        Assert.True(FireResponse.IsBurning(state.Buildings, b));
+        Assert.True(WildfireArson.DetectArsonRing(state));
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsWildfireArsonFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        host.State!.WeatherCondition = 6;
+        host.State.Tiles.TerrainType[host.State.Tiles.Index(20, 20)] = WildfireArson.TerrainForest;
+        Assert.True(WildfireArson.TryIgniteWildfireTile(host.State, 20, 20));
+
+        int house = PlaceBuilding(host.State, 22, 22, serviceFlags: 0);
+        host.State.Tiles.Crime[host.State.Tiles.Index(22, 22)] = 0.95f;
+        host.State.Tiles.ZoneType[host.State.Tiles.Index(22, 22)] = 1;
+        Assert.True(FireResponse.TryIgnite(host.State, house));
+        // Second high-crime fire for ring detection
+        int house2 = PlaceBuilding(host.State, 24, 22, serviceFlags: 0);
+        host.State.Tiles.Crime[host.State.Tiles.Index(24, 22)] = 0.95f;
+        host.State.Tiles.ZoneType[host.State.Tiles.Index(24, 22)] = 1;
+        Assert.True(FireResponse.TryIgnite(host.State, house2));
+
+        host.Services!.UpdateWildfireArson(host.State, hours: 0f);
+
+        Assert.Equal(WildfireArson.HeatwaveDroughtRisk, host.State.WildfireRiskIndex, precision: 3);
+        Assert.True(host.State.ActiveWildfireTileCount >= 1);
+        Assert.True(host.State.ArsonRingActive);
+        Assert.True(host.State.ArsonRiskIndex > 0f);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("wildfireRiskIndex", out var risk));
+        Assert.True(doc.RootElement.TryGetProperty("activeWildfireTileCount", out var tiles));
+        Assert.True(doc.RootElement.TryGetProperty("arsonRiskIndex", out var arson));
+        Assert.True(doc.RootElement.TryGetProperty("arsonRingActive", out var ring));
+        Assert.Equal(host.State.WildfireRiskIndex, risk.GetSingle(), precision: 3);
+        Assert.Equal(host.State.ActiveWildfireTileCount, tiles.GetInt32());
+        Assert.Equal(host.State.ArsonRiskIndex, arson.GetSingle(), precision: 3);
+        Assert.True(ring.GetBoolean());
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.WildfireRiskIndex, dto.WildfireRiskIndex, precision: 3);
+        Assert.Equal(host.State.ActiveWildfireTileCount, dto.ActiveWildfireTileCount);
+        Assert.Equal(host.State.ArsonRiskIndex, dto.ArsonRiskIndex, precision: 3);
+        Assert.True(dto.ArsonRingActive);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.WildfireRiskIndex, snap.WildfireRiskIndex, precision: 3);
+        Assert.Equal(host.State.ActiveWildfireTileCount, snap.ActiveWildfireTileCount);
+        Assert.True(snap.ArsonRingActive);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

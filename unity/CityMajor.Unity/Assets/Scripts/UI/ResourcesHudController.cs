@@ -165,11 +165,24 @@ namespace CityMajor.UI
             {
                 var hydrantPct = Mathf.RoundToInt(Mathf.Clamp01(state.HydrantCoverageFraction) * 100f);
                 var fires = Mathf.Max(0, state.ActiveFireCount);
-                _fireValue.text = fires > 0
+                var wildfire = Mathf.Max(0, state.ActiveWildfireTileCount);
+                var droughtPct = Mathf.RoundToInt(Mathf.Clamp01(state.WildfireRiskIndex) * 100f);
+
+                var text = fires > 0
                     ? $"🚰 {hydrantPct}% · 🔥 {fires}"
                     : $"🚰 {hydrantPct}%";
+                if (wildfire > 0)
+                    text += $" · 🌲 {wildfire}";
+                else if (droughtPct >= 70)
+                    text += $" · 🌲 {droughtPct}%";
+                if (state.ArsonRingActive)
+                    text += " · 🕵️";
+                else if (state.ArsonRiskIndex >= 0.25f)
+                    text += $" · 🕵️ {Mathf.RoundToInt(Mathf.Clamp01(state.ArsonRiskIndex) * 100f)}%";
+
+                _fireValue.text = text;
                 _fireValue.tooltip =
-                    "Hydrant coverage over zoned buildings; active fire count when any building is burning (P5.3).";
+                    "Hydrant coverage; active building fires (P5.3); wildfire tiles / drought risk and arson ring / crime-driven arson risk (Tier-2 / MISSING_SYSTEMS §1.1).";
             }
 
             if (_hospitalValue != null)

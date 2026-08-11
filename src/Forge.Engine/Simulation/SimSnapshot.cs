@@ -244,6 +244,18 @@ public sealed class SimSnapshot
     /// <summary>Free hospital beds city-wide (Tier-2 EMS diversion).</summary>
     public int AvailableHospitalBeds { get; init; }
 
+    /// <summary>Drought / wildfire risk 0–1 (Tier-2 / MISSING_SYSTEMS §1.1).</summary>
+    public float WildfireRiskIndex { get; init; }
+
+    /// <summary>Forest / park / ag tiles currently burning (Tier-2 wildfire).</summary>
+    public int ActiveWildfireTileCount { get; init; }
+
+    /// <summary>Mean arson risk from crime excess 0–1 (Tier-2).</summary>
+    public float ArsonRiskIndex { get; init; }
+
+    /// <summary>High-crime building-fire cluster / arson ring flag (Tier-2).</summary>
+    public bool ArsonRingActive { get; init; }
+
     public readonly record struct BuildingSnapshot(
         int GridX, int GridY, ushort TypeId, byte Level,
         byte State, ushort Occupants, ushort MaxOccupants, byte Condition);
@@ -415,6 +427,10 @@ public sealed class SimSnapshot
             MeanEmsSurvivalRate = state.MeanEmsSurvivalRate,
             HospitalBedOccupancyFraction = state.HospitalBedOccupancyFraction,
             AvailableHospitalBeds = state.AvailableHospitalBeds,
+            WildfireRiskIndex = state.WildfireRiskIndex,
+            ActiveWildfireTileCount = state.ActiveWildfireTileCount,
+            ArsonRiskIndex = state.ArsonRiskIndex,
+            ArsonRingActive = state.ArsonRingActive,
         };
     }
 }

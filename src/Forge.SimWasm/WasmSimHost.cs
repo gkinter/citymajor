@@ -120,6 +120,14 @@ public sealed class WasmSimHost
     /// <summary>Free hospital beds city-wide (Tier-2 EMS diversion).</summary>
     public int AvailableHospitalBeds =>
         _host.State?.AvailableHospitalBeds ?? 0;
+    /// <summary>Drought / wildfire risk 0–1 (Tier-2).</summary>
+    public float WildfireRiskIndex => _host.State?.WildfireRiskIndex ?? 0f;
+    /// <summary>Burning forest / park / ag tiles (Tier-2 wildfire).</summary>
+    public int ActiveWildfireTileCount => _host.State?.ActiveWildfireTileCount ?? 0;
+    /// <summary>Mean arson risk from crime excess 0–1 (Tier-2).</summary>
+    public float ArsonRiskIndex => _host.State?.ArsonRiskIndex ?? 0f;
+    /// <summary>High-crime building-fire cluster / arson ring (Tier-2).</summary>
+    public bool ArsonRingActive => _host.State?.ArsonRingActive ?? false;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
     /// <summary>Faction id per council seat (length <see cref="PoliticsSystem.CouncilSeatCount"/>).</summary>
@@ -356,6 +364,14 @@ public sealed class WasmStatusDto
     public float HospitalBedOccupancyFraction { get; init; }
     /// <summary>Free hospital beds city-wide (Tier-2).</summary>
     public int AvailableHospitalBeds { get; init; }
+    /// <summary>Drought / wildfire risk 0–1 (Tier-2).</summary>
+    public float WildfireRiskIndex { get; init; }
+    /// <summary>Burning forest / park / ag tiles (Tier-2 wildfire).</summary>
+    public int ActiveWildfireTileCount { get; init; }
+    /// <summary>Mean arson risk from crime excess 0–1 (Tier-2).</summary>
+    public float ArsonRiskIndex { get; init; }
+    /// <summary>High-crime building-fire cluster / arson ring (Tier-2).</summary>
+    public bool ArsonRingActive { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Faction id per council seat (length 9).</summary>
@@ -467,6 +483,10 @@ public sealed class WasmStatusDto
             MeanEmsSurvivalRate = host.MeanEmsSurvivalRate,
             HospitalBedOccupancyFraction = host.HospitalBedOccupancyFraction,
             AvailableHospitalBeds = host.AvailableHospitalBeds,
+            WildfireRiskIndex = host.WildfireRiskIndex,
+            ActiveWildfireTileCount = host.ActiveWildfireTileCount,
+            ArsonRiskIndex = host.ArsonRiskIndex,
+            ArsonRingActive = host.ArsonRingActive,
             MarketZoneCount = host.MarketZoneCount,
             CouncilSeats = host.CouncilSeats,
         };

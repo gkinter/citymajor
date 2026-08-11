@@ -10,7 +10,7 @@
 
 ## 1. Goal
 
-Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind.
+Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind. Ship **Tier-2 wildfire / arson rings** — drought fuel spread + high-crime ignition clusters.
 
 ---
 
@@ -23,6 +23,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 | **P5.3** | Fire v1 (spread + hydrant coverage) | **Live** — `FireResponse` + `HydrantCoverageFraction` / `ActiveFireCount` on snapshot + ResourcesHud Fire line |
 | **P5.4** | EMS survival curve from response minutes | **Live** — `EmsSurvival` + `MeanEmsSurvivalRate` on snapshot + ResourcesHud `EMS Xm · N%` |
 | **Tier-2** | Hospital capacity + EMS diversion | **Live** — `HospitalCapacity` + `HospitalBedOccupancyFraction` / `AvailableHospitalBeds` + ResourcesHud Hosp line |
+| **Tier-2** | Wildfire / arson rings | **Live** — `WildfireArson` + `WildfireRiskIndex` / `ActiveWildfireTileCount` / `ArsonRiskIndex` / `ArsonRingActive` + Fire HUD 🌲/🕵️ |
 
 ---
 
@@ -143,8 +144,26 @@ Worker maps the key onto `SimResources`; ResourcesHud shows `EMS 4.2m` when pres
 
 `CathedralUtilitiesTests` pins nearest-with-capacity diversion, full-city penalty, open beds raising survival, and snapshot export.
 
+### 4.8 Live (Tier-2 wildfire / arson rings)
+
+```json
+{
+  "wildfireRiskIndex": 0.7,
+  "activeWildfireTileCount": 3,
+  "arsonRiskIndex": 0.12,
+  "arsonRingActive": false
+}
+```
+
+- Fuel = forest terrain or park/ag zone without a building; roads / water / rock are firebreaks
+- Drought risk: heatwave → 1.0, dry summer → 0.7, else baseline; sparks + cardinal spread on fuel; edge tiles can ignite buildings via `FireResponse`
+- Arson: crime above threshold raises per-building ignition chance; ≥2 concurrent high-crime building fires → `ArsonRingActive`
+- Unity ResourcesHud Fire line appends `🌲 {n|drought%}` and `🕵️` / arson % when relevant
+
+`CathedralUtilitiesTests` pins drought buckets, firebreak stop, edge building ignition, arson ring detection, and snapshot export.
+
 ## 5. Out of scope (this stub)
 
-- Wildfire / arson rings (`MISSING_SYSTEMS.md` depth)
+- Aerial firefighting / lookout towers / fire rating insurance (`MISSING_SYSTEMS.md` depth)
 - Sewage / internet / waste as separate HUD meters
 - Rewriting tile BFS grids — keep daily ServiceSystem path

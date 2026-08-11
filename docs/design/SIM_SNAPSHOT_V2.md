@@ -146,6 +146,10 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | MeanEmsSurvivalRate | ✅ | ✅ | ✅ | WorldState | P5.4; default 0.40 |
 | HospitalBedOccupancyFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 hospital capacity |
 | AvailableHospitalBeds | ✅ | ✅ | ✅ | WorldState | Tier-2 EMS diversion |
+| WildfireRiskIndex | ✅ | ✅ | ✅ | WorldState | Tier-2 drought / wildfire risk |
+| ActiveWildfireTileCount | ✅ | ✅ | ✅ | WorldState | Tier-2 burning fuel tiles |
+| ArsonRiskIndex | ✅ | ✅ | ✅ | WorldState | Tier-2 crime-driven arson risk |
+| ArsonRingActive | ✅ | ✅ | ✅ | WorldState | Tier-2 high-crime fire cluster |
 | ServiceCoverage[] | — | ✅ | overlay via services | ServiceSystem | Sparse zoned tiles |
 | CouncilSeats | ✅ `byte[]` | ✅ `int[]` | via bridge getter | Politics | Length 9 |
 
@@ -260,3 +264,4 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **CulturalDna[] WASM DTO** — politics flavor vector export + `ApplySnapshotDto` restore (closes former §6 gap #5) |
 | 2026-08-11 | **TradeBalance / export-import WASM DTO** — TradeBalance + MonthlyExportValue/ImportCost export + `ApplySnapshotDto` restore (closes former §6 gap #1) |
 | 2026-08-11 | **Commute O-D Unity parity** — `CitySimState.CommuteOdSample[]` via `SimHost.CollectCommuteOdSample`; Cathedral HUD top pairs (closes former §6 Commute O-D gap) |
+| 2026-08-11 | **Tier-2 wildfire / arson rings** — `WildfireRiskIndex` / `ActiveWildfireTileCount` / `ArsonRiskIndex` / `ArsonRingActive` on E+W+U |

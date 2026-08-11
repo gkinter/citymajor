@@ -183,6 +183,14 @@ public sealed class SimSnapshotDto
     public float HospitalBedOccupancyFraction { get; init; }
     /// <summary>Free hospital beds city-wide (Tier-2 EMS diversion).</summary>
     public int AvailableHospitalBeds { get; init; }
+    /// <summary>Drought / wildfire risk 0–1 (Tier-2 / MISSING_SYSTEMS §1.1).</summary>
+    public float WildfireRiskIndex { get; init; }
+    /// <summary>Forest / park / ag tiles currently burning (Tier-2 wildfire).</summary>
+    public int ActiveWildfireTileCount { get; init; }
+    /// <summary>Mean arson risk from crime excess 0–1 (Tier-2).</summary>
+    public float ArsonRiskIndex { get; init; }
+    /// <summary>High-crime building-fire cluster / arson ring (Tier-2).</summary>
+    public bool ArsonRingActive { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Sparse market-zone boundary friction samples (0–1 heat).</summary>
@@ -308,6 +316,10 @@ public sealed class SimSnapshotDto
             MeanEmsSurvivalRate = state.MeanEmsSurvivalRate,
             HospitalBedOccupancyFraction = state.HospitalBedOccupancyFraction,
             AvailableHospitalBeds = state.AvailableHospitalBeds,
+            WildfireRiskIndex = state.WildfireRiskIndex,
+            ActiveWildfireTileCount = state.ActiveWildfireTileCount,
+            ArsonRiskIndex = state.ArsonRiskIndex,
+            ArsonRingActive = state.ArsonRingActive,
             MarketZoneCount = state.MarketZoneCount,
             CommuterCoverage = commuterAudit.Coverage,
             CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),

@@ -262,6 +262,7 @@ public sealed class ServiceSystem
         UpdatePerTileCrime(state);
         UpdateMeanEmergencyResponse(state);
         UpdateFireResponse(state);
+        UpdateWildfireArson(state);
         UpdateHospitalCapacity(state);
     }
 
@@ -273,6 +274,15 @@ public sealed class ServiceSystem
         state.HydrantCoverageFraction = FireResponse.CalculateHydrantCoverageFraction(state);
         FireResponse.TickSpread(state, hours, rng);
         state.ActiveFireCount = FireResponse.CountActiveFires(state);
+    }
+
+    /// <summary>
+    /// Tier-2 wildfire + arson rings — drought sparks, fuel spread, high-crime ignitions.
+    /// Recounts <see cref="WorldState.ActiveFireCount"/> after edge/arson building fires.
+    /// </summary>
+    public void UpdateWildfireArson(WorldState state, float hours = 1f, Random? rng = null)
+    {
+        WildfireArson.Tick(state, hours, rng);
     }
 
     /// <summary>

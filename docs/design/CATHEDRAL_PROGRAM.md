@@ -116,6 +116,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P5.3** | ✅ Done | Fire v1 (spread + hydrant coverage) |
 | **P5.4** | ✅ Done | EMS survival curve from response minutes |
 | **Tier-2 hosp** | ✅ Done | Hospital capacity — nearest free beds + EMS chain + ResourcesHud Hosp |
+| **Tier-2 wildfire** | ✅ Done | Wildfire / arson rings — drought fuel spread + high-crime cluster + Fire HUD |
 | **P6.1**–**P6.3** / **P5.6** | ✅ Done | Law spawn mults · Event*Mult bridge · Herald predicates · council seats |
 | **P7.5** | ✅ Done | Unity Cathedral HUD Event*Mult + WASM DTO export (Sprint 3 parity close) |
 | **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` · mode share `370e944` · unemployment HUD `e70ed78` |
@@ -225,7 +226,7 @@ flowchart TB
 ### P5 — Services & emergencies
 
 **Phase 5a (EA):** Utilities L0 balance, coverage overlays, response time = distance + traffic.  
-**Phase 5b:** Fire spread, hydrants (P5.3 ✅), EMS survival curve (P5.4 ✅), hospital capacity Tier-2 ✅. Wildfire / arson rings still Tier 2.
+**Phase 5b:** Fire spread, hydrants (P5.3 ✅), EMS survival curve (P5.4 ✅), hospital capacity Tier-2 ✅, wildfire / arson rings Tier-2 ✅.
 
 | Milestone | Deliverable |
 |-----------|-------------|
@@ -235,6 +236,7 @@ flowchart TB
 | **P5.3** ✅ | Fire v1 (spread + hydrant coverage) — `FireResponse` + ResourcesHud Fire line |
 | **P5.4** ✅ | EMS survival curve — `EmsSurvival` + `MeanEmsSurvivalRate` + ResourcesHud EMS % |
 | **Tier-2 hosp** ✅ | Hospital capacity — `HospitalCapacity` nearest free beds + EMS transport chain + ResourcesHud Hosp |
+| **Tier-2 wildfire** ✅ | Wildfire / arson rings — `WildfireArson` + Fire HUD 🌲/🕵️ |
 
 ### P6 — Governance
 
@@ -389,3 +391,4 @@ openspec/
 | 2026-08-11 | **CulturalDna[] WASM DTO** — politics flavor vector export + restore; `SnapshotRoundTrip_PreservesCulturalDna` |
 | 2026-08-11 | **TradeBalance / export-import WASM DTO** — TradeBalance + MonthlyExport/Import export + restore; `SnapshotRoundTrip_PreservesTradeBalance` |
 | 2026-08-11 | **Commute O-D Unity parity** — `CitySimState.CommuteOdSample[]` + Cathedral HUD top pairs; closes SIM_SNAPSHOT_V2 §6 Commute O-D gap |
+| 2026-08-11 | **Tier-2 wildfire / arson rings** — `WildfireArson` drought fuel spread + firebreaks + high-crime arson / ring flag; snapshot + ResourcesHud Fire 🌲/🕵️ |

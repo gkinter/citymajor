@@ -209,6 +209,32 @@ public sealed class WorldState
     /// </summary>
     public int AvailableHospitalBeds { get; set; }
 
+    /// <summary>
+    /// Drought / wildfire risk index 0–1 (heatwave or dry summer). Tier-2 / MISSING_SYSTEMS §1.1.
+    /// </summary>
+    public float WildfireRiskIndex { get; set; }
+
+    /// <summary>
+    /// Forest / park / ag tiles currently burning (Tier-2 wildfire cellular front).
+    /// </summary>
+    public int ActiveWildfireTileCount { get; set; }
+
+    /// <summary>
+    /// Mean arson risk over sampled zoned buildings from crime excess (0–1). Tier-2.
+    /// </summary>
+    public float ArsonRiskIndex { get; set; }
+
+    /// <summary>
+    /// True when ≥2 concurrent building fires sit on high-crime tiles (arson ring).
+    /// </summary>
+    public bool ArsonRingActive { get; set; }
+
+    /// <summary>
+    /// Per-tile wildfire burn intensity (0 = cold). Sized to <see cref="Tiles"/>.Count when first used.
+    /// Not exported on snapshots — aggregates only.
+    /// </summary>
+    public byte[]? WildfireIntensity { get; set; }
+
     // =========================================================================
     // Goods economy imbalance (persisted after daily economy tick)
     // =========================================================================

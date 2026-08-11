@@ -191,6 +191,12 @@ public sealed class WorldState
     /// </summary>
     public int ActiveFireCount { get; set; }
 
+    /// <summary>
+    /// Mean EMS survival rate (0–1) over sampled zoned tiles from response minutes (P5.4 / Phase 5b).
+    /// Default matches no-station response (≥15 min → 40%).
+    /// </summary>
+    public float MeanEmsSurvivalRate { get; set; } = 0.40f;
+
     // =========================================================================
     // Goods economy imbalance (persisted after daily economy tick)
     // =========================================================================

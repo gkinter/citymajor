@@ -10,7 +10,8 @@ namespace Forge.SimCore.Tests;
 
 /// <summary>
 /// Characterization tests for Cathedral P5.1 utilities foundation (SB-4987),
-/// P5.2 emergency response time (SB-4242), and P5.3 fire response v1.
+/// P5.2 emergency response time (SB-4242), P5.3 fire response v1,
+/// and P5.4 EMS survival curve (Phase 5b).
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -247,6 +248,78 @@ public sealed class CathedralUtilitiesTests
         var snap = host.GetSnapshot();
         Assert.Equal(host.State.HydrantCoverageFraction, snap.HydrantCoverageFraction, precision: 3);
         Assert.Equal(host.State.ActiveFireCount, snap.ActiveFireCount);
+    }
+
+    [Fact]
+    public void EmsSurvival_BucketsMatchMissingSystemsCurve()
+    {
+        Assert.Equal(EmsSurvival.SurvivalUnder5Min, EmsSurvival.CalculateRate(3f));
+        Assert.Equal(EmsSurvival.Survival5To10Min, EmsSurvival.CalculateRate(7f));
+        Assert.Equal(EmsSurvival.Survival10To15Min, EmsSurvival.CalculateRate(12f));
+        Assert.Equal(EmsSurvival.SurvivalOver15Min, EmsSurvival.CalculateRate(20f));
+        Assert.Equal(EmsSurvival.SurvivalOver15Min, EmsSurvival.DefaultMeanRate);
+        // ServiceSystem facade must stay in lockstep with SimCore helper.
+        Assert.Equal(EmsSurvival.CalculateRate(4f), ServiceSystem.CalculateEmsSurvivalRate(4f));
+    }
+
+    [Fact]
+    public void EmsSurvival_FasterResponseRaisesMeanSurvivalRate()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        for (int x = 8; x <= 40; x++)
+            host.PlaceRoad(x, 10);
+        for (int x = 12; x <= 36; x++)
+            host.State!.Tiles.ZoneType[host.State.Tiles.Index(x, 11)] = 1;
+
+        // Far station → slower response → lower survival.
+        PlaceBuilding(host.State!, 8, 11, ServiceFire);
+        host.Services!.UpdateMeanEmergencyResponse(host.State!);
+        float farMinutes = host.State.MeanEmergencyResponseMinutes;
+        float farSurvival = host.State.MeanEmsSurvivalRate;
+
+        // Near station → faster response → higher survival.
+        PlaceBuilding(host.State, 20, 11, ServiceFire);
+        host.Services.UpdateMeanEmergencyResponse(host.State);
+        float nearMinutes = host.State.MeanEmergencyResponseMinutes;
+        float nearSurvival = host.State.MeanEmsSurvivalRate;
+
+        Assert.True(nearMinutes < farMinutes,
+            $"near station should cut mean minutes ({nearMinutes:F2} vs {farMinutes:F2})");
+        Assert.True(nearSurvival > farSurvival,
+            $"faster response should raise mean survival ({nearSurvival:F3} vs {farSurvival:F3})");
+        Assert.InRange(nearSurvival, EmsSurvival.SurvivalOver15Min, EmsSurvival.SurvivalUnder5Min);
+        Assert.InRange(farSurvival, EmsSurvival.SurvivalOver15Min, EmsSurvival.SurvivalUnder5Min);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsMeanEmsSurvivalRate()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        for (int x = 8; x <= 24; x++)
+            host.PlaceRoad(x, 10);
+        PlaceBuilding(host.State!, 10, 11, ServiceFire);
+        for (int x = 12; x <= 20; x++)
+            host.State!.Tiles.ZoneType[host.State.Tiles.Index(x, 11)] = 1;
+
+        host.Services!.UpdateMeanEmergencyResponse(host.State!);
+
+        float rate = host.State.MeanEmsSurvivalRate;
+        Assert.InRange(rate, 0.40f, 0.90f);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("meanEmsSurvivalRate", out var survival));
+        Assert.Equal(JsonValueKind.Number, survival.ValueKind);
+        Assert.Equal(rate, survival.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(rate, dto.MeanEmsSurvivalRate, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(rate, snap.MeanEmsSurvivalRate, precision: 3);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

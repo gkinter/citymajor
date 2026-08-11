@@ -152,9 +152,11 @@ namespace CityMajor.UI
         {
             if (_emsValue != null)
             {
-                _emsValue.text = FormatEmergencyResponseMinutes(state.MeanEmergencyResponseMinutes);
+                var minutes = FormatEmergencyResponseMinutes(state.MeanEmergencyResponseMinutes);
+                var survivalPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanEmsSurvivalRate) * 100f);
+                _emsValue.text = $"{minutes} · {survivalPct}%";
                 _emsValue.tooltip =
-                    "Mean fire/EMS response minutes over sampled zoned tiles (road distance + traffic; 2× without hydrant).";
+                    "Mean fire/EMS response minutes over sampled zoned tiles (road distance + traffic; 2× without hydrant) and EMS survival rate from response time (P5.4).";
             }
 
             if (_fireValue != null)

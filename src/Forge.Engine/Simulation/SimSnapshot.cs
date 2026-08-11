@@ -235,6 +235,9 @@ public sealed class SimSnapshot
     /// <summary>Buildings currently burning (Cathedral P5.3).</summary>
     public int ActiveFireCount { get; init; }
 
+    /// <summary>Mean EMS survival rate 0–1 from response-minute curve (Cathedral P5.4).</summary>
+    public float MeanEmsSurvivalRate { get; init; } = 0.40f;
+
     public readonly record struct BuildingSnapshot(
         int GridX, int GridY, ushort TypeId, byte Level,
         byte State, ushort Occupants, ushort MaxOccupants, byte Condition);
@@ -403,6 +406,7 @@ public sealed class SimSnapshot
             MeanEmergencyResponseMinutes = state.MeanEmergencyResponseMinutes,
             HydrantCoverageFraction = state.HydrantCoverageFraction,
             ActiveFireCount = state.ActiveFireCount,
+            MeanEmsSurvivalRate = state.MeanEmsSurvivalRate,
         };
     }
 }

@@ -114,6 +114,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P5.1** | ✅ Done | Utilities L0 coverage export + characterization — `ae635b0` / SB-4987 |
 | **P5.2** | ✅ Done | Emergency response time (graph + BPR) — `06977a9` / SB-4242 |
 | **P5.3** | ✅ Done | Fire v1 (spread + hydrant coverage) |
+| **P5.4** | ✅ Done | EMS survival curve from response minutes |
 | **P6.1**–**P6.3** / **P5.6** | ✅ Done | Law spawn mults · Event*Mult bridge · Herald predicates · council seats |
 | **P7.5** | ✅ Done | Unity Cathedral HUD Event*Mult + WASM DTO export (Sprint 3 parity close) |
 | **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` · mode share `370e944` · unemployment HUD `e70ed78` |
@@ -223,7 +224,7 @@ flowchart TB
 ### P5 — Services & emergencies
 
 **Phase 5a (EA):** Utilities L0 balance, coverage overlays, response time = distance + traffic.  
-**Phase 5b (post-EA):** Fire spread, hydrants, EMS survival curve from `MISSING_SYSTEMS.md`.
+**Phase 5b:** Fire spread, hydrants (P5.3 ✅), EMS survival curve (P5.4 ✅). Wildfire / arson rings still Tier 2.
 
 | Milestone | Deliverable |
 |-----------|-------------|
@@ -231,6 +232,7 @@ flowchart TB
 | **P5.1** ✅ | Utilities L0 balance + coverage export characterization — [`CATHEDRAL_P5_SERVICES.md`](./CATHEDRAL_P5_SERVICES.md) / `ae635b0` / SB-4987 |
 | **P5.2** ✅ | Emergency response time model (distance + traffic / BPR) — `EmergencyResponseTime` / `06977a9` / SB-4242 |
 | **P5.3** ✅ | Fire v1 (spread + hydrant coverage) — `FireResponse` + ResourcesHud Fire line |
+| **P5.4** ✅ | EMS survival curve — `EmsSurvival` + `MeanEmsSurvivalRate` + ResourcesHud EMS % |
 
 ### P6 — Governance
 
@@ -373,3 +375,4 @@ openspec/
 | 2026-08-11 | **P6.2 landed** — `ApplyEventEffectsToState` city-wide Event*Mult + Herald snake_case; `EventEffectsTests` |
 | 2026-08-11 | **P7.5 landed** — Unity Cathedral HUD binds Event*Mult; WASM `SimSnapshotDto` Event*Mult export |
 | 2026-08-11 | **P5.3 landed** — `FireResponse` hydrant coverage + spread; no-hydrant 2× response; ResourcesHud Fire line |
+| 2026-08-11 | **P5.4 landed** — `EmsSurvival` response→survival curve; `MeanEmsSurvivalRate` snapshot + ResourcesHud EMS % |

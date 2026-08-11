@@ -277,13 +277,15 @@ public sealed class ServiceSystem
     /// <summary>
     /// Sample zoned tiles (every <paramref name="sampleStride"/>-th) and average
     /// fire/EMS response minutes (road-graph + BPR). Writes
-    /// <see cref="WorldState.MeanEmergencyResponseMinutes"/>.
+    /// <see cref="WorldState.MeanEmergencyResponseMinutes"/> and
+    /// <see cref="WorldState.MeanEmsSurvivalRate"/> (P5.4 survival curve).
     /// </summary>
     public void UpdateMeanEmergencyResponse(WorldState state, int sampleStride = 8)
     {
         int stride = Math.Max(1, sampleStride);
         var tiles = state.Tiles;
         double sum = 0;
+        double survivalSum = 0;
         int count = 0;
         int seen = 0;
 
@@ -294,13 +296,21 @@ public sealed class ServiceSystem
             if (tiles.ZoneType[idx] == 0) continue;
             if ((seen++ % stride) != 0) continue;
 
-            sum += CalculateFireResponseTime(state, x, y);
+            float minutes = CalculateFireResponseTime(state, x, y);
+            sum += minutes;
+            survivalSum += EmsSurvival.CalculateRate(minutes);
             count++;
         }
 
-        state.MeanEmergencyResponseMinutes = count == 0
-            ? EmergencyResponseTime.NoStationResponseMinutes
-            : (float)(sum / count);
+        if (count == 0)
+        {
+            state.MeanEmergencyResponseMinutes = EmergencyResponseTime.NoStationResponseMinutes;
+            state.MeanEmsSurvivalRate = EmsSurvival.DefaultMeanRate;
+            return;
+        }
+
+        state.MeanEmergencyResponseMinutes = (float)(sum / count);
+        state.MeanEmsSurvivalRate = (float)(survivalSum / count);
     }
 
     // =========================================================================
@@ -485,16 +495,11 @@ public sealed class ServiceSystem
     }
 
     /// <summary>
-    /// Calculate EMS survival rate based on response time.
+    /// Calculate EMS survival rate based on response time (Cathedral P5.4).
     /// Under 5 min: 90%, 5-10 min: 70%, 10-15 min: 55%, over 15 min: 40%.
     /// </summary>
     public static float CalculateEmsSurvivalRate(float responseMinutes)
-    {
-        if (responseMinutes < 5f) return 0.90f;
-        if (responseMinutes < 10f) return 0.70f;
-        if (responseMinutes < 15f) return 0.55f;
-        return 0.40f;
-    }
+        => EmsSurvival.CalculateRate(responseMinutes);
 
     // =========================================================================
     // Education

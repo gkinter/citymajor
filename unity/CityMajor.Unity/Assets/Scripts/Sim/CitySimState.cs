@@ -67,6 +67,9 @@ namespace CityMajor.Sim
         /// <summary>Cathedral P5.3 — buildings currently burning.</summary>
         public int ActiveFireCount;
 
+        /// <summary>Cathedral P5.4 — mean EMS survival rate from response minutes (0–1).</summary>
+        public float MeanEmsSurvivalRate;
+
         /// <summary>Cathedral P2 — mean rent / income burden (0–1+).</summary>
         public float MeanRentBurden;
 

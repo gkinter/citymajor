@@ -16,7 +16,8 @@ namespace Forge.SimCore.Tests;
 /// Tier-2 education depth, Tier-2 park amenity parity, Tier-2 hospital→HH
 /// health progression, P4 health→satisfaction/migration, Tier-2 tourism
 /// attractions stub, Tier-2 police/crime depth, Tier-2 waste/pollution depth,
-/// Tier-2 sewage / water contamination depth, and Cathedral P3.5 bilateral
+/// Tier-2 sewage / water contamination depth, Manning/CSO storm overflow,
+/// Tier-2 internet / telecom + fiber/5G tech gates, and Cathedral P3.5 bilateral
 /// trade freight metrics.
 /// </summary>
 public sealed class CathedralUtilitiesTests
@@ -1569,6 +1570,77 @@ public sealed class CathedralUtilitiesTests
     }
 
     [Fact]
+    public void TelecomNetwork_TechGates_CapFiberAnd5G()
+    {
+        // Quality alone would yield 5G — research must unlock fiber then Future 5G.
+        const float cov = 0.95f;
+        const float quality = 1f;
+        Assert.Equal(TelecomNetwork.Tier5G,
+            TelecomNetwork.ConnectionTier(cov, quality));
+        Assert.Equal(TelecomNetwork.TierCopper,
+            TelecomNetwork.ConnectionTier(cov, quality, TelecomNetwork.TierCopper));
+        Assert.Equal(TelecomNetwork.TierFiber,
+            TelecomNetwork.ConnectionTier(cov, quality, TelecomNetwork.TierFiber));
+        Assert.Equal(TelecomNetwork.Tier5G,
+            TelecomNetwork.ConnectionTier(cov, quality, TelecomNetwork.Tier5G));
+
+        var state = new WorldState(16, maxBuildings: 4);
+        Assert.Equal(TelecomNetwork.TierCopper, TelecomNetwork.MaxUnlockedTier(state));
+
+        state.UnlockTech(TelecomNetwork.TechFiberId);
+        Assert.Equal(TelecomNetwork.TierFiber, TelecomNetwork.MaxUnlockedTier(state));
+
+        state.UnlockTech(TelecomNetwork.Tech5GId);
+        Assert.Equal(TelecomNetwork.Tier5G, TelecomNetwork.MaxUnlockedTier(state));
+    }
+
+    [Fact]
+    public void TelecomTick_WithoutFiberTech_CapsAtCopper()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(20, 20)] = 1;
+        int hub = PlaceBuilding(host.State!, 20, 21, serviceFlags: TelecomNetwork.ServiceTelecom, level: 3);
+        host.State.Buildings.Condition[hub] = 255;
+        host.Services!.RebuildFromWorld(host.State);
+
+        Assert.False(host.State.IsTechUnlocked(TelecomNetwork.TechFiberId));
+        Assert.Equal(TelecomNetwork.TierCopper, TelecomNetwork.MaxUnlockedTier(host.State));
+
+        TelecomNetwork.Tick(host.State, host.Services.TelecomCoverage, days: 1f);
+        byte tier = host.State.Tiles.InternetConnection[host.State.Tiles.Index(20, 20)];
+        Assert.Equal(TelecomNetwork.TierCopper, tier);
+        Assert.True(tier < TelecomNetwork.TierFiber);
+    }
+
+    [Fact]
+    public void TelecomTick_FiberThen5GTech_RaisesMaxTier()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(20, 20)] = 5; // Office — fiber demand
+        int hub = PlaceBuilding(host.State!, 20, 21, serviceFlags: TelecomNetwork.ServiceTelecom, level: 3);
+        host.State.Buildings.Condition[hub] = 255;
+        host.Services!.RebuildFromWorld(host.State);
+        Assert.True(host.Services.TelecomCoverage.GetValue(20, 20) > 0.5f);
+
+        host.State.UnlockTech(TelecomNetwork.TechFiberId);
+        TelecomNetwork.Tick(host.State, host.Services.TelecomCoverage, days: 1f);
+        byte afterFiber = host.State.Tiles.InternetConnection[host.State.Tiles.Index(20, 20)];
+        Assert.True(afterFiber >= TelecomNetwork.TierFiber,
+            $"T044 should unlock fiber (got {afterFiber})");
+        Assert.True(afterFiber < TelecomNetwork.Tier5G,
+            "5G must stay locked without T045");
+
+        host.State.UnlockTech(TelecomNetwork.Tech5GId);
+        TelecomNetwork.Tick(host.State, host.Services.TelecomCoverage, days: 1f);
+        byte after5G = host.State.Tiles.InternetConnection[host.State.Tiles.Index(20, 20)];
+        Assert.Equal(TelecomNetwork.Tier5G, after5G);
+    }
+
+    [Fact]
     public void TelecomTick_HubCoverage_WritesInternetConnectionAndRaisesAccess()
     {
         var host = new SimHost();
@@ -1579,6 +1651,8 @@ public sealed class CathedralUtilitiesTests
         host.State.Tiles.InternetConnection[host.State.Tiles.Index(20, 20)] = 0;
         int hub = PlaceBuilding(host.State!, 20, 21, serviceFlags: TelecomNetwork.ServiceTelecom, level: 3);
         host.State.Buildings.Condition[hub] = 255;
+        // Unlock fiber so quality can deepen past copper (copper alone still covers).
+        host.State.UnlockTech(TelecomNetwork.TechFiberId);
 
         int slot = host.State!.Households.Allocate();
         Assert.True(slot >= 0);
@@ -1612,6 +1686,7 @@ public sealed class CathedralUtilitiesTests
         host.State!.Tiles.ZoneType[host.State.Tiles.Index(15, 15)] = 1;
         int hub = PlaceBuilding(host.State!, 15, 16, serviceFlags: TelecomNetwork.ServiceTelecom, level: 2);
         host.State.Buildings.Condition[hub] = 220;
+        host.State.UnlockTech(TelecomNetwork.TechFiberId);
         int slot = host.State!.Households.Allocate();
         host.State.Households.HomeBuildingId[slot] = (ushort)home;
         host.State.Households.MemberCount[slot] = 2;

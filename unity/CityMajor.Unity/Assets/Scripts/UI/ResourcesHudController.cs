@@ -263,7 +263,9 @@ namespace CityMajor.UI
                     ? $"📡 {accessPct}% · tier {tier:0.0}/3 · {covPct}%"
                     : "📡 —";
                 _netValue.tooltip =
-                    "Mean telecom access (tier / 3), mean InternetConnection tier (0=none … 3=5G), and fraction with copper+. Telecom hubs deepen TileData.InternetConnection; coverage feeds services satisfaction / immigration (Tier-2 internet / telecom → outcomes).";
+                    "Mean telecom access (tier / 3), mean InternetConnection tier (0=none … 3=5G), and fraction with copper+. " +
+                    "Telecom hubs deepen TileData.InternetConnection; fiber needs T044 Internet Infrastructure, 5G needs T045 5G/6G Networks. " +
+                    "Coverage feeds services satisfaction / immigration (Tier-2 internet / telecom → outcomes).";
             }
 
             if (_eduValue != null)

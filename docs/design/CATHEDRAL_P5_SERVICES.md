@@ -33,7 +33,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 | **Tier-2** | Waste / pollution depth | **Live** — `WasteCollection` depots → pollution; `WasteCoverageFraction` / `MeanPollution` / `MeanEnvironmentScore` + Waste HUD 🗑️ → P4 sat / immigration |
 | **Tier-2** | Sewage / water contamination | **Live** — `SewageTreatment` plants → water quality; `SewageCoverageFraction` / `MeanWaterContamination` / `MeanWaterQuality` + Sewage HUD 💧 → P4 sat / immigration |
 | **Tier-2** | Manning / CSO storm overflow | **Live** — `StormOverflow` Manning capacity + rational runoff; `MeanPipeUtilization` / `CsoOverflowRate` / `StormRunoffLoad` + Sewage HUD `cso`/`util` |
-| **Tier-2** | Internet / telecom | **Live** — `TelecomNetwork` hubs → `InternetConnection`; `InternetCoverageFraction` / `MeanInternetTier` / `MeanTelecomAccess` + Net HUD 📡 → P4 services sat / immigration |
+| **Tier-2** | Internet / telecom | **Live** — `TelecomNetwork` hubs → `InternetConnection`; T044/T045 fiber/5G tech gates; `InternetCoverageFraction` / `MeanInternetTier` / `MeanTelecomAccess` + Net HUD 📡 → P4 services sat / immigration |
 
 ---
 
@@ -332,17 +332,17 @@ Park + hospital coverage already write `HouseholdData.HealthSatisfaction` and `M
 ```
 
 - Telecom hubs (`ServiceTelecom`, `1 << 15`) publish coverage; **hub quality** (level × condition) scales effective factor so better hubs raise `TileData.InternetConnection` tier (0=none, 1=copper, 2=fiber, 3=5G)
-- Daily tick: zoned R/C/O/I tiles rewrite connection from coverage × quality; aggregates export coverage / mean tier / access
+- **Tech gates:** copper always; **fiber** needs T044 Internet Infrastructure (modern); **5G** needs T045 5G/6G Networks (Future) — `TelecomNetwork.MaxUnlockedTier` clamps the quality-derived tier
+- Daily tick: zoned R/C/O/I tiles rewrite connection from coverage × quality × unlock cap; aggregates export coverage / mean tier / access
 - Services satisfaction reads home-tile `InternetConnection`; immigration multiplies by telecom attractiveness (**0.55–1.45**)
-- Unity ResourcesHud Net line: `📡 {access%} · tier {tier}/3 · {cov%}`
+- Unity ResourcesHud Net line: `📡 {access%} · tier {tier}/3 · {cov%}` (tooltip notes T044/T045)
 
-`CathedralUtilitiesTests` + `PopulationSystemTests` pin quality→higher tier, hub tick→connection + aggregates, snapshot export, and telecom→satisfaction / immigration.
+`CathedralUtilitiesTests` + `PopulationSystemTests` pin quality→higher tier, tech caps, hub tick→connection + aggregates, snapshot export, and telecom→satisfaction / immigration.
 
 ## 5. Out of scope (this stub)
 
-- Full fiber/5G tech-tree unlock gates (Tier-2 uses hub quality → tier)
 - Rewriting tile BFS grids — keep daily ServiceSystem path
 - Full insurance market / flood-risk premium coupling (fire rating mult is the v1 hook)
-- Garbage truck route logistics / landfill capacity lifespan
+- Garbage truck route logistics / landfill capacity lifespan / recycling diversion rates
 - Per-pipe graph routing / pump-station elevation lifts (Manning/CSO uses local slope + plant quality capacity)
 - Separated-sewer retrofit construction events (quality→combined fraction is the thin hook)

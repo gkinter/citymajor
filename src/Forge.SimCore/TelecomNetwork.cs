@@ -7,8 +7,10 @@ namespace Forge.SimCore;
 /// Tier-2 internet / telecom coverage → city outcomes (Cathedral P5).
 /// Telecom hubs (<see cref="ServiceTelecom"/>) publish coverage; hub quality
 /// deepens the tier written to <see cref="TileData.InternetConnection"/>
-/// (0=none, 1=copper, 2=fiber, 3=5G). Coverage feeds services satisfaction and
-/// immigration attractiveness. Aggregates feed ResourcesHud Net.
+/// (0=none, 1=copper, 2=fiber, 3=5G). Fiber requires modern
+/// <see cref="TechFiberId"/> (T044); 5G requires Future <see cref="Tech5GId"/>
+/// (T045). Coverage feeds services satisfaction and immigration attractiveness.
+/// Aggregates feed ResourcesHud Net.
 /// </summary>
 public static class TelecomNetwork
 {
@@ -27,6 +29,18 @@ public static class TelecomNetwork
     /// <summary>TileData.InternetConnection — 5G / dense wireless.</summary>
     public const byte Tier5G = 3;
 
+    /// <summary>
+    /// technologies.json array index for T044 Internet Infrastructure (modern / office era).
+    /// Unlocks fiber tier.
+    /// </summary>
+    public const int TechFiberId = 43;
+
+    /// <summary>
+    /// technologies.json array index for T045 5G/6G Networks (Future era).
+    /// Unlocks 5G tier.
+    /// </summary>
+    public const int Tech5GId = 44;
+
     /// <summary>Minimum effective factor counted as "covered" for HUD fraction.</summary>
     public const float MinCoverageForService = 0.2f;
 
@@ -43,6 +57,19 @@ public static class TelecomNetwork
     }
 
     /// <summary>
+    /// Highest <see cref="TileData.InternetConnection"/> tier research currently allows.
+    /// Copper is always available; fiber needs T044; 5G needs T045.
+    /// </summary>
+    public static byte MaxUnlockedTier(WorldState state)
+    {
+        if (state.IsTechUnlocked(Tech5GId))
+            return Tier5G;
+        if (state.IsTechUnlocked(TechFiberId))
+            return TierFiber;
+        return TierCopper;
+    }
+
+    /// <summary>
     /// Map effective factor to <see cref="TileData.InternetConnection"/> tier.
     /// </summary>
     public static byte TierFromFactor(float effectiveFactor)
@@ -55,10 +82,23 @@ public static class TelecomNetwork
     }
 
     /// <summary>
-    /// Connection tier from coverage + hub quality (test / HUD helper).
+    /// Clamp a quality-derived tier to the research unlock cap.
     /// </summary>
-    public static byte ConnectionTier(float coverage, float hubQuality)
-        => TierFromFactor(EffectiveTelecomFactor(coverage, hubQuality));
+    public static byte ClampToUnlockedTier(byte tier, byte maxUnlockedTier)
+    {
+        byte cap = maxUnlockedTier < TierCopper ? TierCopper : maxUnlockedTier;
+        if (cap > Tier5G) cap = Tier5G;
+        return tier > cap ? cap : tier;
+    }
+
+    /// <summary>
+    /// Connection tier from coverage + hub quality (test / HUD helper).
+    /// Optional <paramref name="maxUnlockedTier"/> applies fiber/5G tech gates.
+    /// </summary>
+    public static byte ConnectionTier(float coverage, float hubQuality, byte maxUnlockedTier = Tier5G)
+        => ClampToUnlockedTier(
+            TierFromFactor(EffectiveTelecomFactor(coverage, hubQuality)),
+            maxUnlockedTier);
 
     /// <summary>
     /// Telecom access 0–1 from a connection tier (tier / 3).
@@ -142,7 +182,7 @@ public static class TelecomNetwork
 
     /// <summary>
     /// Write <see cref="TileData.InternetConnection"/> from coverage × hub quality
-    /// on zoned tiles, then export
+    /// on zoned tiles (capped by fiber/5G tech unlocks), then export
     /// <see cref="WorldState.InternetCoverageFraction"/>,
     /// <see cref="WorldState.MeanInternetTier"/>, and
     /// <see cref="WorldState.MeanTelecomAccess"/>.
@@ -155,6 +195,7 @@ public static class TelecomNetwork
     {
         _ = days; // connection is stateful coverage rewrite (like sewage connection bit)
         float quality = MeanHubQuality(state);
+        byte maxTier = MaxUnlockedTier(state);
         int upgraded = 0;
 
         var tiles = state.Tiles;
@@ -173,7 +214,7 @@ public static class TelecomNetwork
 
             float coverage = Math.Clamp(telecomCoverage.GetValue(x, y), 0f, 1f);
             byte before = tiles.InternetConnection[idx];
-            byte after = ConnectionTier(coverage, quality);
+            byte after = ConnectionTier(coverage, quality, maxTier);
             tiles.InternetConnection[idx] = after;
             if (after > before)
                 upgraded++;

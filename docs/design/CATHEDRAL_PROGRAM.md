@@ -127,7 +127,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **Tier-2 waste** | ✅ Done | Garbage depots → pollution → env sat / immigration + Waste HUD 🗑️ |
 | **Tier-2 sewage** | ✅ Done | Treatment plants → water quality → health/env / immigration + Sewage HUD 💧 |
 | **Manning/CSO** | ✅ Done | Manning pipe capacity + rational storm runoff → CSO overflow → pollution + Sewage HUD cso/util |
-| **Tier-2 internet** | ✅ Done | Telecom hubs → `InternetConnection` tiers → services sat / immigration + Net HUD 📡 |
+| **Tier-2 internet** | ✅ Done | Telecom hubs → `InternetConnection` tiers (T044 fiber / T045 5G gates) → services sat / immigration + Net HUD 📡 |
 | **P6.1**–**P6.3** / **P5.6** | ✅ Done | Law spawn mults · Event*Mult bridge · Herald predicates · council seats |
 | **P7.5** | ✅ Done | Unity Cathedral HUD Event*Mult + WASM DTO export (Sprint 3 parity close) |
 | **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` · mode share `370e944` · unemployment HUD `e70ed78` |
@@ -258,7 +258,7 @@ flowchart TB
 | **Tier-2 waste** ✅ | Garbage depots → pollution → env score — `WasteCollection` + Waste HUD 🗑️ → P4 sat / immigration |
 | **Tier-2 sewage** ✅ | Treatment plants → water quality — `SewageTreatment` + Sewage HUD 💧 → P4 sat / immigration |
 | **Manning/CSO** ✅ | Manning capacity + rational runoff → CSO — `StormOverflow` + Sewage HUD `cso`/`util` |
-| **Tier-2 internet** ✅ | Telecom hubs → `InternetConnection` — `TelecomNetwork` + Net HUD 📡 → P4 services sat / immigration |
+| **Tier-2 internet** ✅ | Telecom hubs → `InternetConnection` — `TelecomNetwork` + T044/T045 fiber/5G gates + Net HUD 📡 → P4 services sat / immigration |
 
 ### P6 — Governance
 
@@ -425,6 +425,7 @@ openspec/
 | 2026-08-11 | **Tier-2 waste / pollution** — `WasteCollection` depots abate R/C waste; `WasteCoverageFraction` / `MeanPollution` / `MeanEnvironmentScore` + Waste HUD 🗑️ → P4 sat / immigration |
 | 2026-08-11 | **Tier-2 sewage / water contamination** — `SewageTreatment` plants abate waterborne pollution; `SewageCoverageFraction` / `MeanWaterContamination` / `MeanWaterQuality` + Sewage HUD 💧 → P4 sat / immigration |
 | 2026-08-11 | **Tier-2 internet / telecom** — `TelecomNetwork` hubs deepen `InternetConnection` (0–3); `InternetCoverageFraction` / `MeanInternetTier` / `MeanTelecomAccess` + Net HUD 📡 → P4 services sat / immigration |
+| 2026-08-11 | **Fiber/5G tech gates** — T044 Internet Infrastructure unlocks fiber; T045 5G/6G Networks unlocks 5G; copper without research |
 | 2026-08-11 | **Manning / CSO storm overflow** — `StormOverflow` Manning capacity + rational runoff; `MeanPipeUtilization` / `CsoOverflowRate` / `StormRunoffLoad` + Sewage HUD 💧 cso/util |
 | 2026-08-11 | **P3.5 bilateral trade routes** — partner + contract + `FreightMonths`; SimHost keeps bilateral routes; snapshot + Unity Trade/Economy HUD |
 | 2026-08-11 | **SB-3728 create/cancel bilateral** — `SimHost.CreateBilateralTradeRoute` / `CancelBilateralTradeRoute`; Unity Trade strip `[Y]` + toolbar |

@@ -21,7 +21,7 @@ Make the **goods economy legible** in HUD: top shortages/surpluses with prices, 
 | P3.2 | Market zone partition count on snapshot | **Partial** — `ActiveZoneCount` in `EconomySystem`; export stub `MarketZoneCount` |
 | P3.3 | Per-zone price spread visible (partition prices differ) | **Done** — `GetAnchorZonePriceSpreads` + Unity Economy/Cathedral HUD; scale 1→4→9→16 |
 | P3.4 | Inter-zone friction on snapshot + HUD | **Live** — `MeanInterZoneFriction`, `InterZoneTradeVolume`, `GoodsTransportCostIndex`, friction corridor overlay |
-| P3.5 | Traffic delay → goods delivery lag | **Not implemented** — cross-link P1 |
+| P3.5 | Traffic delay → goods delivery lag | **Done** — `EffectiveTradeFriction` + industrial throughput; Unity Delivery % HUD |
 | P3.6 | Bilateral trade routes | **v2 boundary** — `TradeSystem.CreateTradeRoute` exists; player-facing routes deferred |
 
 ---
@@ -122,11 +122,12 @@ Panel shows **top 5 shortages** and **top 5 surpluses**, each row includes `city
 
 ## 6. Traffic delay → goods delivery (P1 × P3)
 
-**Target model (P3.5):**
+**Model (P3.5 — landed):**
 
 ```
-delivery_delay_z = mean_edge_delay_z / baseline_edge_delay    // from P1 traffic partition
+delivery_delay_z = mean_road_tile_traffic_z   // 0 free-flow … 1 congested (P1 overlay)
 effective_friction(z_a, z_b) = TradeCoefficients[z_a,z_b] * (1 + 0.5 * max(delay_z_a, delay_z_b))
+industrial_throughput = clamp(1 − 0.4 * delay_local, 0.35, 1)
 ```
 
 Effects:
@@ -134,8 +135,10 @@ Effects:
 - High congestion reduces cross-zone trade volume in `CrossZoneTrade` greedy matcher.
 - Same-zone supply consumed first; distant zones starve during rush hour.
 - `MeanInterZoneFriction` rises when traffic delays rise (observable feedback loop).
+- Industrial sell orders scale by `IndustrialThroughputFromDeliveryDelay`.
+- Snapshot / Unity: `MeanGoodsDeliveryDelay` + existing friction / transport-cost HUD.
 
-**Acceptance:** characterization test in `CathedralEconomyTests` when P3.5 lands (not skipped yet — add with Skip when stubbing).
+**Acceptance:** `CathedralEconomyTests.TrafficDelay_IncreasesMeanInterZoneFriction` (+ throughput / effective-friction unit pins).
 
 Cross-reference: P1 traffic partition observability · `WasmTrafficLite` · [`SIM_FOUNDATION_CHARTER.md`](./SIM_FOUNDATION_CHARTER.md) WP-A.
 
@@ -171,7 +174,7 @@ Document in UI: “International trade is automatic; trade agreements — coming
 | Goods shortage index correlates with industrial/commercial imbalance | `CathedralEconomyTests` | **Implement** (may pass today) |
 | Market zone prices differ across partitions | `CathedralEconomyTests` | **Green** (incl. trade-shock + 9/16 scale) |
 | `MarketZoneCount` on snapshot matches economy | `CathedralEconomyTests` | After export stub |
-| Traffic delay increases mean inter-zone friction | `CathedralEconomyTests` | Pending P3.5 |
+| Traffic delay increases mean inter-zone friction | `CathedralEconomyTests` | **Green** (P3.5) |
 | Goods panel JSON includes prices per top imbalance | Integration | Pending P3.1 |
 
 ```bash
@@ -185,7 +188,7 @@ dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"
 1. **P3.2** `MarketZoneCount` snapshot export (small, enables HUD scale indicator).  
 2. **P3.1** Add `price` + `goodId` to `GoodImbalanceDto` / `EconomySnapshotDto`.  
 3. **P3.3** Per-zone price spread test + optional sparse zone price export.  
-4. **P3.5** Wire traffic partition delays into `CrossZoneTrade` friction multiplier.  
+4. **P3.5** ✅ Wire traffic partition delays into `CrossZoneTrade` friction multiplier + industrial throughput.  
 5. **P3.6** Document v2 trade-route UI only — no sim changes in v1.
 
 **Dependency:** P3.5 requires P1 traffic partition delay export stable on snapshot (`MeanTrafficDensity` per partition or edge delay rollup).

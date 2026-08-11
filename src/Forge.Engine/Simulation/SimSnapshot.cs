@@ -113,6 +113,9 @@ public sealed class SimSnapshot
     /// <summary>Composite 0–1 goods transport cost pressure (friction + congestion).</summary>
     public float GoodsTransportCostIndex { get; init; }
 
+    /// <summary>Cathedral P3.5 — mean goods delivery delay (0 free-flow … 1 congested).</summary>
+    public float MeanGoodsDeliveryDelay { get; init; }
+
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
 
@@ -325,6 +328,7 @@ public sealed class SimSnapshot
             InterZoneTradeVolume = state.InterZoneTradeVolume,
             MeanInterZoneFriction = state.MeanInterZoneFriction,
             GoodsTransportCostIndex = state.GoodsTransportCostIndex,
+            MeanGoodsDeliveryDelay = state.MeanGoodsDeliveryDelay,
             MarketZoneCount = state.MarketZoneCount,
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,

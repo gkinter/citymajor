@@ -121,6 +121,8 @@ public sealed class SimSnapshotDto
     public float MeanInterZoneFriction { get; init; } = 1f;
     /// <summary>Composite 0–1 goods transport cost (friction + congestion).</summary>
     public float GoodsTransportCostIndex { get; init; }
+    /// <summary>Cathedral P3.5 — mean goods delivery delay (0 free-flow … 1 congested).</summary>
+    public float MeanGoodsDeliveryDelay { get; init; }
     public float MeanRentBurden { get; init; }
     public float ResidentialVacancy { get; init; } = 1f;
     /// <summary>Mean fire/EMS response minutes over sampled zoned tiles (P5.2).</summary>
@@ -215,6 +217,7 @@ public sealed class SimSnapshotDto
             InterZoneTradeVolume = state.InterZoneTradeVolume,
             MeanInterZoneFriction = state.MeanInterZoneFriction,
             GoodsTransportCostIndex = state.GoodsTransportCostIndex,
+            MeanGoodsDeliveryDelay = state.MeanGoodsDeliveryDelay,
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,
             MeanEmergencyResponseMinutes = state.MeanEmergencyResponseMinutes,

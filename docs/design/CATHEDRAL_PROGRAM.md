@@ -105,6 +105,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P3.2** | ✅ Done | Partition prices export + production-chain HUD — `45d8186` / `746780c` |
 | **P3.3** | ✅ Done | Market-zone pricing depth (1→4→9→16 + Unity partition spread HUD) |
 | **P3.4** | ✅ Done | Inter-zone friction overlay — `a9e7878` · Unity `F` overlay |
+| **P3.6** | ✅ Done | Traffic → goods delivery lag + industrial throughput · Unity Delivery % |
 | **P4.1** | ✅ Done | Home/work building O-D for traffic lite — `99a6547` · O-D HUD `ccf7f22` |
 | **P4.2** | ✅ Done | Frank-Wolfe + graph commute → satisfaction — `76db8bf` / `f72dd3d` |
 | **P4.5** | ✅ Done | Mode-choice stub (simple MNL) — `571352a` · mode-share HUD `370e944` |
@@ -204,7 +205,7 @@ flowchart TB
 | **P3.3** ✅ | 1→4→9→16 market zones + partition price spread HUD | `SIMULATION_ARCHITECTURE` §5 · Unity Economy `[E]` |
 | **P3.4** ✅ | Inter-zone trade friction matrix visible | WP-E / `a9e7878` |
 | **P3.5** | Bilateral trade routes (v2): partner city, contract, freight time | `TradeSystem`, SB-3728 |
-| **P3.6** | Traffic delays → goods delivery latency → industrial throughput | Cross-pillar with P1 |
+| **P3.6** ✅ | Traffic delays → goods delivery latency → industrial throughput | Domain P3.5 — `EffectiveTradeFriction` + `MeanGoodsDeliveryDelay` + Unity Delivery % |
 
 ### P4 — Population & life
 
@@ -363,3 +364,4 @@ openspec/
 | 2026-08-11 | **P3.3 closed** — zone scale 1→4→9→16 + trade-shock characterization; Unity Economy/Cathedral partition spread HUD (`[E]`) |
 | 2026-08-11 | **U3.4 landed** — Park zone byte 8 (T112) + density Med/High era+tech gates; `HasNearbyPark` reads painted park tiles |
 | 2026-08-11 | **P2.6 landed** — `AbandonedBuildingCount` on snapshot; decline formula characterization; Unity abandoned mesh tint + Cathedral `Abandoned N` |
+| 2026-08-11 | **P3.5 / PROGRAM P3.6 landed** — traffic delivery delay → `EffectiveTradeFriction` + industrial throughput; `MeanGoodsDeliveryDelay` + Unity Delivery % HUD |

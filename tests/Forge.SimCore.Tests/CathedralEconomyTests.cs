@@ -241,4 +241,74 @@ public sealed class CathedralEconomyTests
         Assert.NotEmpty(dto.FrictionCorridors);
         Assert.Equal(0.4f, dto.GoodsTransportCostIndex, 3);
     }
+
+    [Fact]
+    public void EffectiveTradeFriction_RisesWithDeliveryDelay()
+    {
+        float clear = EconomySystem.EffectiveTradeFriction(0, 1, 2, 0f, 0f);
+        float delayed = EconomySystem.EffectiveTradeFriction(0, 1, 2, 1f, 1f);
+
+        Assert.True(clear > 1f, $"Base neighbor friction should exceed 1. Got {clear:F3}");
+        Assert.True(delayed > clear * 1.4f,
+            $"Delay=1 should raise friction by ~50%. clear={clear:F3} delayed={delayed:F3}");
+        Assert.Equal(clear * 1.5f, delayed, 3);
+    }
+
+    [Fact]
+    public void TrafficDelay_IncreasesMeanInterZoneFriction()
+    {
+        var economy = new EconomySystem();
+        economy.SetActiveZoneCount(4);
+
+        void SeedImbalance()
+        {
+            economy.SetZoneSupply(0, Good.Food, 120f);
+            economy.SetZoneDemand(0, Good.Food, 10f);
+            economy.SetZoneSupply(3, Good.Food, 1f);
+            economy.SetZoneDemand(3, Good.Food, 90f);
+            economy.RecalculatePrices();
+        }
+
+        SeedImbalance();
+        economy.SetCityDeliveryDelay(0f);
+        economy.RunCrossZoneTradeOnly();
+        float frictionClear = economy.LastMeanInterZoneFriction;
+        float volumeClear = economy.LastInterZoneTradeVolume;
+
+        SeedImbalance();
+        economy.SetCityDeliveryDelay(1.0f);
+        economy.RunCrossZoneTradeOnly();
+        float frictionCongested = economy.LastMeanInterZoneFriction;
+        float volumeCongested = economy.LastInterZoneTradeVolume;
+
+        Assert.True(volumeClear > 0f, "Clear roads should allow some inter-zone trade.");
+        Assert.True(frictionCongested > frictionClear * 1.2f,
+            $"Congestion should raise mean friction. clear={frictionClear:F3} congested={frictionCongested:F3}");
+        Assert.True(volumeCongested <= volumeClear + 0.001f,
+            $"Congestion should not increase trade volume. clear={volumeClear:F1} congested={volumeCongested:F1}");
+        Assert.Equal(1.0f, economy.LastMeanGoodsDeliveryDelay, 3);
+    }
+
+    [Fact]
+    public void TrafficDelay_ReducesIndustrialThroughput()
+    {
+        float full = EconomySystem.IndustrialThroughputFromDeliveryDelay(0f);
+        float congested = EconomySystem.IndustrialThroughputFromDeliveryDelay(1f);
+
+        Assert.Equal(1f, full, 3);
+        Assert.True(congested < full,
+            $"Delivery delay should cut industrial throughput. full={full:F3} congested={congested:F3}");
+        Assert.Equal(0.6f, congested, 3);
+    }
+
+    [Fact]
+    public void Snapshot_ExportsMeanGoodsDeliveryDelay()
+    {
+        var state = new WorldState(32) { MeanGoodsDeliveryDelay = 0.42f };
+        var snap = SimSnapshot.CaptureFrom(state);
+        Assert.Equal(0.42f, snap.MeanGoodsDeliveryDelay, 3);
+
+        var dto = SimSnapshotDto.From(snap, state);
+        Assert.Equal(0.42f, dto.MeanGoodsDeliveryDelay, 3);
+    }
 }

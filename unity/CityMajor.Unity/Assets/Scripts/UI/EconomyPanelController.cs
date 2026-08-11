@@ -183,6 +183,7 @@ namespace CityMajor.UI
                 $"Inter-zone {state.InterZoneTradeVolume:N0}/d\n" +
                 $"Markets {zones} · Spread ×{spread:F2} · " +
                 $"Friction ×{state.MeanInterZoneFriction:F2} · " +
+                $"Delivery {Mathf.RoundToInt(Mathf.Clamp01(state.MeanGoodsDeliveryDelay) * 100f)}% · " +
                 $"Transport cost {Mathf.RoundToInt(Mathf.Clamp01(state.GoodsTransportCostIndex) * 100f)}%";
 
             var hasImbalances = _sim.TryGetGoodImbalances(out var shortages, out var surpluses);

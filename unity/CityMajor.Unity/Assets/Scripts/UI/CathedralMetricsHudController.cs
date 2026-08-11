@@ -215,6 +215,7 @@ namespace CityMajor.UI
             var commuteMin = Mathf.Max(0f, state.MeanCommuteMinutes);
             var friction = Mathf.Max(0f, state.MeanInterZoneFriction);
             var transport = Pct(state.GoodsTransportCostIndex);
+            var delivery = Pct(state.MeanGoodsDeliveryDelay);
             var abandoned = Mathf.Max(0, state.AbandonedBuildingCount);
 
             var goods = state.HasGoodsPrices
@@ -240,7 +241,7 @@ namespace CityMajor.UI
                 $"Unemployment {unemployment}\n" +
                 $"Commute  {commuteMin:0}m · O-D {od} · Sat {commuteSat}\n" +
                 $"Modes  Car {car} · Transit {transit} · Walk {walk}\n" +
-                $"Trade fric ×{friction:0.00} · Cost {transport}\n" +
+                $"Trade fric ×{friction:0.00} · Cost {transport} · Delivery {delivery}\n" +
                 $"Approval     {approval}\n" +
                 $"Power {power} · Water {water}\n" +
                 $"Goods  {goods}\n" +

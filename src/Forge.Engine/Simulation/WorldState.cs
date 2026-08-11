@@ -204,6 +204,11 @@ public sealed class WorldState
     /// </summary>
     public float GoodsTransportCostIndex { get; set; }
 
+    /// <summary>
+    /// Cathedral P3.5 — mean goods delivery delay from traffic (0 = free-flow, 1 = heavy congestion).
+    /// </summary>
+    public float MeanGoodsDeliveryDelay { get; set; }
+
     /// <summary>Active Leontief market partitions (1–16), from <see cref="EconomySystem.ActiveZoneCount"/>.</summary>
     public int MarketZoneCount { get; set; } = 1;
 

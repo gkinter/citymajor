@@ -37,6 +37,9 @@ namespace CityMajor.Sim
         /// <summary>Cathedral P3.4 — composite goods transport cost pressure (0–1).</summary>
         public float GoodsTransportCostIndex;
 
+        /// <summary>Cathedral P3.5 — mean goods delivery delay (0 free-flow … 1 congested).</summary>
+        public float MeanGoodsDeliveryDelay;
+
         public int BuildingCount;
         public int ConstructingBuildingCount;
         /// <summary>Cathedral P2.6 — abandoned buildings (visible with abandoned tint).</summary>

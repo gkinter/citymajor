@@ -102,6 +102,28 @@ public sealed class EconomySystem
         return FrictionFromOffsets(Math.Abs(ax - bx), Math.Abs(ay - by));
     }
 
+    /// <summary>
+    /// Cathedral P3.5 — geometric trade friction scaled by traffic delivery delay.
+    /// <c>effective = TradeCoefficients × (1 + 0.5 × max(delayA, delayB))</c> where delay is
+    /// excess travel (0 = free-flow, 1 ≈ travel time ≈ 2× free-flow / heavy congestion).
+    /// </summary>
+    public static float EffectiveTradeFriction(
+        int zoneA, int zoneB, int divisions, float delayA, float delayB)
+    {
+        float baseFriction = GetTradeFriction(zoneA, zoneB, divisions);
+        float delay = MathF.Max(Math.Clamp(delayA, 0f, 2f), Math.Clamp(delayB, 0f, 2f));
+        return baseFriction * (1f + 0.5f * delay);
+    }
+
+    /// <summary>
+    /// Cathedral P3.5 — industrial sell-order throughput vs local delivery delay (1 = full).
+    /// </summary>
+    public static float IndustrialThroughputFromDeliveryDelay(float deliveryDelay)
+    {
+        float d = Math.Clamp(deliveryDelay, 0f, 1.5f);
+        return Math.Clamp(1f - 0.4f * d, 0.35f, 1f);
+    }
+
     // =========================================================================
     // Orders
     // =========================================================================
@@ -342,6 +364,18 @@ public sealed class EconomySystem
 
     /// <summary>Weighted mean friction for inter-zone transfers in the last economy tick.</summary>
     public float LastMeanInterZoneFriction { get; private set; } = 1.0f;
+
+    /// <summary>
+    /// Cathedral P3.5 — mean goods delivery delay (0 = free-flow, 1 = heavy congestion)
+    /// rolled from market-zone road traffic / city mean.
+    /// </summary>
+    public float LastMeanGoodsDeliveryDelay { get; private set; }
+
+    /// <summary>Per-zone delivery delay overrides (traffic / test injection).</summary>
+    private readonly float[] _zoneDeliveryDelay = new float[MaxMarketZones];
+
+    /// <summary>City-wide fallback delay when zone samples are sparse (or tests).</summary>
+    private float _fallbackDeliveryDelay;
 
     // =========================================================================
     // Constructor
@@ -639,6 +673,7 @@ public sealed class EconomySystem
         state.GoodsSurplusIndex = ComputeSurplusIndex();
         state.InterZoneTradeVolume = LastInterZoneTradeVolume;
         state.MeanInterZoneFriction = LastMeanInterZoneFriction;
+        state.MeanGoodsDeliveryDelay = LastMeanGoodsDeliveryDelay;
         state.GoodsTransportCostIndex = ComputeGoodsTransportCostIndex(
             LastMeanInterZoneFriction, state.MeanTrafficDensity);
         state.MarketZoneCount = ActiveZoneCount;
@@ -792,6 +827,9 @@ public sealed class EconomySystem
         // Update zone count based on population thresholds
         UpdateZoneCount(state.Population);
 
+        // Cathedral P3.5 — traffic delays before order collection (throughput) + trade
+        RefreshZoneDeliveryDelays(state);
+
         // Step 1-2: Collect orders
         CollectOrders(state);
 
@@ -845,10 +883,17 @@ public sealed class EconomySystem
             var def = defOpt.Value;
             float productivity = _productionChains.CalculateProductivity(state, i, this);
 
-            // Sell orders: output goods scaled by productivity
+            // Cathedral P3.5 — congestion delays goods delivery → industrial throughput
+            int bx = buildings.GridX[i];
+            int by = buildings.GridY[i];
+            int buildingZone = GetMarketZoneForTile(bx, by, state.Tiles.Size);
+            float deliveryDelay = GetZoneDeliveryDelay(buildingZone);
+            float deliveryThroughput = IndustrialThroughputFromDeliveryDelay(deliveryDelay);
+
+            // Sell orders: output goods scaled by productivity × delivery throughput
             for (int g = 0; g < def.OutputGoods.Length; g++)
             {
-                float qty = def.OutputQuantities[g] * productivity / 30f; // monthly -> daily
+                float qty = def.OutputQuantities[g] * productivity * deliveryThroughput / 30f; // monthly -> daily
                 if (qty > 0f)
                 {
                     _sellOrders.Add(new Order
@@ -978,6 +1023,59 @@ public sealed class EconomySystem
         }
     }
 
+    /// <summary>
+    /// Cathedral P3.5 — roll per-market-zone delivery delay from road-tile traffic,
+    /// falling back to <see cref="WorldState.MeanTrafficDensity"/> / injected city delay.
+    /// </summary>
+    private void RefreshZoneDeliveryDelays(WorldState state)
+    {
+        Array.Clear(_zoneDeliveryDelay, 0, _zoneDeliveryDelay.Length);
+
+        float fallback = Math.Clamp(
+            MathF.Max(_fallbackDeliveryDelay, state.MeanTrafficDensity), 0f, 2f);
+
+        var traffic = state.Tiles.Traffic;
+        var roads = state.Tiles.RoadFlags;
+        int worldSize = state.Tiles.Size;
+        var zoneSum = new float[ActiveZoneCount];
+        var zoneCount = new int[ActiveZoneCount];
+
+        for (int i = 0; i < traffic.Length; i++)
+        {
+            if (roads[i] == 0) continue;
+            int x = i % worldSize;
+            int y = i / worldSize;
+            int zone = GetMarketZoneForTile(x, y, worldSize);
+            if (zone < 0 || zone >= ActiveZoneCount) continue;
+            zoneSum[zone] += Math.Clamp(traffic[i], 0f, 1f);
+            zoneCount[zone]++;
+        }
+
+        float delaySum = 0f;
+        int delaySamples = 0;
+        for (int z = 0; z < ActiveZoneCount; z++)
+        {
+            float delay = zoneCount[z] > 0
+                ? zoneSum[z] / zoneCount[z]
+                : fallback;
+            _zoneDeliveryDelay[z] = Math.Clamp(delay, 0f, 2f);
+            delaySum += _zoneDeliveryDelay[z];
+            delaySamples++;
+        }
+
+        LastMeanGoodsDeliveryDelay = delaySamples > 0 ? delaySum / delaySamples : fallback;
+    }
+
+    private float GetZoneDeliveryDelay(int zoneId)
+    {
+        if (zoneId < 0 || zoneId >= MaxMarketZones)
+            return Math.Clamp(_fallbackDeliveryDelay, 0f, 2f);
+        float z = _zoneDeliveryDelay[zoneId];
+        if (z > 0.0001f)
+            return z;
+        return Math.Clamp(_fallbackDeliveryDelay, 0f, 2f);
+    }
+
     private void CrossZoneTrade()
     {
         int divisions = (int)MathF.Ceiling(MathF.Sqrt(ActiveZoneCount));
@@ -1026,7 +1124,10 @@ public sealed class EconomySystem
                 foreach (int surplusZone in surplusZones)
                 {
                     float priceA = _zones[surplusZone].Prices[g];
-                    float friction = GetTradeFriction(surplusZone, deficitZone, divisions);
+                    float friction = EffectiveTradeFriction(
+                        surplusZone, deficitZone, divisions,
+                        GetZoneDeliveryDelay(surplusZone),
+                        GetZoneDeliveryDelay(deficitZone));
                     float transport = priceA * BaseTransportCostFraction * friction;
                     float margin = priceB - (priceA + transport);
                     if (margin > 0f)
@@ -1048,7 +1149,10 @@ public sealed class EconomySystem
 
                 float priceA = _zones[surplusZone].Prices[g];
                 float priceB = _zones[deficitZone].Prices[g];
-                float friction = GetTradeFriction(surplusZone, deficitZone, divisions);
+                float friction = EffectiveTradeFriction(
+                    surplusZone, deficitZone, divisions,
+                    GetZoneDeliveryDelay(surplusZone),
+                    GetZoneDeliveryDelay(deficitZone));
                 float transport = priceA * BaseTransportCostFraction * friction;
                 if (priceA + transport >= priceB)
                     continue;
@@ -1439,6 +1543,35 @@ public sealed class EconomySystem
     {
         if (ActiveZoneCount > 1)
             CrossZoneTrade();
+    }
+
+    /// <summary>
+    /// Cathedral P3.5 test helper — inject city-wide delivery delay (0 free-flow … 1+ congested).
+    /// </summary>
+    internal void SetCityDeliveryDelay(float delay)
+    {
+        _fallbackDeliveryDelay = Math.Clamp(delay, 0f, 2f);
+        LastMeanGoodsDeliveryDelay = _fallbackDeliveryDelay;
+        for (int z = 0; z < MaxMarketZones; z++)
+            _zoneDeliveryDelay[z] = _fallbackDeliveryDelay;
+    }
+
+    /// <summary>
+    /// Cathedral P3.5 test helper — set per-zone delivery delays (length ≤ ActiveZoneCount).
+    /// </summary>
+    internal void SetZoneDeliveryDelays(params float[] delays)
+    {
+        Array.Clear(_zoneDeliveryDelay, 0, _zoneDeliveryDelay.Length);
+        float sum = 0f;
+        int n = 0;
+        for (int z = 0; z < ActiveZoneCount && delays != null && z < delays.Length; z++)
+        {
+            _zoneDeliveryDelay[z] = Math.Clamp(delays[z], 0f, 2f);
+            sum += _zoneDeliveryDelay[z];
+            n++;
+        }
+
+        LastMeanGoodsDeliveryDelay = n > 0 ? sum / n : _fallbackDeliveryDelay;
     }
 
     /// <summary>

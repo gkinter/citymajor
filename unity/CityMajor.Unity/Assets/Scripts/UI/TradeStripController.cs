@@ -117,6 +117,7 @@ namespace CityMajor.UI
                 _interzone.text =
                     $"Inter-zone volume: {state.InterZoneTradeVolume:N0}/day · " +
                     $"Friction ×{state.MeanInterZoneFriction:F2} · " +
+                    $"Delivery {Mathf.RoundToInt(Mathf.Clamp01(state.MeanGoodsDeliveryDelay) * 100f)}% · " +
                     $"Transport {Mathf.RoundToInt(Mathf.Clamp01(state.GoodsTransportCostIndex) * 100f)}%";
             }
 

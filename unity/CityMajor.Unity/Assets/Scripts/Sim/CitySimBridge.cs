@@ -113,6 +113,13 @@ namespace CityMajor.Sim
             {
                 State = CreatePlaceholderState();
                 Publish();
+                Debug.LogError(
+                    "[CityMajor] CitySimBridge running placeholder-only — HUD/zones will not match SimHost. " +
+                    "Play gate: CityMajor → Run Play Gate Batch Checks (U3.6) or ./scripts/verify-unity-play-gate.sh");
+            }
+            else
+            {
+                Debug.Log($"[CityMajor] SimHost ready (map {mapSize}) — Forge.SimCore live");
             }
         }
 
@@ -260,7 +267,11 @@ namespace CityMajor.Sim
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"[CityMajor] Forge.SimCore unavailable — using placeholder sim ({ex.Message})");
+                // U3.6 fail-fast: placeholder is not a Play gate. Agents/humans must rebuild DLL.
+                Debug.LogError(
+                    "[CityMajor] Forge.SimCore unavailable — placeholder sim is NOT valid for Play gate / SB-4176. " +
+                    "Run ./scripts/build-simcore-for-unity.sh then domain-reload. " +
+                    $"Editor: CityMajor → Run Play Gate Batch Checks (U3.6). Detail: {ex.Message}");
                 return false;
             }
         }

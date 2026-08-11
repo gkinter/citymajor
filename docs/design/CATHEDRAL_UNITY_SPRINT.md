@@ -91,6 +91,8 @@ Sprint 1–2 landed Cathedral **sim depth** (roads, zoning, goods, O-D, commute 
 | **Owner** | Orchestrator + human |
 | **Deliverable** | Update [`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md) for Cathedral Sprint 2/3 surfaces; Editor menu verify where possible |
 | **Acceptance** | Checklist subset signed for integration tip before next sim-depth sprint |
+| **Landed (automation)** | Enter-Play guards (SimCore/SimHost/bootstrap/build settings); **Run Play Gate Batch Checks**; Cathedral surfaces verify; CLI `./scripts/verify-unity-play-gate.sh`; placeholder → `LogError` |
+| **Still human** | SB-4176 Cathedral subset C1–C6 sign-off on integration tip |
 
 ### S2 carry — P3.3 market partitions (SimCore) ✅
 
@@ -134,7 +136,8 @@ Follow merge protocol in [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md). B
 - [x] Unity Play: friction corridor overlay reads economy corridor samples (`F`)
 - [x] Unity Play: extended zones + density paint work under era gates (Park `8`; Med/High density gated)
 - [x] Unity Play: O-D / commute satisfaction sample visible (Cathedral HUD — tip after U3.5 bind)
-- [ ] [`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md) Cathedral subset signed on integration tip
+- [x] Play gate automation (U3.6): batch checks + enter guards + CLI (`verify-unity-play-gate.sh`)
+- [ ] [`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md) Cathedral subset **human-signed** on integration tip (SB-4176)
 - [ ] `dotnet test --filter "FullyQualifiedName~Cathedral"` green
 - [ ] No commits that treat web `/play` as the player ship surface
 

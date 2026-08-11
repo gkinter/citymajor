@@ -11,7 +11,10 @@
 | **Open Play Scene** | Loads `Play.unity` |
 | **Open Play Mode Smoke Checklist** | Opens this doc |
 | **Log Smoke Steps** | Prints the 7 steps below to Console |
-| **Run Smoke Prep** | Open scene + SimCore/GLTF preflight + log steps |
+| **Run Smoke Prep** | Open scene + **U3.6 Play gate batch** + log steps |
+
+**Also:** **CityMajor → Run Play Gate Batch Checks (U3.6)** · CLI `./scripts/verify-unity-play-gate.sh`  
+Entering Play is **cancelled** if SimCore DLL / SimHost type / bootstrap / build-settings blockers fail (toggle skip under **CityMajor → Play Gate**).
 
 ---
 
@@ -19,7 +22,7 @@
 
 - [ ] Project open at `unity/CityMajor.Unity` (Unity 6000.5+ / URP)
 - [ ] `./scripts/build-simcore-for-unity.sh` after any `SimHost` change
-- [ ] **CityMajor → Smoke → Run Smoke Prep** — Console shows Preflight OK (or fix blockers)
+- [ ] **CityMajor → Smoke → Run Smoke Prep** — Console shows Play gate batch PASS (or fix blockers)
 
 ---
 
@@ -57,7 +60,8 @@ Use **CityMajor → Smoke → Open Play Scene**, then press **Play**.
 
 | Symptom | Likely fix |
 |---------|------------|
-| No sim / placeholder HUD | Rebuild SimCore DLL; domain reload |
+| Play cancelled on enter | Read Play gate BLOCK errors — missing DLL/bootstrap/build settings; or toggle Skip Enter Guards |
+| No sim / placeholder HUD | Rebuild SimCore DLL; domain reload; Console must show `SimHost ready` |
 | Roads/zones don’t stick | Confirm Play mode + raycast hits ZoneGrid collider |
 | No buildings | Wait ~8 ticks; check GLTF symlink (`CityMajor → Verify GLTF Catalog`) |
 | HUD static | `CitySimBridge` not publishing `OnStateChanged` — check bootstrap |

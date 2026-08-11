@@ -80,9 +80,11 @@ namespace CityMajor.Editor
         public static void RunSmokePrep()
         {
             OpenPlayScene();
-            CityMajorPlayVerify.RunPreflightChecks();
+            CityMajorPlayVerify.RunPlayGateBatchChecks();
             LogSmokeSteps();
-            Debug.Log("[CityMajor] Smoke prep done — press Play and walk the 7 steps.");
+            Debug.Log(
+                "[CityMajor] Smoke prep done — press Play and walk the 7 steps. " +
+                "Enter Play is blocked if SimCore/bootstrap/build-settings fail (U3.6).");
         }
     }
 }

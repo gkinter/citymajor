@@ -112,7 +112,13 @@ Unity v1 quality is **not** fully automated in CI today. Use this split so agent
 |-------|------------|-------|-------|
 | `Forge.Engine.Tests` + `Forge.Game.Tests` | ✅ | `.github/workflows/unity-simcore.yml` | 833 + 110 tests on `ubuntu-latest` |
 | Modern GLTF catalog on disk | ✅ | `scripts/verify-unity-gltf-catalog.sh` + GHA | 12 keys; Editor: **CityMajor → Verify GLTF Catalog** |
+| Achievements catalog JSON | ✅ | `scripts/verify-achievements-catalog.sh` | Editor: **CityMajor → Verify Achievements Catalog** |
 | Rendering parity (box LOD, demand foundation, ticker) | ✅ | Editor menu | **CityMajor → Verify Rendering Parity** |
+| Zone era / density gates (U3.4) | ✅ | Editor menu | **CityMajor → Verify Zone Era Gates (U3.4)** |
+| Play scene bootstrap + build settings | ✅ | Editor + CLI | **Verify Play Scene Bootstrap**; `./scripts/verify-unity-play-gate.sh` |
+| Cathedral Sprint 3 surfaces present | ✅ | Editor + CLI | **Verify Cathedral Surfaces (U3.6)** — HUD/overlays/UXML on disk |
+| Play gate batch (all of above) | ✅ | Editor + CLI | **CityMajor → Run Play Gate Batch Checks (U3.6)** · `./scripts/verify-unity-play-gate.sh` |
+| Play Mode enter guards | ✅ | Editor `InitializeOnLoad` | Blocks Play if SimCore DLL / SimHost type / bootstrap / build settings fail |
 | Web vitest (sim-metrics, event-catalog, news-ticker, play-keyboard) | ✅ | `.github/workflows/unity-simcore.yml` | `pnpm test` in `web/` |
 | SimCore → Unity DLL copy | ✅ | Script | `./scripts/build-simcore-for-unity.sh` — **run after every SimHost change** |
 | Windows headless player build | ✅ | Script | `./scripts/build-steam-unity.sh` — needs `UNITY_PATH`; produces `Build/Steam/windows/CityMajor.exe` |
@@ -126,23 +132,56 @@ Unity v1 quality is **not** fully automated in CI today. Use this split so agent
 
 **Agent rule:** lane merge gates ([UNITY_AGENT_DISPATCH.md](./UNITY_AGENT_DISPATCH.md)) are necessary but **not sufficient** — orchestrator still requests human Play verification before cherry-picking the next batch to `feat/unity-port-plan-2026-07-12`.
 
+**U3.6 note:** Automation hardens *prerequisites* and *surface presence*. It does **not** replace human SB-4176 sign-off for feel, panels, save/load, or FPS.
+
+---
+
+## Cathedral Sprint 2/3 subset (agent prep → human sign)
+
+Run **CityMajor → Smoke → Run Smoke Prep** (batch + enter guards), then human Play for:
+
+| # | Surface | Keys / UI | Pass |
+|---|---------|-----------|------|
+| C1 | Road tiers + bridge/tunnel/ramp | RoadTypeToolbar + ToolMode HUD; inspector flags → `PlaceRoad` | ☐ |
+| C2 | Economy truth + partition spread | `E` — goods, chain, min–max spread; Cathedral **Markets · Spread** | ☐ |
+| C3 | Congestion + friction overlays | `T` edge traffic; `F` friction corridors | ☐ |
+| C4 | Park + density era gates | `8` Park (T112); `D` Med T029 / High Industrial+T031 | ☐ |
+| C5 | Commute / O-D readouts | Cathedral HUD `Commute · O-D · Sat` | ☐ |
+| C6 | No placeholder sim | Console `[CityMajor] SimHost ready` (not placeholder-only Error) | ☐ |
+
+When C1–C6 pass on integration tip → tick SB-4176 Cathedral rows above + sign-off table.
+
 ---
 
 ## Editor menu
 
 **CityMajor → Smoke → …** — fast Play Mode smoke (see [UNITY_PLAY_SMOKE.md](./UNITY_PLAY_SMOKE.md)).
 
+**CityMajor → Run Play Gate Batch Checks (U3.6)** — SimCore DLL + SimHost type + build settings + bootstrap + catalogs + Cathedral surfaces.
+
 **CityMajor → Open Play Verification Checklist** — opens this doc in the OS default viewer.
 
 **CityMajor → Open Agent Dispatch Doc** — opens parallel-agent playbook for orchestrator.
 
-**CityMajor → Run Preflight Checks** — SimCore DLL + GLTF catalog before Play.
+**CityMajor → Run Preflight Checks** — same diagnostics as batch (alias for agents).
 
 **CityMajor → Verify GLTF Catalog** — asserts modern symlink + 12 shipped GLBs.
 
+**CityMajor → Verify Achievements Catalog** — StreamingAssets achievements JSON.
+
 **CityMajor → Verify Rendering Parity** — box LOD field, camera Distance, demand foundation UXML, EventTicker UXML.
 
+**CityMajor → Verify Zone Era Gates (U3.4)** — Park byte 8 + density Med/High tech gates.
+
+**CityMajor → Verify Play Scene Bootstrap** — `Play.unity` in build settings + `CityMajorBootstrap`.
+
+**CityMajor → Verify Cathedral Surfaces (U3.6)** — Economy/Friction/Traffic/Cathedral HUD types + road/tool UXML.
+
+**CityMajor → Play Gate → Skip Enter Guards (toggle)** — bypass enter-Play blockers (session EditorPrefs).
+
 **CityMajor → Setup Play Scene** — adds `CityMajorBootstrap` if missing.
+
+**CLI:** `./scripts/verify-unity-play-gate.sh` (`STRICT=1` fails on catalog warnings).
 
 ---
 

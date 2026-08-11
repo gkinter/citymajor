@@ -268,7 +268,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 
 **Controls summary:** `1`/`2`/`3` zones · `4` road · `0` erase · `X` bulldoze · `R` research · `H` herald · `C` citizens · `L` laws · `B` build · `P` blueprint · `E` economy · `G` politics · `F1` help · `V` services · `U` utilities · `T` edges · `F` friction · `Space` pause · `[`/`]`/`\` speed · LMB · MMB pan
 
-**Play gate:** [UNITY_PLAY_CHECKLIST.md](./UNITY_PLAY_CHECKLIST.md) · **CityMajor → Open Play Verification Checklist**
+**Play gate:** [UNITY_PLAY_CHECKLIST.md](./UNITY_PLAY_CHECKLIST.md) · **CityMajor → Open Play Verification Checklist** · **Run Play Gate Batch Checks (U3.6)** · `./scripts/verify-unity-play-gate.sh`
 
 ---
 

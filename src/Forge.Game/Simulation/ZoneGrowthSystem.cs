@@ -213,12 +213,7 @@ public sealed class ZoneGrowthSystem
                     float pollution = tiles.Pollution[idx];
                     float crime = tiles.Crime[idx];
 
-                    float declineChance = Math.Max(0f,
-                        -demand * DeclineBaseProbability
-                        + pollution * DeclinePollutionWeight
-                        + crime * DeclineCrimeWeight);
-
-                    declineChance = Math.Clamp(declineChance, 0f, 0.1f); // cap at 10% per day
+                    float declineChance = ComputeDeclineChance(demand, pollution, crime);
 
                     if (_rng.NextDouble() < declineChance)
                     {
@@ -231,9 +226,10 @@ public sealed class ZoneGrowthSystem
         // Process auto-demolition of long-abandoned buildings
         ProcessAbandonedBuildings(state);
 
-        // Advance in-progress construction and publish HUD count
+        // Advance in-progress construction and publish HUD counts
         ProcessConstruction(state);
         state.ConstructingBuildingCount = CountConstructingBuildings(state);
+        state.AbandonedBuildingCount = CountAbandonedBuildings(state);
     }
 
     // =========================================================================
@@ -791,6 +787,33 @@ public sealed class ZoneGrowthSystem
         }
 
         return count;
+    }
+
+    /// <summary>City-wide abandoned building count for snapshot / Cathedral HUD (P2.6).</summary>
+    internal static int CountAbandonedBuildings(WorldState state)
+    {
+        int count = 0;
+        var buildings = state.Buildings;
+        for (int i = 0; i < buildings.Capacity; i++)
+        {
+            if (!buildings.IsActive(i)) continue;
+            if (buildings.State[i] == StateAbandoned) count++;
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// Decline probability for an occupied tile (Cathedral P2.6 / AGENT_05).
+    /// Negative demand raises chance; pollution and crime add pressure. Capped at 10%/day.
+    /// </summary>
+    internal static float ComputeDeclineChance(float demand, float pollution, float crime)
+    {
+        float declineChance = Math.Max(0f,
+            -demand * DeclineBaseProbability
+            + pollution * DeclinePollutionWeight
+            + crime * DeclineCrimeWeight);
+        return Math.Clamp(declineChance, 0f, 0.1f);
     }
 
     /// <summary>

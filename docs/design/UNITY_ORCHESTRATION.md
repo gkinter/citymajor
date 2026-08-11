@@ -192,7 +192,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 |-----------|--------------|-------|
 | `ZoneOverlayRenderer` | — | R/C/I zone GL quads |
 | `ZoneGrowthVisualizer` | — | Building scale staging |
-| `BuildingInstancer` | — | GLTF / placeholder instanced meshes |
+| `BuildingInstancer` | — | GLTF / placeholder instanced meshes (constructing + **abandoned tint**, P2.6) |
 | `RoadOverlayRenderer` | — | Road network tint |
 | `VehicleInstancer` | — | GPU cubes on roads / sim vehicles |
 | `PedestrianInstancer` | — | ≤200 citizen dots, happiness tint |
@@ -232,7 +232,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `ApprovalMeterController` | — | Top-right mayor approval |
 | `EventTickerController` | — | Bottom HUD ticker — Herald headline from sim bucket |
 | `TimeControlsController` | `Space`, `[`/`]`/`\` (keypad 1/2/4) | Pause + 1×/2×/4× speed — not 5/6/7 (zone paint) |
-| `CathedralMetricsHudController` | — | Rent/vacancy/unemployment + commute/O-D/sat + **trade friction × / transport cost** (U3.3) |
+| `CathedralMetricsHudController` | — | Rent/vacancy/**abandoned**/unemployment + commute/O-D/sat + **trade friction × / transport cost** (U3.3 / P2.6) |
 | `ToolModeHudController` | — | Active tool indicator (zone/road/build/bulldoze) |
 | `RoadTypeToolbarController` | road mode (`4`) | Local/Collector/Highway + Ramp + Bridge/Tunnel |
 | `StatusToastController` | — | Ephemeral top toast (road reject / tool hints, U3.1) |

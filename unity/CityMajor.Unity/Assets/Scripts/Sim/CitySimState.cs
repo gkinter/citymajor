@@ -39,6 +39,8 @@ namespace CityMajor.Sim
 
         public int BuildingCount;
         public int ConstructingBuildingCount;
+        /// <summary>Cathedral P2.6 — abandoned buildings (visible with abandoned tint).</summary>
+        public int AbandonedBuildingCount;
         public int ZonedTiles;
         public float PowerCoverageFraction;
         public float WaterCoverageFraction;

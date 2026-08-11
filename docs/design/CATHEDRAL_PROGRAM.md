@@ -100,6 +100,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P1.5 UX** | ✅ Done | Dedicated ramp paint + bridge/tunnel toolbar toggle — `6084fad` / `b34942a` / `c8f9e52` |
 | **P2.1** | ✅ Done | Extended zone palette (office, mixed, park, ag) — `a990636` |
 | **P2.2**–**P2.5** | ✅ Done | Density brush, rent model, Herald housing triggers, vacancy/rent burden snapshot |
+| **P2.6** | ✅ Done | Decline/abandonment export + Unity abandoned tint / Cathedral HUD |
 | **P3.1** | ✅ Done | Goods panel shortages/surpluses + prices in HUD |
 | **P3.2** | ✅ Done | Partition prices export + production-chain HUD — `45d8186` / `746780c` |
 | **P3.3** | ✅ Done | Market-zone pricing depth (1→4→9→16 + Unity partition spread HUD) |
@@ -192,7 +193,7 @@ flowchart TB
 | **P2.3** ✅ | Housing market: rent = f(land value, supply, shortage); `rent_burden` per HH | `PopulationSystem`, events |
 | **P2.4** ✅ | Affordability → migration + `housing_crisis` events | Herald + politics |
 | **P2.5** ✅ | Construction states in UI (foundation → complete) | Partial in Unity |
-| **P2.6** | Decline/abandonment when demand negative + pollution/crime | `AGENT_05` decline formula |
+| **P2.6** ✅ | Decline/abandonment when demand negative + pollution/crime | Snapshot `AbandonedBuildingCount` + Unity abandoned tint / Cathedral HUD |
 
 ### P3 — Economy & trade
 
@@ -361,3 +362,4 @@ openspec/
 | 2026-08-10 | **Sprint 2 wave-3 sync** @ `06977a9` — P5.2 EMS response (`06977a9`), P5.5/P5.6 (`0452f88`/`ae15498`), P5.1 utilities char (`ae635b0`), P7.2 0-skip (`817e968`/SB-4986), mode-share HUD (`370e944`), unemployment HUD (`e70ed78`), smoke WASM wait (`0ecc0ba`), E-key fix (`5205201`), perf median gate (`6c1f077`); remaining **P3.3** |
 | 2026-08-11 | **P3.3 closed** — zone scale 1→4→9→16 + trade-shock characterization; Unity Economy/Cathedral partition spread HUD (`[E]`) |
 | 2026-08-11 | **U3.4 landed** — Park zone byte 8 (T112) + density Med/High era+tech gates; `HasNearbyPark` reads painted park tiles |
+| 2026-08-11 | **P2.6 landed** — `AbandonedBuildingCount` on snapshot; decline formula characterization; Unity abandoned mesh tint + Cathedral `Abandoned N` |

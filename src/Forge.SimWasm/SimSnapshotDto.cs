@@ -107,6 +107,8 @@ public sealed class SimSnapshotDto
     public Dictionary<int, float> EurekaBonuses { get; init; } = new();
     public Dictionary<int, int> BranchingChoices { get; init; } = new();
     public int ConstructingBuildingCount { get; init; }
+    /// <summary>Buildings currently abandoned (Cathedral P2.6).</summary>
+    public int AbandonedBuildingCount { get; init; }
     /// <summary>Share of working-age households with a workplace (0–1).</summary>
     public float EmploymentRate { get; init; }
     public float MeanTrafficDensity { get; init; }
@@ -202,6 +204,7 @@ public sealed class SimSnapshotDto
             EurekaBonuses = research is null ? new() : new Dictionary<int, float>(research.EurekaBonuses),
             BranchingChoices = research is null ? new() : new Dictionary<int, int>(research.BranchingChoices),
             ConstructingBuildingCount = state.ConstructingBuildingCount,
+            AbandonedBuildingCount = state.AbandonedBuildingCount,
             EmploymentRate = state.EmploymentRate,
             MeanTrafficDensity = state.MeanTrafficDensity,
             PowerCoverageFraction = state.PowerCoverageFraction,

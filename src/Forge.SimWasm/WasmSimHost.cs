@@ -91,6 +91,7 @@ public sealed class WasmSimHost
     public (float Car, float Transit, float Walk) ModeShares =>
         _host.IsInitialized ? _host.CollectModeShares() : (0f, 0f, 0f);
     public int ConstructingBuildingCount => _host.State?.ConstructingBuildingCount ?? 0;
+    public int AbandonedBuildingCount => _host.State?.AbandonedBuildingCount ?? 0;
     public float PowerCoverageFraction => _host.State?.PowerCoverageFraction ?? 1f;
     public float WaterCoverageFraction => _host.State?.WaterCoverageFraction ?? 1f;
     public float UtilityStressIndex => _host.State?.UtilityStressIndex ?? 0f;
@@ -313,6 +314,7 @@ public sealed class WasmStatusDto
     /// <summary>Bus/transit coverage proxy (0–1).</summary>
     public float BusCoverage { get; init; }
     public int ConstructingBuildingCount { get; init; }
+    public int AbandonedBuildingCount { get; init; }
     public float PowerCoverageFraction { get; init; } = 1f;
     public float WaterCoverageFraction { get; init; } = 1f;
     public float UtilityStressIndex { get; init; }
@@ -420,6 +422,7 @@ public sealed class WasmStatusDto
             TransitLineCount = host.TransitLineCount,
             BusCoverage = host.BusCoverage,
             ConstructingBuildingCount = host.ConstructingBuildingCount,
+            AbandonedBuildingCount = host.AbandonedBuildingCount,
             PowerCoverageFraction = host.PowerCoverageFraction,
             WaterCoverageFraction = host.WaterCoverageFraction,
             UtilityStressIndex = host.UtilityStressIndex,

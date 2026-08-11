@@ -130,6 +130,9 @@ public sealed class WorldState
     /// <summary>Buildings currently in constructing state (updated each zone growth tick).</summary>
     public int ConstructingBuildingCount { get; set; }
 
+    /// <summary>Buildings currently abandoned (Cathedral P2.6 — updated each zone growth tick).</summary>
+    public int AbandonedBuildingCount { get; set; }
+
     // =========================================================================
     // L0 utility partition balance (updated each sim tick)
     // =========================================================================

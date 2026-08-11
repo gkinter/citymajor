@@ -146,7 +146,7 @@ Run **CityMajor → Smoke → Run Smoke Prep** (batch + enter guards), then huma
 | C2 | Economy truth + partition spread | `E` — goods, chain, min–max spread; Cathedral **Markets · Spread** | ☐ |
 | C3 | Congestion + friction overlays | `T` edge traffic; `F` friction corridors | ☐ |
 | C4 | Park + density era gates | `8` Park (T112); `D` Med T029 / High Industrial+T031 | ☐ |
-| C5 | Commute / O-D readouts | Cathedral HUD `Commute · O-D · Sat` | ☐ |
+| C5 | Commute / O-D readouts | Cathedral HUD `Commute · O-D · Sat` + `Abandoned N` (P2.6) | ☐ |
 | C6 | No placeholder sim | Console `[CityMajor] SimHost ready` (not placeholder-only Error) | ☐ |
 
 When C1–C6 pass on integration tip → tick SB-4176 Cathedral rows above + sign-off table.

@@ -175,6 +175,9 @@ public sealed class SimSnapshot
     /// <summary>Buildings currently under construction.</summary>
     public int ConstructingBuildingCount { get; init; }
 
+    /// <summary>Buildings currently abandoned (Cathedral P2.6).</summary>
+    public int AbandonedBuildingCount { get; init; }
+
     /// <summary>Fraction of partitions with power supply ≥ demand (0–1).</summary>
     public float PowerCoverageFraction { get; init; } = 1f;
 
@@ -345,6 +348,7 @@ public sealed class SimSnapshot
             LawConstructionSpeedMult = state.LawConstructionSpeedMult,
             LawSpawnDemandMult = state.LawSpawnDemandMult,
             ConstructingBuildingCount = state.ConstructingBuildingCount,
+            AbandonedBuildingCount = state.AbandonedBuildingCount,
             PowerCoverageFraction = state.PowerCoverageFraction,
             WaterCoverageFraction = state.WaterCoverageFraction,
             BlackoutFraction = state.BlackoutFraction,

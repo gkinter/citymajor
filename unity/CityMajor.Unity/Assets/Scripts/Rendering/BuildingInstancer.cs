@@ -23,10 +23,12 @@ namespace CityMajor.Rendering
         Mesh _fallbackMesh;
         Material _mat;
         Material _matConstructing;
+        Material _matAbandoned;
         SimSnapshot _snap;
 
         const byte StateConstructing = 0;
         const byte StateOperational = 1;
+        const byte StateAbandoned = 2;
 
         readonly Dictionary<string, InstanceGroup> _groups = new();
 
@@ -54,6 +56,11 @@ namespace CityMajor.Rendering
             _matConstructing = new Material(Shader.Find("Universal Render Pipeline/Lit"))
             {
                 color = new Color(0.92f, 0.68f, 0.22f, 1f),
+            };
+            // Cathedral P2.6 — desaturated / darkened abandoned tint (matches web applyAbandonedTint).
+            _matAbandoned = new Material(Shader.Find("Universal Render Pipeline/Lit"))
+            {
+                color = new Color(0.28f, 0.30f, 0.32f, 1f),
             };
             GltfMeshCache.Preload(GltfCatalog.ShippedKeys);
 
@@ -113,14 +120,21 @@ namespace CityMajor.Rendering
 
             foreach (var b in snap.Buildings)
             {
-                if (b.TypeId == 0 || (b.State != StateConstructing && b.State != StateOperational))
+                if (b.TypeId == 0)
+                    continue;
+                if (b.State != StateConstructing && b.State != StateOperational && b.State != StateAbandoned)
                     continue;
 
                 var catalogKey = BuildingArchetypes.CatalogKeyForTypeId(b.TypeId);
                 if (string.IsNullOrEmpty(catalogKey))
                     continue;
 
-                var groupKey = b.State == StateConstructing ? catalogKey + "::constructing" : catalogKey;
+                var groupKey = b.State switch
+                {
+                    StateConstructing => catalogKey + "::constructing",
+                    StateAbandoned => catalogKey + "::abandoned",
+                    _ => catalogKey,
+                };
                 var matrix = ComposeBuildingMatrix(b.GridX, b.GridY, b.TypeId, b.Level, b.State, b.Condition);
                 if (!grouped.TryGetValue(groupKey, out var list))
                 {
@@ -199,16 +213,27 @@ namespace CityMajor.Rendering
                     buffer[i] = matrices[i];
 
                 var constructing = groupKey.EndsWith("::constructing");
-                var catalogKey = constructing ? groupKey[..^"::constructing".Length] : groupKey;
+                var abandoned = groupKey.EndsWith("::abandoned");
+                var catalogKey = constructing
+                    ? groupKey[..^"::constructing".Length]
+                    : abandoned
+                        ? groupKey[..^"::abandoned".Length]
+                        : groupKey;
                 var mesh = GltfMeshCache.GetOrLoad(catalogKey);
                 var isFallback = mesh == null;
                 if (isFallback)
                     mesh = _fallbackMesh;
 
+                Material material = _mat;
+                if (constructing)
+                    material = _matConstructing;
+                else if (abandoned)
+                    material = _matAbandoned;
+
                 _groups[groupKey] = new InstanceGroup
                 {
                     Mesh = mesh,
-                    Material = constructing ? _matConstructing : _mat,
+                    Material = material,
                     IsFallback = isFallback,
                     Matrices = buffer,
                     Count = count,

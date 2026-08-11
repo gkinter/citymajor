@@ -202,6 +202,37 @@ public sealed class LawSystem
     }
 
     /// <summary>
+    /// Clear all active toggles without unloading catalog definitions.
+    /// Used by snapshot restore before re-applying saved ordinance ids.
+    /// </summary>
+    public void ClearActive()
+    {
+        Array.Clear(_active, 0, _active.Length);
+        ActiveLawCount = 0;
+    }
+
+    /// <summary>Slug ids of ordinances currently enabled (stable save/load order = catalog order).</summary>
+    public string[] CollectActiveIds()
+    {
+        if (ActiveLawCount <= 0) return [];
+
+        var ids = new string[ActiveLawCount];
+        int n = 0;
+        for (int i = 0; i < _definitions.Count; i++)
+        {
+            if (!_active[i]) continue;
+            ids[n++] = _definitions[i].Id;
+            if (n >= ids.Length) break;
+        }
+
+        if (n == ids.Length) return ids;
+        if (n == 0) return [];
+        var trimmed = new string[n];
+        Array.Copy(ids, trimmed, n);
+        return trimmed;
+    }
+
+    /// <summary>
     /// Sum the <paramref name="effectKey"/> modifier across all active ordinances.
     /// Missing keys return 0 (safe default).
     /// </summary>

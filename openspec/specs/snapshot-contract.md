@@ -16,6 +16,7 @@
 - **P7.4** — Gap matrix CI: `scripts/verify-sim-snapshot-v2.py` (doc→code + code→doc) on `unity-simcore.yml`; local `pnpm verify:sim-snapshot-v2`.
 - **P7.5** — Unity Cathedral HUD Event*Mult + WASM DTO export.
 - **Law\*Mult WASM save/load** — `SimSnapshotDto` exports Law traffic/construction/spawn Mults; `ApplySnapshotDto` restores them (parity with Event\*Mult).
+- **ActiveLawIds WASM save/load** — `SimSnapshotDto` exports active ordinance slug ids; `ApplySnapshotDto` restores `LawSystem` toggles then Law\*Mult scalars.
 
 ## Target milestones
 

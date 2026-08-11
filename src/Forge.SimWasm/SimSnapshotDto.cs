@@ -95,6 +95,11 @@ public sealed class SimSnapshotDto
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
     /// <summary>Count of live EventSystem instances — Herald HUD badge (Cathedral P6).</summary>
     public int ActiveEventCount { get; init; }
+    /// <summary>
+    /// Cathedral P6.1 — slug ids of player-enabled ordinances (laws.json).
+    /// Deeper save/load than Law*Mult scalars alone — restore via <see cref="LawSystem.SetActive"/>.
+    /// </summary>
+    public string[] ActiveLawIds { get; init; } = [];
     /// <summary>Cathedral P6.1 — road capacity multiplier from active ordinances.</summary>
     public float LawTrafficCapacityMult { get; init; } = 1f;
     /// <summary>Cathedral P6.1 — construction duration multiplier from active ordinances.</summary>
@@ -191,6 +196,7 @@ public sealed class SimSnapshotDto
         ServiceSystem? services = null,
         PopulationSystem? population = null,
         ResearchSystem? research = null,
+        LawSystem? laws = null,
         float[]? edgeVolumes = null,
         float[]? edgeTravelTimes = null,
         float carModeShare = 0f,
@@ -230,6 +236,7 @@ public sealed class SimSnapshotDto
             FrictionCorridors = frictionCorridors,
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
             ActiveEventCount = events?.ActiveEventCount ?? 0,
+            ActiveLawIds = laws?.CollectActiveIds() ?? [],
             LawTrafficCapacityMult = state.LawTrafficCapacityMult,
             LawConstructionSpeedMult = state.LawConstructionSpeedMult,
             LawSpawnDemandMult = state.LawSpawnDemandMult,
@@ -770,6 +777,7 @@ public sealed class EconomySnapshotDto
 [JsonSerializable(typeof(UtilityCoverageDto[]))]
 [JsonSerializable(typeof(ActiveEventDto))]
 [JsonSerializable(typeof(ActiveEventDto[]))]
+[JsonSerializable(typeof(string[]))]
 [JsonSerializable(typeof(GoodImbalanceDto))]
 [JsonSerializable(typeof(GoodImbalanceDto[]))]
 [JsonSerializable(typeof(GoodFlowDto))]

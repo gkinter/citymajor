@@ -180,6 +180,11 @@ FIELD_EXPAND: dict[str, dict[str, list[str]]] = {
         "W": ["ActiveEvents"],
         "U": [],  # Herald path — not on CitySimState
     },
+    "ActiveLawIds[]": {
+        "E": [],
+        "W": ["ActiveLawIds"],
+        "U": [],
+    },
     "ActiveOrdinances / NextElectionYear": {
         "E": ["ActiveOrdinances", "NextElectionYear"],
         "W": [],
@@ -233,6 +238,7 @@ REVERSE_ALLOW: dict[str, set[str]] = {
         "Traffic",
         "ServiceCoverage",
         "ActiveEvents",
+        "ActiveLawIds",
         "Economy",
         "RoadGraph",
         "FrictionCorridors",

@@ -22,7 +22,7 @@ public sealed partial class SimHost
         var (edgeVolumes, edgeTravelTimes) = CollectTrafficEdgeExport();
         var (carShare, transitShare, walkShare) = CollectModeShares();
         var dto = SimSnapshotDto.From(
-            snap, _state, _events, _economy, _services, _population, _research,
+            snap, _state, _events, _economy, _services, _population, _research, _laws,
             edgeVolumes, edgeTravelTimes,
             carShare, transitShare, walkShare);
         return JsonSerializer.Serialize(dto, SnapshotJsonContext.Default.SimSnapshotDto);
@@ -177,7 +177,8 @@ public sealed partial class SimHost
         _fullTraffic?.RestoreModeShares(
             dto.CarModeShare, dto.TransitModeShare, dto.WalkModeShare);
 
-        // Cathedral wave restores — Law*Mult, Event*Mult, delivery delay, vacancy, abandoned, L2 sample.
+        // Cathedral wave restores — active law ids (+ Mults), Event*Mult, delivery delay, vacancy, abandoned, L2 sample.
+        RestoreActiveLaws(dto);
         RestoreLawMultipliers(dto);
         RestoreEventMultipliers(dto);
         RestoreActiveEvents(dto);
@@ -225,6 +226,24 @@ public sealed partial class SimHost
     {
         if (savedId <= 0) return 0;
         return map.TryGetValue(savedId, out int mapped) ? mapped : savedId;
+    }
+
+    private void RestoreActiveLaws(SimSnapshotDto dto)
+    {
+        if (_laws is null || _state is null) return;
+
+        _laws.ClearActive();
+        if (dto.ActiveLawIds is { Length: > 0 })
+        {
+            foreach (var lawId in dto.ActiveLawIds)
+            {
+                if (string.IsNullOrWhiteSpace(lawId)) continue;
+                _laws.SetActive(lawId, true);
+            }
+        }
+
+        // Re-rollup Mults from restored toggles; RestoreLawMultipliers may override with saved scalars.
+        RecomputeLawEffects();
     }
 
     private void RestoreLawMultipliers(SimSnapshotDto dto)

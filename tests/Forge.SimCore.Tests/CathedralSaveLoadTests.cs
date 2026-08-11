@@ -12,7 +12,7 @@ namespace Forge.SimCore.Tests;
 /// Characterization: Cathedral HUD metrics that are exported on the save API
 /// (<see cref="SimHost.GetSnapshotJson"/> / <see cref="SimHost.LoadSnapshotFromJson"/>)
 /// must survive snapshot restore — MeanRentBurden, councilSeats, mode shares,
-/// plus Event*Mult / Law*Mult / delivery delay / abandoned / fire / EMS / L2 sample.
+/// plus Event*Mult / Law*Mult / ActiveLawIds / delivery delay / abandoned / fire / EMS / L2 sample.
 /// </summary>
 [Collection("SimHost")]
 public sealed class CathedralSaveLoadTests
@@ -253,6 +253,123 @@ public sealed class CathedralSaveLoadTests
         Assert.Equal(saved.LawTrafficCapacityMult, roundTrip!.LawTrafficCapacityMult, precision: 3);
         Assert.Equal(saved.LawSpawnDemandMult, roundTrip.LawSpawnDemandMult, precision: 3);
         Assert.Equal(saved.LawCommercialSpawnMult, roundTrip.LawCommercialSpawnMult, precision: 3);
+    }
+
+    [Fact]
+    public void SnapshotRoundTrip_PreservesActiveLawIds()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions
+        {
+            SkipStarterCity = true,
+            DataPaths = SimDataPaths.FromContentRoot(FindRepoRoot()),
+        });
+        // Fallback if pack path resolution failed in CI sandboxes.
+        if (host.Laws.DefinitionCount == 0
+            || host.Laws.GetIndexById("speed_limit") < 0
+            || host.Laws.GetIndexById("parking_regulations") < 0
+            || host.Laws.GetIndexById("congestion_charge") < 0)
+        {
+            host.Laws.LoadFromJson("""
+                [
+                  {
+                    "id": "speed_limit",
+                    "name": "Speed Limits",
+                    "category": "traffic",
+                    "era_min": "industrial",
+                    "parameters": [],
+                    "effects": { "road_capacity": -0.1 },
+                    "faction_reactions": {},
+                    "cost_monthly": 0,
+                    "compliance_base": 0.7,
+                    "description": "Speed limits"
+                  },
+                  {
+                    "id": "parking_regulations",
+                    "name": "Parking Regulations",
+                    "category": "traffic",
+                    "era_min": "industrial",
+                    "parameters": [],
+                    "effects": { "commercial_accessibility": -0.1 },
+                    "faction_reactions": {},
+                    "cost_monthly": 0,
+                    "compliance_base": 0.75,
+                    "description": "Parking"
+                  },
+                  {
+                    "id": "congestion_charge",
+                    "name": "Congestion Charge",
+                    "category": "traffic",
+                    "era_min": "industrial",
+                    "parameters": [],
+                    "effects": { "traffic_congestion": 0.15 },
+                    "faction_reactions": {},
+                    "cost_monthly": 0,
+                    "compliance_base": 0.8,
+                    "description": "Congestion charge"
+                  }
+                ]
+                """);
+        }
+
+        Assert.True(host.Laws.DefinitionCount >= 3, "ordinance catalog must load");
+        Assert.True(host.SetLawActive("speed_limit", true));
+        Assert.True(host.SetLawActive("parking_regulations", true));
+
+        // Pin Mults independently so restore proves both id toggles and scalar Mults survive.
+        host.State!.LawTrafficCapacityMult = 0.62f;
+        host.State.LawResidentialSpawnMult = 0.88f;
+
+        string json = host.GetSnapshotJson();
+        var saved = JsonSerializer.Deserialize(json, SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(saved);
+
+        using (var doc = JsonDocument.Parse(json))
+        {
+            Assert.True(doc.RootElement.TryGetProperty("activeLawIds", out var idsEl));
+            Assert.Equal(JsonValueKind.Array, idsEl.ValueKind);
+            Assert.Equal(2, idsEl.GetArrayLength());
+        }
+
+        Assert.Equal(2, saved!.ActiveLawIds.Length);
+        Assert.Contains("speed_limit", saved.ActiveLawIds);
+        Assert.Contains("parking_regulations", saved.ActiveLawIds);
+        Assert.Equal(0.62f, saved.LawTrafficCapacityMult, precision: 3);
+
+        // Flip laws away from saved set so restore cannot pass by coincidence.
+        Assert.True(host.SetLawActive("speed_limit", false));
+        Assert.True(host.SetLawActive("congestion_charge", true));
+        Assert.False(host.Laws.IsActive(host.Laws.GetIndexById("speed_limit")));
+
+        Assert.True(host.LoadSnapshotFromJson(json));
+
+        Assert.True(host.Laws.IsActive(host.Laws.GetIndexById("speed_limit")));
+        Assert.True(host.Laws.IsActive(host.Laws.GetIndexById("parking_regulations")));
+        Assert.False(host.Laws.IsActive(host.Laws.GetIndexById("congestion_charge")));
+        Assert.Equal(2, host.Laws.ActiveLawCount);
+        Assert.Equal(2, host.State!.ActiveLawCount);
+        Assert.Equal(saved.LawTrafficCapacityMult, host.State.LawTrafficCapacityMult, precision: 3);
+        Assert.Equal(saved.LawResidentialSpawnMult, host.State.LawResidentialSpawnMult, precision: 3);
+
+        var roundTrip = JsonSerializer.Deserialize(
+            host.GetSnapshotJson(),
+            SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(roundTrip);
+        Assert.Equal(saved.ActiveLawIds, roundTrip!.ActiveLawIds);
+        Assert.Equal(saved.LawTrafficCapacityMult, roundTrip.LawTrafficCapacityMult, precision: 3);
+    }
+
+    private static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            if (File.Exists(Path.Combine(dir.FullName, "base", "data", "laws", "laws.json")))
+                return dir.FullName;
+            dir = dir.Parent;
+        }
+
+        throw new InvalidOperationException("Could not locate repo root (base/data/laws/laws.json).");
     }
 
     private static int PlaceBuilding(

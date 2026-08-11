@@ -640,19 +640,8 @@ public sealed partial class SimHost
 
     private void ApplyEventEffectsToState(WorldState state)
     {
-        if (_events.ActiveEventCount == 0) return;
-
-        float happinessMod = _events.GetAggregateEffect(EventSystem.EffectIndex.Happiness);
-        if (happinessMod != 0f)
-        {
-            state.Happiness = Math.Clamp(state.Happiness + happinessMod * 0.01f, 0f, 1f);
-        }
-
-        float approvalMod = _events.GetAggregateEffect(EventSystem.EffectIndex.ApprovalRatingChange);
-        if (approvalMod != 0f)
-        {
-            state.ApprovalRating = Math.Clamp(state.ApprovalRating + approvalMod * 0.01f, 0f, 1f);
-        }
+        // Cathedral P6.2 — happiness/approval drip + city-wide Event*Mult recompute.
+        _events.ApplyEffectsToState(state);
     }
 
     private void RunMonthTick()
@@ -666,6 +655,7 @@ public sealed partial class SimHost
         _zoneGrowth.CheckUpgrades(_state);
         _budget.CalculateMonthlyBudget(_state, _economy);
         _budget.ApplyLawModifiers(_state, _laws);
+        _budget.ApplyEventModifiers(_state);
         _politics.MonthlyTick(_state, WasmConfig.GameDayInterval);
         _research.MonthlyTick(_state, WasmConfig.GameDayInterval);
 

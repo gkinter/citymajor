@@ -851,7 +851,11 @@
       "homelessness": 0.3,
       "income_inequality": 0.15,
       "crime": 0.1,
-      "civic_engagement": 0.1
+      "civic_engagement": 0.1,
+      "immigration": -0.25,
+      "commerce": -0.1,
+      "tax_revenue": -0.15,
+      "construction": -0.2
     },
     "trigger_conditions": {
       "housing_supply_below": 0.4,
@@ -876,7 +880,10 @@
       "happiness": -10,
       "population": -2,
       "homelessness": 0.15,
-      "crime": 0.05
+      "crime": 0.05,
+      "immigration": -0.15,
+      "construction": 0.2,
+      "tax_revenue": -0.05
     },
     "trigger_conditions": {},
     "cascade_events": [
@@ -897,7 +904,10 @@
       "happiness": -8,
       "approvalRatingPenalty": -5,
       "civic_engagement": 0.15,
-      "trust": -0.1
+      "trust": -0.1,
+      "commerce": -0.08,
+      "tax_revenue": -0.08,
+      "productivity": -0.05
     },
     "trigger_conditions": {
       "approval_below": 40

@@ -633,23 +633,11 @@ public sealed class IronAndOakGame
     }
 
     /// <summary>
-    /// Apply aggregate effects from active game events to WorldState.
+    /// Apply aggregate effects from active game events to WorldState (Cathedral P6.2).
     /// </summary>
     private void ApplyEventEffectsToState(WorldState state)
     {
-        if (_eventSystem == null || _eventSystem.ActiveEventCount == 0) return;
-
-        float happinessMod = _eventSystem.GetAggregateEffect(Simulation.EventSystem.EffectIndex.Happiness);
-        if (happinessMod != 0f)
-        {
-            state.Happiness = Math.Clamp(state.Happiness + happinessMod * 0.01f, 0f, 1f);
-        }
-
-        float approvalMod = _eventSystem.GetAggregateEffect(Simulation.EventSystem.EffectIndex.ApprovalRatingChange);
-        if (approvalMod != 0f)
-        {
-            state.ApprovalRating = Math.Clamp(state.ApprovalRating + approvalMod * 0.01f, 0f, 1f);
-        }
+        _eventSystem?.ApplyEffectsToState(state);
     }
 
     private static float CalculateEmploymentRate(WorldState state)

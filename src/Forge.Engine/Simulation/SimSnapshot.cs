@@ -184,6 +184,24 @@ public sealed class SimSnapshot
     /// <summary>Commercial / office zone spawn multiplier (accessibility / diversity).</summary>
     public float LawCommercialSpawnMult { get; init; } = 1f;
 
+    /// <summary>Cathedral P6.2 — tax revenue multiplier from active events.</summary>
+    public float EventTaxRevenueMult { get; init; } = 1f;
+
+    /// <summary>Cathedral P6.2 — immigration multiplier from active events.</summary>
+    public float EventImmigrationMult { get; init; } = 1f;
+
+    /// <summary>Cathedral P6.2 — commercial spawn multiplier from active events.</summary>
+    public float EventCommercialSpawnMult { get; init; } = 1f;
+
+    /// <summary>Cathedral P6.2 — productivity / industrial spawn multiplier from active events.</summary>
+    public float EventProductivityMult { get; init; } = 1f;
+
+    /// <summary>Cathedral P6.2 — research rate multiplier from active events.</summary>
+    public float EventResearchMult { get; init; } = 1f;
+
+    /// <summary>Cathedral P6.2 — baseline spawn demand multiplier from active events.</summary>
+    public float EventSpawnDemandMult { get; init; } = 1f;
+
     /// <summary>Buildings currently under construction.</summary>
     public int ConstructingBuildingCount { get; init; }
 
@@ -363,6 +381,12 @@ public sealed class SimSnapshot
             LawResidentialSpawnMult = state.LawResidentialSpawnMult,
             LawIndustrialSpawnMult = state.LawIndustrialSpawnMult,
             LawCommercialSpawnMult = state.LawCommercialSpawnMult,
+            EventTaxRevenueMult = state.EventTaxRevenueMult,
+            EventImmigrationMult = state.EventImmigrationMult,
+            EventCommercialSpawnMult = state.EventCommercialSpawnMult,
+            EventProductivityMult = state.EventProductivityMult,
+            EventResearchMult = state.EventResearchMult,
+            EventSpawnDemandMult = state.EventSpawnDemandMult,
             ConstructingBuildingCount = state.ConstructingBuildingCount,
             AbandonedBuildingCount = state.AbandonedBuildingCount,
             PowerCoverageFraction = state.PowerCoverageFraction,

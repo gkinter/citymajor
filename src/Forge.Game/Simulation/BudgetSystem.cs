@@ -243,6 +243,28 @@ public sealed class BudgetSystem
         _eventBus?.Publish(new BudgetChangedEvent { NewBalance = state.CityFunds });
     }
 
+    /// <summary>
+    /// Cathedral P6.2 — scale monthly revenue by active-event tax multiplier.
+    /// </summary>
+    public void ApplyEventModifiers(WorldState state)
+    {
+        float mult = state.EventTaxRevenueMult;
+        if (Math.Abs(mult - 1f) < 0.001f)
+            return;
+
+        float revenueDelta = TotalRevenue * Math.Max(-0.95f, mult - 1f);
+        if (Math.Abs(revenueDelta) < 0.01f)
+            return;
+
+        state.CityFunds += (long)revenueDelta;
+        if (revenueDelta > 0f)
+            state.Income.ServiceFees += (long)revenueDelta;
+        else
+            state.Expenses.Miscellaneous += (long)(-revenueDelta);
+
+        _eventBus?.Publish(new BudgetChangedEvent { NewBalance = state.CityFunds });
+    }
+
     // =========================================================================
     // Revenue calculation
     // =========================================================================

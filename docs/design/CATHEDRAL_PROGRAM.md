@@ -235,7 +235,7 @@ flowchart TB
 | Milestone | Deliverable |
 |-----------|-------------|
 | **P6.1** ✅ | Law toggles apply budget/traffic/spawn multipliers — zone R/C/I spawn hooks + Law panel mults |
-| **P6.2** | `ApplyEventEffectsToState` bridge (Unity primary; WASM harness optional) — **partial**: happiness/approval aggregate; `activeEventCount` exported to Herald HUD |
+| **P6.2** ✅ | `ApplyEventEffectsToState` bridge — city-wide Event*Mult (tax/immigration/commerce/productivity/research/spawn) + Herald snake_case effects; `EventEffectsTests` |
 | **P6.3** ✅ | Herald buckets only fire when snapshot predicates true — P5.5 `0452f88` |
 | **P6.4** | Economic Control Spectrum slider (SB-3729) — **v2**, not EA |
 | **P5.6** ✅ | Council seats export on WASM status/snapshot — `ae15498` |

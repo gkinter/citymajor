@@ -513,6 +513,54 @@ public sealed class EventSystem
     }
 
     /// <summary>
+    /// Cathedral P6.2 — apply active-event aggregates to <see cref="WorldState"/>.
+    /// Happiness/approval drip (desktop parity) plus city-wide multipliers consumed by
+    /// budget / immigration / zone growth / research.
+    /// </summary>
+    public void ApplyEffectsToState(WorldState state)
+    {
+        if (_activeEvents.Count == 0)
+        {
+            ResetCityWideModifiers(state);
+            return;
+        }
+
+        float happinessMod = GetAggregateEffect(EffectIndex.Happiness);
+        if (happinessMod != 0f)
+            state.Happiness = Math.Clamp(state.Happiness + happinessMod * 0.01f, 0f, 1f);
+
+        float approvalMod = GetAggregateEffect(EffectIndex.ApprovalRatingChange);
+        if (approvalMod != 0f)
+            state.ApprovalRating = Math.Clamp(state.ApprovalRating + approvalMod * 0.01f, 0f, 1f);
+
+        // Fractional effect keys (tax_revenue, immigration, commerce, …) → lasting multipliers.
+        state.EventTaxRevenueMult = Math.Clamp(
+            1f + GetAggregateEffect(EffectIndex.TaxRevenueMultiplier), 0.25f, 3f);
+        state.EventImmigrationMult = Math.Clamp(
+            1f + GetAggregateEffect(EffectIndex.ImmigrationModifier), 0.25f, 3f);
+        state.EventCommercialSpawnMult = Math.Clamp(
+            1f + GetAggregateEffect(EffectIndex.CommercialModifier), 0.25f, 3f);
+        state.EventProductivityMult = Math.Clamp(
+            1f + GetAggregateEffect(EffectIndex.ProductivityChange), 0.25f, 3f);
+        state.EventResearchMult = Math.Clamp(
+            1f + GetAggregateEffect(EffectIndex.ResearchModifier), 0.25f, 3f);
+        // Property-value / construction pressure nudges empty-tile spawn demand.
+        state.EventSpawnDemandMult = Math.Clamp(
+            1f + GetAggregateEffect(EffectIndex.PropertyValueChange) * 0.5f, 0.25f, 3f);
+    }
+
+    /// <summary>Reset event multipliers to neutral when no events are active.</summary>
+    public static void ResetCityWideModifiers(WorldState state)
+    {
+        state.EventTaxRevenueMult = 1f;
+        state.EventImmigrationMult = 1f;
+        state.EventCommercialSpawnMult = 1f;
+        state.EventProductivityMult = 1f;
+        state.EventResearchMult = 1f;
+        state.EventSpawnDemandMult = 1f;
+    }
+
+    /// <summary>
     /// Manually trigger an event by type ID. Used for scripted events, cheats, or cascades.
     /// Returns true if the event was spawned successfully.
     /// </summary>
@@ -905,6 +953,7 @@ public sealed class EventSystem
 
     /// <summary>
     /// Map an effect name from JSON to an EffectIndex enum value.
+    /// Accepts both camelCase catalog keys and snake_case <c>events.json</c> keys.
     /// Returns -1 for unrecognized effect names (they are silently ignored).
     /// </summary>
     internal static int MapEffectNameToIndex(string effectName)
@@ -912,27 +961,40 @@ public sealed class EventSystem
         return effectName switch
         {
             "happiness" or "happinessComplex" => (int)EffectIndex.Happiness,
-            "propertyDamage" => (int)EffectIndex.PropertyDamage,
-            "populationLoss" => (int)EffectIndex.PopulationLoss,
-            "trafficDisruption" or "trafficIncrease" => (int)EffectIndex.TrafficDisruption,
-            "pollutionIncrease" => (int)EffectIndex.PollutionIncrease,
-            "taxRevenueMultiplier" => (int)EffectIndex.TaxRevenueMultiplier,
-            "unemploymentIncrease" => (int)EffectIndex.UnemploymentIncrease,
-            "propertyValueDecline" or "propertyValueIncrease" => (int)EffectIndex.PropertyValueChange,
-            "immigrationPenalty" or "immigrationBonus" => (int)EffectIndex.ImmigrationModifier,
-            "productivityLoss" or "productivityBoost" => (int)EffectIndex.ProductivityChange,
-            "crimeIncrease" => (int)EffectIndex.CrimeChange,
-            "approvalRatingPenalty" or "approvalRatingVolatility" => (int)EffectIndex.ApprovalRatingChange,
-            "commercialBoost" or "commercialLoss" or "tourismIncome" => (int)EffectIndex.CommercialModifier,
-            "powerOutage" or "powerDemand" or "powerCostIncrease" or "heatingDemand" => (int)EffectIndex.PowerDemandChange,
-            "healthRisk" or "healthDemand" => (int)EffectIndex.HealthDemandChange,
-            "fireRiskIncrease" or "fireDepartmentDemand" => (int)EffectIndex.FireRiskChange,
-            "researchBoost" => (int)EffectIndex.ResearchModifier,
-            "waterShortage" => (int)EffectIndex.WaterDemandChange,
+            "propertyDamage" or "property_damage" => (int)EffectIndex.PropertyDamage,
+            "populationLoss" or "population_loss" => (int)EffectIndex.PopulationLoss,
+            "trafficDisruption" or "trafficIncrease" or "transport" or "traffic"
+                => (int)EffectIndex.TrafficDisruption,
+            "pollutionIncrease" or "pollution" => (int)EffectIndex.PollutionIncrease,
+            "taxRevenueMultiplier" or "tax_revenue" => (int)EffectIndex.TaxRevenueMultiplier,
+            "unemploymentIncrease" or "unemployment" => (int)EffectIndex.UnemploymentIncrease,
+            "propertyValueDecline" or "propertyValueIncrease" or "property_value" or "construction"
+                => (int)EffectIndex.PropertyValueChange,
+            "immigrationPenalty" or "immigrationBonus" or "immigration"
+                => (int)EffectIndex.ImmigrationModifier,
+            "productivityLoss" or "productivityBoost" or "productivity"
+                => (int)EffectIndex.ProductivityChange,
+            "crimeIncrease" or "crime" => (int)EffectIndex.CrimeChange,
+            "approvalRatingPenalty" or "approvalRatingVolatility" or "approval"
+                => (int)EffectIndex.ApprovalRatingChange,
+            "commercialBoost" or "commercialLoss" or "tourismIncome"
+                or "commerce" or "tourism" => (int)EffectIndex.CommercialModifier,
+            "powerOutage" or "powerDemand" or "powerCostIncrease" or "heatingDemand"
+                or "energy_cost" => (int)EffectIndex.PowerDemandChange,
+            "healthRisk" or "healthDemand" or "healthcare_cost" or "healthcare_demand"
+                => (int)EffectIndex.HealthDemandChange,
+            "fireRiskIncrease" or "fireDepartmentDemand" or "fire_risk"
+                => (int)EffectIndex.FireRiskChange,
+            "researchBoost" or "research" or "innovation" or "education"
+                => (int)EffectIndex.ResearchModifier,
+            "waterShortage" or "water_supply" => (int)EffectIndex.WaterDemandChange,
             // Effects that don't map to a tracked index -- consumed by other systems
             "agriculturalLoss" or "suburbanGrowth" or "homelessnessIncrease"
                 or "industrialCostIncrease" or "industrialBoost"
-                or "policyUncertainty" or "cityBudgetDrain" => -1,
+                or "policyUncertainty" or "cityBudgetDrain"
+                or "homelessness" or "income_inequality" or "civic_engagement"
+                or "trust" or "population" or "employment" or "agriculture"
+                => -1,
             _ => -1,
         };
     }

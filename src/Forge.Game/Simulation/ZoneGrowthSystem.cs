@@ -764,7 +764,7 @@ public sealed class ZoneGrowthSystem
 
     /// <summary>
     /// Effective spawn chance multiplier for a zone type.
-    /// Compounds city-wide <see cref="WorldState.LawSpawnDemandMult"/> with the zone-specific mult.
+    /// Compounds law + event (P6.2) city-wide and zone-specific multipliers.
     /// </summary>
     internal static float GetZoneLawSpawnMult(WorldState state, byte zoneType)
     {
@@ -772,12 +772,13 @@ public sealed class ZoneGrowthSystem
         {
             ZoneResidentialLow or ZoneResidentialHigh or ZoneMixedUse or ZoneAgricultural
                 => state.LawResidentialSpawnMult,
-            ZoneIndustrial => state.LawIndustrialSpawnMult,
-            ZoneCommercial or ZoneOffice => state.LawCommercialSpawnMult,
+            ZoneIndustrial => state.LawIndustrialSpawnMult * state.EventProductivityMult,
+            ZoneCommercial or ZoneOffice
+                => state.LawCommercialSpawnMult * state.EventCommercialSpawnMult,
             _ => 1f,
         };
 
-        return state.LawSpawnDemandMult * zoneMult;
+        return state.LawSpawnDemandMult * state.EventSpawnDemandMult * zoneMult;
     }
 
     private static int CountConstructingBuildings(WorldState state)

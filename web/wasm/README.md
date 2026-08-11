@@ -143,7 +143,7 @@ Matches `web/lib/sim-bridge.ts` `SimSnapshot` in citymajor-web-r3f-spike:
 - `EconomySystem`, `PopulationSystem`, `ServiceSystem`
 - `WasmTrafficLite` — BPR-lite traffic (SB-3685 partial; see performance budget below)
 - `ZoneGrowthSystem`, `BudgetSystem`, `PoliticsSystem`, `EventSystem`, `ResearchSystem`, `CulturalDNASystem`
-- **Event effects (partial parity):** `RunDayTick` calls `ApplyEventEffectsToState` after `UpdateEvents`, matching desktop `IronAndOakGame` — applies aggregate happiness / approval modifiers from active events. Tile-local effects (crime, fire, pollution, etc.) remain inside `EventSystem.UpdateEvents`.
+- **Event effects (P6.2):** `RunDayTick` calls `ApplyEventEffectsToState` → `EventSystem.ApplyEffectsToState` — happiness/approval drip plus city-wide `EventTaxRevenueMult` / `EventImmigrationMult` / `EventCommercialSpawnMult` / `EventProductivityMult` / `EventResearchMult` / `EventSpawnDemandMult`. Monthly budget applies tax mult; immigration + zone growth + research consume the rest. Tile-local effects (crime, fire, pollution, etc.) remain inside `EventSystem.UpdateEvents`.
 - Engine data: `WorldState`, `SimSnapshot`, `MapGenerator`, tile/building pools
 
 **Traffic modes (`GetStatus().trafficMode`):**

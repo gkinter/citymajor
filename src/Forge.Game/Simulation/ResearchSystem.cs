@@ -716,7 +716,8 @@ public sealed class ResearchSystem
     /// </summary>
     public void MonthlyTick(WorldState state, double dt)
     {
-        float effectiveRp = CalculateEffectiveRP();
+        float effectiveRp = CalculateEffectiveRP()
+            * Math.Clamp(state.EventResearchMult, 0.25f, 3f);
         state.ResearchRate = effectiveRp;
 
         // Distribute RP to queued research (first item gets 100%, overflow to next)

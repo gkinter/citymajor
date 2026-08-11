@@ -21,7 +21,7 @@ Pin the **mayor approval loop** as the politics foundation: happiness / services
 | **P5.1** | Approval on WASM `GetStatus` + snapshot (percent 0–100) | P6 foundation | **Live** — `WasmStatusDto.Approval`, `SimSnapshotDto.Approval` |
 | **P5.2** | `ApplyApprovalDelta` Herald bridge characterization | P6.2 partial | **Live** — `SimHost.ApplyApprovalDelta` / WASM export |
 | **P5.3** ✅ | Law toggles → budget / traffic / spawn multipliers | P6.1 | **Live** — R/C/I spawn mults + congestion capacity; `LawEffectsTests`; Unity Law panel |
-| **P5.4** | `ApplyEventEffectsToState` parity (web + Unity) | P6.2 | **Partial** — WASM day tick applies aggregate happiness/approval |
+| **P5.4** ✅ | `ApplyEventEffectsToState` parity (web + Unity) | P6.2 | **Live** — happiness/approval drip + Event*Mult → budget/immigration/spawn/research; `EventEffectsTests` |
 | **P5.5** | Herald buckets only when snapshot predicates true | P6.3 | **Live** — `ApprovalHeraldSystem` fires `approval_unrest` only when approval &lt; 40% for 2 months; web/Unity buckets share the same threshold |
 | **P5.6** | Faction / council seat export on status | AGENT_07 Phase 2 | **Live** — `councilSeats` on WASM status + snapshot DTO |
 | **P5.7** | Economic Control Spectrum slider | P6.4 / SB-3729 | **v2 boundary** |
@@ -122,6 +122,9 @@ Web Herald options emit `approval_event` with `approvalDelta` (`herald-option-co
 | `WasmStatus_ExportsCouncilSeats` | Council seats on WASM | **Pinned** |
 | `SetLawActive_RecomputesZoneSpawnMultipliers` | Law toggle → R/C/I spawn mults | **Pinned** (`LawEffectsTests` / P6.1) |
 | `RestrictiveHousingLaws_ReduceResidentialSpawnsVsBaseline` | Spawn mults change growth | **Pinned** (`LawEffectsTests` / P6.1) |
+| `ApplyEffectsToState_HousingCrisis_SetsCityWideMultipliers` | Herald event → Event*Mult | **Pinned** (`EventEffectsTests` / P6.2) |
+| `ApplyEventModifiers_ReducesCityFunds_WhenTaxMultBelowOne` | Event tax mult → treasury | **Pinned** (`EventEffectsTests` / P6.2) |
+| `EventImmigrationMult_ScalesMonthlyImmigration` | Event immigration mult → HH inflow | **Pinned** (`EventEffectsTests` / P6.2) |
 
 Unit math already covered in `Forge.Game.Tests/PoliticsSystemTests` (weights, elections, clout).
 

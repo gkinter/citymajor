@@ -127,6 +127,28 @@ public sealed class WorldState
     /// <summary>Commercial / office zone spawn multiplier.</summary>
     public float LawCommercialSpawnMult { get; set; } = 1f;
 
+    // =========================================================================
+    // Active event city-wide multipliers (Cathedral P6.2 — ApplyEventEffectsToState)
+    // =========================================================================
+
+    /// <summary>Tax revenue multiplier from active events (1.0 = neutral).</summary>
+    public float EventTaxRevenueMult { get; set; } = 1f;
+
+    /// <summary>Immigration rate multiplier from active events (1.0 = neutral).</summary>
+    public float EventImmigrationMult { get; set; } = 1f;
+
+    /// <summary>Commercial / office spawn multiplier from active events (1.0 = neutral).</summary>
+    public float EventCommercialSpawnMult { get; set; } = 1f;
+
+    /// <summary>Industrial / productivity spawn multiplier from active events (1.0 = neutral).</summary>
+    public float EventProductivityMult { get; set; } = 1f;
+
+    /// <summary>Research point generation multiplier from active events (1.0 = neutral).</summary>
+    public float EventResearchMult { get; set; } = 1f;
+
+    /// <summary>Baseline zone spawn demand multiplier from active events (1.0 = neutral).</summary>
+    public float EventSpawnDemandMult { get; set; } = 1f;
+
     /// <summary>Buildings currently in constructing state (updated each zone growth tick).</summary>
     public int ConstructingBuildingCount { get; set; }
 

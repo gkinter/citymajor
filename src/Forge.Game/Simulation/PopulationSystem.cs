@@ -506,7 +506,8 @@ public sealed class PopulationSystem
         float sizeScale = 1f + (float)Math.Log(Math.Max(1, state.Population / 1000f), 2);
         float rawRate = BaseImmigrationPerMonth * sizeScale *
                         jobAvailability * housingAvailability * reputation * taxMod *
-                        GetRentAttractivenessModifier();
+                        GetRentAttractivenessModifier() *
+                        Math.Clamp(state.EventImmigrationMult, 0.25f, 3f);
 
         int count = (int)rawRate;
         // Fractional part becomes probability for +1

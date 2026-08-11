@@ -167,6 +167,9 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | PoliceCoverageFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH under police coverage |
 | MeanCrimeRate | ✅ | ✅ | ✅ | WorldState | Tier-2 mean home-tile crime (0–1); station quality deepens suppression |
 | MeanSafetySatisfaction | ✅ | ✅ | ✅ | WorldState | Tier-2 mean SafetySatisfaction (0–1); feeds P4 sat / immigration |
+| WasteCoverageFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH under waste coverage |
+| MeanPollution | ✅ | ✅ | ✅ | WorldState | Tier-2 mean home-tile pollution (0–1); depot quality deepens abatement |
+| MeanEnvironmentScore | ✅ | ✅ | ✅ | WorldState | Tier-2 mean (1 − pollution); feeds P4 sat / immigration |
 | ParkAttractionCount | ✅ | ✅ | ✅ | WorldState | Tier-2 park attraction units (buildings + zone sites) → tourism |
 | LandmarkAttractionCount | ✅ | ✅ | ✅ | WorldState | Tier-2 landmark / monument attraction units → tourism |
 | TourismAttractionCount | ✅ | ✅ | ✅ | WorldState | Tier-2 park + landmark attraction units |

@@ -23,6 +23,7 @@ public sealed class ServiceSystem
     private readonly InfluenceMap _policeCoverage;
     private readonly InfluenceMap _healthCoverage;
     private readonly InfluenceMap _educationCoverage;
+    private readonly InfluenceMap _wasteCoverage;
     private readonly InfluenceMap _pollutionMap;
     private readonly InfluenceMap _noiseMap;
     private readonly InfluenceMap _crimeMap;
@@ -43,6 +44,7 @@ public sealed class ServiceSystem
     private const uint ServiceEducation = 1 << 5;
     private const uint ServicePowerPlant = 1 << 7;
     private const uint ServiceWaterPump = 1 << 8;
+    private const uint ServiceGarbage = (int)WasteCollection.ServiceGarbage;
 
     // Zone types (from TileData.ZoneType)
     private const byte ZoneNone = 0;
@@ -64,6 +66,7 @@ public sealed class ServiceSystem
     private const float PoliceStationRadius = 18f;
     private const float HospitalRadius = 25f;
     private const float SchoolRadius = 15f;
+    private const float WasteDepotRadius = 22f;
 
     // Fire risk material multipliers
     internal const float MaterialWood = 1.5f;
@@ -111,6 +114,7 @@ public sealed class ServiceSystem
         _policeCoverage = new InfluenceMap(worldSize, worldSize);
         _healthCoverage = new InfluenceMap(worldSize, worldSize);
         _educationCoverage = new InfluenceMap(worldSize, worldSize);
+        _wasteCoverage = new InfluenceMap(worldSize, worldSize);
         _pollutionMap = new InfluenceMap(worldSize, worldSize);
         _noiseMap = new InfluenceMap(worldSize, worldSize);
         _crimeMap = new InfluenceMap(worldSize, worldSize);
@@ -124,6 +128,7 @@ public sealed class ServiceSystem
     public InfluenceMap PoliceCoverage => _policeCoverage;
     public InfluenceMap HealthCoverage => _healthCoverage;
     public InfluenceMap EducationCoverage => _educationCoverage;
+    public InfluenceMap WasteCoverage => _wasteCoverage;
     public InfluenceMap PollutionMap => _pollutionMap;
     public InfluenceMap NoiseMap => _noiseMap;
     public InfluenceMap CrimeMap => _crimeMap;
@@ -157,6 +162,7 @@ public sealed class ServiceSystem
         _policeCoverage.ClearAll();
         _healthCoverage.ClearAll();
         _educationCoverage.ClearAll();
+        _wasteCoverage.ClearAll();
         _pollutionMap.ClearAll();
         _noiseMap.ClearAll();
         _crimeMap.ClearAll();
@@ -201,6 +207,9 @@ public sealed class ServiceSystem
         if ((flags & ServiceEducation) != 0)
             _educationCoverage.AddSource(cx, cy, DefaultServiceStrength, SchoolRadius, FalloffType.Linear);
 
+        if ((flags & ServiceGarbage) != 0)
+            _wasteCoverage.AddSource(cx, cy, DefaultServiceStrength, WasteDepotRadius, FalloffType.Linear);
+
         // Industrial buildings produce pollution and noise
         byte zone = state.Tiles.ZoneType[state.Tiles.Index(cx, cy)];
         if (zone == ZoneIndustrial)
@@ -226,6 +235,7 @@ public sealed class ServiceSystem
         _policeCoverage.RemoveSource(cx, cy, DefaultServiceStrength, PoliceStationRadius, FalloffType.Linear);
         _healthCoverage.RemoveSource(cx, cy, DefaultServiceStrength, HospitalRadius, FalloffType.Linear);
         _educationCoverage.RemoveSource(cx, cy, DefaultServiceStrength, SchoolRadius, FalloffType.Linear);
+        _wasteCoverage.RemoveSource(cx, cy, DefaultServiceStrength, WasteDepotRadius, FalloffType.Linear);
         _pollutionMap.RemoveSource(cx, cy, IndustrialPollutionStrength, IndustrialPollutionRadius, FalloffType.Exponential);
         _noiseMap.RemoveSource(cx, cy, IndustrialNoiseStrength, IndustrialNoiseRadius, FalloffType.Linear);
 
@@ -241,6 +251,7 @@ public sealed class ServiceSystem
         _policeCoverage.Recalculate();
         _healthCoverage.Recalculate();
         _educationCoverage.Recalculate();
+        _wasteCoverage.Recalculate();
         _pollutionMap.Recalculate();
         _noiseMap.Recalculate();
         _crimeMap.Recalculate();
@@ -266,6 +277,7 @@ public sealed class ServiceSystem
         UpdateEducationProgression(state);
         UpdateHealthProgression(state);
         UpdatePoliceCrime(state);
+        UpdateWasteCollection(state);
         UpdateParkAmenity(state);
     }
 
@@ -299,6 +311,17 @@ public sealed class ServiceSystem
     public void UpdatePoliceCrime(WorldState state, float days = 1f)
     {
         PoliceCrime.Tick(state, _policeCoverage, days);
+    }
+
+    /// <summary>
+    /// Tier-2 waste → pollution → environment — depots abate R/C waste;
+    /// uncovered zones accumulate pollution. Exports coverage / mean pollution /
+    /// environment score for HUD + P4 immigration. Environment satisfaction and
+    /// health progression already read tile pollution.
+    /// </summary>
+    public void UpdateWasteCollection(WorldState state, float days = 1f)
+    {
+        WasteCollection.Tick(state, _wasteCoverage, days);
     }
 
     /// <summary>
@@ -828,6 +851,10 @@ public sealed class ServiceSystem
                 tiles.Pollution[idx] = Math.Clamp(_pollutionMap.GetValue(x, y), 0f, 1f);
             }
         }
+
+        // Re-apply waste accumulation / abatement for the monthly window so
+        // industrial recalculation does not wipe Tier-2 garbage coverage effects.
+        WasteCollection.Tick(state, _wasteCoverage, days: Math.Max(1f, dt));
     }
 
     // =========================================================================
@@ -879,12 +906,13 @@ public sealed class ServiceSystem
         float police = Math.Clamp(_policeCoverage.GetValue(tileX, tileY), 0f, 1f);
         float health = Math.Clamp(_healthCoverage.GetValue(tileX, tileY), 0f, 1f);
         float education = Math.Clamp(_educationCoverage.GetValue(tileX, tileY), 0f, 1f);
+        float waste = Math.Clamp(_wasteCoverage.GetValue(tileX, tileY), 0f, 1f);
         float power = state.Tiles.PowerGrid[idx] != 0 ? 1f : 0f;
         float water = state.Tiles.WaterGrid[idx] != 0 ? 1f : 0f;
 
         // Weighted average: utilities are critical, services are important
-        return (fire * 0.10f + police * 0.15f + health * 0.20f + education * 0.15f
-              + power * 0.25f + water * 0.15f);
+        return (fire * 0.08f + police * 0.12f + health * 0.18f + education * 0.12f
+              + waste * 0.10f + power * 0.25f + water * 0.15f);
     }
 
     // =========================================================================

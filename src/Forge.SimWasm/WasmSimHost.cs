@@ -166,6 +166,15 @@ public sealed class WasmSimHost
     /// <summary>Mean household SafetySatisfaction 0–1 (Tier-2).</summary>
     public float MeanSafetySatisfaction =>
         _host.State?.MeanSafetySatisfaction ?? 0f;
+    /// <summary>Fraction of households with waste coverage (Tier-2).</summary>
+    public float WasteCoverageFraction =>
+        _host.State?.WasteCoverageFraction ?? 0f;
+    /// <summary>Mean tile pollution at household homes 0–1 (Tier-2).</summary>
+    public float MeanPollution =>
+        _host.State?.MeanPollution ?? 0f;
+    /// <summary>Mean environment score 0–1 ≈ (1 − pollution) (Tier-2).</summary>
+    public float MeanEnvironmentScore =>
+        _host.State?.MeanEnvironmentScore ?? 0f;
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount => _host.State?.ParkAttractionCount ?? 0;
     /// <summary>Landmark attraction units for tourism (Tier-2).</summary>
@@ -452,6 +461,12 @@ public sealed class WasmStatusDto
     public float MeanCrimeRate { get; init; }
     /// <summary>Mean household SafetySatisfaction 0–1 (Tier-2).</summary>
     public float MeanSafetySatisfaction { get; init; }
+    /// <summary>Fraction of households with waste coverage (Tier-2).</summary>
+    public float WasteCoverageFraction { get; init; }
+    /// <summary>Mean tile pollution at household homes 0–1 (Tier-2).</summary>
+    public float MeanPollution { get; init; }
+    /// <summary>Mean environment score 0–1 ≈ (1 − pollution) (Tier-2).</summary>
+    public float MeanEnvironmentScore { get; init; }
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount { get; init; }
     /// <summary>Landmark attraction units for tourism (Tier-2).</summary>
@@ -592,6 +607,9 @@ public sealed class WasmStatusDto
             PoliceCoverageFraction = host.PoliceCoverageFraction,
             MeanCrimeRate = host.MeanCrimeRate,
             MeanSafetySatisfaction = host.MeanSafetySatisfaction,
+            WasteCoverageFraction = host.WasteCoverageFraction,
+            MeanPollution = host.MeanPollution,
+            MeanEnvironmentScore = host.MeanEnvironmentScore,
             ParkAttractionCount = host.ParkAttractionCount,
             LandmarkAttractionCount = host.LandmarkAttractionCount,
             TourismAttractionCount = host.TourismAttractionCount,

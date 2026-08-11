@@ -31,6 +31,8 @@
             <ui:Label name="hospital-value" class="hud-value hud-hospital-value" text="—" />
             <ui:Label class="hud-label hud-police-label" text="Police" />
             <ui:Label name="police-value" class="hud-value hud-police-value" text="—" />
+            <ui:Label class="hud-label hud-waste-label" text="Waste" />
+            <ui:Label name="waste-value" class="hud-value hud-waste-value" text="—" />
             <ui:Label class="hud-label hud-edu-label" text="Edu" />
             <ui:Label name="edu-value" class="hud-value hud-edu-value" text="—" />
             <ui:Label class="hud-label hud-park-label" text="Park" />

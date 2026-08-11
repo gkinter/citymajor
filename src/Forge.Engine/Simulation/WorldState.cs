@@ -296,6 +296,21 @@ public sealed class WorldState
     public float MeanSafetySatisfaction { get; set; }
 
     /// <summary>
+    /// Fraction of households with home-tile waste coverage ≥ collection threshold (0–1). Tier-2.
+    /// </summary>
+    public float WasteCoverageFraction { get; set; }
+
+    /// <summary>
+    /// Mean tile pollution at household homes (0–1). Tier-2 waste → pollution.
+    /// </summary>
+    public float MeanPollution { get; set; }
+
+    /// <summary>
+    /// Mean environment score 0–1 ≈ (1 − pollution) at household homes. Tier-2.
+    /// </summary>
+    public float MeanEnvironmentScore { get; set; }
+
+    /// <summary>
     /// Park attraction units for tourism (park buildings + painted park zone sites). Tier-2.
     /// </summary>
     public int ParkAttractionCount { get; set; }

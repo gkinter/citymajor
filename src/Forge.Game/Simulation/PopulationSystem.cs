@@ -556,12 +556,13 @@ public sealed class PopulationSystem
         float taxMod = GetTaxAttractivenessModifier(state);
         float healthMod = GetHealthAttractivenessModifier(state);
         float safetyMod = GetSafetyAttractivenessModifier(state);
+        float environmentMod = GetEnvironmentAttractivenessModifier(state);
 
         // Scale base with city size (log scale)
         float sizeScale = 1f + (float)Math.Log(Math.Max(1, state.Population / 1000f), 2);
         float rawRate = BaseImmigrationPerMonth * sizeScale *
                         jobAvailability * housingAvailability * reputation * taxMod *
-                        healthMod * safetyMod *
+                        healthMod * safetyMod * environmentMod *
                         GetRentAttractivenessModifier() *
                         Math.Clamp(state.EventImmigrationMult, 0.25f, 3f);
 
@@ -1208,6 +1209,18 @@ public sealed class PopulationSystem
         float safety = Math.Clamp(PoliceCrime.MeanSafetySatisfaction(state), 0f, 1f);
         state.MeanSafetySatisfaction = safety;
         return PoliceCrime.SafetyAttractivenessModifier(safety);
+    }
+
+    /// <summary>
+    /// Immigration attractiveness from mean environment (waste → pollution → cleanliness).
+    /// 0.55 at pollution=1 → 1.45 at pollution=0 (neutral ~1.0 at mid pollution).
+    /// </summary>
+    private float GetEnvironmentAttractivenessModifier(WorldState state)
+    {
+        float env = Math.Clamp(WasteCollection.MeanEnvironmentScore(state), 0f, 1f);
+        state.MeanEnvironmentScore = env;
+        state.MeanPollution = Math.Clamp(1f - env, 0f, 1f);
+        return WasteCollection.EnvironmentAttractivenessModifier(env);
     }
 
     /// <summary>Get healthcare modifier for births (0.5-1.5).</summary>

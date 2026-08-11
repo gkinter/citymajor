@@ -15,8 +15,8 @@ namespace Forge.SimCore.Tests;
 /// Tier-2 wildfire / arson rings, aerial / lookout / fire rating,
 /// Tier-2 education depth, Tier-2 park amenity parity, Tier-2 hospital→HH
 /// health progression, P4 health→satisfaction/migration, Tier-2 tourism
-/// attractions stub, Tier-2 police/crime depth, and Cathedral P3.5 bilateral
-/// trade freight metrics.
+/// attractions stub, Tier-2 police/crime depth, Tier-2 waste/pollution depth,
+/// and Cathedral P3.5 bilateral trade freight metrics.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -1283,6 +1283,137 @@ public sealed class CathedralUtilitiesTests
             $"police→safety should raise P4 satisfaction (low={satLow:F1}, high={satHigh:F1})");
         Assert.True(host.State.MeanSafetySatisfaction > 30f / 255f);
         Assert.True(host.State.PoliceCoverageFraction > 0f);
+    }
+
+    [Fact]
+    public void WasteCollection_HigherQuality_AbatesMoreAtSameCoverage()
+    {
+        float lowQ = WasteCollection.PollutionDelta(
+            coverage: 0.8f, depotQuality: 0.3f, zoneType: 1, days: 1f);
+        float highQ = WasteCollection.PollutionDelta(
+            coverage: 0.8f, depotQuality: 1f, zoneType: 1, days: 1f);
+        float uncovered = WasteCollection.PollutionDelta(
+            coverage: 0f, depotQuality: 1f, zoneType: 1, days: 1f);
+
+        Assert.True(highQ < lowQ,
+            $"higher depot quality should abate more (lowQ={lowQ:F4}, highQ={highQ:F4})");
+        Assert.True(uncovered > 0f, "uncovered residential should accumulate waste pollution");
+        Assert.True(highQ < 0f, "full-quality coverage should net-clean");
+        Assert.True(WasteCollection.EffectiveCollectionFactor(0.8f, 1f) >
+                    WasteCollection.EffectiveCollectionFactor(0.8f, 0.3f));
+    }
+
+    [Fact]
+    public void WasteTick_DepotCoverage_LowersPollutionAndRaisesEnvironment()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 16, 16, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(16, 16)] = 1; // Residential
+        host.State.Tiles.Pollution[host.State.Tiles.Index(16, 16)] = 0.55f;
+        PlaceBuilding(host.State!, 16, 17, serviceFlags: WasteCollection.ServiceGarbage, level: 3);
+
+        int slot = host.State!.Households.Allocate();
+        Assert.True(slot >= 0);
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        float pollutionBefore = host.State.Tiles.Pollution[host.State.Tiles.Index(16, 16)];
+
+        int cleaned = 0;
+        for (int i = 0; i < 20; i++)
+        {
+            host.Services.DailyTick(host.State, 1.0);
+            cleaned += WasteCollection.Tick(host.State, host.Services.WasteCoverage, days: 1f);
+        }
+
+        float pollutionAfter = host.State.Tiles.Pollution[host.State.Tiles.Index(16, 16)];
+        Assert.True(host.State.WasteCoverageFraction > 0.5f);
+        Assert.True(pollutionAfter < pollutionBefore,
+            $"waste coverage should lower pollution (before={pollutionBefore:F3}, after={pollutionAfter:F3})");
+        Assert.True(cleaned > 0);
+        Assert.True(host.State.MeanPollution < 0.55f);
+        Assert.True(host.State.MeanEnvironmentScore > 0.45f);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsWasteCollectionFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 12, 12, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(12, 12)] = 1;
+        host.State.Tiles.Pollution[host.State.Tiles.Index(12, 12)] = 0.25f;
+        PlaceBuilding(host.State!, 12, 13, serviceFlags: WasteCollection.ServiceGarbage, level: 2);
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        host.Services.UpdateWasteCollection(host.State, days: 0f);
+
+        Assert.True(host.State.WasteCoverageFraction > 0f);
+        Assert.InRange(host.State.MeanPollution, 0f, 1f);
+        Assert.Equal(1f - host.State.MeanPollution, host.State.MeanEnvironmentScore, precision: 3);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("wasteCoverageFraction", out var cov));
+        Assert.True(doc.RootElement.TryGetProperty("meanPollution", out var pollution));
+        Assert.True(doc.RootElement.TryGetProperty("meanEnvironmentScore", out var env));
+        Assert.Equal(host.State.WasteCoverageFraction, cov.GetSingle(), precision: 3);
+        Assert.Equal(host.State.MeanPollution, pollution.GetSingle(), precision: 3);
+        Assert.Equal(host.State.MeanEnvironmentScore, env.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.WasteCoverageFraction, dto.WasteCoverageFraction, precision: 3);
+        Assert.Equal(host.State.MeanPollution, dto.MeanPollution, precision: 3);
+        Assert.Equal(host.State.MeanEnvironmentScore, dto.MeanEnvironmentScore, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.WasteCoverageFraction, snap.WasteCoverageFraction, precision: 3);
+        Assert.Equal(host.State.MeanPollution, snap.MeanPollution, precision: 3);
+        Assert.Equal(host.State.MeanEnvironmentScore, snap.MeanEnvironmentScore, precision: 3);
+    }
+
+    [Fact]
+    public void WasteCoverage_LowersPollution_RaisesP4EnvironmentSatisfaction()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 11, 10, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(11, 10)] = 1;
+        host.State.Tiles.Pollution[host.State.Tiles.Index(11, 10)] = 0.7f;
+        host.State.Tiles.Noise[host.State.Tiles.Index(11, 10)] = 0.1f;
+        host.State.Tiles.Desirability[host.State.Tiles.Index(11, 10)] = 0f;
+        PlaceBuilding(host.State!, 11, 11, serviceFlags: WasteCollection.ServiceGarbage, level: 3);
+        int work = PlaceBuilding(host.State!, 20, 20, serviceFlags: 0);
+
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.WorkBuildingId[slot] = (ushort)work;
+        host.State.Households.HealthSatisfaction[slot] = 128;
+        host.State.Households.SafetySatisfaction[slot] = 128;
+        host.State.Households.LeisureSatisfaction[slot] = 128;
+        host.State.Households.MemberCount[slot] = 2;
+        host.State.Households.Income[slot] = 1500;
+
+        host.Services!.RebuildFromWorld(host.State);
+        var pop = new PopulationSystem(seed: 42);
+        float satDirty = pop.CalculateSatisfaction(host.State, slot);
+
+        for (int i = 0; i < 25; i++)
+            host.Services.DailyTick(host.State, 1.0);
+
+        float satClean = pop.CalculateSatisfaction(host.State, slot);
+        Assert.True(host.State.Tiles.Pollution[host.State.Tiles.Index(11, 10)] < 0.7f);
+        Assert.True(satClean > satDirty,
+            $"waste→lower pollution should raise P4 satisfaction (dirty={satDirty:F1}, clean={satClean:F1})");
+        Assert.True(host.State.WasteCoverageFraction > 0f);
+        Assert.True(host.State.MeanEnvironmentScore > 0.3f);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

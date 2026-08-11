@@ -213,6 +213,100 @@ public class PopulationSystemTests
     }
 
     [Fact]
+    public void CalculateSatisfaction_LowerPollution_RaisesEnvironmentScore()
+    {
+        var state = new WorldState(64, 256, 64);
+        var system = new PopulationSystem(seed: 100);
+
+        // HomeBuildingId 0 = homeless sentinel — burn slot 0.
+        _ = state.Buildings.Allocate();
+        int homeId = state.Buildings.Allocate();
+        state.Buildings.GridX[homeId] = 10;
+        state.Buildings.GridY[homeId] = 10;
+        state.Buildings.State[homeId] = 1;
+        state.Buildings.MaxOccupants[homeId] = 50;
+        int homeIdx = state.Tiles.Index(10, 10);
+        state.Tiles.ZoneType[homeIdx] = 1;
+        state.Tiles.BuildingId[homeIdx] = (ushort)homeId;
+        state.Tiles.Noise[homeIdx] = 0.1f;
+        state.Tiles.Desirability[homeIdx] = 0f;
+
+        int workId = state.Buildings.Allocate();
+        state.Buildings.GridX[workId] = 20;
+        state.Buildings.GridY[workId] = 20;
+        state.Buildings.State[workId] = 1;
+
+        int slot = AddHousehold(state, system,
+            homeBuilding: (ushort)homeId, workBuilding: (ushort)workId, income: 1500);
+
+        state.Tiles.Pollution[homeIdx] = 0.9f;
+        float satDirty = system.CalculateSatisfaction(state, slot);
+
+        state.Tiles.Pollution[homeIdx] = 0.05f;
+        float satClean = system.CalculateSatisfaction(state, slot);
+
+        Assert.True(satClean > satDirty,
+            $"lower pollution should raise P4 satisfaction (dirty={satDirty:F1}, clean={satClean:F1})");
+        Assert.True(satClean - satDirty > 2f,
+            $"expected material environment delta, got {satClean - satDirty:F2}");
+    }
+
+    [Fact]
+    public void CalculateImmigration_LowerMeanPollution_AttractsMoreImmigrants()
+    {
+        var state = new WorldState(64, 256, 64);
+        state.Population = 2000;
+        state.Happiness = 0.7f;
+
+        _ = state.Buildings.Allocate();
+        int homeId = state.Buildings.Allocate();
+        state.Buildings.GridX[homeId] = 10;
+        state.Buildings.GridY[homeId] = 10;
+        state.Buildings.State[homeId] = 1;
+        state.Buildings.MaxOccupants[homeId] = 500;
+        int homeIdx = state.Tiles.Index(10, 10);
+        state.Tiles.ZoneType[homeIdx] = 1;
+        state.Tiles.BuildingId[homeIdx] = (ushort)homeId;
+
+        var dirty = new PopulationSystem(seed: 77);
+        for (int i = 0; i < 40; i++)
+        {
+            int slot = AddHousehold(state, dirty, members: 2, homeBuilding: (ushort)homeId);
+            state.Households.HealthSatisfaction[slot] = 128;
+            state.Households.SafetySatisfaction[slot] = 128;
+        }
+        state.Tiles.Pollution[homeIdx] = 0.95f;
+        int immigrantsDirty = dirty.CalculateImmigration(state);
+
+        var stateClean = new WorldState(64, 256, 64);
+        stateClean.Population = 2000;
+        stateClean.Happiness = 0.7f;
+        _ = stateClean.Buildings.Allocate();
+        int cleanHome = stateClean.Buildings.Allocate();
+        stateClean.Buildings.GridX[cleanHome] = 10;
+        stateClean.Buildings.GridY[cleanHome] = 10;
+        stateClean.Buildings.State[cleanHome] = 1;
+        stateClean.Buildings.MaxOccupants[cleanHome] = 500;
+        int cleanIdx = stateClean.Tiles.Index(10, 10);
+        stateClean.Tiles.ZoneType[cleanIdx] = 1;
+        stateClean.Tiles.BuildingId[cleanIdx] = (ushort)cleanHome;
+        var clean = new PopulationSystem(seed: 77);
+        for (int i = 0; i < 40; i++)
+        {
+            int slot = AddHousehold(stateClean, clean, members: 2, homeBuilding: (ushort)cleanHome);
+            stateClean.Households.HealthSatisfaction[slot] = 128;
+            stateClean.Households.SafetySatisfaction[slot] = 128;
+        }
+        stateClean.Tiles.Pollution[cleanIdx] = 0.05f;
+        int immigrantsClean = clean.CalculateImmigration(stateClean);
+
+        Assert.True(immigrantsClean > immigrantsDirty,
+            $"cleaner environment should attract more immigrants (dirty={immigrantsDirty}, clean={immigrantsClean})");
+        Assert.True(stateClean.MeanEnvironmentScore > state.MeanEnvironmentScore);
+        Assert.True(stateClean.MeanPollution < state.MeanPollution);
+    }
+
+    [Fact]
     public void Tick_LowHealthSatisfaction_LowersHappinessTowardEmigrationBand()
     {
         var state = CreateTestWorld();

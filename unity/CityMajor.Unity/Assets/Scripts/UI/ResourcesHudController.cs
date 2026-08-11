@@ -26,6 +26,7 @@ namespace CityMajor.UI
         Label _fireValue;
         Label _hospitalValue;
         Label _policeValue;
+        Label _wasteValue;
         Label _eduValue;
         Label _parkValue;
         Label _cranesLabel;
@@ -98,6 +99,7 @@ namespace CityMajor.UI
             _fireValue = root.Q<Label>("fire-value");
             _hospitalValue = root.Q<Label>("hospital-value");
             _policeValue = root.Q<Label>("police-value");
+            _wasteValue = root.Q<Label>("waste-value");
             _eduValue = root.Q<Label>("edu-value");
             _parkValue = root.Q<Label>("park-value");
             _cranesLabel = root.Q<Label>("cranes-label");
@@ -220,6 +222,18 @@ namespace CityMajor.UI
                     : "👮 —";
                 _policeValue.tooltip =
                     "Mean household SafetySatisfaction, mean home-tile crime, and fraction under police coverage. Station quality deepens crime suppression; safety feeds P4 satisfaction / immigration (Tier-2 police → crime → outcomes; arson already reads tile crime).";
+            }
+
+            if (_wasteValue != null)
+            {
+                var envPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanEnvironmentScore) * 100f);
+                var pollutionPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanPollution) * 100f);
+                var covPct = Mathf.RoundToInt(Mathf.Clamp01(state.WasteCoverageFraction) * 100f);
+                _wasteValue.text = covPct > 0 || envPct > 0 || pollutionPct > 0
+                    ? $"🗑️ {envPct}% · pol {pollutionPct}% · {covPct}%"
+                    : "🗑️ —";
+                _wasteValue.tooltip =
+                    "Mean environment score (1 − pollution), mean home-tile pollution, and fraction under waste coverage. Depots abate residential/commercial waste; uncovered zones accumulate pollution that feeds environment satisfaction / health / immigration (Tier-2 waste → pollution → outcomes).";
             }
 
             if (_eduValue != null)

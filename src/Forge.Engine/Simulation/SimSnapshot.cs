@@ -307,6 +307,15 @@ public sealed class SimSnapshot
     /// <summary>Mean household SafetySatisfaction 0–1 (Tier-2 police → crime → safety).</summary>
     public float MeanSafetySatisfaction { get; init; }
 
+    /// <summary>Fraction of households with waste coverage (Tier-2 waste/pollution).</summary>
+    public float WasteCoverageFraction { get; init; }
+
+    /// <summary>Mean tile pollution at household homes 0–1 (Tier-2 waste/pollution).</summary>
+    public float MeanPollution { get; init; }
+
+    /// <summary>Mean environment score 0–1 ≈ (1 − pollution) (Tier-2 waste → outcomes).</summary>
+    public float MeanEnvironmentScore { get; init; }
+
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount { get; init; }
 
@@ -511,6 +520,9 @@ public sealed class SimSnapshot
             PoliceCoverageFraction = state.PoliceCoverageFraction,
             MeanCrimeRate = state.MeanCrimeRate,
             MeanSafetySatisfaction = state.MeanSafetySatisfaction,
+            WasteCoverageFraction = state.WasteCoverageFraction,
+            MeanPollution = state.MeanPollution,
+            MeanEnvironmentScore = state.MeanEnvironmentScore,
             ParkAttractionCount = state.ParkAttractionCount,
             LandmarkAttractionCount = state.LandmarkAttractionCount,
             TourismAttractionCount = state.TourismAttractionCount,

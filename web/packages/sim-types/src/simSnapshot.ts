@@ -261,6 +261,12 @@ export type SimSnapshotDto = {
   meanCrimeRate: number;
   /** Mean household SafetySatisfaction 0–1. */
   meanSafetySatisfaction: number;
+  /** Fraction of households under waste coverage. */
+  wasteCoverageFraction: number;
+  /** Mean tile pollution at household homes 0–1. */
+  meanPollution: number;
+  /** Mean environment score 0–1 ≈ (1 − pollution). */
+  meanEnvironmentScore: number;
   /** Park attraction units for tourism (buildings + zone sites). */
   parkAttractionCount: number;
   /** Landmark / monument attraction units for tourism. */
@@ -366,6 +372,9 @@ export type SimResourcesDto = Pick<
   | "policeCoverageFraction"
   | "meanCrimeRate"
   | "meanSafetySatisfaction"
+  | "wasteCoverageFraction"
+  | "meanPollution"
+  | "meanEnvironmentScore"
   | "parkAttractionCount"
   | "landmarkAttractionCount"
   | "tourismAttractionCount"

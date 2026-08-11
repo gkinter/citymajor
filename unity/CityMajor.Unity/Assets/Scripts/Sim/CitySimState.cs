@@ -65,6 +65,15 @@ namespace CityMajor.Sim
         /// <summary>Cathedral P4 — walk mode share (0–1).</summary>
         public float WalkModeShare;
 
+        /// <summary>Cathedral P4 / U3.5 — mean home→work commute minutes.</summary>
+        public float MeanCommuteMinutes;
+
+        /// <summary>Cathedral P4.1 / U3.5 — fraction of working commuters with valid home+work IDs.</summary>
+        public float CommuterCoverage;
+
+        /// <summary>Cathedral P4.2 / U3.5 — mean commute satisfaction (0–1).</summary>
+        public float MeanCommuteSatisfaction;
+
         /// <summary>Cathedral P3 — city-average Food price (0 if economy unavailable).</summary>
         public float FoodAvgPrice;
 

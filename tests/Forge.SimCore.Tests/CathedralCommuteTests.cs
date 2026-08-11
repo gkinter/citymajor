@@ -67,6 +67,36 @@ public sealed class CathedralCommuteTests
     }
 
     [Fact]
+    public void CollectCommuteHudMetrics_ReportsOdCoverageAndCommuteSatisfaction()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        for (int x = 8; x <= 20; x++)
+            host.PlaceRoad(x, 9);
+
+        // Warm the road graph without risking building churn on hand-allocated IDs.
+        for (int i = 0; i < 4; i++)
+            host.Tick(1.0);
+
+        int homeId = PlaceTestBuilding(host, 10, 10, zone: 1, typeId: 101);
+        int workId = PlaceTestBuilding(host, 16, 10, zone: 3, typeId: 301);
+        Assert.True(homeId > 0 && workId > 0 && homeId != workId);
+        AllocateWorkingCommuter(host, homeId, workId);
+
+        var (meanMin, coverage, meanSat) = host.CollectCommuteHudMetrics();
+        var audit = host.Population.AuditCommuters(host.State);
+
+        Assert.Equal(1, audit.WorkingCommuters);
+        Assert.Equal(1, audit.AssignedCommuters);
+        Assert.Equal(audit.Coverage, coverage, precision: 4);
+        Assert.True(coverage >= 0.99f, $"expected full O-D coverage, got {coverage}");
+        Assert.True(meanMin > 0f, $"expected positive mean commute minutes, got {meanMin}");
+        Assert.InRange(meanSat, 0f, 1f);
+        Assert.True(meanSat > 0.2f, $"expected usable commute satisfaction, got {meanSat}");
+    }
+
+    [Fact]
     public void ConnectedRoadPath_BeatsEuclideanFallbackWhenDetourIsShorter()
     {
         var host = new SimHost();

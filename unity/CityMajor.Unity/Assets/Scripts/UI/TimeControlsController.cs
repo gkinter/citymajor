@@ -4,7 +4,10 @@ using UnityEngine.UIElements;
 
 namespace CityMajor.UI
 {
-    /// <summary>Pause + sim speed (Space / 1 / 2 / 4). Cosmetic-only until SimHost exposes time scale.</summary>
+    /// <summary>
+    /// Pause + sim speed. Keys: Space pause; <c>[</c>/<c>]</c>/<c>\</c> (or keypad 1/2/4) for 1×/2×/4×.
+    /// Does not use 5/6/7 — those paint Office / Mixed / Ag zones.
+    /// </summary>
     public sealed class TimeControlsController : MonoBehaviour
     {
         CitySimBridge _sim;
@@ -29,11 +32,12 @@ namespace CityMajor.UI
                 Refresh();
             }
 
-            if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha5) || UnityEngine.Input.GetKeyDown(KeyCode.Keypad1))
+            // Bracket keys avoid clash with ZonePaintTool Office/Mixed/Ag (5/6/7).
+            if (UnityEngine.Input.GetKeyDown(KeyCode.LeftBracket) || UnityEngine.Input.GetKeyDown(KeyCode.Keypad1))
                 SetSpeed(1f);
-            if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha6) || UnityEngine.Input.GetKeyDown(KeyCode.Keypad2))
+            if (UnityEngine.Input.GetKeyDown(KeyCode.RightBracket) || UnityEngine.Input.GetKeyDown(KeyCode.Keypad2))
                 SetSpeed(2f);
-            if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha7) || UnityEngine.Input.GetKeyDown(KeyCode.Keypad4))
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Backslash) || UnityEngine.Input.GetKeyDown(KeyCode.Keypad4))
                 SetSpeed(4f);
         }
 

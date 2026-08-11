@@ -84,7 +84,7 @@
 
 ## Time & persistence
 
-- [ ] `Space` — pause; `5`/`6`/`7` — 1×/2×/4× sim speed
+- [ ] `Space` — pause; `[`/`]`/`\` (or keypad 1/2/4) — 1×/2×/4× sim speed (`5`/`6`/`7` are Office/Mixed/Ag)
 - [ ] **Save** writes `citymajor.cmjr` to persistentDataPath
 - [ ] **Load** restores zones/buildings/funds
 - [ ] **Share** copies spectator URL to clipboard

@@ -1596,6 +1596,58 @@ public sealed class PopulationSystem
     }
 
     /// <summary>
+    /// Mean commute satisfaction (0–100) over working-age households with a workplace.
+    /// Cathedral U3.5 / P4.2 — Unity Cathedral metrics HUD.
+    /// </summary>
+    public float AuditMeanCommuteSatisfaction(WorldState state)
+    {
+        var hh = state.Households;
+        float total = 0f;
+        int count = 0;
+
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+            if (hh.AgeGroup[i] != 1) continue;
+            if (hh.WorkBuildingId[i] == 0) continue;
+
+            total += CalculateCommuteSatisfaction(state, i);
+            count++;
+        }
+
+        return count > 0 ? total / count : 0f;
+    }
+
+    /// <summary>
+    /// Mean home→work travel cost in approximate game-minutes for working commuters.
+    /// Uses the same graph cost path as satisfaction when road travel times are present.
+    /// </summary>
+    public float AuditMeanCommuteMinutes(WorldState state)
+    {
+        var hh = state.Households;
+        float total = 0f;
+        int count = 0;
+
+        for (int i = 0; i < hh.Capacity; i++)
+        {
+            if (!hh.IsActive(i)) continue;
+            if (hh.AgeGroup[i] != 1) continue;
+            if (hh.WorkBuildingId[i] == 0) continue;
+
+            float travelCost = CommuteTravelTime.CalculateTravelCost(
+                state,
+                hh.HomeBuildingId[i],
+                hh.WorkBuildingId[i],
+                state.RoadEdgeTravelTimes);
+            // Match HouseholdSampleRow tuning: cost units ≈ free-flow tile hops → minutes.
+            total += travelCost * TilesToCommuteMinutes;
+            count++;
+        }
+
+        return count > 0 ? total / count : 0f;
+    }
+
+    /// <summary>
     /// Aggregate O-D pairs by home/work tile for snapshot debug export.
     /// </summary>
     public CommuteOdSampleRow[] CollectCommuteOdSample(WorldState state, int limit = 16)

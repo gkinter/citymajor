@@ -285,6 +285,9 @@ namespace CityMajor.Sim
             CarModeShare = 0.65f,
             TransitModeShare = 0.20f,
             WalkModeShare = 0.15f,
+            MeanCommuteMinutes = 14f,
+            CommuterCoverage = 0.92f,
+            MeanCommuteSatisfaction = 0.74f,
             FoodAvgPrice = 1.0f,
             WaterAvgPrice = 0.8f,
             SteelAvgPrice = 2.4f,
@@ -311,6 +314,7 @@ namespace CityMajor.Sim
             var sampleLaw = _simHost.GetSampleLawPreview();
             var laws = _simHost.Laws;
             var (carShare, transitShare, walkShare) = _simHost.CollectModeShares();
+            var (meanCommuteMin, commuterCoverage, meanCommuteSat) = _simHost.CollectCommuteHudMetrics();
             var employment = snap.EmploymentRate;
             var unemployment = Mathf.Clamp01(1f - employment);
             var hasGoodsPrices = economy != null;
@@ -353,6 +357,9 @@ namespace CityMajor.Sim
                 CarModeShare = carShare,
                 TransitModeShare = transitShare,
                 WalkModeShare = walkShare,
+                MeanCommuteMinutes = meanCommuteMin,
+                CommuterCoverage = commuterCoverage,
+                MeanCommuteSatisfaction = meanCommuteSat,
                 FoodAvgPrice = foodPrice,
                 WaterAvgPrice = waterPrice,
                 SteelAvgPrice = steelPrice,

@@ -129,7 +129,7 @@ Follow merge protocol in [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md). B
 - [ ] Unity Play: Economy panel shows goods + chain (+ partition spread if P3.3 merged)
 - [ ] Unity Play: congestion overlay reads snapshot edge data
 - [ ] Unity Play: extended zones + density paint work under era gates
-- [ ] Unity Play: O-D / commute satisfaction sample visible
+- [x] Unity Play: O-D / commute satisfaction sample visible (Cathedral HUD — tip after U3.5 bind)
 - [ ] [`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md) Cathedral subset signed on integration tip
 - [ ] `dotnet test --filter "FullyQualifiedName~Cathedral"` green
 - [ ] No commits that treat web `/play` as the player ship surface

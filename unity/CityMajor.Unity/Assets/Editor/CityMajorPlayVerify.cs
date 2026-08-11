@@ -45,7 +45,8 @@ namespace CityMajor.Editor
                 "Rebuild SimCore after SimHost edits: ./scripts/build-simcore-for-unity.sh. " +
                 "Cathedral P1–P4: RoadTypeToolbar Local/Collector/Highway + Bridge/Tunnel/Ramp → PlaceRoad; ZonePaintTool density; " +
                 "ZoningToolbar Office/Mixed/Ag era gates; " +
-                "CitySimState MeanRentBurden / ResidentialVacancy (F1 Help).");
+                "CitySimState MeanRentBurden / ResidentialVacancy / MeanCommuteMinutes · O-D · commute sat (F1 Help). " +
+                "Sim speed: [ ] \\ (not 5/6/7 — those are Office/Mixed/Ag).");
         }
 
         [MenuItem("CityMajor/Verify GLTF Catalog")]

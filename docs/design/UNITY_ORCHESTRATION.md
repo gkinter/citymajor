@@ -230,7 +230,8 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `BudgetPanelController` | — | Top-right economy strip |
 | `ApprovalMeterController` | — | Top-right mayor approval |
 | `EventTickerController` | — | Bottom HUD ticker — Herald headline from sim bucket |
-| `TimeControlsController` | `Space`, `5`/`6`/`7` | Pause + 1×/2×/4× speed |
+| `TimeControlsController` | `Space`, `[`/`]`/`\` (keypad 1/2/4) | Pause + 1×/2×/4× speed — not 5/6/7 (zone paint) |
+| `CathedralMetricsHudController` | — | Rent/vacancy/unemployment + **Commute min · O-D coverage · commute sat** (U3.5) |
 | `ToolModeHudController` | — | Active tool indicator (zone/road/build/bulldoze) |
 
 #### UI — toggle panels

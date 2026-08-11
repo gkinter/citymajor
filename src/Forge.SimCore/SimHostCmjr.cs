@@ -48,6 +48,24 @@ public sealed partial class SimHost
         return (_traffic.CarModeShare, _traffic.TransitModeShare, _traffic.WalkModeShare);
     }
 
+    /// <summary>
+    /// Cathedral U3.5 — mean commute minutes, O-D assignment coverage, mean commute satisfaction (0–1).
+    /// Prefer full TrafficSystem average when enabled; otherwise population graph cost rollup.
+    /// </summary>
+    public (float MeanCommuteMinutes, float CommuterCoverage, float MeanCommuteSatisfaction) CollectCommuteHudMetrics()
+    {
+        if (!IsInitialized || _state is null || _population is null)
+            return (0f, 0f, 0f);
+
+        var audit = _population.AuditCommuters(_state);
+        float meanSat = _population.AuditMeanCommuteSatisfaction(_state) / 100f;
+        float meanMin = _useFullTraffic && _fullTraffic is not null && _fullTraffic.AverageCommuteMinutes > 0f
+            ? _fullTraffic.AverageCommuteMinutes
+            : _population.AuditMeanCommuteMinutes(_state);
+
+        return (meanMin, audit.Coverage, meanSat);
+    }
+
     /// <summary>Per-edge assignment export for snapshot/status (P1.6 / P4.2).</summary>
     public (float[] EdgeVolumes, float[] EdgeTravelTimes) GetTrafficEdgeExport() =>
         CollectTrafficEdgeExport();

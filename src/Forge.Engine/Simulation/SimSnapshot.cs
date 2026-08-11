@@ -268,6 +268,12 @@ public sealed class SimSnapshot
     /// <summary>Insurance premium mult from fire safety rating (Tier-2).</summary>
     public float FireInsurancePremiumMult { get; init; } = 1f;
 
+    /// <summary>Mean household education level 0–3 (Tier-2 education depth).</summary>
+    public float MeanEducationLevel { get; init; }
+
+    /// <summary>Fraction of households with school coverage (Tier-2 education depth).</summary>
+    public float EducationCoverageFraction { get; init; }
+
     public readonly record struct BuildingSnapshot(
         int GridX, int GridY, ushort TypeId, byte Level,
         byte State, ushort Occupants, ushort MaxOccupants, byte Condition);
@@ -447,6 +453,8 @@ public sealed class SimSnapshot
             AerialFirefightingAvailable = state.AerialFirefightingAvailable,
             FireSafetyRating = state.FireSafetyRating,
             FireInsurancePremiumMult = state.FireInsurancePremiumMult,
+            MeanEducationLevel = state.MeanEducationLevel,
+            EducationCoverageFraction = state.EducationCoverageFraction,
         };
     }
 }

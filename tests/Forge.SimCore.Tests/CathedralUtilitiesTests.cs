@@ -12,7 +12,8 @@ namespace Forge.SimCore.Tests;
 /// Characterization tests for Cathedral P5.1 utilities foundation (SB-4987),
 /// P5.2 emergency response time (SB-4242), P5.3 fire response v1,
 /// P5.4 EMS survival curve (Phase 5b), Tier-2 hospital capacity,
-/// and Tier-2 wildfire / arson rings.
+/// Tier-2 wildfire / arson rings, aerial / lookout / fire rating,
+/// and Tier-2 education depth.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -682,6 +683,128 @@ public sealed class CathedralUtilitiesTests
         Assert.Equal(1, snap.LookoutTowerCount);
         Assert.True(snap.AerialFirefightingAvailable);
         Assert.Equal(host.State.FireSafetyRating, snap.FireSafetyRating);
+    }
+
+    [Fact]
+    public void EducationUpgradeChance_HigherWithCoverageAndQuality()
+    {
+        float none = EducationProgression.UpgradeChance(0f, 1f, level: 0);
+        float thin = EducationProgression.UpgradeChance(0.1f, 1f, level: 0);
+        float covered = EducationProgression.UpgradeChance(1f, 1f, level: 0);
+        float advanced = EducationProgression.UpgradeChance(1f, 1f, level: 2);
+
+        Assert.Equal(0f, none);
+        Assert.Equal(0f, thin);
+        Assert.True(covered > 0f);
+        Assert.True(advanced > 0f && advanced < covered,
+            $"higher education levels should be harder (L0={covered:F3}, L2={advanced:F3})");
+    }
+
+    [Fact]
+    public void EducationTick_SchoolCoverage_RaisesHouseholdLevels()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 16, 16, serviceFlags: 0);
+        PlaceBuilding(host.State!, 16, 17, serviceFlags: EducationProgression.ServiceEducation, level: 3);
+
+        int slot = host.State!.Households.Allocate();
+        Assert.True(slot >= 0);
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.Education[slot] = 0;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        float before = host.State.MeanEducationLevel;
+
+        int delta = 0;
+        for (int i = 0; i < 40; i++)
+        {
+            delta += EducationProgression.Tick(
+                host.State,
+                host.Services.EducationCoverage,
+                schoolQuality: 1f,
+                days: 1f,
+                rng: new AlwaysLowRandom());
+        }
+
+        Assert.True(delta > 0, "forced-success RNG should upgrade households under a school");
+        Assert.True(host.State.Households.Education[slot] > 0);
+        Assert.True(host.State.MeanEducationLevel > before);
+        Assert.True(host.State.EducationCoverageFraction > 0.5f);
+    }
+
+    [Fact]
+    public void EducationTick_NoCoverage_DecaysLevel()
+    {
+        var state = new WorldState(32, maxBuildings: 8);
+        int home = PlaceBuilding(state, 10, 10, serviceFlags: 0);
+        int slot = state.Households.Allocate();
+        state.Households.HomeBuildingId[slot] = (ushort)home;
+        state.Households.Education[slot] = 2;
+
+        var emptyCoverage = new InfluenceMap(32, 32);
+        emptyCoverage.Recalculate();
+
+        for (int i = 0; i < 30; i++)
+        {
+            EducationProgression.Tick(
+                state,
+                emptyCoverage,
+                schoolQuality: 1f,
+                days: 1f,
+                rng: new AlwaysLowRandom());
+        }
+
+        Assert.True(state.Households.Education[slot] < 2,
+            "uncovered households should slowly lose education");
+        Assert.Equal(0f, state.EducationCoverageFraction);
+    }
+
+    [Fact]
+    public void ResearchEducationMultiplier_MonotonicWithMean()
+    {
+        float low = EducationProgression.ResearchEducationMultiplier(0f);
+        float mid = EducationProgression.ResearchEducationMultiplier(1.5f);
+        float high = EducationProgression.ResearchEducationMultiplier(3f);
+        Assert.Equal(EducationProgression.MinResearchEducationMult, low, precision: 3);
+        Assert.Equal(EducationProgression.MaxResearchEducationMult, high, precision: 3);
+        Assert.True(mid > low && mid < high);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsEducationProgressionFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 12, 12, serviceFlags: 0);
+        PlaceBuilding(host.State!, 12, 13, serviceFlags: EducationProgression.ServiceEducation, level: 2);
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.Education[slot] = 1;
+        host.State.Households.MemberCount[slot] = 3;
+
+        host.Services!.RebuildFromWorld(host.State);
+        host.Services.UpdateEducationProgression(host.State, days: 0f);
+
+        Assert.True(host.State.EducationCoverageFraction > 0f);
+        Assert.Equal(1f, host.State.MeanEducationLevel, precision: 3);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("meanEducationLevel", out var mean));
+        Assert.True(doc.RootElement.TryGetProperty("educationCoverageFraction", out var cov));
+        Assert.Equal(host.State.MeanEducationLevel, mean.GetSingle(), precision: 3);
+        Assert.Equal(host.State.EducationCoverageFraction, cov.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.MeanEducationLevel, dto.MeanEducationLevel, precision: 3);
+        Assert.Equal(host.State.EducationCoverageFraction, dto.EducationCoverageFraction, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.MeanEducationLevel, snap.MeanEducationLevel, precision: 3);
+        Assert.Equal(host.State.EducationCoverageFraction, snap.EducationCoverageFraction, precision: 3);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

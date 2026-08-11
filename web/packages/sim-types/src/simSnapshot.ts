@@ -237,6 +237,10 @@ export type SimSnapshotDto = {
   /** Fire safety rating 1–10. */
   fireSafetyRating: number;
   fireInsurancePremiumMult: number;
+  /** Mean household education level 0–3. */
+  meanEducationLevel: number;
+  /** Fraction of households under school coverage. */
+  educationCoverageFraction: number;
 
   marketZoneCount: number;
   commuterCoverage: number;
@@ -322,6 +326,8 @@ export type SimResourcesDto = Pick<
   | "aerialFirefightingAvailable"
   | "fireSafetyRating"
   | "fireInsurancePremiumMult"
+  | "meanEducationLevel"
+  | "educationCoverageFraction"
   | "marketZoneCount"
   | "commuterCoverage"
   | "councilSeats"

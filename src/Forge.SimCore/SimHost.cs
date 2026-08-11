@@ -1087,6 +1087,8 @@ public sealed partial class SimHost
                 educatedPop += _state.Households.MemberCount[i];
         }
         _research.EducatedPopulation = educatedPop;
+        _research.EducationLevelMultiplier =
+            EducationProgression.ResearchEducationMultiplier(_state.MeanEducationLevel);
 
         _budget.PropertyTaxRate = _state.PropertyTaxRate;
         _budget.CommercialTaxRate = _state.CommercialTaxRate;

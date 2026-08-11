@@ -138,6 +138,11 @@ public sealed class WasmSimHost
     /// <summary>Insurance premium mult from fire safety rating (Tier-2).</summary>
     public float FireInsurancePremiumMult =>
         _host.State?.FireInsurancePremiumMult ?? 1f;
+    /// <summary>Mean household education level 0–3 (Tier-2).</summary>
+    public float MeanEducationLevel => _host.State?.MeanEducationLevel ?? 0f;
+    /// <summary>Fraction of households with school coverage (Tier-2).</summary>
+    public float EducationCoverageFraction =>
+        _host.State?.EducationCoverageFraction ?? 0f;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
     /// <summary>Faction id per council seat (length <see cref="PoliticsSystem.CouncilSeatCount"/>).</summary>
@@ -390,6 +395,10 @@ public sealed class WasmStatusDto
     public byte FireSafetyRating { get; init; } = 5;
     /// <summary>Insurance premium mult from fire safety rating (Tier-2).</summary>
     public float FireInsurancePremiumMult { get; init; } = 1f;
+    /// <summary>Mean household education level 0–3 (Tier-2).</summary>
+    public float MeanEducationLevel { get; init; }
+    /// <summary>Fraction of households with school coverage (Tier-2).</summary>
+    public float EducationCoverageFraction { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Faction id per council seat (length 9).</summary>
@@ -509,6 +518,8 @@ public sealed class WasmStatusDto
             AerialFirefightingAvailable = host.AerialFirefightingAvailable,
             FireSafetyRating = host.FireSafetyRating,
             FireInsurancePremiumMult = host.FireInsurancePremiumMult,
+            MeanEducationLevel = host.MeanEducationLevel,
+            EducationCoverageFraction = host.EducationCoverageFraction,
             MarketZoneCount = host.MarketZoneCount,
             CouncilSeats = host.CouncilSeats,
         };

@@ -112,6 +112,12 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — insurance premium mult from fire safety rating.</summary>
         public float FireInsurancePremiumMult;
 
+        /// <summary>Tier-2 — mean household education level 0–3.</summary>
+        public float MeanEducationLevel;
+
+        /// <summary>Tier-2 — fraction of households with school coverage.</summary>
+        public float EducationCoverageFraction;
+
         /// <summary>Cathedral P2 — mean rent / income burden (0–1+).</summary>
         public float MeanRentBurden;
 

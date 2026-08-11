@@ -25,6 +25,7 @@ namespace CityMajor.UI
         Label _emsValue;
         Label _fireValue;
         Label _hospitalValue;
+        Label _eduValue;
         Label _cranesLabel;
         readonly PopulationGrowthTracker _growthTracker = new();
 
@@ -94,6 +95,7 @@ namespace CityMajor.UI
             _emsValue = root.Q<Label>("ems-value");
             _fireValue = root.Q<Label>("fire-value");
             _hospitalValue = root.Q<Label>("hospital-value");
+            _eduValue = root.Q<Label>("edu-value");
             _cranesLabel = root.Q<Label>("cranes-label");
         }
 
@@ -200,6 +202,15 @@ namespace CityMajor.UI
                     : "🏥 —";
                 _hospitalValue.tooltip =
                     "Free hospital beds and city-wide bed occupancy. EMS transports to the nearest hospital with capacity (Tier-2 / MISSING_SYSTEMS §1.2).";
+            }
+
+            if (_eduValue != null)
+            {
+                var mean = Mathf.Clamp(state.MeanEducationLevel, 0f, 3f);
+                var covPct = Mathf.RoundToInt(Mathf.Clamp01(state.EducationCoverageFraction) * 100f);
+                _eduValue.text = $"🎓 {mean:0.0}/3 · {covPct}%";
+                _eduValue.tooltip =
+                    "Mean household education level (0–3) and fraction of households under school coverage. Coverage raises education over time; thin coverage slowly decays (Tier-2 / Cathedral P5 education depth).";
             }
         }
 

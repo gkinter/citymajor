@@ -29,6 +29,8 @@
             <ui:Label name="fire-value" class="hud-value hud-fire-value" text="—" />
             <ui:Label class="hud-label hud-hospital-label" text="Hosp" />
             <ui:Label name="hospital-value" class="hud-value hud-hospital-value" text="—" />
+            <ui:Label class="hud-label hud-edu-label" text="Edu" />
+            <ui:Label name="edu-value" class="hud-value hud-edu-value" text="—" />
         </ui:VisualElement>
         <ui:Label name="cranes-label" class="hud-sub hud-cranes" text="" style="display: none;" />
     </ui:VisualElement>

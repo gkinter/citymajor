@@ -264,6 +264,18 @@ public sealed class ServiceSystem
         UpdateFireResponse(state);
         UpdateWildfireArson(state);
         UpdateHospitalCapacity(state);
+        UpdateEducationProgression(state);
+    }
+
+    /// <summary>
+    /// Tier-2 education depth — households under school coverage raise education
+    /// level; thin coverage slowly decays. Writes mean level + coverage fraction.
+    /// </summary>
+    public void UpdateEducationProgression(WorldState state, float days = 1f, Random? rng = null)
+    {
+        float quality = EducationProgression.MeanSchoolQuality(
+            state, (s, id) => CalculateEducationQuality(s, id));
+        EducationProgression.Tick(state, _educationCoverage, quality, days, rng);
     }
 
     /// <summary>

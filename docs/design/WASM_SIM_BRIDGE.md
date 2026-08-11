@@ -296,6 +296,8 @@ export type SimSnapshotDto = {
   aerialFirefightingAvailable: boolean;
   fireSafetyRating: number; // 1–10
   fireInsurancePremiumMult: number;
+  meanEducationLevel: number; // 0–3
+  educationCoverageFraction: number;
 
   marketZoneCount: number;
   commuterCoverage: number;
@@ -426,6 +428,8 @@ export type CommuteOdSampleDto = {
   "wildfireRiskIndex": 0.12,
   "fireSafetyRating": 5,
   "fireInsurancePremiumMult": 1,
+  "meanEducationLevel": 1.2,
+  "educationCoverageFraction": 0.55,
   "culturalDna": [0, 0, 0, 0, 0, 0, 0, 0],
   "councilSeats": [0, 0, 0, 0, 0, 0, 0, 0, 0],
   "buildings": [

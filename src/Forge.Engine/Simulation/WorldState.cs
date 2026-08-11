@@ -251,6 +251,16 @@ public sealed class WorldState
     public float FireInsurancePremiumMult { get; set; } = 1f;
 
     /// <summary>
+    /// Mean household education level 0–3 (none → university). Tier-2 education depth.
+    /// </summary>
+    public float MeanEducationLevel { get; set; }
+
+    /// <summary>
+    /// Fraction of households with home-tile school coverage ≥ upgrade threshold (0–1).
+    /// </summary>
+    public float EducationCoverageFraction { get; set; }
+
+    /// <summary>
     /// Per-tile wildfire burn intensity (0 = cold). Sized to <see cref="Tiles"/>.Count when first used.
     /// Not exported on snapshots — aggregates only.
     /// </summary>

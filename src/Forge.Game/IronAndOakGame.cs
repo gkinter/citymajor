@@ -3,6 +3,7 @@ using Forge.Engine.Data;
 using Forge.Engine.Input;
 using Forge.Engine.Rendering;
 using Forge.Engine.Simulation;
+using Forge.SimCore;
 
 namespace Forge.Game;
 
@@ -625,6 +626,8 @@ public sealed class IronAndOakGame
                 educatedPop += state.Households.MemberCount[i];
         }
         _researchSystem.EducatedPopulation = educatedPop;
+        _researchSystem.EducationLevelMultiplier =
+            EducationProgression.ResearchEducationMultiplier(state.MeanEducationLevel);
 
         // --- Budget system: sync tax rates from WorldState ---
         _budgetSystem!.PropertyTaxRate = state.PropertyTaxRate;

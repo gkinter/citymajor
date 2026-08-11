@@ -18,6 +18,8 @@
     <Compile Include="..\Forge.SimCore\FireResponse.cs" Link="SimCore\FireResponse.cs" />
     <Compile Include="..\Forge.SimCore\EmsSurvival.cs" Link="SimCore\EmsSurvival.cs" />
     <Compile Include="..\Forge.SimCore\HospitalCapacity.cs" Link="SimCore\HospitalCapacity.cs" />
+    <Compile Include="..\Forge.SimCore\WildfireArson.cs" Link="SimCore\WildfireArson.cs" />
+    <Compile Include="..\Forge.SimCore\EducationProgression.cs" Link="SimCore\EducationProgression.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\production_chains.json">

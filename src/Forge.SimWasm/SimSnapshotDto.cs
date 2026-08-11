@@ -199,6 +199,10 @@ public sealed class SimSnapshotDto
     public byte FireSafetyRating { get; init; } = 5;
     /// <summary>Insurance premium mult from fire safety rating (Tier-2).</summary>
     public float FireInsurancePremiumMult { get; init; } = 1f;
+    /// <summary>Mean household education level 0–3 (Tier-2 education depth).</summary>
+    public float MeanEducationLevel { get; init; }
+    /// <summary>Fraction of households with school coverage (Tier-2 education depth).</summary>
+    public float EducationCoverageFraction { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Sparse market-zone boundary friction samples (0–1 heat).</summary>
@@ -332,6 +336,8 @@ public sealed class SimSnapshotDto
             AerialFirefightingAvailable = state.AerialFirefightingAvailable,
             FireSafetyRating = state.FireSafetyRating,
             FireInsurancePremiumMult = state.FireInsurancePremiumMult,
+            MeanEducationLevel = state.MeanEducationLevel,
+            EducationCoverageFraction = state.EducationCoverageFraction,
             MarketZoneCount = state.MarketZoneCount,
             CommuterCoverage = commuterAudit.Coverage,
             CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),

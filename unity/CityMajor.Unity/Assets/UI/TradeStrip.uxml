@@ -3,13 +3,13 @@
     <ui:VisualElement name="trade-root" class="panel-root panel-root--trade" style="display: none;">
         <ui:VisualElement class="panel-header">
             <ui:VisualElement>
-                <ui:Label name="trade-title" class="panel-title" text="Trade routes" />
+                <ui:Label name="trade-title" class="panel-title" text="Trade routes [Y]" />
                 <ui:Label name="trade-subtitle" class="panel-subtitle" text="Global market · bilateral contracts ready (P3.5)" />
             </ui:VisualElement>
             <ui:Button name="trade-close" class="panel-close" text="✕" />
         </ui:VisualElement>
         <ui:ScrollView name="trade-scroll" class="panel-body">
-            <ui:Label name="trade-status" class="panel-note" text="No bilateral routes yet. Create partner contracts in sim; auto-trade fills global gaps." />
+            <ui:Label name="trade-status" class="panel-note" text="No bilateral routes yet. Create a partner contract below." />
             <ui:Label name="trade-employment" class="panel-note" text="" />
             <ui:Label name="trade-income" class="panel-note" text="" />
             <ui:Label name="trade-expense" class="panel-note" text="" />
@@ -17,6 +17,44 @@
             <ui:Label name="trade-flow" class="panel-note" text="" />
             <ui:Label name="trade-interzone" class="panel-note" text="" />
             <ui:Label name="trade-demand" class="panel-note" text="" />
+
+            <ui:Label class="panel-section-title" text="Active bilateral" />
+            <ui:VisualElement name="trade-routes" class="trade-route-list" />
+
+            <ui:Label class="panel-section-title" text="New contract (SB-3728)" />
+            <ui:VisualElement name="trade-create" class="trade-create">
+                <ui:VisualElement class="trade-create-row">
+                    <ui:Label class="trade-create-label" text="Partner" />
+                    <ui:Button name="trade-partner-prev" class="trade-cycle" text="‹" />
+                    <ui:Label name="trade-partner-label" class="trade-create-value" text="Coal Ridge" />
+                    <ui:Button name="trade-partner-next" class="trade-cycle" text="›" />
+                </ui:VisualElement>
+                <ui:VisualElement class="trade-create-row">
+                    <ui:Label class="trade-create-label" text="Good" />
+                    <ui:Button name="trade-good-prev" class="trade-cycle" text="‹" />
+                    <ui:Label name="trade-good-label" class="trade-create-value" text="Steel" />
+                    <ui:Button name="trade-good-next" class="trade-cycle" text="›" />
+                </ui:VisualElement>
+                <ui:VisualElement class="trade-create-row">
+                    <ui:Label class="trade-create-label" text="Direction" />
+                    <ui:Button name="trade-dir-toggle" class="trade-dir" text="Export +" />
+                </ui:VisualElement>
+                <ui:VisualElement class="trade-create-row">
+                    <ui:Label class="trade-create-label" text="Volume" />
+                    <ui:Button name="trade-qty-prev" class="trade-cycle" text="‹" />
+                    <ui:Label name="trade-qty-label" class="trade-create-value" text="50 /mo" />
+                    <ui:Button name="trade-qty-next" class="trade-cycle" text="›" />
+                </ui:VisualElement>
+                <ui:VisualElement class="trade-create-row">
+                    <ui:Label class="trade-create-label" text="Duration" />
+                    <ui:Button name="trade-months-prev" class="trade-cycle" text="‹" />
+                    <ui:Label name="trade-months-label" class="trade-create-value" text="12 mo" />
+                    <ui:Button name="trade-months-next" class="trade-cycle" text="›" />
+                </ui:VisualElement>
+                <ui:Label name="trade-create-hint" class="panel-note" text="Price uses global market; freight from partner + delivery delay." />
+                <ui:Button name="trade-create-btn" class="trade-create-btn" text="Create bilateral route" />
+                <ui:Label name="trade-create-feedback" class="panel-note" text="" />
+            </ui:VisualElement>
         </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>

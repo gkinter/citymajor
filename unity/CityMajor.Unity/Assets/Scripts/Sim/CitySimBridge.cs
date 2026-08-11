@@ -809,5 +809,80 @@ namespace CityMajor.Sim
                 PublishFromSimHost();
             return ok;
         }
+
+        /// <summary>
+        /// SB-3728 — create a bilateral partner contract (PartnerCityId ≥ 0).
+        /// Positive <paramref name="monthlyQuantity"/> exports; negative imports.
+        /// </summary>
+        public bool CreateBilateralTradeRoute(
+            int partnerCityId,
+            Good goodType,
+            float monthlyQuantity,
+            float agreedPrice,
+            int durationMonths)
+        {
+            if (!_simCoreReady || _simHost == null)
+                return false;
+
+            var ok = _simHost.CreateBilateralTradeRoute(
+                partnerCityId, goodType, monthlyQuantity, agreedPrice, durationMonths);
+            if (ok)
+                PublishFromSimHost();
+            return ok;
+        }
+
+        /// <summary>SB-3728 — cancel Nth bilateral route (skips global-market rows).</summary>
+        public bool CancelBilateralTradeRoute(int bilateralIndex)
+        {
+            if (!_simCoreReady || _simHost == null)
+                return false;
+
+            var ok = _simHost.CancelBilateralTradeRoute(bilateralIndex);
+            if (ok)
+                PublishFromSimHost();
+            return ok;
+        }
+
+        /// <summary>Active bilateral routes for Trade strip list / cancel buttons.</summary>
+        public BilateralRouteRow[] GetBilateralRoutes()
+        {
+            if (!_simCoreReady || _simHost?.Trade == null)
+                return Array.Empty<BilateralRouteRow>();
+
+            var routes = _simHost.Trade.Routes;
+            if (routes == null || routes.Count == 0)
+                return Array.Empty<BilateralRouteRow>();
+
+            var list = new System.Collections.Generic.List<BilateralRouteRow>(routes.Count);
+            for (var i = 0; i < routes.Count; i++)
+            {
+                var r = routes[i];
+                if (r.PartnerCityId < 0)
+                    continue;
+                list.Add(new BilateralRouteRow
+                {
+                    BilateralIndex = list.Count,
+                    PartnerCityId = r.PartnerCityId,
+                    GoodType = r.GoodType,
+                    Quantity = r.Quantity,
+                    AgreedPrice = r.AgreedPrice,
+                    RemainingMonths = r.RemainingMonths,
+                    FreightMonths = r.FreightMonths,
+                });
+            }
+            return list.ToArray();
+        }
+    }
+
+    /// <summary>Player-facing bilateral route row for SB-3728 Trade strip.</summary>
+    public struct BilateralRouteRow
+    {
+        public int BilateralIndex;
+        public int PartnerCityId;
+        public Good GoodType;
+        public float Quantity;
+        public float AgreedPrice;
+        public int RemainingMonths;
+        public int FreightMonths;
     }
 }

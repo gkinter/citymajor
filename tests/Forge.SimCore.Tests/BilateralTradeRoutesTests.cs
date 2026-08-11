@@ -90,6 +90,64 @@ public sealed class BilateralTradeRoutesTests
         Assert.Equal(host.State.MeanFreightMonths, dto.MeanFreightMonths, precision: 2);
     }
 
+    [Fact]
+    public void CancelBilateralRoute_SkipsGlobalMarketRows()
+    {
+        var trade = new TradeSystem();
+        Assert.True(trade.CreateTradeRoute(-1, Good.Wheat, 10f, 2f, 6));
+        Assert.True(trade.CreateTradeRoute(1, Good.Steel, 20f, 8f, 6));
+        Assert.True(trade.CreateTradeRoute(2, Good.Coal, 15f, 4f, 6));
+
+        Assert.True(trade.CancelBilateralRoute(0)); // removes partner 1, keeps global + partner 2
+        Assert.Equal(2, trade.Routes.Count);
+        Assert.Equal(-1, trade.Routes[0].PartnerCityId);
+        Assert.Equal(2, trade.Routes[1].PartnerCityId);
+        Assert.False(trade.CancelBilateralRoute(1));
+        Assert.True(trade.CancelBilateralRoute(0));
+        Assert.Single(trade.Routes);
+        Assert.Equal(-1, trade.Routes[0].PartnerCityId);
+    }
+
+    [Fact]
+    public void SimHost_CreateAndCancelBilateralTradeRoute_UpdatesSnapshotMetrics()
+    {
+        var host = new SimHost();
+        host.Init(32, new SimHostInitOptions { SkipStarterCity = true });
+        host.State!.MeanGoodsDeliveryDelay = 1f;
+
+        Assert.False(host.CreateBilateralTradeRoute(-1, Good.Steel, 50f, 10f, 12));
+        Assert.True(host.CreateBilateralTradeRoute(1, Good.Steel, 50f, 10f, 12));
+        Assert.Equal(1, host.State.BilateralRouteCount);
+        Assert.Equal(500f, host.State.BilateralTradeValue, precision: 1);
+        Assert.Equal(4, host.State.MeanFreightMonths, precision: 2); // partner 1 + delay 1 → freight 4
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(1, snap.BilateralRouteCount);
+        Assert.Equal(4f, snap.MeanFreightMonths, precision: 2);
+
+        Assert.True(host.CancelBilateralTradeRoute(0));
+        Assert.Equal(0, host.State.BilateralRouteCount);
+        Assert.Equal(0f, host.State.BilateralTradeValue);
+        Assert.Equal(0f, host.State.MeanFreightMonths);
+        Assert.Empty(host.Trade.Routes);
+
+        Assert.False(host.CancelBilateralTradeRoute(0));
+    }
+
+    [Fact]
+    public void SimHost_CreateBilateralTradeRoute_RespectsMaxCap()
+    {
+        var host = new SimHost();
+        host.Init(32, new SimHostInitOptions { SkipStarterCity = true });
+
+        for (int i = 0; i < TradeSystem.MaxBilateralRoutes; i++)
+            Assert.True(host.CreateBilateralTradeRoute(i % 5, Good.Coal, 10f, 5f, 6));
+
+        Assert.Equal(TradeSystem.MaxBilateralRoutes, host.State!.BilateralRouteCount);
+        Assert.False(host.CreateBilateralTradeRoute(1, Good.Steel, 10f, 5f, 6));
+        Assert.Equal(TradeSystem.MaxBilateralRoutes, host.Trade.CountBilateralRoutes());
+    }
+
     static WorldState CreateWorld()
     {
         var state = new WorldState(16);

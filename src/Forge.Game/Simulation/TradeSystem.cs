@@ -221,6 +221,45 @@ public sealed class TradeSystem
         return true;
     }
 
+    /// <summary>
+    /// Soft cap on concurrent bilateral contracts (SB-3728 create flow).
+    /// </summary>
+    public const int MaxBilateralRoutes = 8;
+
+    /// <summary>
+    /// Count of routes with <see cref="TradeRoute.PartnerCityId"/> ≥ 0 (live list, not last publish).
+    /// </summary>
+    public int CountBilateralRoutes()
+    {
+        int count = 0;
+        for (int i = 0; i < _routes.Count; i++)
+        {
+            if (_routes[i].PartnerCityId >= 0)
+                count++;
+        }
+        return count;
+    }
+
+    /// <summary>
+    /// Cancel the Nth bilateral route (PartnerCityId ≥ 0), skipping global-market rows.
+    /// </summary>
+    public bool CancelBilateralRoute(int bilateralIndex)
+    {
+        if (bilateralIndex < 0) return false;
+        int seen = 0;
+        for (int i = 0; i < _routes.Count; i++)
+        {
+            if (_routes[i].PartnerCityId < 0) continue;
+            if (seen == bilateralIndex)
+            {
+                _routes.RemoveAt(i);
+                return true;
+            }
+            seen++;
+        }
+        return false;
+    }
+
     // =========================================================================
     // Global price events
     // =========================================================================

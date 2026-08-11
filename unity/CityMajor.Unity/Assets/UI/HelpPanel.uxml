@@ -19,8 +19,9 @@
             <ui:Label class="help-section" text="Panels" />
             <ui:Label class="help-line" text="R — Research · H — Herald · C — Citizens · L — Laws" />
             <ui:Label class="help-line" text="E — Economy (goods / production) · G — Politics (approval / council)" />
+            <ui:Label class="help-line" text="Y — Trade routes (create / cancel bilateral contracts)" />
             <ui:Label class="help-line" text="P — Blueprint · F1 — Help · Esc — Close panel" />
-            <ui:Label class="help-line" text="Bottom toolbar — Economy / Politics buttons" />
+            <ui:Label class="help-line" text="Bottom toolbar — Economy / Politics / Trade buttons" />
             <ui:Label class="help-section" text="Overlays" />
             <ui:Label class="help-line" text="V — Service coverage · U — Utility stress · T — Edge traffic heat" />
             <ui:Label class="help-line" text="F — Trade friction corridors (market-zone boundaries)" />

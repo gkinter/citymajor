@@ -85,6 +85,11 @@
     max-height: 78%;
 }
 
+.panel-root--trade {
+    width: 380px;
+    max-width: 380px;
+}
+
 .panel-root--blueprint {
     top: auto;
     bottom: 120px;
@@ -500,6 +505,102 @@
     color: rgba(180, 190, 210, 0.75);
     margin-top: 6px;
     margin-bottom: 4px;
+}
+
+.trade-route-list {
+    margin-bottom: 6px;
+}
+
+.trade-route-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    background-color: rgba(20, 24, 34, 0.85);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.trade-route-row__name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    font-size: 10px;
+    color: rgba(220, 228, 240, 0.92);
+    white-space: normal;
+    margin-right: 6px;
+}
+
+.trade-route-cancel {
+    min-width: 56px;
+    height: 22px;
+    font-size: 10px;
+    padding: 0 6px;
+    background-color: rgba(90, 40, 48, 0.9);
+    border-width: 1px;
+    border-color: rgba(255, 140, 150, 0.35);
+    border-radius: 3px;
+    color: rgb(255, 200, 205);
+}
+
+.trade-create {
+    margin-bottom: 8px;
+}
+
+.trade-create-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.trade-create-label {
+    width: 72px;
+    font-size: 10px;
+    color: rgba(180, 190, 210, 0.75);
+}
+
+.trade-create-value {
+    flex-grow: 1;
+    font-size: 11px;
+    color: rgb(240, 244, 252);
+    -unity-text-align: middle-center;
+}
+
+.trade-cycle {
+    width: 28px;
+    height: 22px;
+    font-size: 12px;
+    padding: 0;
+    margin: 0 2px;
+    background-color: rgba(40, 48, 64, 0.95);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+    color: rgb(220, 228, 240);
+}
+
+.trade-dir {
+    flex-grow: 1;
+    height: 24px;
+    font-size: 11px;
+    background-color: rgba(36, 52, 72, 0.95);
+    border-width: 1px;
+    border-color: rgba(120, 180, 220, 0.35);
+    border-radius: 3px;
+    color: rgb(180, 220, 255);
+}
+
+.trade-create-btn {
+    margin-top: 6px;
+    height: 28px;
+    font-size: 12px;
+    -unity-font-style: bold;
+    background-color: rgba(48, 78, 58, 0.95);
+    border-width: 1px;
+    border-color: rgba(120, 200, 140, 0.4);
+    border-radius: 4px;
+    color: rgb(180, 255, 200);
 }
 
 .panel-row {

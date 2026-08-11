@@ -379,6 +379,54 @@ public sealed partial class SimHost
         return true;
     }
 
+    /// <summary>
+    /// SB-3728 — player create bilateral partner contract (PartnerCityId ≥ 0).
+    /// Uses current <see cref="WorldState.MeanGoodsDeliveryDelay"/> for freight lag.
+    /// </summary>
+    public bool CreateBilateralTradeRoute(
+        int partnerCityId,
+        Good goodType,
+        float monthlyQuantity,
+        float agreedPrice,
+        int durationMonths)
+    {
+        if (!IsInitialized || _trade is null || _state is null) return false;
+        if (partnerCityId < 0) return false;
+        if (durationMonths <= 0 || monthlyQuantity == 0f) return false;
+        if ((byte)goodType >= (byte)Good.COUNT) return false;
+        if (_trade.CountBilateralRoutes() >= TradeSystem.MaxBilateralRoutes) return false;
+
+        float price = agreedPrice;
+        if (!(price > 0f) || !float.IsFinite(price))
+        {
+            int gi = (int)goodType;
+            price = gi >= 0 && gi < _trade.GlobalPrices.Length
+                ? Math.Max(0.01f, _trade.GlobalPrices[gi])
+                : 1f;
+        }
+
+        float delay = float.IsFinite(_state.MeanGoodsDeliveryDelay)
+            ? Math.Clamp(_state.MeanGoodsDeliveryDelay, 0f, 1f)
+            : 0f;
+
+        if (!_trade.CreateTradeRoute(partnerCityId, goodType, monthlyQuantity, price, durationMonths, delay))
+            return false;
+
+        _trade.PublishBilateralMetrics(_state);
+        return true;
+    }
+
+    /// <summary>
+    /// SB-3728 — cancel Nth bilateral route (skips global-market PartnerCityId &lt; 0).
+    /// </summary>
+    public bool CancelBilateralTradeRoute(int bilateralIndex)
+    {
+        if (!IsInitialized || _trade is null || _state is null) return false;
+        if (!_trade.CancelBilateralRoute(bilateralIndex)) return false;
+        _trade.PublishBilateralMetrics(_state);
+        return true;
+    }
+
     public LawPreviewDto? GetSampleLawPreview()
     {
         if (!IsInitialized || _laws is null || _laws.DefinitionCount == 0)

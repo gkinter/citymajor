@@ -216,7 +216,7 @@ flowchart TB
 | **P3.2** ✅ | Partition prices export + production-chain HUD | `EconomySystem` / `45d8186` / `746780c` |
 | **P3.3** ✅ | 1→4→9→16 market zones + partition price spread HUD | `SIMULATION_ARCHITECTURE` §5 · Unity Economy `[E]` |
 | **P3.4** ✅ | Inter-zone trade friction matrix visible | WP-E / `a9e7878` |
-| **P3.5** ✅ | Bilateral trade routes (v2 stretch): partner city, contract, freight time | `TradeSystem`, SB-3728 — freight + snapshot + Unity Trade/Economy HUD |
+| **P3.5** ✅ | Bilateral trade routes (v2 stretch): partner city, contract, freight time | `TradeSystem`, SB-3728 — freight + snapshot + Unity Trade create/cancel `[Y]` (regional map deferred) |
 | **P3.6** ✅ | Traffic delays → goods delivery latency → industrial throughput | Domain P3.5 — `EffectiveTradeFriction` + `MeanGoodsDeliveryDelay` + Unity Delivery % |
 
 ### P4 — Population & life
@@ -412,3 +412,4 @@ openspec/
 | 2026-08-11 | **Tier-2 hospital → HH health** — `HealthProgression` raises / decays `HealthSatisfaction` under hospital coverage; `HealthCoverageFraction` + Hosp HUD ❤ / cov% |
 | 2026-08-11 | **Tier-2 tourism attractions** — `TourismAttractions` parks/landmarks feed `TourismIncome` (not only pop×happiness); Budget HUD + snapshot |
 | 2026-08-11 | **P3.5 bilateral trade routes** — partner + contract + `FreightMonths`; SimHost keeps bilateral routes; snapshot + Unity Trade/Economy HUD |
+| 2026-08-11 | **SB-3728 create/cancel bilateral** — `SimHost.CreateBilateralTradeRoute` / `CancelBilateralTradeRoute`; Unity Trade strip `[Y]` + toolbar; regional map still deferred |

@@ -21,7 +21,7 @@ Make the **goods economy legible** in HUD: top shortages/surpluses with prices, 
 | P3.2 | Market zone partition count on snapshot | **Partial** — `ActiveZoneCount` in `EconomySystem`; export stub `MarketZoneCount` |
 | P3.3 | Per-zone price spread visible (partition prices differ) | **Done** — `GetAnchorZonePriceSpreads` + Unity Economy/Cathedral HUD; scale 1→4→9→16 |
 | P3.4 | Inter-zone friction on snapshot + HUD | **Live** — `MeanInterZoneFriction`, `InterZoneTradeVolume`, `GoodsTransportCostIndex`, friction corridor overlay |
-| P3.5 | Bilateral trade routes (partner, contract, freight) | **Done (v2 stretch)** — `FreightMonths` + snapshot + Unity Trade/Economy HUD; regional map / create UI remain SB-3728 |
+| P3.5 | Bilateral trade routes (partner, contract, freight) | **Done (v2 stretch)** — `FreightMonths` + snapshot + Unity Trade/Economy HUD; **SB-3728 create/cancel** on Trade strip `[Y]` (regional map still deferred) |
 | P3.6 | Traffic delay → goods delivery lag | **Done** — `EffectiveTradeFriction` + industrial throughput; Unity Delivery % HUD |
 
 ---
@@ -157,8 +157,14 @@ Cross-reference: P1 traffic partition observability · `WasmTrafficLite` · [`SI
 **Still deferred (SB-3728 regional polish):**
 
 - Regional map UI / NPC town markers
-- Player-facing create/cancel flow + multi-city save linking
+- Multi-city save linking
 - Route cancellation penalties / diplomacy
+
+**Landed (SB-3728 create/cancel slice):**
+
+- `SimHost.CreateBilateralTradeRoute` / `CancelBilateralTradeRoute` (cap 8; freight from delivery delay)
+- Unity Trade strip `[Y]` — partner/good/dir/volume/duration create + per-route Cancel
+- Characterization: `BilateralTradeRoutesTests` create/cancel/cap
 
 **v1 behavior (keep):**
 

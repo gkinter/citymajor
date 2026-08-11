@@ -107,6 +107,10 @@ public sealed class WasmSimHost
     public float MeanEmergencyResponseMinutes =>
         _host.State?.MeanEmergencyResponseMinutes
         ?? EmergencyResponseTime.NoStationResponseMinutes;
+    /// <summary>Hydrant coverage over sampled zoned buildings (P5.3).</summary>
+    public float HydrantCoverageFraction => _host.State?.HydrantCoverageFraction ?? 1f;
+    /// <summary>Buildings currently burning (P5.3).</summary>
+    public int ActiveFireCount => _host.State?.ActiveFireCount ?? 0;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
     /// <summary>Faction id per council seat (length <see cref="PoliticsSystem.CouncilSeatCount"/>).</summary>
@@ -333,6 +337,10 @@ public sealed class WasmStatusDto
     public float ResidentialVacancy { get; init; } = 1f;
     /// <summary>Mean fire/EMS response minutes over sampled zoned tiles (P5.2).</summary>
     public float MeanEmergencyResponseMinutes { get; init; } = 30f;
+    /// <summary>Hydrant coverage over sampled zoned buildings (P5.3).</summary>
+    public float HydrantCoverageFraction { get; init; } = 1f;
+    /// <summary>Buildings currently burning (P5.3).</summary>
+    public int ActiveFireCount { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Faction id per council seat (length 9).</summary>
@@ -439,6 +447,8 @@ public sealed class WasmStatusDto
             MeanRentBurden = host.MeanRentBurden,
             ResidentialVacancy = host.ResidentialVacancy,
             MeanEmergencyResponseMinutes = host.MeanEmergencyResponseMinutes,
+            HydrantCoverageFraction = host.HydrantCoverageFraction,
+            ActiveFireCount = host.ActiveFireCount,
             MarketZoneCount = host.MarketZoneCount,
             CouncilSeats = host.CouncilSeats,
         };

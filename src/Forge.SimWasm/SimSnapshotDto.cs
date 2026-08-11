@@ -140,6 +140,10 @@ public sealed class SimSnapshotDto
     public float ResidentialVacancy { get; init; } = 1f;
     /// <summary>Mean fire/EMS response minutes over sampled zoned tiles (P5.2).</summary>
     public float MeanEmergencyResponseMinutes { get; init; } = 30f;
+    /// <summary>Fraction of sampled zoned buildings with hydrant coverage (P5.3).</summary>
+    public float HydrantCoverageFraction { get; init; } = 1f;
+    /// <summary>Buildings currently burning (P5.3).</summary>
+    public int ActiveFireCount { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Sparse market-zone boundary friction samples (0–1 heat).</summary>
@@ -240,6 +244,8 @@ public sealed class SimSnapshotDto
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,
             MeanEmergencyResponseMinutes = state.MeanEmergencyResponseMinutes,
+            HydrantCoverageFraction = state.HydrantCoverageFraction,
+            ActiveFireCount = state.ActiveFireCount,
             MarketZoneCount = state.MarketZoneCount,
             CommuterCoverage = commuterAudit.Coverage,
             CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),

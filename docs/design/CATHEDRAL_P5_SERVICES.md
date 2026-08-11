@@ -10,7 +10,7 @@
 
 ## 1. Goal
 
-Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Defer fire-spread depth (P5.3).
+Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3).
 
 ---
 
@@ -20,7 +20,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 |----|-------------|---------------|
 | **P5.1** | Utilities L0 balance on WASM status + HUD % | **Live** — `WorldState.PowerCoverageFraction` / `WaterCoverageFraction` → `WasmStatusDto` + ResourcesHud `Util` line |
 | **P5.2** | Emergency response time = distance + traffic | **Live** — `EmergencyResponseTime` + mean minutes on `WasmStatusDto` / Resources+Economy HUD |
-| **P5.3** | Fire v1 (spread + hydrant coverage) | **Not started** (post-EA Phase 5b) |
+| **P5.3** | Fire v1 (spread + hydrant coverage) | **Live** — `FireResponse` + `HydrantCoverageFraction` / `ActiveFireCount` on snapshot + ResourcesHud Fire line |
 
 ---
 
@@ -94,8 +94,24 @@ responseMinutes =
 
 Worker maps the key onto `SimResources`; ResourcesHud shows `EMS 4.2m` when present.
 
+### 4.5 Live (P5.3 fire v1)
+
+```json
+{
+  "hydrantCoverageFraction": 0.72,
+  "activeFireCount": 2
+}
+```
+
+- Hydrants = buildings with `ServiceHydrant` (`1 << 9`); coverage radius **3 tiles**
+- No hydrant at incident → response minutes **×2** (shuttle water)
+- Spread chance: `base * material * wind * adjacency * hydrant_inverse` (AGENT_06)
+- Burning intensity stored in `BuildingData.FireRisk`; Unity ResourcesHud shows `🚰 {hydrant%} · 🔥 {n}` when fires active
+
+`CathedralUtilitiesTests` pins hydrant response/spread math, adjacent ignition, and snapshot export.
+
 ## 5. Out of scope (this stub)
 
-- Full EMS survival curves / hydrant graph (`MISSING_SYSTEMS.md`)
+- Full EMS survival curves / wildfire / arson rings (`MISSING_SYSTEMS.md` depth)
 - Sewage / internet / waste as separate HUD meters
 - Rewriting tile BFS grids — keep daily ServiceSystem path

@@ -171,8 +171,20 @@
 }
 
 .hud-ems-value {
-    flex-grow: 1;
+    flex-grow: 0;
+    margin-right: 10px;
     color: rgb(240, 200, 160);
+}
+
+.hud-fire-label {
+    min-width: 28px;
+    color: rgba(255, 120, 80, 0.95);
+    -unity-font-style: bold;
+}
+
+.hud-fire-value {
+    flex-grow: 1;
+    color: rgb(255, 170, 120);
 }
 
 .hud-cranes {

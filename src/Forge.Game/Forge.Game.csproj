@@ -15,6 +15,7 @@
     <Compile Include="..\Forge.SimCore\TrafficBpr.cs" Link="SimCore\TrafficBpr.cs" />
     <Compile Include="..\Forge.SimCore\CommuteTravelTime.cs" Link="SimCore\CommuteTravelTime.cs" />
     <Compile Include="..\Forge.SimCore\EmergencyResponseTime.cs" Link="SimCore\EmergencyResponseTime.cs" />
+    <Compile Include="..\Forge.SimCore\FireResponse.cs" Link="SimCore\FireResponse.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\production_chains.json">

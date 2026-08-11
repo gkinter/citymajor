@@ -23,6 +23,7 @@ namespace CityMajor.UI
         VisualElement _utilitiesRow;
         Label _utilitiesValue;
         Label _emsValue;
+        Label _fireValue;
         Label _cranesLabel;
         readonly PopulationGrowthTracker _growthTracker = new();
 
@@ -90,6 +91,7 @@ namespace CityMajor.UI
             _utilitiesRow = root.Q<VisualElement>("utilities-row");
             _utilitiesValue = root.Q<Label>("utilities-value");
             _emsValue = root.Q<Label>("ems-value");
+            _fireValue = root.Q<Label>("fire-value");
             _cranesLabel = root.Q<Label>("cranes-label");
         }
 
@@ -148,12 +150,23 @@ namespace CityMajor.UI
 
         void ApplyServices(CitySimState state)
         {
-            if (_emsValue == null)
-                return;
+            if (_emsValue != null)
+            {
+                _emsValue.text = FormatEmergencyResponseMinutes(state.MeanEmergencyResponseMinutes);
+                _emsValue.tooltip =
+                    "Mean fire/EMS response minutes over sampled zoned tiles (road distance + traffic; 2× without hydrant).";
+            }
 
-            _emsValue.text = FormatEmergencyResponseMinutes(state.MeanEmergencyResponseMinutes);
-            _emsValue.tooltip =
-                "Mean fire/EMS response minutes over sampled zoned tiles (road distance + traffic).";
+            if (_fireValue != null)
+            {
+                var hydrantPct = Mathf.RoundToInt(Mathf.Clamp01(state.HydrantCoverageFraction) * 100f);
+                var fires = Mathf.Max(0, state.ActiveFireCount);
+                _fireValue.text = fires > 0
+                    ? $"🚰 {hydrantPct}% · 🔥 {fires}"
+                    : $"🚰 {hydrantPct}%";
+                _fireValue.tooltip =
+                    "Hydrant coverage over zoned buildings; active fire count when any building is burning (P5.3).";
+            }
         }
 
         /// <summary>Compact HUD readout, e.g. <c>4.3m</c> / <c>30m</c> (mirrors web emergency-response.ts).</summary>

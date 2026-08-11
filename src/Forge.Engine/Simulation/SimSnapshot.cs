@@ -229,6 +229,12 @@ public sealed class SimSnapshot
     /// </summary>
     public float MeanEmergencyResponseMinutes { get; init; } = 30f;
 
+    /// <summary>Fraction of sampled zoned buildings with hydrant coverage (Cathedral P5.3).</summary>
+    public float HydrantCoverageFraction { get; init; } = 1f;
+
+    /// <summary>Buildings currently burning (Cathedral P5.3).</summary>
+    public int ActiveFireCount { get; init; }
+
     public readonly record struct BuildingSnapshot(
         int GridX, int GridY, ushort TypeId, byte Level,
         byte State, ushort Occupants, ushort MaxOccupants, byte Condition);
@@ -395,6 +401,8 @@ public sealed class SimSnapshot
             WaterShortageFraction = state.WaterShortageFraction,
             UtilityStressIndex = state.UtilityStressIndex,
             MeanEmergencyResponseMinutes = state.MeanEmergencyResponseMinutes,
+            HydrantCoverageFraction = state.HydrantCoverageFraction,
+            ActiveFireCount = state.ActiveFireCount,
         };
     }
 }

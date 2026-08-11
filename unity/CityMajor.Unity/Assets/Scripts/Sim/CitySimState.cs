@@ -61,6 +61,12 @@ namespace CityMajor.Sim
         /// </summary>
         public float MeanEmergencyResponseMinutes;
 
+        /// <summary>Cathedral P5.3 — hydrant coverage over sampled zoned buildings (0–1).</summary>
+        public float HydrantCoverageFraction;
+
+        /// <summary>Cathedral P5.3 — buildings currently burning.</summary>
+        public int ActiveFireCount;
+
         /// <summary>Cathedral P2 — mean rent / income burden (0–1+).</summary>
         public float MeanRentBurden;
 

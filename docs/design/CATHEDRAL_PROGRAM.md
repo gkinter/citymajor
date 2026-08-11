@@ -113,6 +113,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P5 stub** | ✅ Done | Politics foundation stub — approval characterization — `fb64bd9` |
 | **P5.1** | ✅ Done | Utilities L0 coverage export + characterization — `ae635b0` / SB-4987 |
 | **P5.2** | ✅ Done | Emergency response time (graph + BPR) — `06977a9` / SB-4242 |
+| **P5.3** | ✅ Done | Fire v1 (spread + hydrant coverage) |
 | **P6.1**–**P6.3** / **P5.6** | ✅ Done | Law spawn mults · Event*Mult bridge · Herald predicates · council seats |
 | **P7.5** | ✅ Done | Unity Cathedral HUD Event*Mult + WASM DTO export (Sprint 3 parity close) |
 | **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` · mode share `370e944` · unemployment HUD `e70ed78` |
@@ -229,7 +230,7 @@ flowchart TB
 | **P5 stub** ✅ | Politics foundation stub (approval characterization) — see [`CATHEDRAL_P5_POLITICS.md`](./CATHEDRAL_P5_POLITICS.md) / `fb64bd9` |
 | **P5.1** ✅ | Utilities L0 balance + coverage export characterization — [`CATHEDRAL_P5_SERVICES.md`](./CATHEDRAL_P5_SERVICES.md) / `ae635b0` / SB-4987 |
 | **P5.2** ✅ | Emergency response time model (distance + traffic / BPR) — `EmergencyResponseTime` / `06977a9` / SB-4242 |
-| **P5.3** | Fire v1 (spread + hydrant coverage) |
+| **P5.3** ✅ | Fire v1 (spread + hydrant coverage) — `FireResponse` + ResourcesHud Fire line |
 
 ### P6 — Governance
 
@@ -371,3 +372,4 @@ openspec/
 | 2026-08-11 | **P6.1 landed** — law→spawn R/C/I mults + Law panel; `LawEffectsTests` |
 | 2026-08-11 | **P6.2 landed** — `ApplyEventEffectsToState` city-wide Event*Mult + Herald snake_case; `EventEffectsTests` |
 | 2026-08-11 | **P7.5 landed** — Unity Cathedral HUD binds Event*Mult; WASM `SimSnapshotDto` Event*Mult export |
+| 2026-08-11 | **P5.3 landed** — `FireResponse` hydrant coverage + spread; no-hydrant 2× response; ResourcesHud Fire line |

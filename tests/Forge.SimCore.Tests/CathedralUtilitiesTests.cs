@@ -9,8 +9,8 @@ using Xunit;
 namespace Forge.SimCore.Tests;
 
 /// <summary>
-/// Characterization tests for Cathedral P5.1 utilities foundation (SB-4987)
-/// and P5.2 emergency response time (SB-4242).
+/// Characterization tests for Cathedral P5.1 utilities foundation (SB-4987),
+/// P5.2 emergency response time (SB-4242), and P5.3 fire response v1.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -127,8 +127,9 @@ public sealed class CathedralUtilitiesTests
         Assert.True(farCongested > farFree,
             $"congestion should raise response time (free={farFree:F2}, congested={farCongested:F2})");
 
-        // ServiceSystem facade must honor the same BPR edge times.
+        // ServiceSystem facade must honor the same BPR edge times (hydrant on-site → no 2×).
         host.State.RoadEdgeTravelTimes = congested;
+        PlaceBuilding(host.State!, farX, incidentY + 1, FireResponse.ServiceHydrant);
         var services = new ServiceSystem(64);
         float viaServices = services.CalculateFireResponseTime(host.State, farX, incidentY);
         Assert.Equal(farCongested, viaServices, precision: 3);
@@ -167,6 +168,93 @@ public sealed class CathedralUtilitiesTests
         Assert.Equal(mean, snap.MeanEmergencyResponseMinutes, precision: 3);
     }
 
+    [Fact]
+    public void HydrantCoverage_ReducesResponseMinutesAndSpreadChance()
+    {
+        var state = new WorldState(32, maxBuildings: 16);
+        PlaceBuilding(state, 10, 10, ServiceFire);
+        PlaceBuilding(state, 16, 10, serviceFlags: 0); // residential target
+        state.Tiles.ZoneType[state.Tiles.Index(16, 10)] = 1;
+
+        float without = EmergencyResponseTime.CalculateMinutes(state, 16, 10, ServiceFire);
+        float withMult = FireResponse.ApplyHydrantResponseMultiplier(without, hasHydrant: false);
+        Assert.Equal(without * FireResponse.NoHydrantResponseMultiplier, withMult, precision: 4);
+
+        PlaceBuilding(state, 15, 10, FireResponse.ServiceHydrant);
+        Assert.True(FireResponse.HasHydrantCoverage(state, 16, 10));
+
+        float covered = FireResponse.ApplyHydrantResponseMultiplier(without, hasHydrant: true);
+        Assert.Equal(without, covered, precision: 4);
+
+        float spreadNoHydrant = FireResponse.CalculateSpreadChance(
+            FireResponse.MaterialWood, windFactor: 1f, adjacentBurningCount: 1, targetHasHydrant: false);
+        float spreadHydrant = FireResponse.CalculateSpreadChance(
+            FireResponse.MaterialWood, windFactor: 1f, adjacentBurningCount: 1, targetHasHydrant: true);
+        Assert.True(spreadHydrant < spreadNoHydrant,
+            $"hydrant should cut spread ({spreadHydrant:F3} vs {spreadNoHydrant:F3})");
+        Assert.Equal(spreadNoHydrant * FireResponse.HydrantSpreadInverse, spreadHydrant, precision: 4);
+    }
+
+    [Fact]
+    public void FireSpread_IgnitesAdjacentBuilding_WithoutHydrant()
+    {
+        var state = new WorldState(32, maxBuildings: 16);
+        state.WindSpeed = 15f; // max wind factor → higher spread
+
+        int source = PlaceBuilding(state, 10, 10, serviceFlags: 0, level: 1);
+        int neighbor = PlaceBuilding(state, 11, 10, serviceFlags: 0, level: 1);
+        Assert.True(FireResponse.TryIgnite(state, source));
+        Assert.Equal(1, FireResponse.CountActiveFires(state));
+
+        // Force ignition: high chance + seeded RNG that always draws low.
+        int ignited = FireResponse.TickSpread(state, hours: 10f, rng: new AlwaysLowRandom());
+        Assert.True(ignited >= 1, "adjacent wood building should ignite under high wind");
+        Assert.True(FireResponse.IsBurning(state.Buildings, neighbor));
+        Assert.True(state.ActiveFireCount >= 0); // updated by ServiceSystem, not TickSpread alone
+
+        var services = new ServiceSystem(32);
+        services.UpdateFireResponse(state, hours: 0f, rng: new AlwaysLowRandom());
+        Assert.True(state.ActiveFireCount >= 2);
+        Assert.InRange(state.HydrantCoverageFraction, 0f, 1f);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsHydrantCoverageAndActiveFires()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int house = PlaceBuilding(host.State!, 12, 12, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(12, 12)] = 1;
+        PlaceBuilding(host.State, 12, 13, FireResponse.ServiceHydrant);
+        Assert.True(FireResponse.TryIgnite(host.State, house));
+
+        host.Services!.UpdateFireResponse(host.State, hours: 0f);
+
+        Assert.Equal(1, host.State.ActiveFireCount);
+        Assert.True(host.State.HydrantCoverageFraction > 0f);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("hydrantCoverageFraction", out var hydrant));
+        Assert.True(doc.RootElement.TryGetProperty("activeFireCount", out var fires));
+        Assert.Equal(host.State.HydrantCoverageFraction, hydrant.GetSingle(), precision: 3);
+        Assert.Equal(host.State.ActiveFireCount, fires.GetInt32());
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.HydrantCoverageFraction, dto.HydrantCoverageFraction, precision: 3);
+        Assert.Equal(host.State.ActiveFireCount, dto.ActiveFireCount);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.HydrantCoverageFraction, snap.HydrantCoverageFraction, precision: 3);
+        Assert.Equal(host.State.ActiveFireCount, snap.ActiveFireCount);
+    }
+
+    /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>
+    private sealed class AlwaysLowRandom : Random
+    {
+        public override double NextDouble() => 0.0;
+    }
+
     private static float[] CaptureFreeFlowEdgeCosts(RoadGraph graph)
     {
         var costs = new float[graph.EdgeCount];
@@ -181,7 +269,7 @@ public sealed class CathedralUtilitiesTests
         return costs;
     }
 
-    private static void PlaceBuilding(
+    private static int PlaceBuilding(
         WorldState state,
         int x,
         int y,
@@ -199,5 +287,6 @@ public sealed class CathedralUtilitiesTests
         state.Buildings.MaxOccupants[slot] = 20;
         state.Buildings.Occupants[slot] = 10;
         state.Tiles.BuildingId[state.Tiles.Index(x, y)] = (ushort)slot;
+        return slot;
     }
 }

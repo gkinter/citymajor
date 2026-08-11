@@ -177,8 +177,19 @@ public sealed class WorldState
     /// <summary>
     /// Mean fire/EMS response minutes over sampled zoned tiles (Cathedral P5.2).
     /// Default matches <c>EmergencyResponseTime.NoStationResponseMinutes</c>.
+    /// Includes hydrant shuttle penalty when uncovered (P5.3).
     /// </summary>
     public float MeanEmergencyResponseMinutes { get; set; } = 30f;
+
+    /// <summary>
+    /// Fraction of sampled zoned buildings with a hydrant within 3 tiles (Cathedral P5.3).
+    /// </summary>
+    public float HydrantCoverageFraction { get; set; } = 1f;
+
+    /// <summary>
+    /// Buildings currently burning (<c>BuildingData.FireRisk</c> ≥ threshold) — Cathedral P5.3.
+    /// </summary>
+    public int ActiveFireCount { get; set; }
 
     // =========================================================================
     // Goods economy imbalance (persisted after daily economy tick)

@@ -261,6 +261,17 @@ public sealed class ServiceSystem
         UpdatePerTileFireRisk(state);
         UpdatePerTileCrime(state);
         UpdateMeanEmergencyResponse(state);
+        UpdateFireResponse(state);
+    }
+
+    /// <summary>
+    /// Cathedral P5.3 — refresh hydrant coverage, tick fire spread, recount active fires.
+    /// </summary>
+    public void UpdateFireResponse(WorldState state, float hours = 1f, Random? rng = null)
+    {
+        state.HydrantCoverageFraction = FireResponse.CalculateHydrantCoverageFraction(state);
+        FireResponse.TickSpread(state, hours, rng);
+        state.ActiveFireCount = FireResponse.CountActiveFires(state);
     }
 
     /// <summary>
@@ -355,17 +366,21 @@ public sealed class ServiceSystem
     /// Calculate fire response time in minutes for a tile.
     /// Uses road-graph distance with BPR edge travel times when available
     /// (Cathedral P5.2); falls back to Euclidean / free-flow graph costs.
+    /// Without hydrant coverage, applies the P5.3 shuttle-water 2× multiplier.
     /// </summary>
     public float CalculateFireResponseTime(WorldState state, int tileX, int tileY)
     {
         // Prefer state.RoadEdgeTravelTimes so congestion from the latest traffic
         // assignment raises response minutes (Cathedral P5.2 / SB-4242).
-        return EmergencyResponseTime.CalculateMinutes(
+        float minutes = EmergencyResponseTime.CalculateMinutes(
             state,
             tileX,
             tileY,
             EmergencyResponseTime.ServiceFire,
             state.RoadEdgeTravelTimes);
+
+        bool hydrant = FireResponse.HasHydrantCoverage(state, tileX, tileY);
+        return FireResponse.ApplyHydrantResponseMultiplier(minutes, hydrant);
     }
 
     /// <summary>
@@ -375,6 +390,16 @@ public sealed class ServiceSystem
     public static float CalculateFireDamage(float baseDamage, float responseMinutes)
     {
         return baseDamage * (1f + 0.15f * responseMinutes);
+    }
+
+    /// <summary>
+    /// Fire damage with hydrant-aware response minutes (Cathedral P5.3).
+    /// No hydrant → longer effective response → more damage.
+    /// </summary>
+    public float CalculateFireDamageAtTile(WorldState state, int tileX, int tileY, float baseDamage = 1f)
+    {
+        float minutes = CalculateFireResponseTime(state, tileX, tileY);
+        return CalculateFireDamage(baseDamage, minutes);
     }
 
     // =========================================================================

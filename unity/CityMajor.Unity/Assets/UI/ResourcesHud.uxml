@@ -25,6 +25,8 @@
             <ui:Label class="hud-label" text="Services" />
             <ui:Label class="hud-label hud-ems-label" text="EMS" />
             <ui:Label name="ems-value" class="hud-value hud-ems-value" text="—" />
+            <ui:Label class="hud-label hud-fire-label" text="Fire" />
+            <ui:Label name="fire-value" class="hud-value hud-fire-value" text="—" />
         </ui:VisualElement>
         <ui:Label name="cranes-label" class="hud-sub hud-cranes" text="" style="display: none;" />
     </ui:VisualElement>

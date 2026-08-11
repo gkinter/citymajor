@@ -558,12 +558,13 @@ public sealed class PopulationSystem
         float safetyMod = GetSafetyAttractivenessModifier(state);
         float environmentMod = GetEnvironmentAttractivenessModifier(state);
         float waterQualityMod = GetWaterQualityAttractivenessModifier(state);
+        float telecomMod = GetTelecomAttractivenessModifier(state);
 
         // Scale base with city size (log scale)
         float sizeScale = 1f + (float)Math.Log(Math.Max(1, state.Population / 1000f), 2);
         float rawRate = BaseImmigrationPerMonth * sizeScale *
                         jobAvailability * housingAvailability * reputation * taxMod *
-                        healthMod * safetyMod * environmentMod * waterQualityMod *
+                        healthMod * safetyMod * environmentMod * waterQualityMod * telecomMod *
                         GetRentAttractivenessModifier() *
                         Math.Clamp(state.EventImmigrationMult, 0.25f, 3f);
 
@@ -806,8 +807,9 @@ public sealed class PopulationSystem
         float police = state.Tiles.GetPoliceCoverage(tileIdx) / 3f;
         float health = state.Tiles.GetHealthCoverage(tileIdx) / 3f;
         float edu = state.Tiles.GetEducationCoverage(tileIdx) / 3f;
+        float internet = state.Tiles.InternetConnection[tileIdx] / 3f;
 
-        return Math.Clamp((fire + police + health + edu) * 25f, 0f, 100f);
+        return Math.Clamp((fire + police + health + edu + internet) * 20f, 0f, 100f);
     }
 
     /// <summary>
@@ -1239,6 +1241,23 @@ public sealed class PopulationSystem
         state.MeanWaterQuality = quality;
         state.MeanWaterContamination = Math.Clamp(1f - quality, 0f, 1f);
         return SewageTreatment.WaterQualityAttractivenessModifier(quality);
+    }
+
+    /// <summary>
+    /// Immigration attractiveness from mean telecom access (internet coverage → tier).
+    /// 0.55 at dead-zone → 1.45 at full 5G (neutral ~1.0 at mid tier).
+    /// </summary>
+    private float GetTelecomAttractivenessModifier(WorldState state)
+    {
+        float access = Math.Clamp(state.MeanTelecomAccess, 0f, 1f);
+        if (access <= 0f && state.InternetCoverageFraction <= 0f)
+        {
+            // Fallback when telecom tick has not run — derive from tile connections.
+            access = Math.Clamp(TelecomNetwork.MeanTelecomAccess(state), 0f, 1f);
+        }
+        state.MeanTelecomAccess = access;
+        state.MeanInternetTier = Math.Clamp(access * 3f, 0f, 3f);
+        return TelecomNetwork.TelecomAttractivenessModifier(access);
     }
 
     /// <summary>Get healthcare modifier for births (0.5-1.5).</summary>

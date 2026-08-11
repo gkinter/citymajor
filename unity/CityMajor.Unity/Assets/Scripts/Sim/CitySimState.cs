@@ -169,6 +169,15 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — mean water quality 0–1 ≈ (1 − contamination).</summary>
         public float MeanWaterQuality;
 
+        /// <summary>Tier-2 — fraction of households with internet tier ≥ copper.</summary>
+        public float InternetCoverageFraction;
+
+        /// <summary>Tier-2 — mean InternetConnection tier at household homes 0–3.</summary>
+        public float MeanInternetTier;
+
+        /// <summary>Tier-2 — mean telecom access 0–1 ≈ mean tier / 3.</summary>
+        public float MeanTelecomAccess;
+
         /// <summary>Tier-2 — park attraction units for tourism.</summary>
         public int ParkAttractionCount;
 

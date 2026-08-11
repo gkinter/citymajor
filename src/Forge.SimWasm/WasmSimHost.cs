@@ -184,6 +184,15 @@ public sealed class WasmSimHost
     /// <summary>Mean water quality 0–1 ≈ (1 − contamination) (Tier-2).</summary>
     public float MeanWaterQuality =>
         _host.State?.MeanWaterQuality ?? 0f;
+    /// <summary>Fraction of households with internet tier ≥ copper (Tier-2).</summary>
+    public float InternetCoverageFraction =>
+        _host.State?.InternetCoverageFraction ?? 0f;
+    /// <summary>Mean InternetConnection tier at household homes 0–3 (Tier-2).</summary>
+    public float MeanInternetTier =>
+        _host.State?.MeanInternetTier ?? 0f;
+    /// <summary>Mean telecom access 0–1 ≈ mean tier / 3 (Tier-2).</summary>
+    public float MeanTelecomAccess =>
+        _host.State?.MeanTelecomAccess ?? 0f;
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount => _host.State?.ParkAttractionCount ?? 0;
     /// <summary>Landmark attraction units for tourism (Tier-2).</summary>
@@ -482,6 +491,12 @@ public sealed class WasmStatusDto
     public float MeanWaterContamination { get; init; }
     /// <summary>Mean water quality 0–1 ≈ (1 − contamination) (Tier-2).</summary>
     public float MeanWaterQuality { get; init; }
+    /// <summary>Fraction of households with internet tier ≥ copper (Tier-2).</summary>
+    public float InternetCoverageFraction { get; init; }
+    /// <summary>Mean InternetConnection tier at household homes 0–3 (Tier-2).</summary>
+    public float MeanInternetTier { get; init; }
+    /// <summary>Mean telecom access 0–1 ≈ mean tier / 3 (Tier-2).</summary>
+    public float MeanTelecomAccess { get; init; }
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount { get; init; }
     /// <summary>Landmark attraction units for tourism (Tier-2).</summary>
@@ -628,6 +643,9 @@ public sealed class WasmStatusDto
             SewageCoverageFraction = host.SewageCoverageFraction,
             MeanWaterContamination = host.MeanWaterContamination,
             MeanWaterQuality = host.MeanWaterQuality,
+            InternetCoverageFraction = host.InternetCoverageFraction,
+            MeanInternetTier = host.MeanInternetTier,
+            MeanTelecomAccess = host.MeanTelecomAccess,
             ParkAttractionCount = host.ParkAttractionCount,
             LandmarkAttractionCount = host.LandmarkAttractionCount,
             TourismAttractionCount = host.TourismAttractionCount,

@@ -24,6 +24,7 @@
     <Compile Include="..\Forge.SimCore\PoliceCrime.cs" Link="SimCore\PoliceCrime.cs" />
     <Compile Include="..\Forge.SimCore\WasteCollection.cs" Link="SimCore\WasteCollection.cs" />
     <Compile Include="..\Forge.SimCore\SewageTreatment.cs" Link="SimCore\SewageTreatment.cs" />
+    <Compile Include="..\Forge.SimCore\TelecomNetwork.cs" Link="SimCore\TelecomNetwork.cs" />
     <Compile Include="..\Forge.SimCore\ParkAmenity.cs" Link="SimCore\ParkAmenity.cs" />
     <Compile Include="..\Forge.SimCore\TourismAttractions.cs" Link="SimCore\TourismAttractions.cs" />
   </ItemGroup>

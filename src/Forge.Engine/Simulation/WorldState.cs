@@ -326,6 +326,21 @@ public sealed class WorldState
     public float MeanWaterQuality { get; set; }
 
     /// <summary>
+    /// Fraction of households with home-tile internet tier ≥ copper (0–1). Tier-2.
+    /// </summary>
+    public float InternetCoverageFraction { get; set; }
+
+    /// <summary>
+    /// Mean <see cref="TileData.InternetConnection"/> tier at household homes (0–3). Tier-2.
+    /// </summary>
+    public float MeanInternetTier { get; set; }
+
+    /// <summary>
+    /// Mean telecom access 0–1 ≈ mean internet tier / 3. Tier-2.
+    /// </summary>
+    public float MeanTelecomAccess { get; set; }
+
+    /// <summary>
     /// Park attraction units for tourism (park buildings + painted park zone sites). Tier-2.
     /// </summary>
     public int ParkAttractionCount { get; set; }

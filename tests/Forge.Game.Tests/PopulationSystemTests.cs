@@ -368,6 +368,73 @@ public class PopulationSystemTests
     }
 
     [Fact]
+    public void CalculateImmigration_HigherTelecomAccess_AttractsMoreImmigrants()
+    {
+        var state = new WorldState(64, 256, 64);
+        state.Population = 2000;
+        state.Happiness = 0.7f;
+        state.MeanTelecomAccess = 0.1f;
+        state.MeanInternetTier = 0.3f;
+        state.InternetCoverageFraction = 0.1f;
+        state.MeanWaterQuality = 0.7f;
+        state.SewageCoverageFraction = 0.7f;
+
+        _ = state.Buildings.Allocate();
+        int homeId = state.Buildings.Allocate();
+        state.Buildings.GridX[homeId] = 10;
+        state.Buildings.GridY[homeId] = 10;
+        state.Buildings.State[homeId] = 1;
+        state.Buildings.MaxOccupants[homeId] = 500;
+        int homeIdx = state.Tiles.Index(10, 10);
+        state.Tiles.ZoneType[homeIdx] = 1;
+        state.Tiles.BuildingId[homeIdx] = (ushort)homeId;
+        state.Tiles.InternetConnection[homeIdx] = 0;
+        state.Tiles.Pollution[homeIdx] = 0.3f;
+
+        var offline = new PopulationSystem(seed: 91);
+        for (int i = 0; i < 40; i++)
+        {
+            int slot = AddHousehold(state, offline, members: 2, homeBuilding: (ushort)homeId);
+            state.Households.HealthSatisfaction[slot] = 128;
+            state.Households.SafetySatisfaction[slot] = 128;
+        }
+        int immigrantsOffline = offline.CalculateImmigration(state);
+
+        var stateOnline = new WorldState(64, 256, 64);
+        stateOnline.Population = 2000;
+        stateOnline.Happiness = 0.7f;
+        stateOnline.MeanTelecomAccess = 0.95f;
+        stateOnline.MeanInternetTier = 2.85f;
+        stateOnline.InternetCoverageFraction = 0.95f;
+        stateOnline.MeanWaterQuality = 0.7f;
+        stateOnline.SewageCoverageFraction = 0.7f;
+        _ = stateOnline.Buildings.Allocate();
+        int onlineHome = stateOnline.Buildings.Allocate();
+        stateOnline.Buildings.GridX[onlineHome] = 10;
+        stateOnline.Buildings.GridY[onlineHome] = 10;
+        stateOnline.Buildings.State[onlineHome] = 1;
+        stateOnline.Buildings.MaxOccupants[onlineHome] = 500;
+        int onlineIdx = stateOnline.Tiles.Index(10, 10);
+        stateOnline.Tiles.ZoneType[onlineIdx] = 1;
+        stateOnline.Tiles.BuildingId[onlineIdx] = (ushort)onlineHome;
+        stateOnline.Tiles.InternetConnection[onlineIdx] = 3;
+        stateOnline.Tiles.Pollution[onlineIdx] = 0.3f;
+        var online = new PopulationSystem(seed: 91);
+        for (int i = 0; i < 40; i++)
+        {
+            int slot = AddHousehold(stateOnline, online, members: 2, homeBuilding: (ushort)onlineHome);
+            stateOnline.Households.HealthSatisfaction[slot] = 128;
+            stateOnline.Households.SafetySatisfaction[slot] = 128;
+        }
+        int immigrantsOnline = online.CalculateImmigration(stateOnline);
+
+        Assert.True(immigrantsOnline > immigrantsOffline,
+            $"higher telecom access should attract more immigrants (offline={immigrantsOffline}, online={immigrantsOnline})");
+        Assert.True(stateOnline.MeanTelecomAccess > state.MeanTelecomAccess);
+        Assert.True(stateOnline.MeanInternetTier > state.MeanInternetTier);
+    }
+
+    [Fact]
     public void Tick_LowHealthSatisfaction_LowersHappinessTowardEmigrationBand()
     {
         var state = CreateTestWorld();

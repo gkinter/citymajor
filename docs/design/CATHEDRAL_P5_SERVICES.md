@@ -10,7 +10,7 @@
 
 ## 1. Goal
 
-Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind. Ship **Tier-2 wildfire / arson rings** — drought fuel spread + high-crime ignition clusters. Ship **Tier-2 aerial / lookout / fire rating** — lookout spark mitigation, aerial suppression, city fire safety rating → insurance premium. Ship **Tier-2 education depth** — household education progression under school coverage + research RP mult + Edu HUD. Ship **Tier-2 park amenity parity** — painted park zones boost health/exercise (not only land value) + Park HUD. Ship **Tier-2 health → P4** — `HealthSatisfaction` feeds household satisfaction / migration so parks + hospitals change city outcomes. Ship **Tier-2 hospital → HH health progression** — hospitals raise nearby `HealthSatisfaction` over time (education analogue) + Hosp HUD coverage. Ship **Tier-2 police / crime** — station quality deepens crime suppression; coverage → crime → `SafetySatisfaction` → satisfaction / immigration + Police HUD (arson already reads tile crime). Ship **Tier-2 waste / pollution** — garbage depots abate residential/commercial waste; coverage → pollution → environment satisfaction / immigration + Waste HUD. Ship **Tier-2 sewage / water contamination** — treatment plants abate waterborne pollution; coverage → water quality → health / environment / immigration + Sewage HUD.
+Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind. Ship **Tier-2 wildfire / arson rings** — drought fuel spread + high-crime ignition clusters. Ship **Tier-2 aerial / lookout / fire rating** — lookout spark mitigation, aerial suppression, city fire safety rating → insurance premium. Ship **Tier-2 education depth** — household education progression under school coverage + research RP mult + Edu HUD. Ship **Tier-2 park amenity parity** — painted park zones boost health/exercise (not only land value) + Park HUD. Ship **Tier-2 health → P4** — `HealthSatisfaction` feeds household satisfaction / migration so parks + hospitals change city outcomes. Ship **Tier-2 hospital → HH health progression** — hospitals raise nearby `HealthSatisfaction` over time (education analogue) + Hosp HUD coverage. Ship **Tier-2 police / crime** — station quality deepens crime suppression; coverage → crime → `SafetySatisfaction` → satisfaction / immigration + Police HUD (arson already reads tile crime). Ship **Tier-2 waste / pollution** — garbage depots abate residential/commercial waste; coverage → pollution → environment satisfaction / immigration + Waste HUD. Ship **Tier-2 sewage / water contamination** — treatment plants abate waterborne pollution; coverage → water quality → health / environment / immigration + Sewage HUD. Ship **Tier-2 internet / telecom** — telecom hubs deepen `TileData.InternetConnection` (0=none…3=5G); coverage → services satisfaction / immigration + Net HUD.
 
 ---
 
@@ -32,6 +32,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 | **Tier-2** | Police / crime depth | **Live** — `PoliceCrime` station quality → crime; `PoliceCoverageFraction` / `MeanCrimeRate` / `MeanSafetySatisfaction` + Police HUD 👮 → P4 sat / immigration |
 | **Tier-2** | Waste / pollution depth | **Live** — `WasteCollection` depots → pollution; `WasteCoverageFraction` / `MeanPollution` / `MeanEnvironmentScore` + Waste HUD 🗑️ → P4 sat / immigration |
 | **Tier-2** | Sewage / water contamination | **Live** — `SewageTreatment` plants → water quality; `SewageCoverageFraction` / `MeanWaterContamination` / `MeanWaterQuality` + Sewage HUD 💧 → P4 sat / immigration |
+| **Tier-2** | Internet / telecom | **Live** — `TelecomNetwork` hubs → `InternetConnection`; `InternetCoverageFraction` / `MeanInternetTier` / `MeanTelecomAccess` + Net HUD 📡 → P4 services sat / immigration |
 
 ---
 
@@ -302,9 +303,26 @@ Park + hospital coverage already write `HouseholdData.HealthSatisfaction` and `M
 
 `CathedralUtilitiesTests` + `PopulationSystemTests` pin quality→more treatment, plant tick→lower contamination, snapshot export, and water quality→satisfaction / immigration.
 
+### 4.17 Live (Tier-2 internet / telecom)
+
+```json
+{
+  "internetCoverageFraction": 0.58,
+  "meanInternetTier": 1.8,
+  "meanTelecomAccess": 0.6
+}
+```
+
+- Telecom hubs (`ServiceTelecom`, `1 << 15`) publish coverage; **hub quality** (level × condition) scales effective factor so better hubs raise `TileData.InternetConnection` tier (0=none, 1=copper, 2=fiber, 3=5G)
+- Daily tick: zoned R/C/O/I tiles rewrite connection from coverage × quality; aggregates export coverage / mean tier / access
+- Services satisfaction reads home-tile `InternetConnection`; immigration multiplies by telecom attractiveness (**0.55–1.45**)
+- Unity ResourcesHud Net line: `📡 {access%} · tier {tier}/3 · {cov%}`
+
+`CathedralUtilitiesTests` + `PopulationSystemTests` pin quality→higher tier, hub tick→connection + aggregates, snapshot export, and telecom→satisfaction / immigration.
+
 ## 5. Out of scope (this stub)
 
-- Internet as a separate HUD meter (waste + sewage meters are live)
+- Full fiber/5G tech-tree unlock gates (Tier-2 uses hub quality → tier)
 - Rewriting tile BFS grids — keep daily ServiceSystem path
 - Full insurance market / flood-risk premium coupling (fire rating mult is the v1 hook)
 - Garbage truck route logistics / landfill capacity lifespan

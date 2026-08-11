@@ -28,6 +28,7 @@ namespace CityMajor.UI
         Label _policeValue;
         Label _wasteValue;
         Label _sewageValue;
+        Label _netValue;
         Label _eduValue;
         Label _parkValue;
         Label _cranesLabel;
@@ -102,6 +103,7 @@ namespace CityMajor.UI
             _policeValue = root.Q<Label>("police-value");
             _wasteValue = root.Q<Label>("waste-value");
             _sewageValue = root.Q<Label>("sewage-value");
+            _netValue = root.Q<Label>("net-value");
             _eduValue = root.Q<Label>("edu-value");
             _parkValue = root.Q<Label>("park-value");
             _cranesLabel = root.Q<Label>("cranes-label");
@@ -248,6 +250,18 @@ namespace CityMajor.UI
                     : "💧 —";
                 _sewageValue.tooltip =
                     "Mean water quality (1 − contamination), mean water contamination, and fraction under sewage coverage. Treatment plants abate waterborne pollution; uncovered zones contaminate water that feeds health / environment / immigration (Tier-2 sewage → water quality → outcomes).";
+            }
+
+            if (_netValue != null)
+            {
+                var accessPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanTelecomAccess) * 100f);
+                var tier = Mathf.Clamp(state.MeanInternetTier, 0f, 3f);
+                var covPct = Mathf.RoundToInt(Mathf.Clamp01(state.InternetCoverageFraction) * 100f);
+                _netValue.text = covPct > 0 || accessPct > 0 || tier > 0.05f
+                    ? $"📡 {accessPct}% · tier {tier:0.0}/3 · {covPct}%"
+                    : "📡 —";
+                _netValue.tooltip =
+                    "Mean telecom access (tier / 3), mean InternetConnection tier (0=none … 3=5G), and fraction with copper+. Telecom hubs deepen TileData.InternetConnection; coverage feeds services satisfaction / immigration (Tier-2 internet / telecom → outcomes).";
             }
 
             if (_eduValue != null)

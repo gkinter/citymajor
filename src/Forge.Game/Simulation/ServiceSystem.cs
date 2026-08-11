@@ -25,6 +25,7 @@ public sealed class ServiceSystem
     private readonly InfluenceMap _educationCoverage;
     private readonly InfluenceMap _wasteCoverage;
     private readonly InfluenceMap _sewageCoverage;
+    private readonly InfluenceMap _telecomCoverage;
     private readonly InfluenceMap _pollutionMap;
     private readonly InfluenceMap _noiseMap;
     private readonly InfluenceMap _crimeMap;
@@ -47,6 +48,7 @@ public sealed class ServiceSystem
     private const uint ServiceWaterPump = 1 << 8;
     private const uint ServiceGarbage = (int)WasteCollection.ServiceGarbage;
     private const uint ServiceSewage = (int)SewageTreatment.ServiceSewage;
+    private const uint ServiceTelecom = (int)TelecomNetwork.ServiceTelecom;
 
     // Zone types (from TileData.ZoneType)
     private const byte ZoneNone = 0;
@@ -70,6 +72,7 @@ public sealed class ServiceSystem
     private const float SchoolRadius = 15f;
     private const float WasteDepotRadius = 22f;
     private const float SewagePlantRadius = 24f;
+    private const float TelecomHubRadius = 18f;
 
     // Fire risk material multipliers
     internal const float MaterialWood = 1.5f;
@@ -119,6 +122,7 @@ public sealed class ServiceSystem
         _educationCoverage = new InfluenceMap(worldSize, worldSize);
         _wasteCoverage = new InfluenceMap(worldSize, worldSize);
         _sewageCoverage = new InfluenceMap(worldSize, worldSize);
+        _telecomCoverage = new InfluenceMap(worldSize, worldSize);
         _pollutionMap = new InfluenceMap(worldSize, worldSize);
         _noiseMap = new InfluenceMap(worldSize, worldSize);
         _crimeMap = new InfluenceMap(worldSize, worldSize);
@@ -134,6 +138,7 @@ public sealed class ServiceSystem
     public InfluenceMap EducationCoverage => _educationCoverage;
     public InfluenceMap WasteCoverage => _wasteCoverage;
     public InfluenceMap SewageCoverage => _sewageCoverage;
+    public InfluenceMap TelecomCoverage => _telecomCoverage;
     public InfluenceMap PollutionMap => _pollutionMap;
     public InfluenceMap NoiseMap => _noiseMap;
     public InfluenceMap CrimeMap => _crimeMap;
@@ -169,6 +174,7 @@ public sealed class ServiceSystem
         _educationCoverage.ClearAll();
         _wasteCoverage.ClearAll();
         _sewageCoverage.ClearAll();
+        _telecomCoverage.ClearAll();
         _pollutionMap.ClearAll();
         _noiseMap.ClearAll();
         _crimeMap.ClearAll();
@@ -219,6 +225,9 @@ public sealed class ServiceSystem
         if ((flags & ServiceSewage) != 0)
             _sewageCoverage.AddSource(cx, cy, DefaultServiceStrength, SewagePlantRadius, FalloffType.Linear);
 
+        if ((flags & ServiceTelecom) != 0)
+            _telecomCoverage.AddSource(cx, cy, DefaultServiceStrength, TelecomHubRadius, FalloffType.Linear);
+
         // Industrial buildings produce pollution and noise
         byte zone = state.Tiles.ZoneType[state.Tiles.Index(cx, cy)];
         if (zone == ZoneIndustrial)
@@ -246,6 +255,7 @@ public sealed class ServiceSystem
         _educationCoverage.RemoveSource(cx, cy, DefaultServiceStrength, SchoolRadius, FalloffType.Linear);
         _wasteCoverage.RemoveSource(cx, cy, DefaultServiceStrength, WasteDepotRadius, FalloffType.Linear);
         _sewageCoverage.RemoveSource(cx, cy, DefaultServiceStrength, SewagePlantRadius, FalloffType.Linear);
+        _telecomCoverage.RemoveSource(cx, cy, DefaultServiceStrength, TelecomHubRadius, FalloffType.Linear);
         _pollutionMap.RemoveSource(cx, cy, IndustrialPollutionStrength, IndustrialPollutionRadius, FalloffType.Exponential);
         _noiseMap.RemoveSource(cx, cy, IndustrialNoiseStrength, IndustrialNoiseRadius, FalloffType.Linear);
 
@@ -263,6 +273,7 @@ public sealed class ServiceSystem
         _educationCoverage.Recalculate();
         _wasteCoverage.Recalculate();
         _sewageCoverage.Recalculate();
+        _telecomCoverage.Recalculate();
         _pollutionMap.Recalculate();
         _noiseMap.Recalculate();
         _crimeMap.Recalculate();
@@ -290,6 +301,7 @@ public sealed class ServiceSystem
         UpdatePoliceCrime(state);
         UpdateWasteCollection(state);
         UpdateSewageTreatment(state);
+        UpdateTelecomNetwork(state);
         UpdateParkAmenity(state);
     }
 
@@ -345,6 +357,16 @@ public sealed class ServiceSystem
     public void UpdateSewageTreatment(WorldState state, float days = 1f)
     {
         SewageTreatment.Tick(state, _sewageCoverage, days);
+    }
+
+    /// <summary>
+    /// Tier-2 internet / telecom — hubs write <see cref="TileData.InternetConnection"/>
+    /// tiers from coverage × quality. Exports coverage / mean tier / access for
+    /// HUD + services satisfaction + P4 immigration.
+    /// </summary>
+    public void UpdateTelecomNetwork(WorldState state, float days = 1f)
+    {
+        TelecomNetwork.Tick(state, _telecomCoverage, days);
     }
 
     /// <summary>
@@ -932,12 +954,14 @@ public sealed class ServiceSystem
         float education = Math.Clamp(_educationCoverage.GetValue(tileX, tileY), 0f, 1f);
         float waste = Math.Clamp(_wasteCoverage.GetValue(tileX, tileY), 0f, 1f);
         float sewage = Math.Clamp(_sewageCoverage.GetValue(tileX, tileY), 0f, 1f);
+        float telecom = Math.Clamp(state.Tiles.InternetConnection[idx] / 3f, 0f, 1f);
         float power = state.Tiles.PowerGrid[idx] != 0 ? 1f : 0f;
         float water = state.Tiles.WaterGrid[idx] != 0 ? 1f : 0f;
 
         // Weighted average: utilities are critical, services are important
-        return (fire * 0.07f + police * 0.11f + health * 0.16f + education * 0.11f
-              + waste * 0.08f + sewage * 0.08f + power * 0.24f + water * 0.15f);
+        return (fire * 0.06f + police * 0.10f + health * 0.14f + education * 0.10f
+              + waste * 0.07f + sewage * 0.07f + telecom * 0.08f
+              + power * 0.23f + water * 0.15f);
     }
 
     // =========================================================================

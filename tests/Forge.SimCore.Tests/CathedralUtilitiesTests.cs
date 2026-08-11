@@ -1552,6 +1552,135 @@ public sealed class CathedralUtilitiesTests
         Assert.True(host.State.MeanWaterQuality > 0.3f);
     }
 
+    [Fact]
+    public void TelecomNetwork_HigherQuality_RaisesTierAtSameCoverage()
+    {
+        byte lowQ = TelecomNetwork.ConnectionTier(coverage: 0.8f, hubQuality: 0.3f);
+        byte highQ = TelecomNetwork.ConnectionTier(coverage: 0.8f, hubQuality: 1f);
+        byte uncovered = TelecomNetwork.ConnectionTier(coverage: 0f, hubQuality: 1f);
+
+        Assert.True(highQ > lowQ,
+            $"higher hub quality should raise tier (lowQ={lowQ}, highQ={highQ})");
+        Assert.Equal(TelecomNetwork.TierNone, uncovered);
+        Assert.True(TelecomNetwork.EffectiveTelecomFactor(0.8f, 1f) >
+                    TelecomNetwork.EffectiveTelecomFactor(0.8f, 0.3f));
+        Assert.Equal(TelecomNetwork.Tier5G, highQ);
+        Assert.True(lowQ >= TelecomNetwork.TierCopper);
+    }
+
+    [Fact]
+    public void TelecomTick_HubCoverage_WritesInternetConnectionAndRaisesAccess()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 20, 20, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(20, 20)] = 1; // Residential
+        host.State.Tiles.InternetConnection[host.State.Tiles.Index(20, 20)] = 0;
+        int hub = PlaceBuilding(host.State!, 20, 21, serviceFlags: TelecomNetwork.ServiceTelecom, level: 3);
+        host.State.Buildings.Condition[hub] = 255;
+
+        int slot = host.State!.Households.Allocate();
+        Assert.True(slot >= 0);
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        Assert.True(host.Services.TelecomCoverage.GetValue(20, 20) > 0.5f,
+            "adjacent telecom hub should cover home tile");
+
+        byte before = host.State.Tiles.InternetConnection[host.State.Tiles.Index(20, 20)];
+        int upgraded = TelecomNetwork.Tick(host.State, host.Services.TelecomCoverage, days: 1f);
+        byte after = host.State.Tiles.InternetConnection[host.State.Tiles.Index(20, 20)];
+
+        Assert.True(host.State.InternetCoverageFraction > 0.5f);
+        Assert.True(after > before,
+            $"telecom coverage should raise InternetConnection (before={before}, after={after})");
+        Assert.True(after >= TelecomNetwork.TierCopper);
+        Assert.True(upgraded > 0);
+        Assert.True(host.State.MeanInternetTier >= 1f);
+        Assert.True(host.State.MeanTelecomAccess > 0.3f);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsTelecomNetworkFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 15, 15, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(15, 15)] = 1;
+        int hub = PlaceBuilding(host.State!, 15, 16, serviceFlags: TelecomNetwork.ServiceTelecom, level: 2);
+        host.State.Buildings.Condition[hub] = 220;
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        host.Services.UpdateTelecomNetwork(host.State, days: 0f);
+
+        Assert.True(host.State.InternetCoverageFraction > 0f);
+        Assert.InRange(host.State.MeanInternetTier, 0f, 3f);
+        Assert.Equal(host.State.MeanInternetTier / 3f, host.State.MeanTelecomAccess, precision: 3);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("internetCoverageFraction", out var cov));
+        Assert.True(doc.RootElement.TryGetProperty("meanInternetTier", out var tier));
+        Assert.True(doc.RootElement.TryGetProperty("meanTelecomAccess", out var access));
+        Assert.Equal(host.State.InternetCoverageFraction, cov.GetSingle(), precision: 3);
+        Assert.Equal(host.State.MeanInternetTier, tier.GetSingle(), precision: 3);
+        Assert.Equal(host.State.MeanTelecomAccess, access.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.InternetCoverageFraction, dto.InternetCoverageFraction, precision: 3);
+        Assert.Equal(host.State.MeanInternetTier, dto.MeanInternetTier, precision: 3);
+        Assert.Equal(host.State.MeanTelecomAccess, dto.MeanTelecomAccess, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.InternetCoverageFraction, snap.InternetCoverageFraction, precision: 3);
+        Assert.Equal(host.State.MeanInternetTier, snap.MeanInternetTier, precision: 3);
+        Assert.Equal(host.State.MeanTelecomAccess, snap.MeanTelecomAccess, precision: 3);
+    }
+
+    [Fact]
+    public void TelecomCoverage_RaisesInternetTier_RaisesP4ServicesSatisfaction()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 12, 11, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(12, 11)] = 1;
+        host.State.Tiles.InternetConnection[host.State.Tiles.Index(12, 11)] = 0;
+        host.State.Tiles.Desirability[host.State.Tiles.Index(12, 11)] = 0f;
+        int hub = PlaceBuilding(host.State!, 12, 12, serviceFlags: TelecomNetwork.ServiceTelecom, level: 3);
+        host.State.Buildings.Condition[hub] = 255;
+        int work = PlaceBuilding(host.State!, 24, 24, serviceFlags: 0);
+
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.WorkBuildingId[slot] = (ushort)work;
+        host.State.Households.HealthSatisfaction[slot] = 128;
+        host.State.Households.SafetySatisfaction[slot] = 128;
+        host.State.Households.LeisureSatisfaction[slot] = 128;
+        host.State.Households.MemberCount[slot] = 2;
+        host.State.Households.Income[slot] = 1500;
+
+        host.Services!.RebuildFromWorld(host.State);
+        // Isolate InternetConnection effect — no DailyTick side-effects on crime/leisure.
+        host.State.Tiles.InternetConnection[host.State.Tiles.Index(12, 11)] = 0;
+        var pop = new PopulationSystem(seed: 42);
+        float satDead = pop.CalculateSatisfaction(host.State, slot);
+
+        host.Services.UpdateTelecomNetwork(host.State, days: 1f);
+
+        float satOnline = pop.CalculateSatisfaction(host.State, slot);
+        Assert.True(host.State.Tiles.InternetConnection[host.State.Tiles.Index(12, 11)] >= TelecomNetwork.TierCopper);
+        Assert.True(satOnline > satDead,
+            $"telecom→InternetConnection should raise P4 satisfaction (dead={satDead:F1}, online={satOnline:F1})");
+        Assert.True(host.State.InternetCoverageFraction > 0f);
+        Assert.True(host.State.MeanTelecomAccess > 0.3f);
+    }
+
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>
     private sealed class AlwaysLowRandom : Random
     {

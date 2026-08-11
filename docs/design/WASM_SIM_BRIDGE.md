@@ -311,6 +311,9 @@ export type SimSnapshotDto = {
   sewageCoverageFraction: number; // 0–1
   meanWaterContamination: number; // 0–1
   meanWaterQuality: number; // 0–1
+  internetCoverageFraction: number; // 0–1
+  meanInternetTier: number; // 0–3
+  meanTelecomAccess: number; // 0–1
 
   marketZoneCount: number;
   commuterCoverage: number;
@@ -456,6 +459,9 @@ export type CommuteOdSampleDto = {
   "sewageCoverageFraction": 0.52,
   "meanWaterContamination": 0.2,
   "meanWaterQuality": 0.8,
+  "internetCoverageFraction": 0.58,
+  "meanInternetTier": 1.8,
+  "meanTelecomAccess": 0.6,
   "culturalDna": [0, 0, 0, 0, 0, 0, 0, 0],
   "councilSeats": [0, 0, 0, 0, 0, 0, 0, 0, 0],
   "buildings": [

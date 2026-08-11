@@ -237,6 +237,12 @@ public sealed class SimSnapshotDto
     public float MeanWaterContamination { get; init; }
     /// <summary>Mean water quality 0–1 ≈ (1 − contamination) (Tier-2 sewage → outcomes).</summary>
     public float MeanWaterQuality { get; init; }
+    /// <summary>Fraction of households with internet tier ≥ copper (Tier-2 telecom).</summary>
+    public float InternetCoverageFraction { get; init; }
+    /// <summary>Mean InternetConnection tier at household homes 0–3 (Tier-2 telecom).</summary>
+    public float MeanInternetTier { get; init; }
+    /// <summary>Mean telecom access 0–1 ≈ mean tier / 3 (Tier-2 telecom → outcomes).</summary>
+    public float MeanTelecomAccess { get; init; }
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount { get; init; }
     /// <summary>Landmark / monument attraction units for tourism (Tier-2).</summary>
@@ -397,6 +403,9 @@ public sealed class SimSnapshotDto
             SewageCoverageFraction = state.SewageCoverageFraction,
             MeanWaterContamination = state.MeanWaterContamination,
             MeanWaterQuality = state.MeanWaterQuality,
+            InternetCoverageFraction = state.InternetCoverageFraction,
+            MeanInternetTier = state.MeanInternetTier,
+            MeanTelecomAccess = state.MeanTelecomAccess,
             ParkAttractionCount = state.ParkAttractionCount,
             LandmarkAttractionCount = state.LandmarkAttractionCount,
             TourismAttractionCount = state.TourismAttractionCount,

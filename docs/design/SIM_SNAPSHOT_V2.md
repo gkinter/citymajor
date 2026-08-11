@@ -137,8 +137,8 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 |-------|---|---|---|-------|-------|
 | PowerCoverageFraction | ✅ | ✅ | ✅ | WorldState | |
 | WaterCoverageFraction | ✅ | ✅ | ✅ | WorldState | |
-| BlackoutFraction | ✅ | — | ✅ | WorldState | Not on WASM DTO tip |
-| WaterShortageFraction | ✅ | — | ✅ | WorldState | Not on WASM DTO tip |
+| BlackoutFraction | ✅ | ✅ | ✅ | WorldState | Rolling L0 utility deficit |
+| WaterShortageFraction | ✅ | ✅ | ✅ | WorldState | Rolling L0 utility deficit |
 | UtilityStressIndex | ✅ | ✅ | ✅ | WorldState | |
 | MeanEmergencyResponseMinutes | ✅ | ✅ | ✅ | WorldState | Default 30 (no station) |
 | HydrantCoverageFraction | ✅ | ✅ | ✅ | WorldState | P5.3 |
@@ -227,12 +227,11 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 
 These are **documentation of tip reality**, not a backlog invent:
 
-1. **BlackoutFraction / WaterShortageFraction** — on engine + Unity; **not** on `SimSnapshotDto`.
-2. **TradeBalance / export-import** — engine + Unity; WASM relies on economy nested payload + indices.
-3. **Commute O-D sample** — WASM array; Unity uses aggregated HUD scalars + Citizen L2, not the same array type on `CitySimState`.
-4. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
-5. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
-6. **CulturalDna[]** — still engine-only on WASM DTO (politics flavor vector).
+1. **TradeBalance / export-import** — engine + Unity; WASM relies on economy nested payload + indices.
+2. **Commute O-D sample** — WASM array; Unity uses aggregated HUD scalars + Citizen L2, not the same array type on `CitySimState`.
+3. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
+4. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
+5. **CulturalDna[]** — still engine-only on WASM DTO (politics flavor vector).
 
 ---
 
@@ -258,3 +257,4 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **Law\*Mult WASM DTO** — traffic/construction/spawn Mults export + `ApplySnapshotDto` restore (closes former §6 gap #2) |
 | 2026-08-11 | **ActiveLawIds WASM DTO** — ordinance slug ids export + `ApplySnapshotDto` restore (deeper than Law\*Mult alone) |
 | 2026-08-11 | **ActiveOrdinances / NextElectionYear WASM DTO** — politics bitfield + election year export + restore (closes former §6 gap #6) |
+| 2026-08-11 | **BlackoutFraction / WaterShortageFraction WASM DTO** — rolling L0 utility shortages export + restore (closes former §6 gap #1) |

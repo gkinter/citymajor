@@ -18,6 +18,7 @@
 - **Law\*Mult WASM save/load** — `SimSnapshotDto` exports Law traffic/construction/spawn Mults; `ApplySnapshotDto` restores them (parity with Event\*Mult).
 - **ActiveLawIds WASM save/load** — `SimSnapshotDto` exports active ordinance slug ids; `ApplySnapshotDto` restores `LawSystem` toggles then Law\*Mult scalars.
 - **ActiveOrdinances / NextElectionYear WASM save/load** — bitfield + election calendar on `SimSnapshotDto`; restored in `ApplySnapshotDto` (orthogonal to ActiveLawIds).
+- **BlackoutFraction / WaterShortageFraction WASM save/load** — rolling L0 utility shortages on `SimSnapshotDto`; restored to WorldState + `UtilityPartitionBalance` after service rebuild.
 
 ## Target milestones
 

@@ -31,6 +31,16 @@ public sealed class UtilityPartitionBalance
     public float BlackoutFraction { get; private set; }
     public float WaterShortageFraction { get; private set; }
 
+    /// <summary>
+    /// Seed rolling L0 fractions after save/load so the next <see cref="Tick"/>
+    /// does not lerp from zero and overwrite restored WorldState values.
+    /// </summary>
+    public void RestoreRollingFractions(float blackoutFraction, float waterShortageFraction)
+    {
+        BlackoutFraction = Math.Clamp(blackoutFraction, 0f, 1f);
+        WaterShortageFraction = Math.Clamp(waterShortageFraction, 0f, 1f);
+    }
+
     public UtilityPartitionBalance(int worldSize, int partitionSize = 32)
     {
         if (worldSize <= 0)

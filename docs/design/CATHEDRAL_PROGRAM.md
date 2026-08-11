@@ -385,3 +385,4 @@ openspec/
 | 2026-08-11 | **Law\*Mult WASM DTO** — export + `ApplySnapshotDto` restore for traffic/construction/spawn Mults; closes SIM_SNAPSHOT_V2 §6 gap; `SnapshotRoundTrip_PreservesLawMults` |
 | 2026-08-11 | **ActiveLawIds WASM DTO** — ordinance slug ids export + restore (deeper than Law\*Mult); `SnapshotRoundTrip_PreservesActiveLawIds` |
 | 2026-08-11 | **ActiveOrdinances / NextElectionYear WASM DTO** — politics bitfield + election year export + restore; `SnapshotRoundTrip_PreservesActiveOrdinancesAndNextElectionYear` |
+| 2026-08-11 | **BlackoutFraction / WaterShortageFraction WASM DTO** — rolling L0 utility shortages export + restore; `SnapshotRoundTrip_PreservesBlackoutAndWaterShortageFractions` |

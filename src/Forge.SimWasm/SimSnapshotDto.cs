@@ -150,6 +150,10 @@ public sealed class SimSnapshotDto
     public float MeanTrafficDensity { get; init; }
     public float PowerCoverageFraction { get; init; } = 1f;
     public float WaterCoverageFraction { get; init; } = 1f;
+    /// <summary>Rolling fraction of utility partitions in power deficit (0–1).</summary>
+    public float BlackoutFraction { get; init; }
+    /// <summary>Rolling fraction of utility partitions in water deficit (0–1).</summary>
+    public float WaterShortageFraction { get; init; }
     public float UtilityStressIndex { get; init; }
     public float GoodsShortageIndex { get; init; }
     public float GoodsSurplusIndex { get; init; }
@@ -273,6 +277,8 @@ public sealed class SimSnapshotDto
             MeanTrafficDensity = state.MeanTrafficDensity,
             PowerCoverageFraction = state.PowerCoverageFraction,
             WaterCoverageFraction = state.WaterCoverageFraction,
+            BlackoutFraction = state.BlackoutFraction,
+            WaterShortageFraction = state.WaterShortageFraction,
             UtilityStressIndex = state.UtilityStressIndex,
             GoodsShortageIndex = state.GoodsShortageIndex,
             GoodsSurplusIndex = state.GoodsSurplusIndex,

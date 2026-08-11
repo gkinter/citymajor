@@ -13,7 +13,7 @@ namespace Forge.SimCore.Tests;
 /// (<see cref="SimHost.GetSnapshotJson"/> / <see cref="SimHost.LoadSnapshotFromJson"/>)
 /// must survive snapshot restore — MeanRentBurden, councilSeats, mode shares,
 /// plus Event*Mult / Law*Mult / ActiveLawIds / ActiveOrdinances / NextElectionYear /
-/// delivery delay / abandoned / fire / EMS / L2 sample.
+/// BlackoutFraction / WaterShortageFraction / delivery delay / abandoned / fire / EMS / L2 sample.
 /// </summary>
 [Collection("SimHost")]
 public sealed class CathedralSaveLoadTests
@@ -402,6 +402,54 @@ public sealed class CathedralSaveLoadTests
         Assert.NotNull(roundTrip);
         Assert.Equal(ordinances, roundTrip!.ActiveOrdinances);
         Assert.Equal(2036, roundTrip.NextElectionYear);
+    }
+
+    [Fact]
+    public void SnapshotRoundTrip_PreservesBlackoutAndWaterShortageFractions()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        var state = host.State!;
+        // Pin rolling L0 utility shortages (orthogonal to Power/WaterCoverageFraction).
+        state.BlackoutFraction = 0.37f;
+        state.WaterShortageFraction = 0.28f;
+        host.Services.UtilityBalance.RestoreRollingFractions(0.37f, 0.28f);
+
+        string json = host.GetSnapshotJson();
+        var saved = JsonSerializer.Deserialize(json, SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(saved);
+
+        using (var doc = JsonDocument.Parse(json))
+        {
+            Assert.True(doc.RootElement.TryGetProperty("blackoutFraction", out var blackoutEl));
+            Assert.Equal(JsonValueKind.Number, blackoutEl.ValueKind);
+            Assert.Equal(0.37f, blackoutEl.GetSingle(), precision: 3);
+            Assert.True(doc.RootElement.TryGetProperty("waterShortageFraction", out var shortageEl));
+            Assert.Equal(0.28f, shortageEl.GetSingle(), precision: 3);
+        }
+
+        Assert.Equal(0.37f, saved!.BlackoutFraction, precision: 3);
+        Assert.Equal(0.28f, saved.WaterShortageFraction, precision: 3);
+
+        // Mutate so restore cannot pass by Init coincidence.
+        state.BlackoutFraction = 0f;
+        state.WaterShortageFraction = 0f;
+        host.Services.UtilityBalance.RestoreRollingFractions(0f, 0f);
+
+        Assert.True(host.LoadSnapshotFromJson(json));
+
+        Assert.Equal(0.37f, host.State!.BlackoutFraction, precision: 3);
+        Assert.Equal(0.28f, host.State.WaterShortageFraction, precision: 3);
+        Assert.Equal(0.37f, host.Services.UtilityBalance.BlackoutFraction, precision: 3);
+        Assert.Equal(0.28f, host.Services.UtilityBalance.WaterShortageFraction, precision: 3);
+
+        var roundTrip = JsonSerializer.Deserialize(
+            host.GetSnapshotJson(),
+            SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(roundTrip);
+        Assert.Equal(0.37f, roundTrip!.BlackoutFraction, precision: 3);
+        Assert.Equal(0.28f, roundTrip.WaterShortageFraction, precision: 3);
     }
 
     private static string FindRepoRoot()

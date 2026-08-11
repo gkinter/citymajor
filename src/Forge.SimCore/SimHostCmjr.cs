@@ -222,6 +222,22 @@ public sealed partial class SimHost
         RebuildServicesAfterLoad();
         // FireRisk + ServiceFlags on restored buildings feed ActiveFireCount / hydrant / EMS
         // via ServiceSystem.DailyTick — no DTO override needed when geometry is present.
+        // Utility rolling fractions are L0 state — restore after service rebuild so DailyTick
+        // cannot leave them at defaults, and seed UtilityPartitionBalance for continuity.
+        RestoreUtilityShortageFractions(dto);
+    }
+
+    private void RestoreUtilityShortageFractions(SimSnapshotDto dto)
+    {
+        float blackout = float.IsFinite(dto.BlackoutFraction)
+            ? Math.Clamp(dto.BlackoutFraction, 0f, 1f)
+            : 0f;
+        float shortage = float.IsFinite(dto.WaterShortageFraction)
+            ? Math.Clamp(dto.WaterShortageFraction, 0f, 1f)
+            : 0f;
+        _state.BlackoutFraction = blackout;
+        _state.WaterShortageFraction = shortage;
+        _services.UtilityBalance.RestoreRollingFractions(blackout, shortage);
     }
 
     private static int RemapBuildingId(Dictionary<int, int> map, int savedId)

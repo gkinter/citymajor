@@ -256,6 +256,18 @@ public sealed class SimSnapshot
     /// <summary>High-crime building-fire cluster / arson ring flag (Tier-2).</summary>
     public bool ArsonRingActive { get; init; }
 
+    /// <summary>Active lookout towers (Tier-2 / MISSING_SYSTEMS §1.1).</summary>
+    public int LookoutTowerCount { get; init; }
+
+    /// <summary>Aerial firefighting / water-bomber base available (Tier-2).</summary>
+    public bool AerialFirefightingAvailable { get; init; }
+
+    /// <summary>City fire safety rating 1–10 (Tier-2 fire rating → insurance).</summary>
+    public byte FireSafetyRating { get; init; } = 5;
+
+    /// <summary>Insurance premium mult from fire safety rating (Tier-2).</summary>
+    public float FireInsurancePremiumMult { get; init; } = 1f;
+
     public readonly record struct BuildingSnapshot(
         int GridX, int GridY, ushort TypeId, byte Level,
         byte State, ushort Occupants, ushort MaxOccupants, byte Condition);
@@ -431,6 +443,10 @@ public sealed class SimSnapshot
             ActiveWildfireTileCount = state.ActiveWildfireTileCount,
             ArsonRiskIndex = state.ArsonRiskIndex,
             ArsonRingActive = state.ArsonRingActive,
+            LookoutTowerCount = state.LookoutTowerCount,
+            AerialFirefightingAvailable = state.AerialFirefightingAvailable,
+            FireSafetyRating = state.FireSafetyRating,
+            FireInsurancePremiumMult = state.FireInsurancePremiumMult,
         };
     }
 }

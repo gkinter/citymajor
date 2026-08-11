@@ -230,6 +230,27 @@ public sealed class WorldState
     public bool ArsonRingActive { get; set; }
 
     /// <summary>
+    /// Active fire lookout towers (ServiceLookout). Tier-2 / MISSING_SYSTEMS §1.1.
+    /// </summary>
+    public int LookoutTowerCount { get; set; }
+
+    /// <summary>
+    /// True when an aerial firefighting / water-bomber base is active (Modern+).
+    /// </summary>
+    public bool AerialFirefightingAvailable { get; set; }
+
+    /// <summary>
+    /// City fire safety rating 1–10 (hydrants, stations, lookouts, aerial − fires).
+    /// Drives <see cref="FireInsurancePremiumMult"/>.
+    /// </summary>
+    public byte FireSafetyRating { get; set; } = 5;
+
+    /// <summary>
+    /// Insurance premium multiplier from fire safety rating (≈1.8 at 1, ≈0.7 at 10).
+    /// </summary>
+    public float FireInsurancePremiumMult { get; set; } = 1f;
+
+    /// <summary>
     /// Per-tile wildfire burn intensity (0 = cold). Sized to <see cref="Tiles"/>.Count when first used.
     /// Not exported on snapshots — aggregates only.
     /// </summary>

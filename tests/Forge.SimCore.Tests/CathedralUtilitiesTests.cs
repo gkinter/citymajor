@@ -556,10 +556,147 @@ public sealed class CathedralUtilitiesTests
         Assert.True(snap.ArsonRingActive);
     }
 
+    [Fact]
+    public void Lookout_CoverageCutsSpark_WhenChanceBorderline()
+    {
+        var state = new WorldState(32, maxBuildings: 4);
+        state.WeatherCondition = 6; // drought = 1.0 → sparkChance 0.35
+        state.Tiles.TerrainType[state.Tiles.Index(16, 16)] = WildfireArson.TerrainForest;
+
+        // RNG returns 0.20: succeeds at 0.35, fails at 0.35 * 0.25 = 0.0875.
+        // Next(size) pinned to 16 so spark probes hit the single fuel tile.
+        var rng = new FixedDoubleRandom(0.20);
+
+        Assert.Equal(1, WildfireArson.TickWildfire(state, hours: 1f, rng: rng));
+        Assert.True(WildfireArson.IsWildfireBurning(state, 16, 16));
+
+        state.WildfireIntensity![state.Tiles.Index(16, 16)] = 0;
+        PlaceBuilding(state, 16, 15, serviceFlags: WildfireArson.ServiceLookout);
+        Assert.True(WildfireArson.HasLookoutCoverage(state, 16, 16));
+        Assert.Equal(1, WildfireArson.CountLookoutTowers(state));
+
+        Assert.Equal(0, WildfireArson.TickWildfire(state, hours: 1f, rng: new FixedDoubleRandom(0.20)));
+        Assert.False(WildfireArson.IsWildfireBurning(state, 16, 16));
+    }
+
+    [Fact]
+    public void Aerial_SuppressesBurningFuelTiles()
+    {
+        var state = new WorldState(32, maxBuildings: 4);
+        for (int x = 5; x <= 10; x++)
+            state.Tiles.TerrainType[state.Tiles.Index(x, 10)] = WildfireArson.TerrainForest;
+
+        Assert.True(WildfireArson.TryIgniteWildfireTile(state, 5, 10));
+        Assert.True(WildfireArson.TryIgniteWildfireTile(state, 6, 10));
+        Assert.True(WildfireArson.TryIgniteWildfireTile(state, 7, 10));
+        Assert.True(WildfireArson.TryIgniteWildfireTile(state, 8, 10));
+        Assert.Equal(4, WildfireArson.CountActiveWildfireTiles(state));
+
+        Assert.Equal(0, WildfireArson.TickAerialSuppression(state, hours: 1f));
+
+        PlaceBuilding(state, 20, 20, serviceFlags: WildfireArson.ServiceAerialFire);
+        Assert.True(WildfireArson.HasAerialFirefighting(state));
+
+        int suppressed = WildfireArson.TickAerialSuppression(state, hours: 1f);
+        Assert.Equal(WildfireArson.AerialSuppressPerHour, suppressed);
+        Assert.Equal(4 - WildfireArson.AerialSuppressPerHour, WildfireArson.CountActiveWildfireTiles(state));
+    }
+
+    [Fact]
+    public void FireRating_LookoutAndAerialRaise_FiresLower()
+    {
+        var state = new WorldState(32, maxBuildings: 16);
+        state.HydrantCoverageFraction = 1f;
+        state.WildfireRiskIndex = WildfireArson.BaseDroughtRisk;
+        state.ArsonRiskIndex = 0f;
+        state.ArsonRingActive = false;
+        state.ActiveFireCount = 0;
+        state.ActiveWildfireTileCount = 0;
+
+        byte baseline = WildfireArson.CalculateFireSafetyRating(state);
+
+        PlaceBuilding(state, 8, 8, serviceFlags: WildfireArson.ServiceLookout);
+        PlaceBuilding(state, 10, 8, serviceFlags: WildfireArson.ServiceAerialFire);
+        PlaceBuilding(state, 12, 8, serviceFlags: EmergencyResponseTime.ServiceFire);
+        PlaceBuilding(state, 14, 8, serviceFlags: FireResponse.ServiceHydrant);
+
+        byte equipped = WildfireArson.CalculateFireSafetyRating(state);
+        Assert.True(equipped > baseline, $"equipped {equipped} should beat baseline {baseline}");
+
+        state.ActiveFireCount = 5;
+        state.ActiveWildfireTileCount = 6;
+        state.ArsonRingActive = true;
+        byte penalized = WildfireArson.CalculateFireSafetyRating(state);
+        Assert.True(penalized < equipped, $"penalized {penalized} should be below equipped {equipped}");
+
+        Assert.Equal(
+            WildfireArson.MaxInsurancePremiumMult,
+            WildfireArson.InsurancePremiumMultFromRating(1),
+            precision: 3);
+        Assert.Equal(
+            WildfireArson.MinInsurancePremiumMult,
+            WildfireArson.InsurancePremiumMultFromRating(10),
+            precision: 3);
+        Assert.True(
+            WildfireArson.InsurancePremiumMultFromRating(3) >
+            WildfireArson.InsurancePremiumMultFromRating(8));
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsFireRatingLookoutAerialFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        PlaceBuilding(host.State!, 10, 10, serviceFlags: WildfireArson.ServiceLookout);
+        PlaceBuilding(host.State!, 12, 10, serviceFlags: WildfireArson.ServiceAerialFire);
+        host.State!.HydrantCoverageFraction = 0.9f;
+
+        host.Services!.UpdateWildfireArson(host.State, hours: 0f);
+
+        Assert.Equal(1, host.State.LookoutTowerCount);
+        Assert.True(host.State.AerialFirefightingAvailable);
+        Assert.InRange(host.State.FireSafetyRating, WildfireArson.MinFireSafetyRating, WildfireArson.MaxFireSafetyRating);
+        Assert.Equal(
+            WildfireArson.InsurancePremiumMultFromRating(host.State.FireSafetyRating),
+            host.State.FireInsurancePremiumMult,
+            precision: 3);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("lookoutTowerCount", out var lookouts));
+        Assert.True(doc.RootElement.TryGetProperty("aerialFirefightingAvailable", out var aerial));
+        Assert.True(doc.RootElement.TryGetProperty("fireSafetyRating", out var rating));
+        Assert.True(doc.RootElement.TryGetProperty("fireInsurancePremiumMult", out var premium));
+        Assert.Equal(1, lookouts.GetInt32());
+        Assert.True(aerial.GetBoolean());
+        Assert.Equal(host.State.FireSafetyRating, rating.GetByte());
+        Assert.Equal(host.State.FireInsurancePremiumMult, premium.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(1, dto.LookoutTowerCount);
+        Assert.True(dto.AerialFirefightingAvailable);
+        Assert.Equal(host.State.FireSafetyRating, dto.FireSafetyRating);
+        Assert.Equal(host.State.FireInsurancePremiumMult, dto.FireInsurancePremiumMult, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(1, snap.LookoutTowerCount);
+        Assert.True(snap.AerialFirefightingAvailable);
+        Assert.Equal(host.State.FireSafetyRating, snap.FireSafetyRating);
+    }
+
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>
     private sealed class AlwaysLowRandom : Random
     {
         public override double NextDouble() => 0.0;
+    }
+
+    /// <summary>RNG with a fixed NextDouble (and Next(size) pinned to mid-map for spark probes).</summary>
+    private sealed class FixedDoubleRandom : Random
+    {
+        private readonly double _value;
+        public FixedDoubleRandom(double value) => _value = value;
+        public override double NextDouble() => _value;
+        public override int Next(int maxValue) => maxValue > 16 ? 16 : 0;
     }
 
     private static float[] CaptureFreeFlowEdgeCosts(RoadGraph graph)

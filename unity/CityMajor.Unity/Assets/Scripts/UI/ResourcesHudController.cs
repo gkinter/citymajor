@@ -167,6 +167,7 @@ namespace CityMajor.UI
                 var fires = Mathf.Max(0, state.ActiveFireCount);
                 var wildfire = Mathf.Max(0, state.ActiveWildfireTileCount);
                 var droughtPct = Mathf.RoundToInt(Mathf.Clamp01(state.WildfireRiskIndex) * 100f);
+                var rating = Mathf.Clamp(state.FireSafetyRating, 1, 10);
 
                 var text = fires > 0
                     ? $"🚰 {hydrantPct}% · 🔥 {fires}"
@@ -179,10 +180,15 @@ namespace CityMajor.UI
                     text += " · 🕵️";
                 else if (state.ArsonRiskIndex >= 0.25f)
                     text += $" · 🕵️ {Mathf.RoundToInt(Mathf.Clamp01(state.ArsonRiskIndex) * 100f)}%";
+                if (state.LookoutTowerCount > 0)
+                    text += $" · 🔭 {state.LookoutTowerCount}";
+                if (state.AerialFirefightingAvailable)
+                    text += " · ✈️";
+                text += $" · ⭐ {rating}";
 
                 _fireValue.text = text;
                 _fireValue.tooltip =
-                    "Hydrant coverage; active building fires (P5.3); wildfire tiles / drought risk and arson ring / crime-driven arson risk (Tier-2 / MISSING_SYSTEMS §1.1).";
+                    "Hydrant coverage; active building fires (P5.3); wildfire / drought and arson (Tier-2); lookout towers / aerial firefighting; fire safety rating 1–10 driving insurance premium (MISSING_SYSTEMS §1.1).";
             }
 
             if (_hospitalValue != null)

@@ -277,7 +277,8 @@ public sealed class ServiceSystem
     }
 
     /// <summary>
-    /// Tier-2 wildfire + arson rings — drought sparks, fuel spread, high-crime ignitions.
+    /// Tier-2 wildfire + arson + lookout/aerial/fire-rating — drought sparks, fuel
+    /// spread, aerial suppression, high-crime ignitions, safety rating aggregates.
     /// Recounts <see cref="WorldState.ActiveFireCount"/> after edge/arson building fires.
     /// </summary>
     public void UpdateWildfireArson(WorldState state, float hours = 1f, Random? rng = null)

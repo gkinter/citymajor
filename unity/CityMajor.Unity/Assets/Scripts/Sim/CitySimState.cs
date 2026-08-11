@@ -100,6 +100,18 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — high-crime building-fire cluster / arson ring.</summary>
         public bool ArsonRingActive;
 
+        /// <summary>Tier-2 — active fire lookout towers.</summary>
+        public int LookoutTowerCount;
+
+        /// <summary>Tier-2 — aerial firefighting / water-bomber base available.</summary>
+        public bool AerialFirefightingAvailable;
+
+        /// <summary>Tier-2 — city fire safety rating 1–10 (insurance driver).</summary>
+        public byte FireSafetyRating;
+
+        /// <summary>Tier-2 — insurance premium mult from fire safety rating.</summary>
+        public float FireInsurancePremiumMult;
+
         /// <summary>Cathedral P2 — mean rent / income burden (0–1+).</summary>
         public float MeanRentBurden;
 

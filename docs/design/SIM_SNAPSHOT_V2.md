@@ -150,6 +150,10 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | ActiveWildfireTileCount | ✅ | ✅ | ✅ | WorldState | Tier-2 burning fuel tiles |
 | ArsonRiskIndex | ✅ | ✅ | ✅ | WorldState | Tier-2 crime-driven arson risk |
 | ArsonRingActive | ✅ | ✅ | ✅ | WorldState | Tier-2 high-crime fire cluster |
+| LookoutTowerCount | ✅ | ✅ | ✅ | WorldState | Tier-2 lookout towers |
+| AerialFirefightingAvailable | ✅ | ✅ | ✅ | WorldState | Tier-2 aerial / water bomber |
+| FireSafetyRating | ✅ | ✅ | ✅ | WorldState | Tier-2 fire rating 1–10 |
+| FireInsurancePremiumMult | ✅ | ✅ | ✅ | WorldState | Tier-2 insurance from fire rating |
 | ServiceCoverage[] | — | ✅ | overlay via services | ServiceSystem | Sparse zoned tiles |
 | CouncilSeats | ✅ `byte[]` | ✅ `int[]` | via bridge getter | Politics | Length 9 |
 
@@ -265,3 +269,4 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **TradeBalance / export-import WASM DTO** — TradeBalance + MonthlyExportValue/ImportCost export + `ApplySnapshotDto` restore (closes former §6 gap #1) |
 | 2026-08-11 | **Commute O-D Unity parity** — `CitySimState.CommuteOdSample[]` via `SimHost.CollectCommuteOdSample`; Cathedral HUD top pairs (closes former §6 Commute O-D gap) |
 | 2026-08-11 | **Tier-2 wildfire / arson rings** — `WildfireRiskIndex` / `ActiveWildfireTileCount` / `ArsonRiskIndex` / `ArsonRingActive` on E+W+U |
+| 2026-08-11 | **Tier-2 aerial / lookout / fire rating** — `LookoutTowerCount` / `AerialFirefightingAvailable` / `FireSafetyRating` / `FireInsurancePremiumMult` on E+W+U |

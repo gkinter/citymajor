@@ -128,6 +128,16 @@ public sealed class WasmSimHost
     public float ArsonRiskIndex => _host.State?.ArsonRiskIndex ?? 0f;
     /// <summary>High-crime building-fire cluster / arson ring (Tier-2).</summary>
     public bool ArsonRingActive => _host.State?.ArsonRingActive ?? false;
+    /// <summary>Active lookout towers (Tier-2).</summary>
+    public int LookoutTowerCount => _host.State?.LookoutTowerCount ?? 0;
+    /// <summary>Aerial firefighting available (Tier-2).</summary>
+    public bool AerialFirefightingAvailable =>
+        _host.State?.AerialFirefightingAvailable ?? false;
+    /// <summary>City fire safety rating 1–10 (Tier-2).</summary>
+    public byte FireSafetyRating => _host.State?.FireSafetyRating ?? 5;
+    /// <summary>Insurance premium mult from fire safety rating (Tier-2).</summary>
+    public float FireInsurancePremiumMult =>
+        _host.State?.FireInsurancePremiumMult ?? 1f;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
     /// <summary>Faction id per council seat (length <see cref="PoliticsSystem.CouncilSeatCount"/>).</summary>
@@ -372,6 +382,14 @@ public sealed class WasmStatusDto
     public float ArsonRiskIndex { get; init; }
     /// <summary>High-crime building-fire cluster / arson ring (Tier-2).</summary>
     public bool ArsonRingActive { get; init; }
+    /// <summary>Active lookout towers (Tier-2).</summary>
+    public int LookoutTowerCount { get; init; }
+    /// <summary>Aerial firefighting available (Tier-2).</summary>
+    public bool AerialFirefightingAvailable { get; init; }
+    /// <summary>City fire safety rating 1–10 (Tier-2).</summary>
+    public byte FireSafetyRating { get; init; } = 5;
+    /// <summary>Insurance premium mult from fire safety rating (Tier-2).</summary>
+    public float FireInsurancePremiumMult { get; init; } = 1f;
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Faction id per council seat (length 9).</summary>
@@ -487,6 +505,10 @@ public sealed class WasmStatusDto
             ActiveWildfireTileCount = host.ActiveWildfireTileCount,
             ArsonRiskIndex = host.ArsonRiskIndex,
             ArsonRingActive = host.ArsonRingActive,
+            LookoutTowerCount = host.LookoutTowerCount,
+            AerialFirefightingAvailable = host.AerialFirefightingAvailable,
+            FireSafetyRating = host.FireSafetyRating,
+            FireInsurancePremiumMult = host.FireInsurancePremiumMult,
             MarketZoneCount = host.MarketZoneCount,
             CouncilSeats = host.CouncilSeats,
         };

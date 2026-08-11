@@ -124,7 +124,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **Tier-2 health prog** | ✅ Done | Hospital → HH `HealthSatisfaction` over time + `HealthCoverageFraction` + Hosp HUD |
 | **Tier-2 tourism** | ✅ Done | Parks/landmarks feed `TourismIncome` (not only pop×happiness) + Budget HUD |
 | **Tier-2 police/crime** | ✅ Done | Station quality → crime → `SafetySatisfaction` → sat/immigration + Police HUD |
-| **Tier-2 waste** | ✅ Done | Garbage depots → pollution → env sat / immigration + Waste HUD 🗑️ |
+| **Tier-2 waste** | ✅ Done | Garbage depots → pollution + landfill capacity / recycling diversion → env sat / immigration + Waste HUD 🗑️ |
 | **Tier-2 sewage** | ✅ Done | Treatment plants → water quality → health/env / immigration + Sewage HUD 💧 |
 | **Manning/CSO** | ✅ Done | Manning pipe capacity + rational storm runoff → CSO overflow → pollution + Sewage HUD cso/util |
 | **Tier-2 internet** | ✅ Done | Telecom hubs → `InternetConnection` tiers (T044 fiber / T045 5G gates) → services sat / immigration + Net HUD 📡 |
@@ -255,7 +255,7 @@ flowchart TB
 | **Tier-2 health prog** ✅ | Hospital → HH health — `HealthProgression` + `HealthCoverageFraction` + Hosp HUD ❤ / cov% |
 | **Tier-2 tourism** ✅ | Parks/landmarks → `TourismIncome` — `TourismAttractions` + Budget HUD tourism row |
 | **Tier-2 police/crime** ✅ | Station quality → crime → `SafetySatisfaction` — `PoliceCrime` + Police HUD 👮 → P4 sat / immigration |
-| **Tier-2 waste** ✅ | Garbage depots → pollution → env score — `WasteCollection` + Waste HUD 🗑️ → P4 sat / immigration |
+| **Tier-2 waste** ✅ | Garbage depots → pollution + landfill capacity / recycling diversion — `WasteCollection` + Waste HUD 🗑️ → P4 sat / immigration |
 | **Tier-2 sewage** ✅ | Treatment plants → water quality — `SewageTreatment` + Sewage HUD 💧 → P4 sat / immigration |
 | **Manning/CSO** ✅ | Manning capacity + rational runoff → CSO — `StormOverflow` + Sewage HUD `cso`/`util` |
 | **Tier-2 internet** ✅ | Telecom hubs → `InternetConnection` — `TelecomNetwork` + T044/T045 fiber/5G gates + Net HUD 📡 → P4 services sat / immigration |
@@ -423,6 +423,7 @@ openspec/
 | 2026-08-11 | **Tier-2 tourism attractions** — `TourismAttractions` parks/landmarks feed `TourismIncome` (not only pop×happiness); Budget HUD + snapshot |
 | 2026-08-11 | **Tier-2 police / crime** — `PoliceCrime` station quality → crime; `PoliceCoverageFraction` / `MeanCrimeRate` / `MeanSafetySatisfaction` + Police HUD 👮 → P4 sat / immigration |
 | 2026-08-11 | **Tier-2 waste / pollution** — `WasteCollection` depots abate R/C waste; `WasteCoverageFraction` / `MeanPollution` / `MeanEnvironmentScore` + Waste HUD 🗑️ → P4 sat / immigration |
+| 2026-08-11 | **Landfill capacity / recycling diversion** — `LandfillUtilizationFraction` / `RecyclingDiversionRate` / `LandfillOverflowRate`; full sites soften abatement + illegal dump; Waste HUD `div`/`fill` |
 | 2026-08-11 | **Tier-2 sewage / water contamination** — `SewageTreatment` plants abate waterborne pollution; `SewageCoverageFraction` / `MeanWaterContamination` / `MeanWaterQuality` + Sewage HUD 💧 → P4 sat / immigration |
 | 2026-08-11 | **Tier-2 internet / telecom** — `TelecomNetwork` hubs deepen `InternetConnection` (0–3); `InternetCoverageFraction` / `MeanInternetTier` / `MeanTelecomAccess` + Net HUD 📡 → P4 services sat / immigration |
 | 2026-08-11 | **Fiber/5G tech gates** — T044 Internet Infrastructure unlocks fiber; T045 5G/6G Networks unlocks 5G; copper without research |

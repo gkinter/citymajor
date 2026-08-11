@@ -308,6 +308,9 @@ export type SimSnapshotDto = {
   wasteCoverageFraction: number; // 0–1
   meanPollution: number; // 0–1
   meanEnvironmentScore: number; // 0–1
+  landfillUtilizationFraction: number; // 0–1+
+  recyclingDiversionRate: number; // 0–1
+  landfillOverflowRate: number; // 0–1
   sewageCoverageFraction: number; // 0–1
   meanWaterContamination: number; // 0–1
   meanWaterQuality: number; // 0–1
@@ -459,6 +462,9 @@ export type CommuteOdSampleDto = {
   "wasteCoverageFraction": 0.48,
   "meanPollution": 0.22,
   "meanEnvironmentScore": 0.78,
+  "landfillUtilizationFraction": 0.42,
+  "recyclingDiversionRate": 0.35,
+  "landfillOverflowRate": 0.02,
   "sewageCoverageFraction": 0.52,
   "meanWaterContamination": 0.2,
   "meanWaterQuality": 0.8,

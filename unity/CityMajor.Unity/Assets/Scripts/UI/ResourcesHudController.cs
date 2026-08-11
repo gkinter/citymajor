@@ -231,13 +231,17 @@ namespace CityMajor.UI
             if (_wasteValue != null)
             {
                 var envPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanEnvironmentScore) * 100f);
-                var pollutionPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanPollution) * 100f);
+                var divPct = Mathf.RoundToInt(Mathf.Clamp01(state.RecyclingDiversionRate) * 100f);
+                var fillPct = Mathf.RoundToInt(Mathf.Clamp(state.LandfillUtilizationFraction, 0f, 2f) * 100f);
                 var covPct = Mathf.RoundToInt(Mathf.Clamp01(state.WasteCoverageFraction) * 100f);
-                _wasteValue.text = covPct > 0 || envPct > 0 || pollutionPct > 0
-                    ? $"🗑️ {envPct}% · pol {pollutionPct}% · {covPct}%"
+                var overflowPct = Mathf.RoundToInt(Mathf.Clamp01(state.LandfillOverflowRate) * 100f);
+                _wasteValue.text = covPct > 0 || envPct > 0 || divPct > 0 || fillPct > 0
+                    ? $"🗑️ {envPct}% · div {divPct}% · fill {fillPct}%"
                     : "🗑️ —";
                 _wasteValue.tooltip =
-                    "Mean environment score (1 − pollution), mean home-tile pollution, and fraction under waste coverage. Depots abate residential/commercial waste; uncovered zones accumulate pollution that feeds environment satisfaction / health / immigration (Tier-2 waste → pollution → outcomes).";
+                    "Mean environment score (1 − pollution), recycling diversion rate, and landfill fill. " +
+                    $"Coverage {covPct}% · overflow/illegal dump {overflowPct}%. " +
+                    "Depots abate residential/commercial waste; full landfills soften abatement and overflow dumps illegally (Tier-2 waste capacity / diversion).";
             }
 
             if (_sewageValue != null)

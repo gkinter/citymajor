@@ -311,6 +311,27 @@ public sealed class WorldState
     public float MeanEnvironmentScore { get; set; }
 
     /// <summary>
+    /// City landfill fill / capacity (0–1+). Tier-2 waste capacity depth.
+    /// </summary>
+    public float LandfillUtilizationFraction { get; set; }
+
+    /// <summary>
+    /// Fraction of collected waste diverted from landfill by recycling (0–1). Tier-2.
+    /// </summary>
+    public float RecyclingDiversionRate { get; set; }
+
+    /// <summary>
+    /// Fraction of collected waste that overflowed landfill (illegal dump) this tick (0–1).
+    /// </summary>
+    public float LandfillOverflowRate { get; set; }
+
+    /// <summary>
+    /// Sub-unit landfill fill accumulator (not snapshotted). Prevents daily
+    /// fractional intake from rounding up to a full ton every tick.
+    /// </summary>
+    public float LandfillPendingFill { get; set; }
+
+    /// <summary>
     /// Fraction of households with home-tile sewage coverage ≥ treatment threshold (0–1). Tier-2.
     /// </summary>
     public float SewageCoverageFraction { get; set; }

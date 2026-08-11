@@ -339,9 +339,11 @@ public sealed class ServiceSystem
 
     /// <summary>
     /// Tier-2 waste → pollution → environment — depots abate R/C waste;
-    /// uncovered zones accumulate pollution. Exports coverage / mean pollution /
-    /// environment score for HUD + P4 immigration. Environment satisfaction and
-    /// health progression already read tile pollution.
+    /// uncovered zones accumulate pollution. Landfill capacity softens abatement
+    /// when full; recycling diversion shrinks intake. Exports coverage / mean
+    /// pollution / environment score + landfill util / diversion / overflow for
+    /// HUD + P4 immigration. Environment satisfaction and health progression
+    /// already read tile pollution.
     /// </summary>
     public void UpdateWasteCollection(WorldState state, float days = 1f)
     {

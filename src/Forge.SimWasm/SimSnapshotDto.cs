@@ -231,6 +231,12 @@ public sealed class SimSnapshotDto
     public float MeanPollution { get; init; }
     /// <summary>Mean environment score 0–1 ≈ (1 − pollution) (Tier-2 waste → outcomes).</summary>
     public float MeanEnvironmentScore { get; init; }
+    /// <summary>City landfill fill / capacity 0–1+ (Tier-2 waste capacity).</summary>
+    public float LandfillUtilizationFraction { get; init; }
+    /// <summary>Recycling diversion rate 0–1 (Tier-2 waste capacity).</summary>
+    public float RecyclingDiversionRate { get; init; }
+    /// <summary>Landfill overflow / illegal-dump rate 0–1 (Tier-2 waste capacity).</summary>
+    public float LandfillOverflowRate { get; init; }
     /// <summary>Fraction of households with sewage coverage (Tier-2 sewage / water quality).</summary>
     public float SewageCoverageFraction { get; init; }
     /// <summary>Mean water contamination at household homes 0–1 (Tier-2 sewage).</summary>
@@ -406,6 +412,9 @@ public sealed class SimSnapshotDto
             WasteCoverageFraction = state.WasteCoverageFraction,
             MeanPollution = state.MeanPollution,
             MeanEnvironmentScore = state.MeanEnvironmentScore,
+            LandfillUtilizationFraction = state.LandfillUtilizationFraction,
+            RecyclingDiversionRate = state.RecyclingDiversionRate,
+            LandfillOverflowRate = state.LandfillOverflowRate,
             SewageCoverageFraction = state.SewageCoverageFraction,
             MeanWaterContamination = state.MeanWaterContamination,
             MeanWaterQuality = state.MeanWaterQuality,

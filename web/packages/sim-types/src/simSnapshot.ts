@@ -267,6 +267,12 @@ export type SimSnapshotDto = {
   meanPollution: number;
   /** Mean environment score 0–1 ≈ (1 − pollution). */
   meanEnvironmentScore: number;
+  /** City landfill fill / capacity 0–1+ (Tier-2 waste capacity). */
+  landfillUtilizationFraction: number;
+  /** Recycling diversion rate 0–1 (Tier-2 waste capacity). */
+  recyclingDiversionRate: number;
+  /** Landfill overflow / illegal-dump rate 0–1 (Tier-2 waste capacity). */
+  landfillOverflowRate: number;
   /** Fraction of households under sewage coverage. */
   sewageCoverageFraction: number;
   /** Mean water contamination at household homes 0–1. */
@@ -387,6 +393,9 @@ export type SimResourcesDto = Pick<
   | "wasteCoverageFraction"
   | "meanPollution"
   | "meanEnvironmentScore"
+  | "landfillUtilizationFraction"
+  | "recyclingDiversionRate"
+  | "landfillOverflowRate"
   | "sewageCoverageFraction"
   | "meanWaterContamination"
   | "meanWaterQuality"

@@ -175,6 +175,15 @@ public sealed class WasmSimHost
     /// <summary>Mean environment score 0–1 ≈ (1 − pollution) (Tier-2).</summary>
     public float MeanEnvironmentScore =>
         _host.State?.MeanEnvironmentScore ?? 0f;
+    /// <summary>City landfill fill / capacity 0–1+ (Tier-2 waste capacity).</summary>
+    public float LandfillUtilizationFraction =>
+        _host.State?.LandfillUtilizationFraction ?? 0f;
+    /// <summary>Recycling diversion rate 0–1 (Tier-2 waste capacity).</summary>
+    public float RecyclingDiversionRate =>
+        _host.State?.RecyclingDiversionRate ?? 0f;
+    /// <summary>Landfill overflow / illegal-dump rate 0–1 (Tier-2 waste capacity).</summary>
+    public float LandfillOverflowRate =>
+        _host.State?.LandfillOverflowRate ?? 0f;
     /// <summary>Fraction of households with sewage coverage (Tier-2).</summary>
     public float SewageCoverageFraction =>
         _host.State?.SewageCoverageFraction ?? 0f;
@@ -494,6 +503,12 @@ public sealed class WasmStatusDto
     public float MeanPollution { get; init; }
     /// <summary>Mean environment score 0–1 ≈ (1 − pollution) (Tier-2).</summary>
     public float MeanEnvironmentScore { get; init; }
+    /// <summary>City landfill fill / capacity 0–1+ (Tier-2 waste capacity).</summary>
+    public float LandfillUtilizationFraction { get; init; }
+    /// <summary>Recycling diversion rate 0–1 (Tier-2 waste capacity).</summary>
+    public float RecyclingDiversionRate { get; init; }
+    /// <summary>Landfill overflow / illegal-dump rate 0–1 (Tier-2 waste capacity).</summary>
+    public float LandfillOverflowRate { get; init; }
     /// <summary>Fraction of households with sewage coverage (Tier-2).</summary>
     public float SewageCoverageFraction { get; init; }
     /// <summary>Mean water contamination at household homes 0–1 (Tier-2).</summary>
@@ -655,6 +670,9 @@ public sealed class WasmStatusDto
             WasteCoverageFraction = host.WasteCoverageFraction,
             MeanPollution = host.MeanPollution,
             MeanEnvironmentScore = host.MeanEnvironmentScore,
+            LandfillUtilizationFraction = host.LandfillUtilizationFraction,
+            RecyclingDiversionRate = host.RecyclingDiversionRate,
+            LandfillOverflowRate = host.LandfillOverflowRate,
             SewageCoverageFraction = host.SewageCoverageFraction,
             MeanWaterContamination = host.MeanWaterContamination,
             MeanWaterQuality = host.MeanWaterQuality,

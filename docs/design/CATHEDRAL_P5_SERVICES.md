@@ -30,7 +30,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 | **Tier-2** | Health → P4 outcomes | **Live** — `HealthSatisfaction` weight in `CalculateSatisfaction` + mean-health immigration mod → happiness / emigration / immigration |
 | **Tier-2** | Hospital → HH health | **Live** — `HealthProgression` raises / decays `HealthSatisfaction` under hospital coverage + `HealthCoverageFraction` + Hosp HUD ❤ / cov% |
 | **Tier-2** | Police / crime depth | **Live** — `PoliceCrime` station quality → crime; `PoliceCoverageFraction` / `MeanCrimeRate` / `MeanSafetySatisfaction` + Police HUD 👮 → P4 sat / immigration |
-| **Tier-2** | Waste / pollution depth | **Live** — `WasteCollection` depots → pollution; `WasteCoverageFraction` / `MeanPollution` / `MeanEnvironmentScore` + Waste HUD 🗑️ → P4 sat / immigration |
+| **Tier-2** | Waste / pollution depth | **Live** — `WasteCollection` depots → pollution + landfill capacity / recycling diversion; `WasteCoverageFraction` / `MeanPollution` / `MeanEnvironmentScore` / `LandfillUtilizationFraction` / `RecyclingDiversionRate` / `LandfillOverflowRate` + Waste HUD 🗑️ → P4 sat / immigration |
 | **Tier-2** | Sewage / water contamination | **Live** — `SewageTreatment` plants → water quality; `SewageCoverageFraction` / `MeanWaterContamination` / `MeanWaterQuality` + Sewage HUD 💧 → P4 sat / immigration |
 | **Tier-2** | Manning / CSO storm overflow | **Live** — `StormOverflow` Manning capacity + rational runoff; `MeanPipeUtilization` / `CsoOverflowRate` / `StormRunoffLoad` + Sewage HUD `cso`/`util` |
 | **Tier-2** | Internet / telecom | **Live** — `TelecomNetwork` hubs → `InternetConnection`; T044/T045 fiber/5G tech gates; `InternetCoverageFraction` / `MeanInternetTier` / `MeanTelecomAccess` + Net HUD 📡 → P4 services sat / immigration |
@@ -274,17 +274,23 @@ Park + hospital coverage already write `HouseholdData.HealthSatisfaction` and `M
 {
   "wasteCoverageFraction": 0.48,
   "meanPollution": 0.22,
-  "meanEnvironmentScore": 0.78
+  "meanEnvironmentScore": 0.78,
+  "landfillUtilizationFraction": 0.42,
+  "recyclingDiversionRate": 0.35,
+  "landfillOverflowRate": 0.02
 }
 ```
 
 - Garbage depots (`ServiceGarbage`, `1 << 13`) publish coverage; **depot quality** (level × condition) scales abatement so better plants clear more waste at the same radius
-- Daily tick: uncovered R/C/O zones accumulate waste pollution; covered tiles abate
+- **Landfill capacity** — `MaxOccupants` (fallback `200 × level`) tracks fill via `Occupants`; utilization softens abatement above ~70% and near-full sites lose cleanup power
+- **Recycling diversion** — quality × mean level diverts 5–85% of collected waste from landfill (higher depots prolong lifespan)
+- **Overflow** — intake beyond remaining capacity dumps illegally (pollution spike on weak-coverage tiles) → `LandfillOverflowRate`
+- Daily tick: uncovered R/C/O zones accumulate waste pollution; covered tiles abate (scaled by capacity)
 - Monthly industrial pollution rewrite re-applies the waste window so coverage effects persist
 - Environment satisfaction + health progression already read tile pollution; immigration multiplies by environment attractiveness (**0.55–1.45**)
-- Unity ResourcesHud Waste line: `🗑️ {env%} · pol {pollution%} · {cov%}`
+- Unity ResourcesHud Waste line: `🗑️ {env%} · div {div%} · fill {util%}` (coverage + overflow in tooltip)
 
-`CathedralUtilitiesTests` + `PopulationSystemTests` pin quality→more abatement, depot tick→lower pollution, snapshot export, and pollution→satisfaction / immigration.
+`CathedralUtilitiesTests` + `PopulationSystemTests` pin quality→more abatement / diversion, full landfill→overflow pollution, snapshot export, and pollution→satisfaction / immigration.
 
 ### 4.16 Live (Tier-2 sewage / water contamination)
 
@@ -343,6 +349,6 @@ Park + hospital coverage already write `HouseholdData.HealthSatisfaction` and `M
 
 - Rewriting tile BFS grids — keep daily ServiceSystem path
 - Full insurance market / flood-risk premium coupling (fire rating mult is the v1 hook)
-- Garbage truck route logistics / landfill capacity lifespan / recycling diversion rates
+- Garbage truck route logistics / multi-depot transfer-station graphs (capacity + diversion are the thin landfill lifespan hooks)
 - Per-pipe graph routing / pump-station elevation lifts (Manning/CSO uses local slope + plant quality capacity)
 - Separated-sewer retrofit construction events (quality→combined fraction is the thin hook)

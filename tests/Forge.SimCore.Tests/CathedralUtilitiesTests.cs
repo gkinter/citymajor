@@ -1419,6 +1419,153 @@ public sealed class CathedralUtilitiesTests
     }
 
     [Fact]
+    public void WasteCollection_HigherQualityAndLevel_DivertMoreFromLandfill()
+    {
+        float low = WasteCollection.CalculateRecyclingDiversion(depotQuality: 0.3f, meanDepotLevel: 1f);
+        float high = WasteCollection.CalculateRecyclingDiversion(depotQuality: 1f, meanDepotLevel: 5f);
+        Assert.True(high > low,
+            $"better recycling should divert more (low={low:F3}, high={high:F3})");
+        Assert.InRange(low, 0.05f, 0.4f);
+        Assert.InRange(high, 0.5f, 0.85f);
+
+        Assert.Equal(1f, WasteCollection.CapacityAbatementScale(0.5f), precision: 3);
+        Assert.True(WasteCollection.CapacityAbatementScale(0.95f) <
+                    WasteCollection.CapacityAbatementScale(0.5f));
+        Assert.True(WasteCollection.CapacityAbatementScale(1.2f) <
+                    WasteCollection.CapacityAbatementScale(0.95f));
+
+        float fullCap = WasteCollection.PollutionDelta(
+            coverage: 0.9f, depotQuality: 1f, zoneType: 1, days: 1f, capacityScale: 1f);
+        float softCap = WasteCollection.PollutionDelta(
+            coverage: 0.9f, depotQuality: 1f, zoneType: 1, days: 1f, capacityScale: 0.15f);
+        Assert.True(softCap > fullCap,
+            $"full landfill should collect less (full={fullCap:F4}, soft={softCap:F4})");
+        Assert.True(softCap > 0f, "near-full landfill should net-accumulate waste on streets");
+    }
+
+    [Fact]
+    public void WasteTick_FullLandfill_OverflowsAndRaisesPollution()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 22, 22, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(22, 22)] = 1;
+        host.State.Tiles.Pollution[host.State.Tiles.Index(22, 22)] = 0.2f;
+        // Tiny capacity already full → any collected waste overflows.
+        PlaceBuilding(
+            host.State!, 22, 23,
+            serviceFlags: WasteCollection.ServiceGarbage,
+            level: 1,
+            maxOccupants: 2,
+            occupants: 2);
+
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        float pollutionBefore = host.State.Tiles.Pollution[host.State.Tiles.Index(22, 22)];
+
+        for (int i = 0; i < 8; i++)
+            WasteCollection.Tick(host.State, host.Services.WasteCoverage, days: 1f);
+
+        Assert.True(host.State.LandfillUtilizationFraction >= 0.99f);
+        Assert.True(host.State.RecyclingDiversionRate > 0.05f);
+        Assert.True(host.State.LandfillOverflowRate > 0f,
+            $"full landfill should overflow (rate={host.State.LandfillOverflowRate:F3})");
+        Assert.True(
+            host.State.Tiles.Pollution[host.State.Tiles.Index(22, 22)] > pollutionBefore,
+            "illegal dump from overflow should raise pollution");
+    }
+
+    [Fact]
+    public void WasteTick_RecyclingDiversion_SlowsLandfillFill()
+    {
+        var hostLow = new SimHost();
+        hostLow.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+        PlaceBuilding(hostLow.State!, 14, 14, serviceFlags: 0);
+        hostLow.State!.Tiles.ZoneType[hostLow.State.Tiles.Index(14, 14)] = 1;
+        int lowDepot = PlaceBuilding(
+            hostLow.State!, 14, 15,
+            serviceFlags: WasteCollection.ServiceGarbage,
+            level: 1,
+            maxOccupants: 100,
+            occupants: 0);
+        hostLow.State.Buildings.Condition[lowDepot] = 80;
+        hostLow.Services!.RebuildFromWorld(hostLow.State);
+
+        var hostHigh = new SimHost();
+        hostHigh.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+        PlaceBuilding(hostHigh.State!, 14, 14, serviceFlags: 0);
+        hostHigh.State!.Tiles.ZoneType[hostHigh.State.Tiles.Index(14, 14)] = 1;
+        int highDepot = PlaceBuilding(
+            hostHigh.State!, 14, 15,
+            serviceFlags: WasteCollection.ServiceGarbage,
+            level: 5,
+            maxOccupants: 100,
+            occupants: 0);
+        hostHigh.State.Buildings.Condition[highDepot] = 255;
+        hostHigh.Services!.RebuildFromWorld(hostHigh.State);
+
+        for (int i = 0; i < 60; i++)
+        {
+            WasteCollection.Tick(hostLow.State!, hostLow.Services!.WasteCoverage, days: 1f);
+            WasteCollection.Tick(hostHigh.State!, hostHigh.Services!.WasteCoverage, days: 1f);
+        }
+
+        Assert.True(hostHigh.State!.RecyclingDiversionRate > hostLow.State!.RecyclingDiversionRate);
+        Assert.True(
+            hostHigh.State.LandfillUtilizationFraction < hostLow.State.LandfillUtilizationFraction,
+            $"higher diversion should fill slower (high={hostHigh.State.LandfillUtilizationFraction:F3}, low={hostLow.State.LandfillUtilizationFraction:F3})");
+        Assert.True(hostLow.State.LandfillUtilizationFraction > 0f);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsLandfillCapacityFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 12, 12, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(12, 12)] = 1;
+        PlaceBuilding(
+            host.State!, 12, 13,
+            serviceFlags: WasteCollection.ServiceGarbage,
+            level: 3,
+            maxOccupants: 50,
+            occupants: 20);
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        host.Services.UpdateWasteCollection(host.State, days: 1f);
+
+        Assert.InRange(host.State.LandfillUtilizationFraction, 0f, 2f);
+        Assert.InRange(host.State.RecyclingDiversionRate, 0.05f, 0.85f);
+        Assert.InRange(host.State.LandfillOverflowRate, 0f, 1f);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("landfillUtilizationFraction", out var util));
+        Assert.True(doc.RootElement.TryGetProperty("recyclingDiversionRate", out var div));
+        Assert.True(doc.RootElement.TryGetProperty("landfillOverflowRate", out var overflow));
+        Assert.Equal(host.State.LandfillUtilizationFraction, util.GetSingle(), precision: 3);
+        Assert.Equal(host.State.RecyclingDiversionRate, div.GetSingle(), precision: 3);
+        Assert.Equal(host.State.LandfillOverflowRate, overflow.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.LandfillUtilizationFraction, dto.LandfillUtilizationFraction, precision: 3);
+        Assert.Equal(host.State.RecyclingDiversionRate, dto.RecyclingDiversionRate, precision: 3);
+        Assert.Equal(host.State.LandfillOverflowRate, dto.LandfillOverflowRate, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.LandfillUtilizationFraction, snap.LandfillUtilizationFraction, precision: 3);
+        Assert.Equal(host.State.RecyclingDiversionRate, snap.RecyclingDiversionRate, precision: 3);
+        Assert.Equal(host.State.LandfillOverflowRate, snap.LandfillOverflowRate, precision: 3);
+    }
+
+    [Fact]
     public void SewageTreatment_HigherQuality_TreatsMoreAtSameCoverage()
     {
         float lowQ = SewageTreatment.ContaminationDelta(

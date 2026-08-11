@@ -160,6 +160,15 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — mean environment score 0–1 ≈ (1 − pollution).</summary>
         public float MeanEnvironmentScore;
 
+        /// <summary>Tier-2 — city landfill fill / capacity 0–1+.</summary>
+        public float LandfillUtilizationFraction;
+
+        /// <summary>Tier-2 — recycling diversion rate 0–1.</summary>
+        public float RecyclingDiversionRate;
+
+        /// <summary>Tier-2 — landfill overflow / illegal-dump rate 0–1.</summary>
+        public float LandfillOverflowRate;
+
         /// <summary>Tier-2 — fraction of households with sewage coverage.</summary>
         public float SewageCoverageFraction;
 

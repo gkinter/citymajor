@@ -131,7 +131,7 @@ FIELD_EXPAND: dict[str, dict[str, list[str]]] = {
     "CommuteOdSample[]": {
         "E": [],
         "W": ["CommuteOdSample"],
-        "U": [],
+        "U": ["CommuteOdSample"],
     },
     "Car/Transit/WalkModeShare": {
         "E": [],

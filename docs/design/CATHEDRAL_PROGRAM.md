@@ -388,3 +388,4 @@ openspec/
 | 2026-08-11 | **BlackoutFraction / WaterShortageFraction WASM DTO** — rolling L0 utility shortages export + restore; `SnapshotRoundTrip_PreservesBlackoutAndWaterShortageFractions` |
 | 2026-08-11 | **CulturalDna[] WASM DTO** — politics flavor vector export + restore; `SnapshotRoundTrip_PreservesCulturalDna` |
 | 2026-08-11 | **TradeBalance / export-import WASM DTO** — TradeBalance + MonthlyExport/Import export + restore; `SnapshotRoundTrip_PreservesTradeBalance` |
+| 2026-08-11 | **Commute O-D Unity parity** — `CitySimState.CommuteOdSample[]` + Cathedral HUD top pairs; closes SIM_SNAPSHOT_V2 §6 Commute O-D gap |

@@ -126,7 +126,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | TileTraffic[] | ✅ dense | sparse `traffic[]` | — | Tiles | |
 | RoadGraph (+ volumes/times) | — | ✅ | — | RoadGraph + traffic lite | |
 | CommuterCoverage | — | ✅ | ✅ | PopulationSystem | |
-| CommuteOdSample[] | — | ✅ (limit 16) | — | PopulationSystem | |
+| CommuteOdSample[] | — | ✅ (limit 16) | ✅ (limit 16) | PopulationSystem | Unity Cathedral HUD top pairs |
 | Car/Transit/WalkModeShare | — | ✅ | ✅ | Traffic assignment args | |
 | TransitLineCount / BusCoverage | — | ✅ | — | WorldState | |
 | MeanCommuteMinutes / MeanCommuteSatisfaction | — | — | ✅ | Client-derived from HH / traffic | U3.5 |
@@ -219,6 +219,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | Binding | Source |
 |---------|--------|
 | `CitySimState.Households[]` | Population L2 sample (subset fields) |
+| `CitySimState.CommuteOdSample[]` | `SimHost.CollectCommuteOdSample` (same collector as WASM DTO, limit 16) |
 | `LatestFrictionCorridors` | Same `CollectFrictionCorridors` as WASM |
 | Law sample id/name/active | Law catalog preview for panel |
 | Mode-share + commute sat/minutes | Live traffic / population after tick |
@@ -229,9 +230,8 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 
 These are **documentation of tip reality**, not a backlog invent:
 
-1. **Commute O-D sample** — WASM array; Unity uses aggregated HUD scalars + Citizen L2, not the same array type on `CitySimState`.
-2. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
-3. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
+1. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
+2. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
 ---
 
 ## 7. Change protocol
@@ -259,3 +259,4 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **BlackoutFraction / WaterShortageFraction WASM DTO** — rolling L0 utility shortages export + restore (closes former §6 gap #1) |
 | 2026-08-11 | **CulturalDna[] WASM DTO** — politics flavor vector export + `ApplySnapshotDto` restore (closes former §6 gap #5) |
 | 2026-08-11 | **TradeBalance / export-import WASM DTO** — TradeBalance + MonthlyExportValue/ImportCost export + `ApplySnapshotDto` restore (closes former §6 gap #1) |
+| 2026-08-11 | **Commute O-D Unity parity** — `CitySimState.CommuteOdSample[]` via `SimHost.CollectCommuteOdSample`; Cathedral HUD top pairs (closes former §6 Commute O-D gap) |

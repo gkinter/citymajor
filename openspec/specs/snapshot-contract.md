@@ -21,6 +21,7 @@
 - **BlackoutFraction / WaterShortageFraction WASM save/load** — rolling L0 utility shortages on `SimSnapshotDto`; restored to WorldState + `UtilityPartitionBalance` after service rebuild.
 - **CulturalDna[] WASM save/load** — 8-float politics flavor vector on `SimSnapshotDto`; `ApplySnapshotDto` copies into `WorldState.CulturalDna` (−1…+1).
 - **TradeBalance / export-import WASM save/load** — `TradeBalance`, `MonthlyExportValue`, `MonthlyImportCost` on `SimSnapshotDto`; `ApplySnapshotDto` seeds WorldState + `TradeSystem.RestoreMonthlyTotals`.
+- **Commute O-D Unity parity** — `CitySimState.CommuteOdSample[]` bound from `SimHost.CollectCommuteOdSample` (same PopulationSystem collector as WASM DTO); Cathedral HUD shows top pairs.
 
 ## Target milestones
 

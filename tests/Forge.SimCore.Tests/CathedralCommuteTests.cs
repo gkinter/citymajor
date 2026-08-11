@@ -97,6 +97,38 @@ public sealed class CathedralCommuteTests
     }
 
     [Fact]
+    public void CollectCommuteOdSample_MatchesHomeAndWorkTiles()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        const int homeX = 10;
+        const int homeY = 10;
+        const int workX = 16;
+        const int workY = 10;
+
+        for (int x = 8; x <= 20; x++)
+            host.PlaceRoad(x, 9);
+
+        int homeId = PlaceTestBuilding(host, homeX, homeY, zone: 1, typeId: 101);
+        int workId = PlaceTestBuilding(host, workX, workY, zone: 3, typeId: 301);
+        AllocateWorkingCommuter(host, homeId, workId);
+        AllocateWorkingCommuter(host, homeId, workId);
+
+        var viaHost = host.CollectCommuteOdSample(limit: 16);
+        var viaPop = host.Population.CollectCommuteOdSample(host.State, limit: 16);
+
+        Assert.Single(viaHost);
+        Assert.Equal(viaPop.Length, viaHost.Length);
+        Assert.Equal(homeX, viaHost[0].HomeTileX);
+        Assert.Equal(homeY, viaHost[0].HomeTileZ);
+        Assert.Equal(workX, viaHost[0].WorkTileX);
+        Assert.Equal(workY, viaHost[0].WorkTileZ);
+        Assert.Equal(2, viaHost[0].TripCount);
+        Assert.Equal(viaPop[0].TripCount, viaHost[0].TripCount);
+    }
+
+    [Fact]
     public void ConnectedRoadPath_BeatsEuclideanFallbackWhenDetourIsShorter()
     {
         var host = new SimHost();

@@ -16,6 +16,18 @@ namespace CityMajor.Sim
     }
 
     /// <summary>
+    /// Aggregated home→work tile pair (mirrors WASM <c>CommuteOdSampleDto</c> / web Economy HUD).
+    /// </summary>
+    public struct CommuteOdSample
+    {
+        public int HomeTileX;
+        public int HomeTileZ;
+        public int WorkTileX;
+        public int WorkTileZ;
+        public int TripCount;
+    }
+
+    /// <summary>
     /// Lightweight sim snapshot for HUD + life layers. Published from Forge.SimCore via CitySimBridge.
     /// </summary>
     public struct CitySimState
@@ -102,6 +114,11 @@ namespace CityMajor.Sim
 
         /// <summary>Cathedral P4.2 / U3.5 — mean commute satisfaction (0–1).</summary>
         public float MeanCommuteSatisfaction;
+
+        /// <summary>
+        /// Cathedral P4.1 — top home→work tile pairs (limit 16), same sample as WASM DTO.
+        /// </summary>
+        public CommuteOdSample[] CommuteOdSample;
 
         /// <summary>Cathedral P3 — city-average Food price (0 if economy unavailable).</summary>
         public float FoodAvgPrice;

@@ -323,6 +323,17 @@ namespace CityMajor.Sim
             MeanCommuteMinutes = 14f,
             CommuterCoverage = 0.92f,
             MeanCommuteSatisfaction = 0.74f,
+            CommuteOdSample = new[]
+            {
+                new CommuteOdSample
+                {
+                    HomeTileX = 48, HomeTileZ = 52, WorkTileX = 72, WorkTileZ = 61, TripCount = 14,
+                },
+                new CommuteOdSample
+                {
+                    HomeTileX = 55, HomeTileZ = 40, WorkTileX = 80, WorkTileZ = 44, TripCount = 9,
+                },
+            },
             FoodAvgPrice = 1.0f,
             WaterAvgPrice = 0.8f,
             SteelAvgPrice = 2.4f,
@@ -359,6 +370,7 @@ namespace CityMajor.Sim
             var laws = _simHost.Laws;
             var (carShare, transitShare, walkShare) = _simHost.CollectModeShares();
             var (meanCommuteMin, commuterCoverage, meanCommuteSat) = _simHost.CollectCommuteHudMetrics();
+            var commuteOdSample = CopyCommuteOdSample(_simHost.CollectCommuteOdSample(limit: 16));
             var employment = snap.EmploymentRate;
             var unemployment = Mathf.Clamp01(1f - employment);
             var hasGoodsPrices = economy != null;
@@ -431,6 +443,7 @@ namespace CityMajor.Sim
                 MeanCommuteMinutes = meanCommuteMin,
                 CommuterCoverage = commuterCoverage,
                 MeanCommuteSatisfaction = meanCommuteSat,
+                CommuteOdSample = commuteOdSample,
                 FoodAvgPrice = foodPrice,
                 WaterAvgPrice = waterPrice,
                 SteelAvgPrice = steelPrice,
@@ -581,6 +594,29 @@ namespace CityMajor.Sim
                     HomeBuildingId = h.HomeBuildingId,
                     WorkBuildingId = h.WorkBuildingId,
                     RentBurden = h.RentBurden,
+                };
+            }
+
+            return dst;
+        }
+
+        static CommuteOdSample[] CopyCommuteOdSample(
+            Forge.Game.Simulation.PopulationSystem.CommuteOdSampleRow[] rows)
+        {
+            if (rows == null || rows.Length == 0)
+                return Array.Empty<CommuteOdSample>();
+
+            var dst = new CommuteOdSample[rows.Length];
+            for (var i = 0; i < rows.Length; i++)
+            {
+                var row = rows[i];
+                dst[i] = new CommuteOdSample
+                {
+                    HomeTileX = row.HomeTileX,
+                    HomeTileZ = row.HomeTileZ,
+                    WorkTileX = row.WorkTileX,
+                    WorkTileZ = row.WorkTileZ,
+                    TripCount = row.TripCount,
                 };
             }
 

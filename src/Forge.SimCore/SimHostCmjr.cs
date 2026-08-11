@@ -67,6 +67,17 @@ public sealed partial class SimHost
         return (meanMin, audit.Coverage, meanSat);
     }
 
+    /// <summary>
+    /// Cathedral P4.1 / Unity parity — top home→work tile O-D pairs (same collector as WASM DTO).
+    /// </summary>
+    public PopulationSystem.CommuteOdSampleRow[] CollectCommuteOdSample(int limit = 16)
+    {
+        if (!IsInitialized || _state is null || _population is null || limit <= 0)
+            return [];
+
+        return _population.CollectCommuteOdSample(_state, limit);
+    }
+
     /// <summary>Per-edge assignment export for snapshot/status (P1.6 / P4.2).</summary>
     public (float[] EdgeVolumes, float[] EdgeTravelTimes) GetTrafficEdgeExport() =>
         CollectTrafficEdgeExport();

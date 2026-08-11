@@ -213,6 +213,7 @@ namespace CityMajor.UI
             var od = Pct(state.CommuterCoverage);
             var commuteSat = Pct(state.MeanCommuteSatisfaction);
             var commuteMin = Mathf.Max(0f, state.MeanCommuteMinutes);
+            var odPairsLine = FormatCommuteOdSampleLine(state.CommuteOdSample);
             var friction = Mathf.Max(0f, state.MeanInterZoneFriction);
             var transport = Pct(state.GoodsTransportCostIndex);
             var delivery = Pct(state.MeanGoodsDeliveryDelay);
@@ -241,6 +242,7 @@ namespace CityMajor.UI
                 $"Abandoned    {abandoned}\n" +
                 $"Unemployment {unemployment}\n" +
                 $"Commute  {commuteMin:0}m · O-D {od} · Sat {commuteSat}\n" +
+                $"{odPairsLine}\n" +
                 $"Modes  Car {car} · Transit {transit} · Walk {walk}\n" +
                 $"Trade fric ×{friction:0.00} · Cost {transport} · Delivery {delivery}\n" +
                 $"Approval     {approval}\n" +
@@ -249,6 +251,27 @@ namespace CityMajor.UI
                 $"{marketsLine}\n" +
                 $"{eventLine}\n" +
                 eventMultLine;
+        }
+
+        /// <summary>
+        /// Compact top home→work tile pairs from <see cref="CitySimState.CommuteOdSample"/>
+        /// (parity with web Economy HUD top O-D list).
+        /// </summary>
+        internal static string FormatCommuteOdSampleLine(CommuteOdSample[] sample, int limit = 3)
+        {
+            if (sample == null || sample.Length == 0 || limit <= 0)
+                return "O-D pairs   —";
+
+            var n = Mathf.Min(limit, sample.Length);
+            var parts = new string[n];
+            for (var i = 0; i < n; i++)
+            {
+                var row = sample[i];
+                parts[i] =
+                    $"({row.HomeTileX},{row.HomeTileZ})→({row.WorkTileX},{row.WorkTileZ})×{Mathf.Max(0, row.TripCount)}";
+            }
+
+            return "O-D top     " + string.Join(" · ", parts);
         }
 
         /// <summary>

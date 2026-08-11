@@ -52,7 +52,7 @@ Use **CityMajor → Smoke → Open Play Scene**, then press **Play**.
 | `Space` | Pause sim |
 | `[` / `]` / Backslash | Sim speed 1× / 2× / 4× (keypad 1/2/4) |
 | `F1` | Help overlay |
-| Cathedral HUD (top-right) | Commute minutes · O-D coverage · commute sat |
+| Cathedral HUD (top-right) | Commute minutes · O-D coverage · commute sat · top O-D tile pairs |
 
 ---
 

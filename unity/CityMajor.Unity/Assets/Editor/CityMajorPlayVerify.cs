@@ -51,7 +51,7 @@ namespace CityMajor.Editor
                 "CLI: ./scripts/verify-unity-play-gate.sh. " +
                 "Cathedral P1–P4: RoadTypeToolbar Local/Collector/Highway + Bridge/Tunnel/Ramp → PlaceRoad; ZonePaintTool density; " +
                 "ZoningToolbar Office/Mixed/Ag/Park era gates; Med/High density era+tech gates; " +
-                "CitySimState MeanRentBurden / ResidentialVacancy / MeanCommuteMinutes · O-D · commute sat (F1 Help). " +
+                "CitySimState MeanRentBurden / ResidentialVacancy / MeanCommuteMinutes · O-D · commute sat · CommuteOdSample top pairs (F1 Help). " +
                 "Sim speed: [ ] \\ (not 5/6/7/8 — those are Office/Mixed/Ag/Park).");
         }
 

@@ -90,6 +90,10 @@ unity/**/*.csproj
 unity/**/*.sln
 # Accidental nested Unity project (Hub "My project") — keep local Library, never track
 unity/CityMajor.Unity/My project/
+# Steamworks.NET — install per machine via scripts/setup-steamworks-unity.sh (do not vendor)
+unity/CityMajor.Unity/Assets/Plugins/Steamworks.NET/
+# Steam player / SteamPipe local artifacts (repo-root Build/)
+/Build/Steam/
 *.pidb
 *.pdb
 *.mdb

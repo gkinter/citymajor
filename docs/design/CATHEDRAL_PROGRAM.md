@@ -248,7 +248,7 @@ flowchart TB
 
 | Milestone | Deliverable |
 |-----------|-------------|
-| **P7.1** | `SIM_SNAPSHOT_V2.md` — fields, cadence, ownership |
+| **P7.1** ✅ | `SIM_SNAPSHOT_V2.md` — fields, cadence, ownership ([`SIM_SNAPSHOT_V2.md`](./SIM_SNAPSHOT_V2.md), tip `8f57614`) |
 | **P7.2** ✅ | Per-pillar characterization tests — 0 Cathedral `Skip=` (`817e968` / SB-4986) |
 | **P7.3** | Unity Play menu verifies ([`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md)); optional WASM smoke as harness only |
 | **P7.4** | Gap matrix auto-regenerated in CI (script diffs spec vs exports) |
@@ -376,3 +376,4 @@ openspec/
 | 2026-08-11 | **P7.5 landed** — Unity Cathedral HUD binds Event*Mult; WASM `SimSnapshotDto` Event*Mult export |
 | 2026-08-11 | **P5.3 landed** — `FireResponse` hydrant coverage + spread; no-hydrant 2× response; ResourcesHud Fire line |
 | 2026-08-11 | **P5.4 landed** — `EmsSurvival` response→survival curve; `MeanEmsSurvivalRate` snapshot + ResourcesHud EMS % |
+| 2026-08-11 | **P7.1 landed** — [`SIM_SNAPSHOT_V2.md`](./SIM_SNAPSHOT_V2.md) field/cadence/ownership matrix for engine · WASM DTO · Unity `CitySimState` |

@@ -171,7 +171,9 @@ Toolbar `ENGINE_ZONE_TYPE` maps UI tools to `1`, `3`, `4` for residential, comme
 
 ## 6. `SimSnapshot` schema
 
-Canonical TypeScript definition: `web/lib/sim-bridge.ts`. C# mirror: `SimSnapshotDto` in `WasmSimHost.cs`. WASM emits **camelCase JSON** from `GetRenderSnapshot()`.
+**Cathedral field matrix (P7.1):** [`SIM_SNAPSHOT_V2.md`](./SIM_SNAPSHOT_V2.md) — engine `SimSnapshot`, WASM `SimSnapshotDto`, and Unity `CitySimState` ownership/cadence. Prefer that doc for Event*Mult, abandonment, fire/EMS, delivery delay, HH sample, and friction corridors.
+
+Canonical TypeScript definition: `web/lib/sim-bridge.ts` (may lag Cathedral fields — see SIM_SNAPSHOT_V2 §6). C# mirror: `SimSnapshotDto` in `src/Forge.SimWasm/SimSnapshotDto.cs`. WASM emits **camelCase JSON** from `GetRenderSnapshot()`.
 
 ### 6.1 `SimResources` (counters)
 
@@ -422,6 +424,7 @@ No-op bridge for tests — `init` resolves immediately, no worker, `getSnapshot(
 
 | Doc | Relevance |
 |-----|-----------|
+| [SIM_SNAPSHOT_V2](./SIM_SNAPSHOT_V2.md) | **P7.1** Cathedral field / cadence / ownership matrix |
 | [GAP_AUDIT_DESIGN_DOCS](./GAP_AUDIT_DESIGN_DOCS.md) | Identified missing bridge contract (fix #7) |
 | [DEPLOY_WEB.md](../DEPLOY_WEB.md) | `BUILD_WASM`, COOP/COEP deploy, fallback verification |
 | [BUILDING_ARCHETYPE_3D](./BUILDING_ARCHETYPE_3D.md) | `typeId` → mesh archetype keys |
@@ -438,3 +441,4 @@ No-op bridge for tests — `init` resolves immediately, no worker, `getSnapshot(
 | Date | Change |
 |------|--------|
 | 2026-07-04 | Initial contract doc (GAP_AUDIT #7) |
+| 2026-08-11 | Link **P7.1** [`SIM_SNAPSHOT_V2.md`](./SIM_SNAPSHOT_V2.md); note TS sketch may lag Cathedral DTO fields |

@@ -1,17 +1,20 @@
 # Snapshot Contract (OpenSpec domain spec)
 
-> **Status:** Stub — points to Tier 0 contract.  
+> **Status:** Active — Tier 0 contract documented.  
 > **Cathedral pillar:** P7 Client Truth Layer  
-> **Tier 0 sources:** [`WASM_SIM_BRIDGE.md`](../../docs/design/WASM_SIM_BRIDGE.md) · future `SIM_SNAPSHOT_V2.md`
+> **Canonical field matrix:** [`SIM_SNAPSHOT_V2.md`](../../docs/design/SIM_SNAPSHOT_V2.md)  
+> **Worker protocol:** [`WASM_SIM_BRIDGE.md`](../../docs/design/WASM_SIM_BRIDGE.md)
 
 ## Scope
 
-`SimSnapshot` / `SimSnapshotDto` field ownership, cadence, Unity vs web parity, characterization test hooks.
+`SimSnapshot` / `SimSnapshotDto` / `CitySimState` field ownership, cadence, Unity vs web parity, characterization test hooks.
 
 ## Implemented requirements
 
-*(Populated as OpenSpec changes archive into this file.)*
+- **P7.1** — `SIM_SNAPSHOT_V2.md` documents tip exports (`8f57614`): Event*Mult, AbandonedBuildingCount, fire/EMS, delivery delay, HH L2 sample, friction corridors, mode share, council seats, and known surface gaps.
+- **P7.2** — Cathedral characterization 0-skip gate.
+- **P7.5** — Unity Cathedral HUD Event*Mult + WASM DTO export.
 
 ## Target milestones
 
-P7.1–P7.4 per [`CATHEDRAL_PROGRAM.md`](../../docs/design/CATHEDRAL_PROGRAM.md) §4.
+P7.3–P7.4 per [`CATHEDRAL_PROGRAM.md`](../../docs/design/CATHEDRAL_PROGRAM.md) §4 (Play verify human gate; CI gap-matrix auto-diff).

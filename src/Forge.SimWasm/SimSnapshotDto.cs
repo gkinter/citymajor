@@ -16,7 +16,10 @@ public sealed class HouseholdPreviewDto
     /// <summary>Commute time in game minutes.</summary>
     public float CommuteMin { get; init; }
     public int HomeBuildingId { get; init; }
+    /// <summary>Workplace building id; 0 = unemployed / no job.</summary>
     public int WorkBuildingId { get; init; }
+    /// <summary>Rent / income ratio (0–1+). Cathedral P4.4.</summary>
+    public float RentBurden { get; init; }
 }
 
 /// <summary>Aggregated home→work tile pair for traffic debug export.</summary>
@@ -29,7 +32,7 @@ public sealed class CommuteOdSampleDto
     public int TripCount { get; init; }
 }
 
-/// <summary>Population L2 snapshot — top households sample for drill-down.</summary>
+/// <summary>Population L2 snapshot — top 50–100 households for drill-down + map pick (P4.4).</summary>
 public sealed class PopulationL2Dto
 {
     public HouseholdPreviewDto[] Households { get; init; } = [];
@@ -39,7 +42,9 @@ public sealed class PopulationL2Dto
         if (population is null || state.Households.Count == 0)
             return new PopulationL2Dto();
 
-        var rows = population.CollectHouseholdSample(state, limit: 50);
+        var rows = population.CollectHouseholdSample(
+            state,
+            limit: PopulationSystem.DefaultL2SampleLimit);
         if (rows.Length == 0)
             return new PopulationL2Dto();
 
@@ -47,7 +52,6 @@ public sealed class PopulationL2Dto
         for (int i = 0; i < rows.Length; i++)
         {
             var row = rows[i];
-            int hhIdx = int.Parse(row.Id.AsSpan(3));
             households[i] = new HouseholdPreviewDto
             {
                 Id = row.Id,
@@ -55,12 +59,9 @@ public sealed class PopulationL2Dto
                 TileZ = row.TileZ,
                 Happiness = row.Happiness,
                 CommuteMin = row.CommuteMin,
-                HomeBuildingId = hhIdx >= 0 && hhIdx < state.Households.Capacity
-                    ? state.Households.HomeBuildingId[hhIdx]
-                    : 0,
-                WorkBuildingId = hhIdx >= 0 && hhIdx < state.Households.Capacity
-                    ? state.Households.WorkBuildingId[hhIdx]
-                    : 0,
+                HomeBuildingId = row.HomeBuildingId,
+                WorkBuildingId = row.WorkBuildingId,
+                RentBurden = row.RentBurden,
             };
         }
 

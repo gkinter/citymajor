@@ -8,6 +8,11 @@ namespace CityMajor.Sim
         public int TileZ;
         public float Happiness;
         public float CommuteMin;
+        public int HomeBuildingId;
+        /// <summary>Workplace building id; 0 = unemployed.</summary>
+        public int WorkBuildingId;
+        /// <summary>Rent / income ratio (0–1+). Cathedral P4.4.</summary>
+        public float RentBurden;
     }
 
     /// <summary>

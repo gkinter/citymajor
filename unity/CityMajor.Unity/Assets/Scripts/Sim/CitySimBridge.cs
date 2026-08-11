@@ -550,6 +550,9 @@ namespace CityMajor.Sim
                     TileZ = h.TileZ,
                     Happiness = h.Happiness,
                     CommuteMin = h.CommuteMin,
+                    HomeBuildingId = h.HomeBuildingId,
+                    WorkBuildingId = h.WorkBuildingId,
+                    RentBurden = h.RentBurden,
                 };
             }
 

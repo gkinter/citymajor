@@ -11,6 +11,8 @@ import {
   aggregateStatsFromResources,
   formatCommuteMin,
   formatHappiness,
+  formatJob,
+  formatRentBurden,
   householdsFromResources,
   resolveSelectedHousehold,
   type HouseholdPreview,
@@ -245,9 +247,14 @@ export function CitizenPanel({
             </div>
             <div className="hud-citizen-list__meta">
               Home tile ({selectedHousehold.tileX}, {selectedHousehold.tileZ})
+              {selectedHousehold.homeBuildingId
+                ? ` · home #${selectedHousehold.homeBuildingId}`
+                : ""}
             </div>
             <div className="hud-citizen-list__meta">
-              Commute {formatCommuteMin(selectedHousehold.commuteMin)}
+              {formatJob(selectedHousehold)} · Commute{" "}
+              {formatCommuteMin(selectedHousehold.commuteMin)} · Rent{" "}
+              {formatRentBurden(selectedHousehold.rentBurden)}
             </div>
           </section>
         ) : selection?.tileX !== undefined && selection.tileZ !== undefined ? (

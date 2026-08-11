@@ -5,7 +5,9 @@ using UnityEngine;
 
 namespace CityMajor.Input
 {
-    /// <summary>Ray pick citizen dots when citizen panel is open (LMB).</summary>
+    /// <summary>
+    /// Ray pick citizen dots (LMB) → open citizen panel with job / commute / rent (P4.4).
+    /// </summary>
     public sealed class CitizenPickTool : MonoBehaviour
     {
         Camera _cam;

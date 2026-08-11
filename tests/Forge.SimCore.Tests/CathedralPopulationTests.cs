@@ -143,6 +143,114 @@ public sealed class CathedralPopulationTests
             "snapshot should include sample O-D pairs when commuters are assigned");
     }
 
+    [Fact]
+    public void CollectHouseholdSample_ScalesToOneHundredRows()
+    {
+        var state = new Forge.Engine.Simulation.WorldState(32, maxHouseholds: 160, maxBuildings: 32);
+        var pop = new Forge.Game.Simulation.PopulationSystem();
+
+        int homeId = state.Buildings.Allocate();
+        state.Buildings.GridX[homeId] = 8;
+        state.Buildings.GridY[homeId] = 8;
+        state.Buildings.TypeId[homeId] = 101;
+        state.Buildings.State[homeId] = 1;
+        state.Buildings.MaxOccupants[homeId] = 200;
+
+        int workId = state.Buildings.Allocate();
+        state.Buildings.GridX[workId] = 20;
+        state.Buildings.GridY[workId] = 20;
+        state.Buildings.TypeId[workId] = 301;
+        state.Buildings.State[workId] = 1;
+        state.Buildings.MaxOccupants[workId] = 200;
+
+        for (int i = 0; i < 120; i++)
+        {
+            int slot = state.Households.Allocate();
+            Assert.True(slot >= 0);
+            state.Households.MemberCount[slot] = 2;
+            state.Households.AgeGroup[slot] = 1;
+            state.Households.Education[slot] = 1;
+            state.Households.Income[slot] = 2000;
+            state.Households.Happiness[slot] = (byte)(40 + (i % 200));
+            state.Households.HomeBuildingId[slot] = (ushort)homeId;
+            state.Households.WorkBuildingId[slot] = (ushort)(i % 3 == 0 ? 0 : workId);
+            state.Households.Flags[slot] = 1;
+        }
+
+        state.Population = 240;
+        pop.RefreshHousingSnapshotMetrics(state);
+
+        var sample = pop.CollectHouseholdSample(state);
+        Assert.Equal(Forge.Game.Simulation.PopulationSystem.DefaultL2SampleLimit, sample.Length);
+        Assert.Equal(100, sample.Length);
+
+        // Sorted by happiness desc.
+        for (int i = 1; i < sample.Length; i++)
+            Assert.True(sample[i - 1].Happiness >= sample[i].Happiness);
+
+        Assert.Contains(sample, row => row.WorkBuildingId == workId);
+        Assert.Contains(sample, row => row.WorkBuildingId == 0);
+        Assert.All(sample, row =>
+        {
+            Assert.Equal(homeId, row.HomeBuildingId);
+            Assert.True(row.RentBurden >= 0f);
+            Assert.Equal(8, row.TileX);
+            Assert.Equal(8, row.TileZ);
+        });
+    }
+
+    [Fact]
+    public void PopulationL2_ExportIncludesJobCommuteAndRentBurden()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int homeX = 10;
+        int homeY = 11;
+        int workX = 30;
+        int workY = 31;
+
+        host.PaintZone(homeX, homeY, zoneType: 1);
+        host.PaintZone(workX, workY, zoneType: 3);
+        int homeId = PlaceTestBuilding(host, homeX, homeY, zone: 1, typeId: 101);
+        int workId = PlaceTestBuilding(host, workX, workY, zone: 3, typeId: 301);
+        Assert.True(homeId > 0);
+        Assert.True(workId > 0);
+
+        int slot = host.State.Households.Allocate();
+        host.State.Households.MemberCount[slot] = 3;
+        host.State.Households.AgeGroup[slot] = 1;
+        host.State.Households.Education[slot] = 1;
+        host.State.Households.Income[slot] = 1800;
+        host.State.Households.Happiness[slot] = 200;
+        host.State.Households.HomeBuildingId[slot] = (ushort)homeId;
+        host.State.Households.WorkBuildingId[slot] = (ushort)workId;
+        host.State.Households.Flags[slot] = 1;
+        host.State.Buildings.Occupants[homeId] = 1;
+        host.State.Buildings.Occupants[workId] = 1;
+        host.State.Population = 3;
+        host.Population.RefreshHousingSnapshotMetrics(host.State);
+
+        var l2 = host.GetPopulationL2();
+        var row = Assert.Single(l2.Households);
+        Assert.Equal($"HH-{slot:D5}", row.Id);
+        Assert.Equal(homeId, row.HomeBuildingId);
+        Assert.Equal(workId, row.WorkBuildingId);
+        Assert.Equal(homeX, row.TileX);
+        Assert.Equal(homeY, row.TileZ);
+        Assert.True(row.CommuteMin > 0f, $"expected positive commute, got {row.CommuteMin}");
+        Assert.True(row.RentBurden > 0f, $"expected positive rent burden, got {row.RentBurden}");
+
+        var json = host.GetSnapshotJson();
+        var dto = JsonSerializer.Deserialize(json, SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(dto);
+        var exported = Assert.Single(dto.PopulationL2.Households);
+        Assert.Equal(workId, exported.WorkBuildingId);
+        Assert.Equal(row.RentBurden, exported.RentBurden, precision: 4);
+        Assert.True(dto.PopulationL2.Households.Length <=
+            Forge.Game.Simulation.PopulationSystem.DefaultL2SampleLimit);
+    }
+
     private static int PlaceTestBuilding(SimHost host, int x, int y, byte zone, ushort typeId)
     {
         int id = host.State.Buildings.Allocate();

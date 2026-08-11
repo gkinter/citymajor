@@ -108,6 +108,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P3.6** | ✅ Done | Traffic → goods delivery lag + industrial throughput · Unity Delivery % |
 | **P4.1** | ✅ Done | Home/work building O-D for traffic lite — `99a6547` · O-D HUD `ccf7f22` |
 | **P4.2** | ✅ Done | Frank-Wolfe + graph commute → satisfaction — `76db8bf` / `f72dd3d` |
+| **P4.4** | ✅ Done | L2 export at scale (top 100 HH) + map pick — job / commute / rent burden |
 | **P4.5** | ✅ Done | Mode-choice stub (simple MNL) — `571352a` · mode-share HUD `370e944` |
 | **P5 stub** | ✅ Done | Politics foundation stub — approval characterization — `fb64bd9` |
 | **P5.1** | ✅ Done | Utilities L0 coverage export + characterization — `ae635b0` / SB-4987 |
@@ -214,7 +215,7 @@ flowchart TB
 | **P4.1** ✅ | Full home/work building IDs on all commuters (not gravity O-D); O-D HUD sample |
 | **P4.2** ✅ | Commute time from graph → satisfaction (FW + edge travel times) |
 | **P4.3** ✅ | Unemployment + job vacancy HUD (city-level export) — `e70ed78` / web `46a08e1` |
-| **P4.4** | L2 export at scale (top 50–100 HH) + pick on map |
+| **P4.4** ✅ | L2 export at scale (top 100 HH) + pick on map — job / commute / rent burden |
 | **P4.5** ✅ | Mode choice stub + mode-share HUD — `571352a` / `370e944` |
 
 ### P5 — Services & emergencies
@@ -365,3 +366,4 @@ openspec/
 | 2026-08-11 | **U3.4 landed** — Park zone byte 8 (T112) + density Med/High era+tech gates; `HasNearbyPark` reads painted park tiles |
 | 2026-08-11 | **P2.6 landed** — `AbandonedBuildingCount` on snapshot; decline formula characterization; Unity abandoned mesh tint + Cathedral `Abandoned N` |
 | 2026-08-11 | **P3.5 / PROGRAM P3.6 landed** — traffic delivery delay → `EffectiveTradeFriction` + industrial throughput; `MeanGoodsDeliveryDelay` + Unity Delivery % HUD |
+| 2026-08-11 | **P4.4 landed** — L2 sample scaled to top 100 HH with job / commute / rent burden; Unity map pick → Citizen panel drill-down |

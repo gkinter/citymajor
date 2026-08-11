@@ -9,6 +9,11 @@ export type HouseholdPreview = {
   happiness: number;
   /** Commute time in game minutes. */
   commuteMin: number;
+  homeBuildingId?: number;
+  /** Workplace building id; 0 / omitted = unemployed. */
+  workBuildingId?: number;
+  /** Rent / income ratio (0–1+). Cathedral P4.4. */
+  rentBurden?: number;
 };
 
 export type PopulationL2Snapshot = {
@@ -48,6 +53,11 @@ export function parsePopulationL2(raw: unknown): PopulationL2Snapshot | undefine
       tileZ: row.tileZ,
       happiness: typeof row.happiness === "number" ? row.happiness : 0,
       commuteMin: typeof row.commuteMin === "number" ? row.commuteMin : 0,
+      homeBuildingId:
+        typeof row.homeBuildingId === "number" ? row.homeBuildingId : undefined,
+      workBuildingId:
+        typeof row.workBuildingId === "number" ? row.workBuildingId : undefined,
+      rentBurden: typeof row.rentBurden === "number" ? row.rentBurden : undefined,
     });
   }
 
@@ -133,6 +143,16 @@ export function formatCommuteMin(value: number): string {
   if (value < 60) return `${value.toFixed(0)} min`;
   const hours = value / 60;
   return `${hours.toFixed(1)} hr`;
+}
+
+export function formatRentBurden(value: number | undefined): string {
+  if (value === undefined || !Number.isFinite(value)) return "—";
+  return `${Math.round(Math.max(0, value) * 100)}%`;
+}
+
+export function formatJob(household: HouseholdPreview): string {
+  const workId = household.workBuildingId ?? 0;
+  return workId > 0 ? `Job bldg #${workId}` : "Unemployed";
 }
 
 /**

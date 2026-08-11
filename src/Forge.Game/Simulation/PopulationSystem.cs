@@ -1703,10 +1703,13 @@ public sealed class PopulationSystem
     }
 
     // =========================================================================
-    // L2 export — top households for web CitizenPanel drill-down
+    // L2 export — top households for CitizenPanel drill-down + map pick (P4.4)
     // =========================================================================
 
-    /// <summary>Named household row for WASM populationL2 export.</summary>
+    /// <summary>Default L2 sample size — Cathedral P4.4 (top 50–100 HH).</summary>
+    public const int DefaultL2SampleLimit = 100;
+
+    /// <summary>Named household row for WASM / Unity populationL2 export.</summary>
     public readonly struct HouseholdSampleRow
     {
         public string Id { get; init; }
@@ -1716,15 +1719,22 @@ public sealed class PopulationSystem
         public float Happiness { get; init; }
         /// <summary>Commute time in game minutes.</summary>
         public float CommuteMin { get; init; }
+        public int HomeBuildingId { get; init; }
+        /// <summary>Workplace building id; 0 = unemployed / no job.</summary>
+        public int WorkBuildingId { get; init; }
+        /// <summary>Rent / income ratio (0–1+).</summary>
+        public float RentBurden { get; init; }
     }
 
     private const float TilesToCommuteMinutes = 3f;
 
     /// <summary>
     /// Collect up to <paramref name="limit"/> active households sorted by happiness (desc)
-    /// for the web CitizenPanel L2 list.
+    /// for CitizenPanel L2 list + map pick (job, commute, rent burden).
     /// </summary>
-    public HouseholdSampleRow[] CollectHouseholdSample(WorldState state, int limit = 50)
+    public HouseholdSampleRow[] CollectHouseholdSample(
+        WorldState state,
+        int limit = DefaultL2SampleLimit)
     {
         if (limit <= 0 || state.Households.Count == 0)
             return [];
@@ -1741,6 +1751,10 @@ public sealed class PopulationSystem
 
         candidates.Sort((a, b) => b.happiness.CompareTo(a.happiness));
 
+        float supplyFactor = CalculateSupplyFactor(state);
+        float goodsFactor = CalculateGoodsFactor(state);
+        float marketBaseRent = CalculateMarketBaseRent(state) * supplyFactor * goodsFactor;
+
         int count = Math.Min(limit, candidates.Count);
         var result = new HouseholdSampleRow[count];
         for (int j = 0; j < count; j++)
@@ -1756,12 +1770,17 @@ public sealed class PopulationSystem
                 tileZ = state.Buildings.GridY[homeId];
             }
 
+            ushort workId = hh.WorkBuildingId[idx];
             float commuteMin = 0f;
-            if (hh.AgeGroup[idx] != 2 && hh.WorkBuildingId[idx] != 0)
+            if (hh.AgeGroup[idx] != 2 && workId != 0)
             {
-                float distance = CalculateBuildingDistance(state, homeId, hh.WorkBuildingId[idx]);
+                float distance = CalculateBuildingDistance(state, homeId, workId);
                 commuteMin = distance * TilesToCommuteMinutes;
             }
+
+            float rentBurden = idx < _rentBurdenCapacity && _rentBurden.Length > idx && _rentBurden[idx] > 0f
+                ? _rentBurden[idx]
+                : CalculateHouseholdRentBurden(state, idx, supplyFactor, goodsFactor, marketBaseRent);
 
             result[j] = new HouseholdSampleRow
             {
@@ -1770,6 +1789,9 @@ public sealed class PopulationSystem
                 TileZ = tileZ,
                 Happiness = hh.Happiness[idx] / 255f,
                 CommuteMin = commuteMin,
+                HomeBuildingId = homeId,
+                WorkBuildingId = workId,
+                RentBurden = rentBurden,
             };
         }
 

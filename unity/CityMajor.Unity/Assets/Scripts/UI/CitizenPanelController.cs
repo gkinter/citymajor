@@ -146,7 +146,22 @@ namespace CityMajor.UI
                 var show = !string.IsNullOrEmpty(_selectedId);
                 _selected.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
                 if (show)
-                    _selected.text = $"Selected: {_selectedId}";
+                {
+                    HouseholdPreview? match = null;
+                    if (hasL2)
+                    {
+                        foreach (var h in households)
+                        {
+                            if (h.Id != _selectedId) continue;
+                            match = h;
+                            break;
+                        }
+                    }
+
+                    _selected.text = match.HasValue
+                        ? FormatSelected(match.Value)
+                        : $"Selected: {_selectedId}";
+                }
             }
         }
 
@@ -159,19 +174,29 @@ namespace CityMajor.UI
             _statsRoot.Add(row);
         }
 
+        static string FormatSelected(HouseholdPreview h)
+        {
+            var job = h.WorkBuildingId > 0 ? $"Job bldg #{h.WorkBuildingId}" : "Unemployed";
+            return
+                $"Selected: {h.Id}\n" +
+                $"Home bldg #{h.HomeBuildingId} · {job}\n" +
+                $"Commute {h.CommuteMin:F0}m · Rent burden {h.RentBurden * 100f:F0}% · " +
+                $"({h.TileX},{h.TileZ})";
+        }
+
         static string FormatRow(HouseholdPreview h)
         {
             var sb = new StringBuilder();
             sb.Append(h.Id);
             sb.Append(" · ");
             sb.Append((h.Happiness * 100f).ToString("F0"));
-            sb.Append("% · (");
-            sb.Append(h.TileX);
-            sb.Append(',');
-            sb.Append(h.TileZ);
-            sb.Append(") · ");
+            sb.Append("% · ");
+            sb.Append(h.WorkBuildingId > 0 ? $"job #{h.WorkBuildingId}" : "no job");
+            sb.Append(" · ");
             sb.Append(h.CommuteMin.ToString("F0"));
-            sb.Append("m commute");
+            sb.Append("m · rent ");
+            sb.Append((h.RentBurden * 100f).ToString("F0"));
+            sb.Append('%');
             return sb.ToString();
         }
     }

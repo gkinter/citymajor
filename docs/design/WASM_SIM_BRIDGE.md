@@ -54,7 +54,8 @@ Deploy and build implications (Docker `BUILD_WASM`, preview verification) live i
 | Worker | `web/workers/sim-worker.ts` |
 | Snapshot → R3F | `web/lib/city-data.ts` (`cityDataFromSnapshot`) |
 | Play integration | `web/components/city/CityCanvas.tsx` |
-| C# DTO | `src/Forge.SimWasm/WasmSimHost.cs` (`SimSnapshotDto`) |
+| C# DTO | `src/Forge.SimWasm/SimSnapshotDto.cs` |
+| TS DTO contract | `web/packages/sim-types/src/simSnapshot.ts` (`@citymajor/sim-types`) |
 | WASM build / demo | `web/wasm/README.md`, `web/public/dotnet/` |
 
 ---
@@ -171,55 +172,234 @@ Toolbar `ENGINE_ZONE_TYPE` maps UI tools to `1`, `3`, `4` for residential, comme
 
 ## 6. `SimSnapshot` schema
 
-**Cathedral field matrix (P7.1):** [`SIM_SNAPSHOT_V2.md`](./SIM_SNAPSHOT_V2.md) — engine `SimSnapshot`, WASM `SimSnapshotDto`, and Unity `CitySimState` ownership/cadence. Prefer that doc for Event*Mult, abandonment, fire/EMS, delivery delay, HH sample, and friction corridors.
+**Cathedral field matrix (P7.1):** [`SIM_SNAPSHOT_V2.md`](./SIM_SNAPSHOT_V2.md) — engine `SimSnapshot`, WASM `SimSnapshotDto`, and Unity `CitySimState` ownership/cadence.
 
-Canonical TypeScript definition: `web/lib/sim-bridge.ts` (may lag Cathedral fields — see SIM_SNAPSHOT_V2 §6). C# mirror: `SimSnapshotDto` in `src/Forge.SimWasm/SimSnapshotDto.cs`. WASM emits **camelCase JSON** from `GetRenderSnapshot()`.
+**Canonical TypeScript contract:** `@citymajor/sim-types` → `web/packages/sim-types/src/simSnapshot.ts` (mirrors tip `SimSnapshotDto.cs`). Archival harness types in `web/lib/sim-bridge.ts` extend the same camelCase JSON shape (optional fields for resource-merge / GetStatus extras). C# source of truth: `src/Forge.SimWasm/SimSnapshotDto.cs`. WASM emits **camelCase JSON** from `GetRenderSnapshot()`.
 
 ### 6.1 `SimResources` (counters)
+
+Resource-only merges and HUD consumers use a scalar subset of the DTO (plus optional GetStatus extras such as `eraProgress`, `researchRate`, `sampleLaw`). Core counters:
 
 ```typescript
 export type SimResources = {
   tick: number;
   population: number;
-  householdCount?: number;  // from GetStatus when not in render snapshot
+  householdCount?: number;
   cityFunds: number;
-  era: number;              // 0=Frontier … 4=Future (visual era band)
+  era: number; // 0=Frontier … 4=Future
+  residentialDemand?: number;
+  commercialDemand?: number;
+  industrialDemand?: number;
+  approval?: number; // percent 0–100
+  happiness?: number;
+  monthlyIncome?: number;
+  monthlyExpenses?: number;
+  tradeBalance?: number;
+  monthlyExportValue?: number;
+  monthlyImportCost?: number;
+  // … Event*Mult, Law*Mult, utilities, fire/EMS — see §6.2 / simSnapshot.ts
 };
 ```
 
-### 6.2 `SimSnapshot` (full render state)
+### 6.2 `SimSnapshotDto` (full render state — tip contract)
 
 ```typescript
-export type SimSnapshot = SimResources & {
-  buildings: BuildingSnapshot[];
-  zones?: ZoneSnapshot[];   // sparse: non-zero zoneType only
-  roads?: RoadSnapshot[];   // sparse: non-zero roadFlags only
+/** Mirrors Forge.SimWasm.SimSnapshotDto — @citymajor/sim-types */
+export type SimSnapshotDto = {
+  tick: number;
+  population: number;
+  householdCount: number;
+  cityFunds: number;
+  era: number;
+  residentialDemand: number;
+  commercialDemand: number;
+  industrialDemand: number;
+  approval: number; // percent 0–100
+  happiness: number;
+  monthlyIncome: number;
+  monthlyExpenses: number;
+  tradeBalance: number;
+  monthlyExportValue: number;
+  monthlyImportCost: number;
+
+  buildings: BuildingDto[];
+  zones: ZoneDto[];
+  roads: RoadDto[];
+  roadGraph: RoadGraphSnapshotDto;
+  traffic: TrafficDto[];
+  serviceCoverage: ServiceCoverageDto[];
+  frictionCorridors: FrictionCorridorDto[];
+  activeEvents: ActiveEventDto[];
+  activeEventCount: number;
+
+  activeLawIds: string[];
+  activeOrdinances: number; // ulong bitfield
+  nextElectionYear: number;
+  lawTrafficCapacityMult: number;
+  lawConstructionSpeedMult: number;
+  lawSpawnDemandMult: number;
+  lawResidentialSpawnMult: number;
+  lawIndustrialSpawnMult: number;
+  lawCommercialSpawnMult: number;
+
+  eventTaxRevenueMult: number;
+  eventImmigrationMult: number;
+  eventCommercialSpawnMult: number;
+  eventProductivityMult: number;
+  eventResearchMult: number;
+  eventSpawnDemandMult: number;
+
+  economy: EconomySnapshotDto;
+  populationL2: PopulationL2Dto;
+
+  researchPoints: number;
+  currentResearchId: number;
+  currentResearchProgress: number;
+  unlockedTechIds: number[];
+  researchQueue: number[];
+  queueProgress: number[];
+  eurekaBonuses: Record<string, number>;
+  branchingChoices: Record<string, number>;
+
+  constructingBuildingCount: number;
+  abandonedBuildingCount: number;
+  employmentRate: number;
+  meanTrafficDensity: number;
+
+  powerCoverageFraction: number;
+  waterCoverageFraction: number;
+  blackoutFraction: number;
+  waterShortageFraction: number;
+  utilityStressIndex: number;
+
+  goodsShortageIndex: number;
+  goodsSurplusIndex: number;
+  interZoneTradeVolume: number;
+  meanInterZoneFriction: number;
+  goodsTransportCostIndex: number;
+  meanGoodsDeliveryDelay: number;
+
+  meanRentBurden: number;
+  residentialVacancy: number;
+
+  meanEmergencyResponseMinutes: number;
+  hydrantCoverageFraction: number;
+  activeFireCount: number;
+  meanEmsSurvivalRate: number;
+  hospitalBedOccupancyFraction: number;
+  availableHospitalBeds: number;
+  wildfireRiskIndex: number;
+  activeWildfireTileCount: number;
+  arsonRiskIndex: number;
+  arsonRingActive: boolean;
+  lookoutTowerCount: number;
+  aerialFirefightingAvailable: boolean;
+  fireSafetyRating: number; // 1–10
+  fireInsurancePremiumMult: number;
+
+  marketZoneCount: number;
+  commuterCoverage: number;
+  commuteOdSample: CommuteOdSampleDto[];
+  councilSeats: number[]; // length 9
+  culturalDna: number[]; // length 8, −1…+1
+
+  carModeShare: number;
+  transitModeShare: number;
+  walkModeShare: number;
+  transitLineCount: number;
+  busCoverage: number;
 };
 ```
+
+Harness `SimSnapshot` in `sim-bridge.ts` is `SimResources & { buildings; zones?; roads?; roadGraph?; traffic?; serviceCoverage?; frictionCorridors? }` — same wire JSON, optional geometry for resource-only merges.
 
 ### 6.3 Nested types
 
 ```typescript
-export type BuildingSnapshot = {
-  id: number;           // building pool slot
-  typeId: number;       // ushort — see BUILDING_ARCHETYPE_3D.md
+export type BuildingDto = {
+  id: number; // building pool slot
+  typeId: number; // ushort — see BUILDING_ARCHETYPE_3D.md
   tileX: number;
-  tileZ: number;        // grid Y → world Z
-  level: number;        // upgrade / density tier
-  state: number;        // 0=constructing, 1=operational, 2=abandoned, 3=demolishing
-  condition: number;    // 0–255
+  tileZ: number; // grid Y → world Z
+  level: number;
+  state: number; // 0=constructing, 1=operational, 2=abandoned, 3=demolishing
+  condition: number; // 0–255
+  fireRisk?: number; // P5.3 burning intensity
+  serviceFlags?: number; // P5 service bitmask
 };
 
-export type ZoneSnapshot = {
+export type ZoneDto = {
   tileX: number;
   tileZ: number;
   zoneType: number;
 };
 
-export type RoadSnapshot = {
+export type RoadDto = {
   tileX: number;
   tileZ: number;
-  roadFlags: number;    // v1 worker sets 1 for placed roads
+  roadFlags: number;
+};
+
+export type RoadGraphSnapshotDto = {
+  nodeCount: number;
+  nodeTypes: number[];
+  nodeTileX: number[];
+  nodeTileZ: number[];
+  edgeCount: number;
+  edgeFrom: number[];
+  edgeTo: number[];
+  edgeVolumes: number[];
+  travelTimes: number[];
+};
+
+export type TrafficDto = {
+  tileX: number;
+  tileZ: number;
+  density: number; // ≥ 0.01 exported
+};
+
+export type ServiceCoverageDto = {
+  tileX: number;
+  tileZ: number;
+  health: number;
+  police: number;
+  fire: number;
+  education: number;
+};
+
+export type FrictionCorridorDto = {
+  tileX: number;
+  tileZ: number;
+  friction: number; // 0–1
+};
+
+export type ActiveEventDto = {
+  eventId: number;
+  typeId: string;
+  phase: string;
+  severity: number;
+  tileX: number;
+  tileY: number;
+};
+
+export type EconomySnapshotDto = {
+  shortages: GoodImbalanceDto[];
+  surpluses: GoodImbalanceDto[];
+  flows: GoodFlowDto[];
+  marketZoneCount: number;
+  marketZonePrices: MarketZonePriceDto[];
+};
+
+export type PopulationL2Dto = {
+  households: HouseholdPreviewDto[]; // ≤100
+};
+
+export type CommuteOdSampleDto = {
+  homeTileX: number;
+  homeTileZ: number;
+  workTileX: number;
+  workTileZ: number;
+  tripCount: number;
 };
 ```
 
@@ -229,8 +409,25 @@ export type RoadSnapshot = {
 {
   "tick": 1000,
   "population": 842,
+  "householdCount": 128,
   "cityFunds": 51200,
   "era": 0,
+  "approval": 62.5,
+  "tradeBalance": 4200,
+  "monthlyExportValue": 8000,
+  "monthlyImportCost": 3800,
+  "activeLawIds": ["zoning_reform"],
+  "lawSpawnDemandMult": 1.05,
+  "eventTaxRevenueMult": 0.95,
+  "blackoutFraction": 0,
+  "waterShortageFraction": 0,
+  "abandonedBuildingCount": 0,
+  "activeFireCount": 0,
+  "wildfireRiskIndex": 0.12,
+  "fireSafetyRating": 5,
+  "fireInsurancePremiumMult": 1,
+  "culturalDna": [0, 0, 0, 0, 0, 0, 0, 0],
+  "councilSeats": [0, 0, 0, 0, 0, 0, 0, 0, 0],
   "buildings": [
     {
       "id": 3,
@@ -239,7 +436,9 @@ export type RoadSnapshot = {
       "tileZ": 31,
       "level": 2,
       "state": 1,
-      "condition": 100
+      "condition": 100,
+      "fireRisk": 0,
+      "serviceFlags": 0
     }
   ],
   "zones": [
@@ -293,7 +492,7 @@ When WASM zone/road arrays are empty or lag behind UI paint, the worker maintain
 
 ### 6.8 Planned extensions
 
-[GAMEPLAY_LOOP_IMPROVEMENTS](./GAMEPLAY_LOOP_IMPROVEMENTS.md) proposes adding `rci`, `approval`, `happiness`, budget deltas, `activeEvents`, and `eraProgress` to `SimSnapshot`. **Do not add fields without updating both `sim-bridge.ts` and `SimSnapshotDto`.**
+[GAMEPLAY_LOOP_IMPROVEMENTS](./GAMEPLAY_LOOP_IMPROVEMENTS.md) proposes adding further HUD-facing fields. **Do not add fields without updating `SimSnapshotDto.cs`, `@citymajor/sim-types` `simSnapshot.ts`, and [`SIM_SNAPSHOT_V2.md`](./SIM_SNAPSHOT_V2.md).** Web harness remains archival — prefer Unity `CitySimState` for product UI.
 
 ---
 
@@ -442,3 +641,4 @@ No-op bridge for tests — `init` resolves immediately, no worker, `getSnapshot(
 |------|--------|
 | 2026-07-04 | Initial contract doc (GAP_AUDIT #7) |
 | 2026-08-11 | Link **P7.1** [`SIM_SNAPSHOT_V2.md`](./SIM_SNAPSHOT_V2.md); note TS sketch may lag Cathedral DTO fields |
+| 2026-08-11 | Refresh §6 TypeScript sketch + `@citymajor/sim-types` `simSnapshot.ts` to tip `SimSnapshotDto` (Event*Mult, Law*Mult, ActiveLawIds, ordinances, utilities, CulturalDna, TradeBalance, fire/wildfire/hospital) — closes SIM_SNAPSHOT_V2 §6 #1 |

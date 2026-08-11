@@ -142,6 +142,10 @@ export type BuildingSnapshot = {
   level: number;
   state: number;
   condition: number;
+  /** Burning intensity (0 = not on fire). Cathedral P5.3. */
+  fireRisk?: number;
+  /** Service bitmask (hydrants, stations, utilities). Cathedral P5. */
+  serviceFlags?: number;
 };
 
 /** RCI demand from EconomySystem — normalized -1 (surplus) to +1 (shortage). */
@@ -286,6 +290,26 @@ export type SimResources = {
   lawDefinitionCount?: number;
   /** WASM GetStatus — ordinances currently in effect. */
   activeLawCount?: number;
+  /** WASM — laws.json slug ids currently enabled (SimSnapshotDto.ActiveLawIds). */
+  activeLawIds?: string[];
+  /** WASM — WorldState ordinance bitfield (politics path). */
+  activeOrdinances?: number;
+  /** WASM — next mayoral election calendar year. */
+  nextElectionYear?: number;
+  /** WASM — Law*Mult scalars from active ordinances (P6.1). */
+  lawTrafficCapacityMult?: number;
+  lawConstructionSpeedMult?: number;
+  lawSpawnDemandMult?: number;
+  lawResidentialSpawnMult?: number;
+  lawIndustrialSpawnMult?: number;
+  lawCommercialSpawnMult?: number;
+  /** WASM — Event*Mult scalars from active events (P6.2). */
+  eventTaxRevenueMult?: number;
+  eventImmigrationMult?: number;
+  eventCommercialSpawnMult?: number;
+  eventProductivityMult?: number;
+  eventResearchMult?: number;
+  eventSpawnDemandMult?: number;
   /** WASM GetStatus — first catalog entry for sample HUD toggle (v1.5 stub). */
   sampleLaw?: LawPreview;
   /** WASM — share of working-age households with a workplace (0–1). */
@@ -294,10 +318,16 @@ export type SimResources = {
   meanTrafficDensity?: number;
   /** WASM — buildings currently in constructing state. */
   constructingBuildingCount?: number;
+  /** WASM — buildings currently abandoned (P2.6). */
+  abandonedBuildingCount?: number;
   /** WASM — fraction of partitions with power supply ≥ demand (0–1). */
   powerCoverageFraction?: number;
   /** WASM — fraction of partitions with water supply ≥ demand (0–1). */
   waterCoverageFraction?: number;
+  /** WASM — rolling fraction of partitions in power deficit (0–1). */
+  blackoutFraction?: number;
+  /** WASM — rolling fraction of partitions in water deficit (0–1). */
+  waterShortageFraction?: number;
   /** WASM — composite utility stress (0 = healthy, 1 = severe shortage). */
   utilityStressIndex?: number;
   /** WASM — city-wide goods shortage pressure (0–1). */
@@ -310,6 +340,8 @@ export type SimResources = {
   meanInterZoneFriction?: number;
   /** WASM — composite 0–1 goods transport cost (friction + congestion). */
   goodsTransportCostIndex?: number;
+  /** WASM — mean goods delivery delay (0 free-flow … 1 congested). P3.5. */
+  meanGoodsDeliveryDelay?: number;
   /** WASM — active Leontief market partitions (1–16). */
   marketZoneCount?: number;
   /** WASM — mean household rent burden (rent / income, 0–1+). */
@@ -318,16 +350,50 @@ export type SimResources = {
   residentialVacancy?: number;
   /** WASM — mean fire/EMS response minutes over sampled zoned tiles (P5.2). */
   meanEmergencyResponseMinutes?: number;
+  /** WASM — fraction of sampled zoned buildings with hydrant coverage (P5.3). */
+  hydrantCoverageFraction?: number;
+  /** WASM — buildings currently burning (P5.3). */
+  activeFireCount?: number;
+  /** WASM — mean EMS survival rate 0–1 (P5.4). */
+  meanEmsSurvivalRate?: number;
+  /** WASM — hospital bed occupancy 0–1 (Tier-2). */
+  hospitalBedOccupancyFraction?: number;
+  /** WASM — free hospital beds city-wide (Tier-2). */
+  availableHospitalBeds?: number;
+  /** WASM — drought / wildfire risk 0–1 (Tier-2). */
+  wildfireRiskIndex?: number;
+  /** WASM — forest / park / ag tiles currently burning (Tier-2). */
+  activeWildfireTileCount?: number;
+  /** WASM — mean arson risk from crime excess 0–1 (Tier-2). */
+  arsonRiskIndex?: number;
+  /** WASM — high-crime building-fire cluster (Tier-2). */
+  arsonRingActive?: boolean;
+  /** WASM — active lookout towers (Tier-2). */
+  lookoutTowerCount?: number;
+  /** WASM — aerial firefighting / water-bomber base available (Tier-2). */
+  aerialFirefightingAvailable?: boolean;
+  /** WASM — city fire safety rating 1–10 (Tier-2). */
+  fireSafetyRating?: number;
+  /** WASM — insurance premium mult from fire safety rating (Tier-2). */
+  fireInsurancePremiumMult?: number;
   /** WASM — share of working commuters with valid home + work building IDs (0–1). */
   commuterCoverage?: number;
   /** WASM — top home→work tile pairs aggregated from household assignments. */
   commuteOdSample?: CommuteOdSample[];
+  /** WASM — faction id per council seat (length 9). */
+  councilSeats?: number[];
+  /** WASM — politics flavor vector (−1…+1, length 8). */
+  culturalDna?: number[];
   /** WASM — city-wide car mode share from WasmTrafficLite (0–1). */
   carModeShare?: number;
   /** WASM — city-wide transit mode share from WasmTrafficLite (0–1). */
   transitModeShare?: number;
   /** WASM — city-wide walk mode share from WasmTrafficLite (0–1). */
   walkModeShare?: number;
+  /** WASM — transit route count. */
+  transitLineCount?: number;
+  /** WASM — bus/transit coverage proxy (0–1). */
+  busCoverage?: number;
 };
 
 export type LawPreview = {

@@ -238,7 +238,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 
 These are **documentation of tip reality**, not a backlog invent:
 
-1. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
+1. ~~**WASM_SIM_BRIDGE §6** TypeScript sketch stale~~ — **closed:** `@citymajor/sim-types` `simSnapshot.ts` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts` fields match tip `SimSnapshotDto` (Event*Mult, Law*Mult, ActiveLawIds, ordinances, utilities, CulturalDna, TradeBalance, fire/wildfire/hospital).
 2. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
 ---
 
@@ -270,3 +270,4 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **Commute O-D Unity parity** — `CitySimState.CommuteOdSample[]` via `SimHost.CollectCommuteOdSample`; Cathedral HUD top pairs (closes former §6 Commute O-D gap) |
 | 2026-08-11 | **Tier-2 wildfire / arson rings** — `WildfireRiskIndex` / `ActiveWildfireTileCount` / `ArsonRiskIndex` / `ArsonRingActive` on E+W+U |
 | 2026-08-11 | **Tier-2 aerial / lookout / fire rating** — `LookoutTowerCount` / `AerialFirefightingAvailable` / `FireSafetyRating` / `FireInsurancePremiumMult` on E+W+U |
+| 2026-08-11 | **WASM_SIM_BRIDGE / sim-types TS refresh** — `@citymajor/sim-types` `simSnapshot.ts` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts` match tip DTO (closes former §6 gap #1) |

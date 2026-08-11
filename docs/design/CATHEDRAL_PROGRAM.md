@@ -395,3 +395,4 @@ openspec/
 | 2026-08-11 | **Commute O-D Unity parity** — `CitySimState.CommuteOdSample[]` + Cathedral HUD top pairs; closes SIM_SNAPSHOT_V2 §6 Commute O-D gap |
 | 2026-08-11 | **Tier-2 wildfire / arson rings** — `WildfireArson` drought fuel spread + firebreaks + high-crime arson / ring flag; snapshot + ResourcesHud Fire 🌲/🕵️ |
 | 2026-08-11 | **Tier-2 aerial / lookout / fire rating** — lookout spark cut + aerial suppress + `FireSafetyRating` / insurance premium; snapshot + Fire HUD 🔭/✈️/⭐ |
+| 2026-08-11 | **WASM_SIM_BRIDGE / sim-types TS refresh** — tip `SimSnapshotDto` contract in `@citymajor/sim-types` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts`; closes SIM_SNAPSHOT_V2 §6 #1 |

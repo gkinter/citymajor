@@ -22,6 +22,7 @@
 - **CulturalDna[] WASM save/load** — 8-float politics flavor vector on `SimSnapshotDto`; `ApplySnapshotDto` copies into `WorldState.CulturalDna` (−1…+1).
 - **TradeBalance / export-import WASM save/load** — `TradeBalance`, `MonthlyExportValue`, `MonthlyImportCost` on `SimSnapshotDto`; `ApplySnapshotDto` seeds WorldState + `TradeSystem.RestoreMonthlyTotals`.
 - **Commute O-D Unity parity** — `CitySimState.CommuteOdSample[]` bound from `SimHost.CollectCommuteOdSample` (same PopulationSystem collector as WASM DTO); Cathedral HUD shows top pairs.
+- **WASM_SIM_BRIDGE / sim-types TS contract** — `@citymajor/sim-types` `simSnapshot.ts` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts` match tip `SimSnapshotDto` (closes SIM_SNAPSHOT_V2 §6 #1).
 
 ## Target milestones
 

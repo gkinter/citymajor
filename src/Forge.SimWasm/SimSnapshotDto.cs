@@ -95,6 +95,18 @@ public sealed class SimSnapshotDto
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
     /// <summary>Count of live EventSystem instances — Herald HUD badge (Cathedral P6).</summary>
     public int ActiveEventCount { get; init; }
+    /// <summary>Cathedral P6.2 — tax revenue multiplier from active events.</summary>
+    public float EventTaxRevenueMult { get; init; } = 1f;
+    /// <summary>Cathedral P6.2 — immigration multiplier from active events.</summary>
+    public float EventImmigrationMult { get; init; } = 1f;
+    /// <summary>Cathedral P6.2 — commercial spawn multiplier from active events.</summary>
+    public float EventCommercialSpawnMult { get; init; } = 1f;
+    /// <summary>Cathedral P6.2 — productivity / industrial spawn multiplier from active events.</summary>
+    public float EventProductivityMult { get; init; } = 1f;
+    /// <summary>Cathedral P6.2 — research rate multiplier from active events.</summary>
+    public float EventResearchMult { get; init; } = 1f;
+    /// <summary>Cathedral P6.2 — baseline spawn demand multiplier from active events.</summary>
+    public float EventSpawnDemandMult { get; init; } = 1f;
     /// <summary>Leontief goods shortages/surpluses for economy HUD.</summary>
     public EconomySnapshotDto Economy { get; init; } = new();
     /// <summary>Top households sample for CitizenPanel L2 drill-down.</summary>
@@ -196,6 +208,12 @@ public sealed class SimSnapshotDto
             FrictionCorridors = frictionCorridors,
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
             ActiveEventCount = events?.ActiveEventCount ?? 0,
+            EventTaxRevenueMult = state.EventTaxRevenueMult,
+            EventImmigrationMult = state.EventImmigrationMult,
+            EventCommercialSpawnMult = state.EventCommercialSpawnMult,
+            EventProductivityMult = state.EventProductivityMult,
+            EventResearchMult = state.EventResearchMult,
+            EventSpawnDemandMult = state.EventSpawnDemandMult,
             Economy = EconomySnapshotDto.From(economy),
             PopulationL2 = PopulationL2Dto.From(state, population),
             ResearchPoints = state.ResearchPoints,

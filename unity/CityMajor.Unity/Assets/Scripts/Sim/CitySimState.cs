@@ -140,5 +140,23 @@ namespace CityMajor.Sim
 
         /// <summary>Cathedral P6 — live EventSystem count for Herald / ticker.</summary>
         public int ActiveEventCount;
+
+        /// <summary>Cathedral P6.2 / P7.5 — tax revenue multiplier from active events.</summary>
+        public float EventTaxRevenueMult;
+
+        /// <summary>Cathedral P6.2 / P7.5 — immigration multiplier from active events.</summary>
+        public float EventImmigrationMult;
+
+        /// <summary>Cathedral P6.2 / P7.5 — commercial spawn multiplier from active events.</summary>
+        public float EventCommercialSpawnMult;
+
+        /// <summary>Cathedral P6.2 / P7.5 — productivity / industrial spawn multiplier from active events.</summary>
+        public float EventProductivityMult;
+
+        /// <summary>Cathedral P6.2 / P7.5 — research rate multiplier from active events.</summary>
+        public float EventResearchMult;
+
+        /// <summary>Cathedral P6.2 / P7.5 — baseline spawn demand multiplier from active events.</summary>
+        public float EventSpawnDemandMult;
     }
 }

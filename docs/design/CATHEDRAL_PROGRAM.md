@@ -113,7 +113,8 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P5 stub** | ✅ Done | Politics foundation stub — approval characterization — `fb64bd9` |
 | **P5.1** | ✅ Done | Utilities L0 coverage export + characterization — `ae635b0` / SB-4987 |
 | **P5.2** | ✅ Done | Emergency response time (graph + BPR) — `06977a9` / SB-4242 |
-| **P5.5** / **P5.6** | ✅ Done | Herald approval predicates `0452f88` · council seats export `ae15498` |
+| **P6.1**–**P6.3** / **P5.6** | ✅ Done | Law spawn mults · Event*Mult bridge · Herald predicates · council seats |
+| **P7.5** | ✅ Done | Unity Cathedral HUD Event*Mult + WASM DTO export (Sprint 3 parity close) |
 | **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` · mode share `370e944` · unemployment HUD `e70ed78` |
 | **P7.2** | ✅ Done | 0 Cathedral `Skip=` gate — `817e968` / SB-4986 · isolation `49edba1` / `b4be623` |
 | **Harness polish** | ✅ Done | Smoke wait WASM `0ecc0ba` · E-key economy toggle `5205201` · perf median gate `6c1f077` |
@@ -248,7 +249,7 @@ flowchart TB
 | **P7.2** ✅ | Per-pillar characterization tests — 0 Cathedral `Skip=` (`817e968` / SB-4986) |
 | **P7.3** | Unity Play menu verifies ([`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md)); optional WASM smoke as harness only |
 | **P7.4** | Gap matrix auto-regenerated in CI (script diffs spec vs exports) |
-| **P7.5** | Unity HUD/tools parity for Cathedral snapshot fields (Sprint 3 — [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md)) |
+| **P7.5** ✅ | Unity HUD/tools parity for Cathedral snapshot fields — Event*Mult on Cathedral HUD + WASM DTO (Sprint 3 — [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md)) |
 
 ---
 
@@ -367,3 +368,6 @@ openspec/
 | 2026-08-11 | **P2.6 landed** — `AbandonedBuildingCount` on snapshot; decline formula characterization; Unity abandoned mesh tint + Cathedral `Abandoned N` |
 | 2026-08-11 | **P3.5 / PROGRAM P3.6 landed** — traffic delivery delay → `EffectiveTradeFriction` + industrial throughput; `MeanGoodsDeliveryDelay` + Unity Delivery % HUD |
 | 2026-08-11 | **P4.4 landed** — L2 sample scaled to top 100 HH with job / commute / rent burden; Unity map pick → Citizen panel drill-down |
+| 2026-08-11 | **P6.1 landed** — law→spawn R/C/I mults + Law panel; `LawEffectsTests` |
+| 2026-08-11 | **P6.2 landed** — `ApplyEventEffectsToState` city-wide Event*Mult + Herald snake_case; `EventEffectsTests` |
+| 2026-08-11 | **P7.5 landed** — Unity Cathedral HUD binds Event*Mult; WASM `SimSnapshotDto` Event*Mult export |

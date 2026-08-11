@@ -1,6 +1,7 @@
 using Forge.Engine.Simulation;
 using Forge.Game.Simulation;
 using Forge.SimCore;
+using Forge.SimWasm;
 using Xunit;
 
 namespace Forge.SimCore.Tests;
@@ -167,6 +168,15 @@ public sealed class EventEffectsTests
         Assert.Equal(host.State.EventImmigrationMult, snap.EventImmigrationMult, 3);
         Assert.Equal(host.State.EventCommercialSpawnMult, snap.EventCommercialSpawnMult, 3);
         Assert.Equal(host.State.EventSpawnDemandMult, snap.EventSpawnDemandMult, 3);
+
+        // Cathedral P7.5 — WASM DTO carries the same Event*Mult for harness / HUD consumers.
+        var dto = SimSnapshotDto.From(snap, host.State, host.Events);
+        Assert.Equal(host.State.EventTaxRevenueMult, dto.EventTaxRevenueMult, 3);
+        Assert.Equal(host.State.EventImmigrationMult, dto.EventImmigrationMult, 3);
+        Assert.Equal(host.State.EventCommercialSpawnMult, dto.EventCommercialSpawnMult, 3);
+        Assert.Equal(host.State.EventProductivityMult, dto.EventProductivityMult, 3);
+        Assert.Equal(host.State.EventResearchMult, dto.EventResearchMult, 3);
+        Assert.Equal(host.State.EventSpawnDemandMult, dto.EventSpawnDemandMult, 3);
     }
 
     [Fact]

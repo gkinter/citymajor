@@ -138,6 +138,7 @@ Follow merge protocol in [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md). B
 - [x] Unity Play: friction corridor overlay reads economy corridor samples (`F`)
 - [x] Unity Play: extended zones + density paint work under era gates (Park `8`; Med/High density gated)
 - [x] Unity Play: O-D / commute satisfaction sample visible (Cathedral HUD — tip after U3.5 bind)
+- [x] Unity Play: Event*Mult on Cathedral HUD when Herald events fire (P7.5 / P6.2 bind)
 - [x] Play gate automation (U3.6): batch checks + enter guards + CLI (`verify-unity-play-gate.sh`)
 - [ ] [`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md) Cathedral subset **human-signed** on integration tip (SB-4176)
 - [ ] `dotnet test --filter "FullyQualifiedName~Cathedral"` green

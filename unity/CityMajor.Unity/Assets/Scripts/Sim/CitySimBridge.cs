@@ -324,6 +324,13 @@ namespace CityMajor.Sim
             HasGoodsPrices = true,
             MarketZoneCount = 4,
             MaxPartitionPriceSpread = 1.35f,
+            EventTaxRevenueMult = 0.85f,
+            EventImmigrationMult = 0.90f,
+            EventCommercialSpawnMult = 0.92f,
+            EventProductivityMult = 0.95f,
+            EventResearchMult = 1f,
+            EventSpawnDemandMult = 0.95f,
+            ActiveEventCount = 1,
         };
 
         void PublishFromSimHost()
@@ -434,6 +441,12 @@ namespace CityMajor.Sim
                 LawResidentialSpawnMult = snap.LawResidentialSpawnMult,
                 LawIndustrialSpawnMult = snap.LawIndustrialSpawnMult,
                 LawCommercialSpawnMult = snap.LawCommercialSpawnMult,
+                EventTaxRevenueMult = snap.EventTaxRevenueMult,
+                EventImmigrationMult = snap.EventImmigrationMult,
+                EventCommercialSpawnMult = snap.EventCommercialSpawnMult,
+                EventProductivityMult = snap.EventProductivityMult,
+                EventResearchMult = snap.EventResearchMult,
+                EventSpawnDemandMult = snap.EventSpawnDemandMult,
             };
 
             LatestServiceCoverage = _simHost.GetServiceCoverageSample(step: 8);

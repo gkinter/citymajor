@@ -76,7 +76,7 @@ namespace CityMajor.UI
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(1f, 1f);
             rt.anchoredPosition = new Vector2(-16f, -140f);
-            rt.sizeDelta = new Vector2(PanelWidth, 308f);
+            rt.sizeDelta = new Vector2(PanelWidth, 348f);
 
             var image = go.AddComponent<Image>();
             image.color = new Color(0.06f, 0.09f, 0.14f, 0.82f);
@@ -97,7 +97,7 @@ namespace CityMajor.UI
             _title.color = new Color(0.85f, 0.9f, 0.95f, 1f);
 
             _body = CreateUguiText(panel, "Body", 13, FontStyle.Normal, new Vector2(PanelPad, -36f),
-                new Vector2(PanelWidth - PanelPad * 2f, 260f));
+                new Vector2(PanelWidth - PanelPad * 2f, 300f));
             _body.alignment = TextAnchor.UpperLeft;
             _body.horizontalOverflow = HorizontalWrapMode.Wrap;
             _body.verticalOverflow = VerticalWrapMode.Overflow;
@@ -137,7 +137,7 @@ namespace CityMajor.UI
             var title = CreateTmp(tmpType, panel, "Title", 15f, true,
                 new Vector2(PanelPad, -PanelPad), new Vector2(PanelWidth - PanelPad * 2f, 22f), "Cathedral");
             _tmpBody = CreateTmp(tmpType, panel, "Body", 13f, false,
-                new Vector2(PanelPad, -36f), new Vector2(PanelWidth - PanelPad * 2f, 260f), "—");
+                new Vector2(PanelPad, -36f), new Vector2(PanelWidth - PanelPad * 2f, 300f), "—");
             return title != null && _tmpBody != null;
         }
 
@@ -233,6 +233,7 @@ namespace CityMajor.UI
             var eventLine = SimActiveEventHeadlines.TryGetPriorityEvent(activeEvents, out var priority)
                 ? $"Events [{eventCount}]  {SimActiveEventHeadlines.FormatPriorityHeadline(priority)}"
                 : $"Events [{eventCount}]";
+            var eventMultLine = FormatEventMultLine(state);
 
             return
                 $"Rent burden  {rent}\n" +
@@ -246,8 +247,38 @@ namespace CityMajor.UI
                 $"Power {power} · Water {water}\n" +
                 $"Goods  {goods}\n" +
                 $"{marketsLine}\n" +
-                eventLine;
+                $"{eventLine}\n" +
+                eventMultLine;
         }
+
+        /// <summary>
+        /// Cathedral P7.5 — compact Event*Mult readout (tax / immigration / spawn / research).
+        /// Shows live multipliers whenever any deviate from 1, else an idle marker.
+        /// </summary>
+        internal static string FormatEventMultLine(CitySimState state)
+        {
+            var tax = MultOrDefault(state.EventTaxRevenueMult);
+            var imm = MultOrDefault(state.EventImmigrationMult);
+            var cSpawn = MultOrDefault(state.EventCommercialSpawnMult);
+            var prod = MultOrDefault(state.EventProductivityMult);
+            var research = MultOrDefault(state.EventResearchMult);
+            var spawn = MultOrDefault(state.EventSpawnDemandMult);
+
+            var active = !NearlyOne(tax) || !NearlyOne(imm) || !NearlyOne(cSpawn)
+                         || !NearlyOne(prod) || !NearlyOne(research) || !NearlyOne(spawn);
+            if (!active)
+                return "Evt mults   idle";
+
+            return
+                $"Evt  tax×{tax:0.00} · imm×{imm:0.00} · C×{cSpawn:0.00}\n" +
+                $"     I×{prod:0.00} · RP×{research:0.00} · spawn×{spawn:0.00}";
+        }
+
+        static float MultOrDefault(float value) =>
+            value > 0f ? value : 1f;
+
+        static bool NearlyOne(float value) =>
+            Mathf.Abs(value - 1f) < 0.005f;
 
         static string Pct(float fraction) =>
             $"{Mathf.RoundToInt(Mathf.Max(0f, fraction) * 100f)}%";

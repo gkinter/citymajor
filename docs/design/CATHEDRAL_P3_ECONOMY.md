@@ -21,8 +21,8 @@ Make the **goods economy legible** in HUD: top shortages/surpluses with prices, 
 | P3.2 | Market zone partition count on snapshot | **Partial** — `ActiveZoneCount` in `EconomySystem`; export stub `MarketZoneCount` |
 | P3.3 | Per-zone price spread visible (partition prices differ) | **Done** — `GetAnchorZonePriceSpreads` + Unity Economy/Cathedral HUD; scale 1→4→9→16 |
 | P3.4 | Inter-zone friction on snapshot + HUD | **Live** — `MeanInterZoneFriction`, `InterZoneTradeVolume`, `GoodsTransportCostIndex`, friction corridor overlay |
-| P3.5 | Traffic delay → goods delivery lag | **Done** — `EffectiveTradeFriction` + industrial throughput; Unity Delivery % HUD |
-| P3.6 | Bilateral trade routes | **v2 boundary** — `TradeSystem.CreateTradeRoute` exists; player-facing routes deferred |
+| P3.5 | Bilateral trade routes (partner, contract, freight) | **Done (v2 stretch)** — `FreightMonths` + snapshot + Unity Trade/Economy HUD; regional map / create UI remain SB-3728 |
+| P3.6 | Traffic delay → goods delivery lag | **Done** — `EffectiveTradeFriction` + industrial throughput; Unity Delivery % HUD |
 
 ---
 
@@ -146,24 +146,25 @@ Cross-reference: P1 traffic partition observability · `WasmTrafficLite` · [`SI
 
 ## 7. v2 boundary — bilateral trade routes
 
-**In codebase but not v1 player feature:**
+**Landed (P3.5 stretch — partner / contract / freight):**
 
-- `TradeSystem.CreateTradeRoute(partnerCityId, good, qty, price, months)`
-- `TradeRoute` contracts with partner city ID ≠ global market
+- `TradeSystem.CreateTradeRoute(partnerCityId, good, qty, price, months, deliveryDelay)` sets `FreightMonths`
+- Bilateral routes (`PartnerCityId ≥ 0`) survive monthly `ProcessGlobalMarketTrade` (no longer cancelled)
+- Freight stretches monthly settlement (`value / FreightMonths`); metrics on snapshot:
+  - `BilateralRouteCount` · `BilateralTradeValue` · `MeanFreightMonths`
+- Unity Trade strip + Economy `[E]` HUD bind
+
+**Still deferred (SB-3728 regional polish):**
+
+- Regional map UI / NPC town markers
+- Player-facing create/cancel flow + multi-city save linking
+- Route cancellation penalties / diplomacy
 
 **v1 behavior (keep):**
 
 - `TradeSystem.AutoTrade` — surplus export / deficit import at `GlobalPrices` ± markup/discount.
 - `TradeSystem.ApplyGlobalEvent` — oil shock, food crisis, etc. on global prices.
 - Monthly `TradeBalance`, `MonthlyExportValue`, `MonthlyImportCost` on snapshot.
-
-**Explicit non-goals for v1:**
-
-- UI to negotiate routes with neighbor cities.
-- Multi-city save linking.
-- Route cancellation penalties / diplomacy.
-
-Document in UI: “International trade is automatic; trade agreements — coming in regional update.”
 
 ---
 
@@ -174,7 +175,8 @@ Document in UI: “International trade is automatic; trade agreements — coming
 | Goods shortage index correlates with industrial/commercial imbalance | `CathedralEconomyTests` | **Implement** (may pass today) |
 | Market zone prices differ across partitions | `CathedralEconomyTests` | **Green** (incl. trade-shock + 9/16 scale) |
 | `MarketZoneCount` on snapshot matches economy | `CathedralEconomyTests` | After export stub |
-| Traffic delay increases mean inter-zone friction | `CathedralEconomyTests` | **Green** (P3.5) |
+| Traffic delay increases mean inter-zone friction | `CathedralEconomyTests` | **Green** (PROGRAM P3.6) |
+| Bilateral freight settles slower than global + snapshot export | `BilateralTradeRoutesTests` | **Green** (P3.5) |
 | Goods panel JSON includes prices per top imbalance | Integration | Pending P3.1 |
 
 ```bash
@@ -188,7 +190,7 @@ dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"
 1. **P3.2** `MarketZoneCount` snapshot export (small, enables HUD scale indicator).  
 2. **P3.1** Add `price` + `goodId` to `GoodImbalanceDto` / `EconomySnapshotDto`.  
 3. **P3.3** Per-zone price spread test + optional sparse zone price export.  
-4. **P3.5** ✅ Wire traffic partition delays into `CrossZoneTrade` friction multiplier + industrial throughput.  
-5. **P3.6** Document v2 trade-route UI only — no sim changes in v1.
+4. **P3.6** ✅ Wire traffic partition delays into `CrossZoneTrade` friction multiplier + industrial throughput.  
+5. **P3.5** ✅ Bilateral partner routes + freight months + snapshot/HUD (regional map UI remains SB-3728).
 
 **Dependency:** P3.5 requires P1 traffic partition delay export stable on snapshot (`MeanTrafficDensity` per partition or edge delay rollup).

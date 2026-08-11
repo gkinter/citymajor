@@ -111,7 +111,10 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | InterZoneTradeVolume | ✅ | ✅ | ✅ | WorldState | |
 | MeanInterZoneFriction | ✅ | ✅ | ✅ | WorldState | ≥ 1 |
 | GoodsTransportCostIndex | ✅ | ✅ | ✅ | WorldState | 0–1 |
-| MeanGoodsDeliveryDelay | ✅ | ✅ | ✅ | WorldState | P3.5; 0 free-flow … 1 congested |
+| MeanGoodsDeliveryDelay | ✅ | ✅ | ✅ | WorldState | PROGRAM P3.6 / domain P3.5; 0 free-flow … 1 congested |
+| BilateralRouteCount | ✅ | ✅ | ✅ | TradeSystem | P3.5 partner routes (PartnerCityId ≥ 0) |
+| BilateralTradeValue | ✅ | ✅ | ✅ | TradeSystem | P3.5 monthly contract notional Σ\|qty\|×price |
+| MeanFreightMonths | ✅ | ✅ | ✅ | TradeSystem | P3.5 mean freight lag (partner + delivery delay) |
 | MarketZoneCount | ✅ | ✅ | ✅ | WorldState / Economy | 1–16 |
 | Residential/Commercial/IndustrialDemand | — | ✅ | ✅ | EconomySystem | |
 | Economy.Shortages/Surpluses/Flows/MarketZonePrices | — | ✅ nested | partial (Food/Water/Steel avg + spread) | EconomySystem | |
@@ -249,7 +252,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 These are **documentation of tip reality**, not a backlog invent:
 
 1. ~~**WASM_SIM_BRIDGE §6** TypeScript sketch stale~~ — **closed:** `@citymajor/sim-types` `simSnapshot.ts` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts` fields match tip `SimSnapshotDto` (Event*Mult, Law*Mult, ActiveLawIds, ordinances, utilities, CulturalDna, TradeBalance, fire/wildfire/hospital).
-2. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
+2. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), multiplayer — do not claim present. Bilateral trade routes (P3.5) — partner/contract/freight metrics + Unity Trade strip bind landed; regional map UI / create-flow polish remain SB-3728.
 ---
 
 ## 7. Change protocol
@@ -285,4 +288,5 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **Tier-2 health → P4** — `MeanHealthSatisfaction` / HH HealthSatisfaction feed satisfaction weight + immigration attractiveness |
 | 2026-08-11 | **Tier-2 hospital → HH health** — `HealthCoverageFraction` on E+W+U; `HealthProgression` recovery / decay under hospital coverage |
 | 2026-08-11 | **Tier-2 tourism attractions** — `ParkAttractionCount` / `LandmarkAttractionCount` / `TourismAttractionCount` / `TourismIncome` on E+W+U; parks/landmarks feed budget tourism |
+| 2026-08-11 | **P3.5 bilateral trade routes** — `BilateralRouteCount` / `BilateralTradeValue` / `MeanFreightMonths` on E+W+U; freight settlement + Unity Trade/Economy HUD |
 | 2026-08-11 | **WASM_SIM_BRIDGE / sim-types TS refresh** — `@citymajor/sim-types` `simSnapshot.ts` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts` match tip DTO (closes former §6 gap #1) |

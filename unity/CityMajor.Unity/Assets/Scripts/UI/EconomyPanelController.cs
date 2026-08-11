@@ -184,7 +184,10 @@ namespace CityMajor.UI
                 $"Markets {zones} · Spread ×{spread:F2} · " +
                 $"Friction ×{state.MeanInterZoneFriction:F2} · " +
                 $"Delivery {Mathf.RoundToInt(Mathf.Clamp01(state.MeanGoodsDeliveryDelay) * 100f)}% · " +
-                $"Transport cost {Mathf.RoundToInt(Mathf.Clamp01(state.GoodsTransportCostIndex) * 100f)}%";
+                $"Transport cost {Mathf.RoundToInt(Mathf.Clamp01(state.GoodsTransportCostIndex) * 100f)}%\n" +
+                $"Bilateral {Mathf.Max(0, state.BilateralRouteCount)} · " +
+                $"notional {state.BilateralTradeValue:N0}/mo · " +
+                $"freight {Mathf.Max(0f, state.MeanFreightMonths):0.#} mo";
 
             var hasImbalances = _sim.TryGetGoodImbalances(out var shortages, out var surpluses);
             var sb = new StringBuilder(256);

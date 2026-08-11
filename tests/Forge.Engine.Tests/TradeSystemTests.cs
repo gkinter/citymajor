@@ -180,6 +180,16 @@ public class TradeSystemTests
         Assert.Equal(50f, route.Quantity);
         Assert.Equal(10f, route.AgreedPrice);
         Assert.Equal(12, route.DurationMonths);
+        Assert.Equal(1, route.FreightMonths); // global market
+    }
+
+    [Fact]
+    public void CreateTradeRoute_BilateralPartner_SetsFreightMonths()
+    {
+        var trade = new TradeSystem();
+        bool created = trade.CreateTradeRoute(1, Good.IronOre, 20f, 8f, 6, deliveryDelay: 1f);
+        Assert.True(created);
+        Assert.Equal(4, trade.Routes[0].FreightMonths);
     }
 
     [Fact]

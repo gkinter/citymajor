@@ -20,10 +20,11 @@ public sealed class TradeSystem
 
     /// <summary>
     /// A trade agreement with another city or the global market.
+    /// Cathedral P3.5 — bilateral routes use <see cref="PartnerCityId"/> ≥ 0 + <see cref="FreightMonths"/>.
     /// </summary>
     public struct TradeRoute
     {
-        /// <summary>Partner city ID. -1 = global market (anonymous buyer/seller).</summary>
+        /// <summary>Partner city ID. -1 = global market (anonymous buyer/seller); ≥ 0 = bilateral NPC/partner.</summary>
         public int PartnerCityId;
 
         /// <summary>Which good is traded on this route.</summary>
@@ -40,6 +41,12 @@ public sealed class TradeSystem
 
         /// <summary>Months remaining on this contract.</summary>
         public int RemainingMonths;
+
+        /// <summary>
+        /// Freight lag in months (1 = settles fully each month). Bilateral routes stretch
+        /// settlement by partner distance + local delivery congestion.
+        /// </summary>
+        public int FreightMonths;
     }
 
     private readonly List<TradeRoute> _routes = new();
@@ -57,6 +64,15 @@ public sealed class TradeSystem
     /// <summary>Net trade balance (exports - imports).</summary>
     public float TradeBalance => MonthlyExportValue - MonthlyImportCost;
 
+    /// <summary>Active bilateral routes (PartnerCityId ≥ 0) after last <see cref="ProcessTrade"/> / publish.</summary>
+    public int BilateralRouteCount { get; private set; }
+
+    /// <summary>Monthly contract notional for bilateral routes (Σ |qty| × price).</summary>
+    public float BilateralTradeValue { get; private set; }
+
+    /// <summary>Mean freight months across bilateral routes (0 when none).</summary>
+    public float MeanFreightMonths { get; private set; }
+
     /// <summary>
     /// Seed monthly export/import totals from a save snapshot (until next <see cref="ProcessTrade"/>).
     /// Non-finite values are treated as 0; negatives clamp to 0.
@@ -65,6 +81,22 @@ public sealed class TradeSystem
     {
         MonthlyExportValue = float.IsFinite(exportValue) ? Math.Max(0f, exportValue) : 0f;
         MonthlyImportCost = float.IsFinite(importCost) ? Math.Max(0f, importCost) : 0f;
+    }
+
+    /// <summary>
+    /// Cathedral P3.5 — freight lag from partner distance + local delivery delay.
+    /// Global market (<paramref name="partnerCityId"/> &lt; 0) always settles in 1 month.
+    /// </summary>
+    public static int ComputeFreightMonths(int partnerCityId, float deliveryDelay)
+    {
+        if (partnerCityId < 0)
+            return 1;
+
+        // NPC towns: base 1–3 months by partner id; congestion adds 0–2.
+        int partnerBase = 1 + (Math.Abs(partnerCityId) % 3);
+        float delay = float.IsFinite(deliveryDelay) ? Math.Clamp(deliveryDelay, 0f, 1f) : 0f;
+        int congestion = (int)MathF.Round(delay * 2f);
+        return Math.Clamp(partnerBase + congestion, 1, 5);
     }
 
     // Import markup: importing goods costs 15% more than the global price
@@ -121,6 +153,9 @@ public sealed class TradeSystem
 
         // Step 5: Clean up expired routes
         TickRoutes();
+
+        // Step 6: Cathedral P3.5 — publish bilateral route metrics for snapshot / HUD
+        PublishBilateralMetrics(state);
     }
 
     // =========================================================================
@@ -130,9 +165,10 @@ public sealed class TradeSystem
     /// <summary>
     /// Establish a new trade route with a partner city or the global market.
     /// Returns true if the route was created successfully.
+    /// <paramref name="deliveryDelay"/> scales bilateral <see cref="TradeRoute.FreightMonths"/> (0 free-flow … 1 congested).
     /// </summary>
     public bool CreateTradeRoute(int partnerCityId, Good goodType, float monthlyQuantity,
-                                  float price, int durationMonths)
+                                  float price, int durationMonths, float deliveryDelay = 0f)
     {
         if (durationMonths <= 0) return false;
         if (monthlyQuantity == 0f) return false;
@@ -145,8 +181,34 @@ public sealed class TradeSystem
             AgreedPrice = price,
             DurationMonths = durationMonths,
             RemainingMonths = durationMonths,
+            FreightMonths = ComputeFreightMonths(partnerCityId, deliveryDelay),
         });
         return true;
+    }
+
+    /// <summary>
+    /// Writes bilateral route aggregates onto <see cref="WorldState"/> (and local properties).
+    /// </summary>
+    public void PublishBilateralMetrics(WorldState state)
+    {
+        int count = 0;
+        float value = 0f;
+        float freightSum = 0f;
+        foreach (var route in _routes)
+        {
+            if (route.PartnerCityId < 0) continue;
+            count++;
+            value += Math.Abs(route.Quantity) * Math.Max(0f, route.AgreedPrice);
+            freightSum += Math.Max(1, route.FreightMonths);
+        }
+
+        BilateralRouteCount = count;
+        BilateralTradeValue = value;
+        MeanFreightMonths = count > 0 ? freightSum / count : 0f;
+
+        state.BilateralRouteCount = BilateralRouteCount;
+        state.BilateralTradeValue = BilateralTradeValue;
+        state.MeanFreightMonths = MeanFreightMonths;
     }
 
     /// <summary>
@@ -260,7 +322,10 @@ public sealed class TradeSystem
         {
             if (route.RemainingMonths <= 0) continue;
 
-            float value = Math.Abs(route.Quantity) * route.AgreedPrice;
+            // Freight stretches monthly settlement (1 = full; 5 = 20% this month).
+            int freight = Math.Max(1, route.FreightMonths);
+            float fulfillment = 1f / freight;
+            float value = Math.Abs(route.Quantity) * route.AgreedPrice * fulfillment;
 
             if (route.Quantity > 0) // Export
             {

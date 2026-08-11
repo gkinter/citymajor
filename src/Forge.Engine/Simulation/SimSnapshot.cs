@@ -113,8 +113,17 @@ public sealed class SimSnapshot
     /// <summary>Composite 0–1 goods transport cost pressure (friction + congestion).</summary>
     public float GoodsTransportCostIndex { get; init; }
 
-    /// <summary>Cathedral P3.5 — mean goods delivery delay (0 free-flow … 1 congested).</summary>
+    /// <summary>Cathedral PROGRAM P3.6 — mean goods delivery delay (0 free-flow … 1 congested).</summary>
     public float MeanGoodsDeliveryDelay { get; init; }
+
+    /// <summary>Cathedral P3.5 — active bilateral trade routes (PartnerCityId ≥ 0).</summary>
+    public int BilateralRouteCount { get; init; }
+
+    /// <summary>Cathedral P3.5 — monthly bilateral contract notional (Σ |qty| × price).</summary>
+    public float BilateralTradeValue { get; init; }
+
+    /// <summary>Cathedral P3.5 — mean freight lag in months across bilateral routes.</summary>
+    public float MeanFreightMonths { get; init; }
 
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
@@ -425,6 +434,9 @@ public sealed class SimSnapshot
             MeanInterZoneFriction = state.MeanInterZoneFriction,
             GoodsTransportCostIndex = state.GoodsTransportCostIndex,
             MeanGoodsDeliveryDelay = state.MeanGoodsDeliveryDelay,
+            BilateralRouteCount = state.BilateralRouteCount,
+            BilateralTradeValue = state.BilateralTradeValue,
+            MeanFreightMonths = state.MeanFreightMonths,
             MarketZoneCount = state.MarketZoneCount,
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,

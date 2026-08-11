@@ -4,12 +4,12 @@
         <ui:VisualElement class="panel-header">
             <ui:VisualElement>
                 <ui:Label name="trade-title" class="panel-title" text="Trade routes" />
-                <ui:Label name="trade-subtitle" class="panel-subtitle" text="Global market · bilateral routes pending (SB-3728)" />
+                <ui:Label name="trade-subtitle" class="panel-subtitle" text="Global market · bilateral contracts ready (P3.5)" />
             </ui:VisualElement>
             <ui:Button name="trade-close" class="panel-close" text="✕" />
         </ui:VisualElement>
         <ui:ScrollView name="trade-scroll" class="panel-body">
-            <ui:Label name="trade-status" class="panel-note" text="No bilateral routes yet. Sim auto-trades via global market." />
+            <ui:Label name="trade-status" class="panel-note" text="No bilateral routes yet. Create partner contracts in sim; auto-trade fills global gaps." />
             <ui:Label name="trade-employment" class="panel-note" text="" />
             <ui:Label name="trade-income" class="panel-note" text="" />
             <ui:Label name="trade-expense" class="panel-note" text="" />

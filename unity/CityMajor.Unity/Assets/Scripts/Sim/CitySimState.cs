@@ -57,6 +57,15 @@ namespace CityMajor.Sim
         /// <summary>Cathedral P3.5 — mean goods delivery delay (0 free-flow … 1 congested).</summary>
         public float MeanGoodsDeliveryDelay;
 
+        /// <summary>Cathedral P3.5 — active bilateral trade routes (PartnerCityId ≥ 0).</summary>
+        public int BilateralRouteCount;
+
+        /// <summary>Cathedral P3.5 — monthly bilateral contract notional (Σ |qty| × price).</summary>
+        public float BilateralTradeValue;
+
+        /// <summary>Cathedral P3.5 — mean freight lag in months across bilateral routes.</summary>
+        public float MeanFreightMonths;
+
         public int BuildingCount;
         public int ConstructingBuildingCount;
         /// <summary>Cathedral P2.6 — abandoned buildings (visible with abandoned tint).</summary>

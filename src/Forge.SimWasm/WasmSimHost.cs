@@ -101,6 +101,9 @@ public sealed class WasmSimHost
     public float MeanInterZoneFriction => _host.State?.MeanInterZoneFriction ?? 1f;
     public float GoodsTransportCostIndex => _host.State?.GoodsTransportCostIndex ?? 0f;
     public float MeanGoodsDeliveryDelay => _host.State?.MeanGoodsDeliveryDelay ?? 0f;
+    public int BilateralRouteCount => _host.State?.BilateralRouteCount ?? 0;
+    public float BilateralTradeValue => _host.State?.BilateralTradeValue ?? 0f;
+    public float MeanFreightMonths => _host.State?.MeanFreightMonths ?? 0f;
     public float MeanRentBurden => _host.State?.MeanRentBurden ?? 0f;
     public float ResidentialVacancy => _host.State?.ResidentialVacancy ?? 1f;
     /// <summary>Mean fire/EMS response minutes over sampled zoned tiles.</summary>
@@ -381,6 +384,12 @@ public sealed class WasmStatusDto
     public float GoodsTransportCostIndex { get; init; }
     /// <summary>Cathedral P3.5 — mean goods delivery delay (0 free-flow … 1 congested).</summary>
     public float MeanGoodsDeliveryDelay { get; init; }
+    /// <summary>Cathedral P3.5 — active bilateral trade routes.</summary>
+    public int BilateralRouteCount { get; init; }
+    /// <summary>Cathedral P3.5 — monthly bilateral contract notional.</summary>
+    public float BilateralTradeValue { get; init; }
+    /// <summary>Cathedral P3.5 — mean freight lag in months.</summary>
+    public float MeanFreightMonths { get; init; }
     /// <summary>Segment-graph node types (parallel arrays, Cathedral P1.6).</summary>
     public RoadGraphSnapshotDto RoadGraph { get; init; } = new();
     public float MeanRentBurden { get; init; }
@@ -535,6 +544,9 @@ public sealed class WasmStatusDto
             MeanInterZoneFriction = host.MeanInterZoneFriction,
             GoodsTransportCostIndex = host.GoodsTransportCostIndex,
             MeanGoodsDeliveryDelay = host.MeanGoodsDeliveryDelay,
+            BilateralRouteCount = host.BilateralRouteCount,
+            BilateralTradeValue = host.BilateralTradeValue,
+            MeanFreightMonths = host.MeanFreightMonths,
             RoadGraph = host.RoadGraphSnapshot,
             MeanRentBurden = host.MeanRentBurden,
             ResidentialVacancy = host.ResidentialVacancy,

@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 namespace CityMajor.UI
 {
     /// <summary>
-    /// Read-only trade routes strip (v2 scaffold).
+    /// Trade routes strip — global market totals + Cathedral P3.5 bilateral freight HUD.
     /// Keyboard toggle moved to <see cref="EconomyPanelController"/> (E).
     /// Open via UI close/open API if wired; Esc still closes while open.
     /// </summary>
@@ -16,6 +16,8 @@ namespace CityMajor.UI
         CitySimBridge _sim;
         UIDocument _document;
         VisualElement _root;
+        Label _subtitle;
+        Label _status;
         Label _employment;
         Label _income;
         Label _expense;
@@ -66,6 +68,8 @@ namespace CityMajor.UI
             _document.sortingOrder = 111;
             var docRoot = _document.rootVisualElement;
             _root = docRoot?.Q<VisualElement>("trade-root");
+            _subtitle = docRoot?.Q<Label>("trade-subtitle");
+            _status = docRoot?.Q<Label>("trade-status");
             _employment = docRoot?.Q<Label>("trade-employment");
             _income = docRoot?.Q<Label>("trade-income");
             _expense = docRoot?.Q<Label>("trade-expense");
@@ -90,6 +94,23 @@ namespace CityMajor.UI
         {
             if (_balance == null)
                 return;
+
+            var routes = Mathf.Max(0, state.BilateralRouteCount);
+            var freight = Mathf.Max(0f, state.MeanFreightMonths);
+            if (_subtitle != null)
+            {
+                _subtitle.text = routes > 0
+                    ? $"Global market · {routes} bilateral route{(routes == 1 ? "" : "s")} · freight {freight:0.#} mo"
+                    : "Global market · bilateral contracts ready (P3.5)";
+            }
+
+            if (_status != null)
+            {
+                _status.text = routes > 0
+                    ? $"Bilateral: {routes} route{(routes == 1 ? "" : "s")} · " +
+                      $"notional {state.BilateralTradeValue:N0}/mo · mean freight {freight:0.#} mo"
+                    : "No bilateral routes yet. Create partner contracts in sim; auto-trade fills global gaps.";
+            }
 
             var net = state.MonthlyIncome - state.MonthlyExpense;
             if (_employment != null)

@@ -1029,13 +1029,7 @@ public sealed partial class SimHost
 
     private void ProcessGlobalMarketTrade()
     {
-        var routes = _trade.Routes;
-        for (int i = routes.Count - 1; i >= 0; i--)
-        {
-            if (routes[i].PartnerCityId != -1)
-                _trade.CancelTradeRoute(i);
-        }
-
+        // Cathedral P3.5 — keep bilateral routes (PartnerCityId ≥ 0); auto-trade fills gaps.
         _trade.ProcessTrade(_state, _economy);
         _state.TradeBalance = _trade.TradeBalance;
         _state.MonthlyExportValue = _trade.MonthlyExportValue;

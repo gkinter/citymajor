@@ -14,8 +14,8 @@ namespace Forge.SimCore.Tests;
 /// P5.4 EMS survival curve (Phase 5b), Tier-2 hospital capacity,
 /// Tier-2 wildfire / arson rings, aerial / lookout / fire rating,
 /// Tier-2 education depth, Tier-2 park amenity parity, Tier-2 hospital→HH
-/// health progression, P4 health→satisfaction/migration, and Tier-2 tourism
-/// attractions stub.
+/// health progression, P4 health→satisfaction/migration, Tier-2 tourism
+/// attractions stub, and Cathedral P3.5 bilateral trade freight metrics.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -1118,6 +1118,38 @@ public sealed class CathedralUtilitiesTests
         Assert.True(doc.RootElement.TryGetProperty("tourismIncome", out var income));
         Assert.Equal(state.TourismAttractionCount, attr.GetInt32());
         Assert.Equal(state.TourismIncome, income.GetSingle(), precision: 2);
+    }
+
+    [Fact]
+    public void BilateralTradeRoutes_ExportFreightMetricsOnSnapshot()
+    {
+        var host = new SimHost();
+        host.Init(32, new SimHostInitOptions { SkipStarterCity = true });
+        var state = host.State!;
+
+        Assert.True(host.Trade.CreateTradeRoute(1, Good.Steel, 50f, 10f, 12, deliveryDelay: 1f));
+        host.Trade.ProcessTrade(state, host.Economy);
+
+        Assert.Equal(1, state.BilateralRouteCount);
+        Assert.Equal(500f, state.BilateralTradeValue, precision: 1);
+        Assert.Equal(4f, state.MeanFreightMonths, precision: 2);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(1, snap.BilateralRouteCount);
+        Assert.Equal(500f, snap.BilateralTradeValue, precision: 1);
+        Assert.Equal(4f, snap.MeanFreightMonths, precision: 2);
+
+        var dto = SimSnapshotDto.From(snap, state);
+        Assert.Equal(1, dto.BilateralRouteCount);
+        Assert.Equal(4f, dto.MeanFreightMonths, precision: 2);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("bilateralRouteCount", out var routes));
+        Assert.True(doc.RootElement.TryGetProperty("bilateralTradeValue", out var value));
+        Assert.True(doc.RootElement.TryGetProperty("meanFreightMonths", out var freight));
+        Assert.Equal(1, routes.GetInt32());
+        Assert.Equal(500f, value.GetSingle(), precision: 1);
+        Assert.Equal(4f, freight.GetSingle(), precision: 2);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

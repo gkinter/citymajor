@@ -218,6 +218,12 @@ export type SimSnapshotDto = {
   meanInterZoneFriction: number;
   goodsTransportCostIndex: number;
   meanGoodsDeliveryDelay: number;
+  /** Active bilateral trade routes (PartnerCityId ≥ 0). */
+  bilateralRouteCount: number;
+  /** Monthly bilateral contract notional (Σ |qty| × price). */
+  bilateralTradeValue: number;
+  /** Mean freight lag in months across bilateral routes. */
+  meanFreightMonths: number;
 
   meanRentBurden: number;
   residentialVacancy: number;
@@ -326,6 +332,9 @@ export type SimResourcesDto = Pick<
   | "meanInterZoneFriction"
   | "goodsTransportCostIndex"
   | "meanGoodsDeliveryDelay"
+  | "bilateralRouteCount"
+  | "bilateralTradeValue"
+  | "meanFreightMonths"
   | "meanRentBurden"
   | "residentialVacancy"
   | "meanEmergencyResponseMinutes"

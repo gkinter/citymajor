@@ -353,9 +353,25 @@ public sealed class WorldState
     public float GoodsTransportCostIndex { get; set; }
 
     /// <summary>
-    /// Cathedral P3.5 — mean goods delivery delay from traffic (0 = free-flow, 1 = heavy congestion).
+    /// Cathedral PROGRAM P3.6 / domain P3.5 — mean goods delivery delay from traffic
+    /// (0 = free-flow, 1 = heavy congestion).
     /// </summary>
     public float MeanGoodsDeliveryDelay { get; set; }
+
+    /// <summary>
+    /// Cathedral P3.5 — active bilateral trade routes (PartnerCityId ≥ 0).
+    /// </summary>
+    public int BilateralRouteCount { get; set; }
+
+    /// <summary>
+    /// Cathedral P3.5 — monthly contract notional for bilateral routes (Σ |qty| × price).
+    /// </summary>
+    public float BilateralTradeValue { get; set; }
+
+    /// <summary>
+    /// Cathedral P3.5 — mean freight lag in months across bilateral routes (0 when none).
+    /// </summary>
+    public float MeanFreightMonths { get; set; }
 
     /// <summary>Active Leontief market partitions (1–16), from <see cref="EconomySystem.ActiveZoneCount"/>.</summary>
     public int MarketZoneCount { get; set; } = 1;

@@ -311,6 +311,21 @@ public sealed class WorldState
     public float MeanEnvironmentScore { get; set; }
 
     /// <summary>
+    /// Fraction of households with home-tile sewage coverage ≥ treatment threshold (0–1). Tier-2.
+    /// </summary>
+    public float SewageCoverageFraction { get; set; }
+
+    /// <summary>
+    /// Mean water contamination at household homes (0–1). Tier-2 sewage → water quality.
+    /// </summary>
+    public float MeanWaterContamination { get; set; }
+
+    /// <summary>
+    /// Mean water quality 0–1 ≈ (1 − contamination) at household homes. Tier-2.
+    /// </summary>
+    public float MeanWaterQuality { get; set; }
+
+    /// <summary>
     /// Park attraction units for tourism (park buildings + painted park zone sites). Tier-2.
     /// </summary>
     public int ParkAttractionCount { get; set; }

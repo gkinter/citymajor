@@ -160,6 +160,15 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — mean environment score 0–1 ≈ (1 − pollution).</summary>
         public float MeanEnvironmentScore;
 
+        /// <summary>Tier-2 — fraction of households with sewage coverage.</summary>
+        public float SewageCoverageFraction;
+
+        /// <summary>Tier-2 — mean water contamination at household homes 0–1.</summary>
+        public float MeanWaterContamination;
+
+        /// <summary>Tier-2 — mean water quality 0–1 ≈ (1 − contamination).</summary>
+        public float MeanWaterQuality;
+
         /// <summary>Tier-2 — park attraction units for tourism.</summary>
         public int ParkAttractionCount;
 

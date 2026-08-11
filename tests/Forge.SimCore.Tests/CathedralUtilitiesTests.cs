@@ -16,7 +16,8 @@ namespace Forge.SimCore.Tests;
 /// Tier-2 education depth, Tier-2 park amenity parity, Tier-2 hospital→HH
 /// health progression, P4 health→satisfaction/migration, Tier-2 tourism
 /// attractions stub, Tier-2 police/crime depth, Tier-2 waste/pollution depth,
-/// and Cathedral P3.5 bilateral trade freight metrics.
+/// Tier-2 sewage / water contamination depth, and Cathedral P3.5 bilateral
+/// trade freight metrics.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -1414,6 +1415,141 @@ public sealed class CathedralUtilitiesTests
             $"waste→lower pollution should raise P4 satisfaction (dirty={satDirty:F1}, clean={satClean:F1})");
         Assert.True(host.State.WasteCoverageFraction > 0f);
         Assert.True(host.State.MeanEnvironmentScore > 0.3f);
+    }
+
+    [Fact]
+    public void SewageTreatment_HigherQuality_TreatsMoreAtSameCoverage()
+    {
+        float lowQ = SewageTreatment.ContaminationDelta(
+            coverage: 0.8f, plantQuality: 0.3f, zoneType: 1, days: 1f);
+        float highQ = SewageTreatment.ContaminationDelta(
+            coverage: 0.8f, plantQuality: 1f, zoneType: 1, days: 1f);
+        float uncovered = SewageTreatment.ContaminationDelta(
+            coverage: 0f, plantQuality: 1f, zoneType: 1, days: 1f);
+
+        Assert.True(highQ < lowQ,
+            $"higher plant quality should treat more (lowQ={lowQ:F4}, highQ={highQ:F4})");
+        Assert.True(uncovered > 0f, "uncovered residential should accumulate water contamination");
+        Assert.True(highQ < 0f, "full-quality coverage should net-clean");
+        Assert.True(SewageTreatment.EffectiveTreatmentFactor(0.8f, 1f) >
+                    SewageTreatment.EffectiveTreatmentFactor(0.8f, 0.3f));
+        Assert.True(
+            SewageTreatment.ContaminationAtTile(0.9f, 1f, 0.2f) <
+            SewageTreatment.ContaminationAtTile(0f, 1f, 0.2f));
+    }
+
+    [Fact]
+    public void SewageTick_PlantCoverage_LowersContaminationAndRaisesWaterQuality()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 18, 18, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(18, 18)] = 1; // Residential
+        host.State.Tiles.Pollution[host.State.Tiles.Index(18, 18)] = 0.6f;
+        PlaceBuilding(host.State!, 18, 19, serviceFlags: SewageTreatment.ServiceSewage, level: 3);
+
+        int slot = host.State!.Households.Allocate();
+        Assert.True(slot >= 0);
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        float pollutionBefore = host.State.Tiles.Pollution[host.State.Tiles.Index(18, 18)];
+
+        int cleaned = 0;
+        for (int i = 0; i < 20; i++)
+        {
+            host.Services.DailyTick(host.State, 1.0);
+            cleaned += SewageTreatment.Tick(host.State, host.Services.SewageCoverage, days: 1f);
+        }
+
+        float pollutionAfter = host.State.Tiles.Pollution[host.State.Tiles.Index(18, 18)];
+        Assert.True(host.State.SewageCoverageFraction > 0.5f);
+        Assert.Equal(1, host.State.Tiles.SewageConnection[host.State.Tiles.Index(18, 18)]);
+        Assert.True(pollutionAfter < pollutionBefore,
+            $"sewage coverage should lower contamination (before={pollutionBefore:F3}, after={pollutionAfter:F3})");
+        Assert.True(cleaned > 0);
+        Assert.True(host.State.MeanWaterContamination < 0.6f);
+        Assert.True(host.State.MeanWaterQuality > 0.4f);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsSewageTreatmentFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 14, 14, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(14, 14)] = 1;
+        host.State.Tiles.Pollution[host.State.Tiles.Index(14, 14)] = 0.3f;
+        PlaceBuilding(host.State!, 14, 15, serviceFlags: SewageTreatment.ServiceSewage, level: 2);
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        host.Services.UpdateSewageTreatment(host.State, days: 0f);
+
+        Assert.True(host.State.SewageCoverageFraction > 0f);
+        Assert.InRange(host.State.MeanWaterContamination, 0f, 1f);
+        Assert.Equal(1f - host.State.MeanWaterContamination, host.State.MeanWaterQuality, precision: 3);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("sewageCoverageFraction", out var cov));
+        Assert.True(doc.RootElement.TryGetProperty("meanWaterContamination", out var contam));
+        Assert.True(doc.RootElement.TryGetProperty("meanWaterQuality", out var quality));
+        Assert.Equal(host.State.SewageCoverageFraction, cov.GetSingle(), precision: 3);
+        Assert.Equal(host.State.MeanWaterContamination, contam.GetSingle(), precision: 3);
+        Assert.Equal(host.State.MeanWaterQuality, quality.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.SewageCoverageFraction, dto.SewageCoverageFraction, precision: 3);
+        Assert.Equal(host.State.MeanWaterContamination, dto.MeanWaterContamination, precision: 3);
+        Assert.Equal(host.State.MeanWaterQuality, dto.MeanWaterQuality, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.SewageCoverageFraction, snap.SewageCoverageFraction, precision: 3);
+        Assert.Equal(host.State.MeanWaterContamination, snap.MeanWaterContamination, precision: 3);
+        Assert.Equal(host.State.MeanWaterQuality, snap.MeanWaterQuality, precision: 3);
+    }
+
+    [Fact]
+    public void SewageCoverage_LowersContamination_RaisesP4EnvironmentSatisfaction()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 13, 12, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(13, 12)] = 1;
+        host.State.Tiles.Pollution[host.State.Tiles.Index(13, 12)] = 0.75f;
+        host.State.Tiles.Noise[host.State.Tiles.Index(13, 12)] = 0.1f;
+        host.State.Tiles.Desirability[host.State.Tiles.Index(13, 12)] = 0f;
+        PlaceBuilding(host.State!, 13, 13, serviceFlags: SewageTreatment.ServiceSewage, level: 3);
+        int work = PlaceBuilding(host.State!, 22, 22, serviceFlags: 0);
+
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.WorkBuildingId[slot] = (ushort)work;
+        host.State.Households.HealthSatisfaction[slot] = 128;
+        host.State.Households.SafetySatisfaction[slot] = 128;
+        host.State.Households.LeisureSatisfaction[slot] = 128;
+        host.State.Households.MemberCount[slot] = 2;
+        host.State.Households.Income[slot] = 1500;
+
+        host.Services!.RebuildFromWorld(host.State);
+        var pop = new PopulationSystem(seed: 42);
+        float satDirty = pop.CalculateSatisfaction(host.State, slot);
+
+        for (int i = 0; i < 25; i++)
+            host.Services.DailyTick(host.State, 1.0);
+
+        float satClean = pop.CalculateSatisfaction(host.State, slot);
+        Assert.True(host.State.Tiles.Pollution[host.State.Tiles.Index(13, 12)] < 0.75f);
+        Assert.True(satClean > satDirty,
+            $"sewage→lower contamination should raise P4 satisfaction (dirty={satDirty:F1}, clean={satClean:F1})");
+        Assert.True(host.State.SewageCoverageFraction > 0f);
+        Assert.True(host.State.MeanWaterQuality > 0.3f);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

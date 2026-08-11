@@ -267,6 +267,12 @@ export type SimSnapshotDto = {
   meanPollution: number;
   /** Mean environment score 0–1 ≈ (1 − pollution). */
   meanEnvironmentScore: number;
+  /** Fraction of households under sewage coverage. */
+  sewageCoverageFraction: number;
+  /** Mean water contamination at household homes 0–1. */
+  meanWaterContamination: number;
+  /** Mean water quality 0–1 ≈ (1 − contamination). */
+  meanWaterQuality: number;
   /** Park attraction units for tourism (buildings + zone sites). */
   parkAttractionCount: number;
   /** Landmark / monument attraction units for tourism. */
@@ -375,6 +381,9 @@ export type SimResourcesDto = Pick<
   | "wasteCoverageFraction"
   | "meanPollution"
   | "meanEnvironmentScore"
+  | "sewageCoverageFraction"
+  | "meanWaterContamination"
+  | "meanWaterQuality"
   | "parkAttractionCount"
   | "landmarkAttractionCount"
   | "tourismAttractionCount"

@@ -27,6 +27,7 @@ namespace CityMajor.UI
         Label _hospitalValue;
         Label _policeValue;
         Label _wasteValue;
+        Label _sewageValue;
         Label _eduValue;
         Label _parkValue;
         Label _cranesLabel;
@@ -100,6 +101,7 @@ namespace CityMajor.UI
             _hospitalValue = root.Q<Label>("hospital-value");
             _policeValue = root.Q<Label>("police-value");
             _wasteValue = root.Q<Label>("waste-value");
+            _sewageValue = root.Q<Label>("sewage-value");
             _eduValue = root.Q<Label>("edu-value");
             _parkValue = root.Q<Label>("park-value");
             _cranesLabel = root.Q<Label>("cranes-label");
@@ -234,6 +236,18 @@ namespace CityMajor.UI
                     : "🗑️ —";
                 _wasteValue.tooltip =
                     "Mean environment score (1 − pollution), mean home-tile pollution, and fraction under waste coverage. Depots abate residential/commercial waste; uncovered zones accumulate pollution that feeds environment satisfaction / health / immigration (Tier-2 waste → pollution → outcomes).";
+            }
+
+            if (_sewageValue != null)
+            {
+                var qualityPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanWaterQuality) * 100f);
+                var contamPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanWaterContamination) * 100f);
+                var covPct = Mathf.RoundToInt(Mathf.Clamp01(state.SewageCoverageFraction) * 100f);
+                _sewageValue.text = covPct > 0 || qualityPct > 0 || contamPct > 0
+                    ? $"💧 {qualityPct}% · contam {contamPct}% · {covPct}%"
+                    : "💧 —";
+                _sewageValue.tooltip =
+                    "Mean water quality (1 − contamination), mean water contamination, and fraction under sewage coverage. Treatment plants abate waterborne pollution; uncovered zones contaminate water that feeds health / environment / immigration (Tier-2 sewage → water quality → outcomes).";
             }
 
             if (_eduValue != null)

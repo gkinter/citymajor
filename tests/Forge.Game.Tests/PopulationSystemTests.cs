@@ -307,6 +307,67 @@ public class PopulationSystemTests
     }
 
     [Fact]
+    public void CalculateImmigration_HigherWaterQuality_AttractsMoreImmigrants()
+    {
+        var state = new WorldState(64, 256, 64);
+        state.Population = 2000;
+        state.Happiness = 0.7f;
+        state.MeanWaterQuality = 0.1f;
+        state.MeanWaterContamination = 0.9f;
+        state.SewageCoverageFraction = 0.1f;
+
+        _ = state.Buildings.Allocate();
+        int homeId = state.Buildings.Allocate();
+        state.Buildings.GridX[homeId] = 10;
+        state.Buildings.GridY[homeId] = 10;
+        state.Buildings.State[homeId] = 1;
+        state.Buildings.MaxOccupants[homeId] = 500;
+        int homeIdx = state.Tiles.Index(10, 10);
+        state.Tiles.ZoneType[homeIdx] = 1;
+        state.Tiles.BuildingId[homeIdx] = (ushort)homeId;
+        state.Tiles.Pollution[homeIdx] = 0.4f;
+
+        var dirty = new PopulationSystem(seed: 88);
+        for (int i = 0; i < 40; i++)
+        {
+            int slot = AddHousehold(state, dirty, members: 2, homeBuilding: (ushort)homeId);
+            state.Households.HealthSatisfaction[slot] = 128;
+            state.Households.SafetySatisfaction[slot] = 128;
+        }
+        int immigrantsDirty = dirty.CalculateImmigration(state);
+
+        var stateClean = new WorldState(64, 256, 64);
+        stateClean.Population = 2000;
+        stateClean.Happiness = 0.7f;
+        stateClean.MeanWaterQuality = 0.95f;
+        stateClean.MeanWaterContamination = 0.05f;
+        stateClean.SewageCoverageFraction = 0.9f;
+        _ = stateClean.Buildings.Allocate();
+        int cleanHome = stateClean.Buildings.Allocate();
+        stateClean.Buildings.GridX[cleanHome] = 10;
+        stateClean.Buildings.GridY[cleanHome] = 10;
+        stateClean.Buildings.State[cleanHome] = 1;
+        stateClean.Buildings.MaxOccupants[cleanHome] = 500;
+        int cleanIdx = stateClean.Tiles.Index(10, 10);
+        stateClean.Tiles.ZoneType[cleanIdx] = 1;
+        stateClean.Tiles.BuildingId[cleanIdx] = (ushort)cleanHome;
+        stateClean.Tiles.Pollution[cleanIdx] = 0.4f;
+        var clean = new PopulationSystem(seed: 88);
+        for (int i = 0; i < 40; i++)
+        {
+            int slot = AddHousehold(stateClean, clean, members: 2, homeBuilding: (ushort)cleanHome);
+            stateClean.Households.HealthSatisfaction[slot] = 128;
+            stateClean.Households.SafetySatisfaction[slot] = 128;
+        }
+        int immigrantsClean = clean.CalculateImmigration(stateClean);
+
+        Assert.True(immigrantsClean > immigrantsDirty,
+            $"higher water quality should attract more immigrants (dirty={immigrantsDirty}, clean={immigrantsClean})");
+        Assert.True(stateClean.MeanWaterQuality > state.MeanWaterQuality);
+        Assert.True(stateClean.MeanWaterContamination < state.MeanWaterContamination);
+    }
+
+    [Fact]
     public void Tick_LowHealthSatisfaction_LowersHappinessTowardEmigrationBand()
     {
         var state = CreateTestWorld();

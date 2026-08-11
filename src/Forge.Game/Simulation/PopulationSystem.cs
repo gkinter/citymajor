@@ -557,12 +557,13 @@ public sealed class PopulationSystem
         float healthMod = GetHealthAttractivenessModifier(state);
         float safetyMod = GetSafetyAttractivenessModifier(state);
         float environmentMod = GetEnvironmentAttractivenessModifier(state);
+        float waterQualityMod = GetWaterQualityAttractivenessModifier(state);
 
         // Scale base with city size (log scale)
         float sizeScale = 1f + (float)Math.Log(Math.Max(1, state.Population / 1000f), 2);
         float rawRate = BaseImmigrationPerMonth * sizeScale *
                         jobAvailability * housingAvailability * reputation * taxMod *
-                        healthMod * safetyMod * environmentMod *
+                        healthMod * safetyMod * environmentMod * waterQualityMod *
                         GetRentAttractivenessModifier() *
                         Math.Clamp(state.EventImmigrationMult, 0.25f, 3f);
 
@@ -1221,6 +1222,23 @@ public sealed class PopulationSystem
         state.MeanEnvironmentScore = env;
         state.MeanPollution = Math.Clamp(1f - env, 0f, 1f);
         return WasteCollection.EnvironmentAttractivenessModifier(env);
+    }
+
+    /// <summary>
+    /// Immigration attractiveness from mean water quality (sewage → contamination).
+    /// 0.55 at contamination=1 → 1.45 at quality=1 (neutral ~1.0 at mid).
+    /// </summary>
+    private float GetWaterQualityAttractivenessModifier(WorldState state)
+    {
+        float quality = Math.Clamp(state.MeanWaterQuality, 0f, 1f);
+        if (quality <= 0f && state.SewageCoverageFraction <= 0f)
+        {
+            // Fallback when sewage tick has not run yet — derive from pollution.
+            quality = Math.Clamp(1f - WasteCollection.MeanPollution(state), 0f, 1f);
+        }
+        state.MeanWaterQuality = quality;
+        state.MeanWaterContamination = Math.Clamp(1f - quality, 0f, 1f);
+        return SewageTreatment.WaterQualityAttractivenessModifier(quality);
     }
 
     /// <summary>Get healthcare modifier for births (0.5-1.5).</summary>

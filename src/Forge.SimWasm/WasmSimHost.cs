@@ -175,6 +175,15 @@ public sealed class WasmSimHost
     /// <summary>Mean environment score 0–1 ≈ (1 − pollution) (Tier-2).</summary>
     public float MeanEnvironmentScore =>
         _host.State?.MeanEnvironmentScore ?? 0f;
+    /// <summary>Fraction of households with sewage coverage (Tier-2).</summary>
+    public float SewageCoverageFraction =>
+        _host.State?.SewageCoverageFraction ?? 0f;
+    /// <summary>Mean water contamination at household homes 0–1 (Tier-2).</summary>
+    public float MeanWaterContamination =>
+        _host.State?.MeanWaterContamination ?? 0f;
+    /// <summary>Mean water quality 0–1 ≈ (1 − contamination) (Tier-2).</summary>
+    public float MeanWaterQuality =>
+        _host.State?.MeanWaterQuality ?? 0f;
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount => _host.State?.ParkAttractionCount ?? 0;
     /// <summary>Landmark attraction units for tourism (Tier-2).</summary>
@@ -467,6 +476,12 @@ public sealed class WasmStatusDto
     public float MeanPollution { get; init; }
     /// <summary>Mean environment score 0–1 ≈ (1 − pollution) (Tier-2).</summary>
     public float MeanEnvironmentScore { get; init; }
+    /// <summary>Fraction of households with sewage coverage (Tier-2).</summary>
+    public float SewageCoverageFraction { get; init; }
+    /// <summary>Mean water contamination at household homes 0–1 (Tier-2).</summary>
+    public float MeanWaterContamination { get; init; }
+    /// <summary>Mean water quality 0–1 ≈ (1 − contamination) (Tier-2).</summary>
+    public float MeanWaterQuality { get; init; }
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount { get; init; }
     /// <summary>Landmark attraction units for tourism (Tier-2).</summary>
@@ -610,6 +625,9 @@ public sealed class WasmStatusDto
             WasteCoverageFraction = host.WasteCoverageFraction,
             MeanPollution = host.MeanPollution,
             MeanEnvironmentScore = host.MeanEnvironmentScore,
+            SewageCoverageFraction = host.SewageCoverageFraction,
+            MeanWaterContamination = host.MeanWaterContamination,
+            MeanWaterQuality = host.MeanWaterQuality,
             ParkAttractionCount = host.ParkAttractionCount,
             LandmarkAttractionCount = host.LandmarkAttractionCount,
             TourismAttractionCount = host.TourismAttractionCount,

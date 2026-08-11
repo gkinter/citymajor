@@ -316,6 +316,15 @@ public sealed class SimSnapshot
     /// <summary>Mean environment score 0–1 ≈ (1 − pollution) (Tier-2 waste → outcomes).</summary>
     public float MeanEnvironmentScore { get; init; }
 
+    /// <summary>Fraction of households with sewage coverage (Tier-2 sewage / water quality).</summary>
+    public float SewageCoverageFraction { get; init; }
+
+    /// <summary>Mean water contamination at household homes 0–1 (Tier-2 sewage).</summary>
+    public float MeanWaterContamination { get; init; }
+
+    /// <summary>Mean water quality 0–1 ≈ (1 − contamination) (Tier-2 sewage → outcomes).</summary>
+    public float MeanWaterQuality { get; init; }
+
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount { get; init; }
 
@@ -523,6 +532,9 @@ public sealed class SimSnapshot
             WasteCoverageFraction = state.WasteCoverageFraction,
             MeanPollution = state.MeanPollution,
             MeanEnvironmentScore = state.MeanEnvironmentScore,
+            SewageCoverageFraction = state.SewageCoverageFraction,
+            MeanWaterContamination = state.MeanWaterContamination,
+            MeanWaterQuality = state.MeanWaterQuality,
             ParkAttractionCount = state.ParkAttractionCount,
             LandmarkAttractionCount = state.LandmarkAttractionCount,
             TourismAttractionCount = state.TourismAttractionCount,

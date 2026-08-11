@@ -125,6 +125,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **Tier-2 tourism** | ✅ Done | Parks/landmarks feed `TourismIncome` (not only pop×happiness) + Budget HUD |
 | **Tier-2 police/crime** | ✅ Done | Station quality → crime → `SafetySatisfaction` → sat/immigration + Police HUD |
 | **Tier-2 waste** | ✅ Done | Garbage depots → pollution → env sat / immigration + Waste HUD 🗑️ |
+| **Tier-2 sewage** | ✅ Done | Treatment plants → water quality → health/env / immigration + Sewage HUD 💧 |
 | **P6.1**–**P6.3** / **P5.6** | ✅ Done | Law spawn mults · Event*Mult bridge · Herald predicates · council seats |
 | **P7.5** | ✅ Done | Unity Cathedral HUD Event*Mult + WASM DTO export (Sprint 3 parity close) |
 | **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` · mode share `370e944` · unemployment HUD `e70ed78` |
@@ -234,7 +235,7 @@ flowchart TB
 ### P5 — Services & emergencies
 
 **Phase 5a (EA):** Utilities L0 balance, coverage overlays, response time = distance + traffic.  
-**Phase 5b:** Fire spread, hydrants (P5.3 ✅), EMS survival curve (P5.4 ✅), hospital capacity Tier-2 ✅, wildfire / arson rings Tier-2 ✅, aerial / lookout / fire rating Tier-2 ✅, education depth Tier-2 ✅, park amenity parity Tier-2 ✅, health → P4 satisfaction/migration Tier-2 ✅, hospital → HH health progression Tier-2 ✅, tourism attractions stub Tier-2 ✅, police/crime depth Tier-2 ✅, waste/pollution depth Tier-2 ✅.
+**Phase 5b:** Fire spread, hydrants (P5.3 ✅), EMS survival curve (P5.4 ✅), hospital capacity Tier-2 ✅, wildfire / arson rings Tier-2 ✅, aerial / lookout / fire rating Tier-2 ✅, education depth Tier-2 ✅, park amenity parity Tier-2 ✅, health → P4 satisfaction/migration Tier-2 ✅, hospital → HH health progression Tier-2 ✅, tourism attractions stub Tier-2 ✅, police/crime depth Tier-2 ✅, waste/pollution depth Tier-2 ✅, sewage / water contamination Tier-2 ✅.
 
 | Milestone | Deliverable |
 |-----------|-------------|
@@ -253,6 +254,7 @@ flowchart TB
 | **Tier-2 tourism** ✅ | Parks/landmarks → `TourismIncome` — `TourismAttractions` + Budget HUD tourism row |
 | **Tier-2 police/crime** ✅ | Station quality → crime → `SafetySatisfaction` — `PoliceCrime` + Police HUD 👮 → P4 sat / immigration |
 | **Tier-2 waste** ✅ | Garbage depots → pollution → env score — `WasteCollection` + Waste HUD 🗑️ → P4 sat / immigration |
+| **Tier-2 sewage** ✅ | Treatment plants → water quality — `SewageTreatment` + Sewage HUD 💧 → P4 sat / immigration |
 
 ### P6 — Governance
 
@@ -417,6 +419,7 @@ openspec/
 | 2026-08-11 | **Tier-2 tourism attractions** — `TourismAttractions` parks/landmarks feed `TourismIncome` (not only pop×happiness); Budget HUD + snapshot |
 | 2026-08-11 | **Tier-2 police / crime** — `PoliceCrime` station quality → crime; `PoliceCoverageFraction` / `MeanCrimeRate` / `MeanSafetySatisfaction` + Police HUD 👮 → P4 sat / immigration |
 | 2026-08-11 | **Tier-2 waste / pollution** — `WasteCollection` depots abate R/C waste; `WasteCoverageFraction` / `MeanPollution` / `MeanEnvironmentScore` + Waste HUD 🗑️ → P4 sat / immigration |
+| 2026-08-11 | **Tier-2 sewage / water contamination** — `SewageTreatment` plants abate waterborne pollution; `SewageCoverageFraction` / `MeanWaterContamination` / `MeanWaterQuality` + Sewage HUD 💧 → P4 sat / immigration |
 | 2026-08-11 | **P3.5 bilateral trade routes** — partner + contract + `FreightMonths`; SimHost keeps bilateral routes; snapshot + Unity Trade/Economy HUD |
 | 2026-08-11 | **SB-3728 create/cancel bilateral** — `SimHost.CreateBilateralTradeRoute` / `CancelBilateralTradeRoute`; Unity Trade strip `[Y]` + toolbar |
 | 2026-08-11 | **SB-3728 regional NPC markers** — `NpcRegionalPartners` catalog + distance freight + `NpcPartnerCount`; Unity Trade regional map |

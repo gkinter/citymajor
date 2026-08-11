@@ -177,7 +177,8 @@ public sealed partial class SimHost
         _fullTraffic?.RestoreModeShares(
             dto.CarModeShare, dto.TransitModeShare, dto.WalkModeShare);
 
-        // Cathedral wave restores — Event*Mult, delivery delay, vacancy, abandoned, L2 sample.
+        // Cathedral wave restores — Law*Mult, Event*Mult, delivery delay, vacancy, abandoned, L2 sample.
+        RestoreLawMultipliers(dto);
         RestoreEventMultipliers(dto);
         RestoreActiveEvents(dto);
         _economy.RestoreMeanGoodsDeliveryDelay(dto.MeanGoodsDeliveryDelay, _state);
@@ -226,6 +227,17 @@ public sealed partial class SimHost
         return map.TryGetValue(savedId, out int mapped) ? mapped : savedId;
     }
 
+    private void RestoreLawMultipliers(SimSnapshotDto dto)
+    {
+        // Match RecomputeLawEffects clamps — traffic allows a deeper floor (0.1).
+        _state.LawTrafficCapacityMult = ClampLawMult(dto.LawTrafficCapacityMult, min: 0.1f);
+        _state.LawConstructionSpeedMult = ClampLawMult(dto.LawConstructionSpeedMult);
+        _state.LawSpawnDemandMult = ClampLawMult(dto.LawSpawnDemandMult);
+        _state.LawResidentialSpawnMult = ClampLawMult(dto.LawResidentialSpawnMult);
+        _state.LawIndustrialSpawnMult = ClampLawMult(dto.LawIndustrialSpawnMult);
+        _state.LawCommercialSpawnMult = ClampLawMult(dto.LawCommercialSpawnMult);
+    }
+
     private void RestoreEventMultipliers(SimSnapshotDto dto)
     {
         _state.EventTaxRevenueMult = ClampEventMult(dto.EventTaxRevenueMult);
@@ -235,6 +247,9 @@ public sealed partial class SimHost
         _state.EventResearchMult = ClampEventMult(dto.EventResearchMult);
         _state.EventSpawnDemandMult = ClampEventMult(dto.EventSpawnDemandMult);
     }
+
+    private static float ClampLawMult(float value, float min = 0.25f) =>
+        float.IsFinite(value) ? Math.Clamp(value, min, 3f) : 1f;
 
     private static float ClampEventMult(float value) =>
         float.IsFinite(value) ? Math.Clamp(value, 0.25f, 3f) : 1f;

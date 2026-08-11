@@ -154,10 +154,10 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | Field | E | W | U | Owner | Notes |
 |-------|---|---|---|-------|-------|
 | ActiveLawCount | ✅ | — | ✅ | LawSystem | |
-| LawTrafficCapacityMult | ✅ | — | ✅ | WorldState | |
-| LawConstructionSpeedMult | ✅ | — | — | WorldState | Not on Unity HUD tip |
-| LawSpawnDemandMult | ✅ | — | ✅ | WorldState | |
-| LawResidential/Industrial/CommercialSpawnMult | ✅ | — | ✅ | WorldState | |
+| LawTrafficCapacityMult | ✅ | ✅ | ✅ | WorldState | |
+| LawConstructionSpeedMult | ✅ | ✅ | — | WorldState | Not on Unity HUD tip |
+| LawSpawnDemandMult | ✅ | ✅ | ✅ | WorldState | |
+| LawResidential/Industrial/CommercialSpawnMult | ✅ | ✅ | ✅ | WorldState | |
 | ActiveEventCount | ✅ | ✅ | ✅ | EventSystem / WorldState | |
 | ActiveEvents[] | — | ✅ | Herald path | EventSystem | |
 | EventTaxRevenueMult | ✅ | ✅ | ✅ | WorldState | P6.2 / P7.5 |
@@ -225,11 +225,11 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 These are **documentation of tip reality**, not a backlog invent:
 
 1. **BlackoutFraction / WaterShortageFraction** — on engine + Unity; **not** on `SimSnapshotDto`.
-2. **Law\*Mult** (except via Unity) — on engine snap; **not** exported on WASM DTO (events are).
-3. **TradeBalance / export-import** — engine + Unity; WASM relies on economy nested payload + indices.
-4. **Commute O-D sample** — WASM array; Unity uses aggregated HUD scalars + Citizen L2, not the same array type on `CitySimState`.
-5. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
-6. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
+2. **TradeBalance / export-import** — engine + Unity; WASM relies on economy nested payload + indices.
+3. **Commute O-D sample** — WASM array; Unity uses aggregated HUD scalars + Citizen L2, not the same array type on `CitySimState`.
+4. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
+5. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
+6. **Active ordinance ids** — `ActiveOrdinances` / law toggles remain engine-only; Law\*Mult scalars now round-trip on WASM DTO for save/load (parity with Event\*Mult).
 
 ---
 
@@ -252,3 +252,4 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **P7.1** initial `SIM_SNAPSHOT_V2.md` from tip `8f57614` exports (Event*Mult, AbandonedBuildingCount, fire/EMS, delivery delay, HH L2, friction corridors, mode share, council seats) |
 | 2026-08-11 | **P7.4** gap-matrix CI — `scripts/verify-sim-snapshot-v2.py` doc↔export check (SB-4264) |
 | 2026-08-11 | **Tier-2 hospital capacity** — `HospitalBedOccupancyFraction` / `AvailableHospitalBeds` on E+W+U |
+| 2026-08-11 | **Law\*Mult WASM DTO** — traffic/construction/spawn Mults export + `ApplySnapshotDto` restore (closes former §6 gap #2) |

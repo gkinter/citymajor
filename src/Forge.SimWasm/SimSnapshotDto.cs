@@ -95,6 +95,18 @@ public sealed class SimSnapshotDto
     public ActiveEventDto[] ActiveEvents { get; init; } = [];
     /// <summary>Count of live EventSystem instances — Herald HUD badge (Cathedral P6).</summary>
     public int ActiveEventCount { get; init; }
+    /// <summary>Cathedral P6.1 — road capacity multiplier from active ordinances.</summary>
+    public float LawTrafficCapacityMult { get; init; } = 1f;
+    /// <summary>Cathedral P6.1 — construction duration multiplier from active ordinances.</summary>
+    public float LawConstructionSpeedMult { get; init; } = 1f;
+    /// <summary>Cathedral P6.1 — baseline zone spawn demand multiplier from ordinances.</summary>
+    public float LawSpawnDemandMult { get; init; } = 1f;
+    /// <summary>Cathedral P6.1 — residential zone spawn multiplier from ordinances.</summary>
+    public float LawResidentialSpawnMult { get; init; } = 1f;
+    /// <summary>Cathedral P6.1 — industrial zone spawn multiplier from ordinances.</summary>
+    public float LawIndustrialSpawnMult { get; init; } = 1f;
+    /// <summary>Cathedral P6.1 — commercial / office spawn multiplier from ordinances.</summary>
+    public float LawCommercialSpawnMult { get; init; } = 1f;
     /// <summary>Cathedral P6.2 — tax revenue multiplier from active events.</summary>
     public float EventTaxRevenueMult { get; init; } = 1f;
     /// <summary>Cathedral P6.2 — immigration multiplier from active events.</summary>
@@ -218,6 +230,12 @@ public sealed class SimSnapshotDto
             FrictionCorridors = frictionCorridors,
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
             ActiveEventCount = events?.ActiveEventCount ?? 0,
+            LawTrafficCapacityMult = state.LawTrafficCapacityMult,
+            LawConstructionSpeedMult = state.LawConstructionSpeedMult,
+            LawSpawnDemandMult = state.LawSpawnDemandMult,
+            LawResidentialSpawnMult = state.LawResidentialSpawnMult,
+            LawIndustrialSpawnMult = state.LawIndustrialSpawnMult,
+            LawCommercialSpawnMult = state.LawCommercialSpawnMult,
             EventTaxRevenueMult = state.EventTaxRevenueMult,
             EventImmigrationMult = state.EventImmigrationMult,
             EventCommercialSpawnMult = state.EventCommercialSpawnMult,

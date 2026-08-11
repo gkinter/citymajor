@@ -164,7 +164,11 @@ FIELD_EXPAND: dict[str, dict[str, list[str]]] = {
             "LawIndustrialSpawnMult",
             "LawCommercialSpawnMult",
         ],
-        "W": [],
+        "W": [
+            "LawResidentialSpawnMult",
+            "LawIndustrialSpawnMult",
+            "LawCommercialSpawnMult",
+        ],
         "U": [
             "LawResidentialSpawnMult",
             "LawIndustrialSpawnMult",

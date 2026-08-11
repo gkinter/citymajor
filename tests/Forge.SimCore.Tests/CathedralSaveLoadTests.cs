@@ -12,7 +12,7 @@ namespace Forge.SimCore.Tests;
 /// Characterization: Cathedral HUD metrics that are exported on the save API
 /// (<see cref="SimHost.GetSnapshotJson"/> / <see cref="SimHost.LoadSnapshotFromJson"/>)
 /// must survive snapshot restore — MeanRentBurden, councilSeats, mode shares,
-/// plus Event*Mult / delivery delay / abandoned / fire / EMS / L2 sample.
+/// plus Event*Mult / Law*Mult / delivery delay / abandoned / fire / EMS / L2 sample.
 /// </summary>
 [Collection("SimHost")]
 public sealed class CathedralSaveLoadTests
@@ -199,6 +199,60 @@ public sealed class CathedralSaveLoadTests
         Assert.Equal(work, restored.WorkBuildingId);
         Assert.InRange(restored.Happiness, 0.95f, 1f);
         Assert.Equal(0.41f, restored.RentBurden, precision: 3);
+    }
+
+    [Fact]
+    public void SnapshotRoundTrip_PreservesLawMults()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        var state = host.State!;
+        // Pin non-default Mults (as if ordinances were active) without relying on law catalog JSON.
+        state.LawTrafficCapacityMult = 0.55f;
+        state.LawConstructionSpeedMult = 1.40f;
+        state.LawSpawnDemandMult = 1.025f;
+        state.LawResidentialSpawnMult = 0.765f;
+        state.LawIndustrialSpawnMult = 0.835f;
+        state.LawCommercialSpawnMult = 0.91f;
+
+        string json = host.GetSnapshotJson();
+        var saved = JsonSerializer.Deserialize(json, SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(saved);
+
+        using (var doc = JsonDocument.Parse(json))
+        {
+            Assert.True(doc.RootElement.TryGetProperty("lawTrafficCapacityMult", out _));
+            Assert.True(doc.RootElement.TryGetProperty("lawConstructionSpeedMult", out _));
+            Assert.True(doc.RootElement.TryGetProperty("lawSpawnDemandMult", out _));
+            Assert.True(doc.RootElement.TryGetProperty("lawResidentialSpawnMult", out _));
+            Assert.True(doc.RootElement.TryGetProperty("lawIndustrialSpawnMult", out _));
+            Assert.True(doc.RootElement.TryGetProperty("lawCommercialSpawnMult", out _));
+        }
+
+        Assert.Equal(0.55f, saved!.LawTrafficCapacityMult, precision: 3);
+        Assert.Equal(1.40f, saved.LawConstructionSpeedMult, precision: 3);
+        Assert.Equal(1.025f, saved.LawSpawnDemandMult, precision: 3);
+        Assert.Equal(0.765f, saved.LawResidentialSpawnMult, precision: 3);
+        Assert.Equal(0.835f, saved.LawIndustrialSpawnMult, precision: 3);
+        Assert.Equal(0.91f, saved.LawCommercialSpawnMult, precision: 3);
+
+        Assert.True(host.LoadSnapshotFromJson(json));
+
+        Assert.Equal(saved.LawTrafficCapacityMult, host.State!.LawTrafficCapacityMult, precision: 3);
+        Assert.Equal(saved.LawConstructionSpeedMult, host.State.LawConstructionSpeedMult, precision: 3);
+        Assert.Equal(saved.LawSpawnDemandMult, host.State.LawSpawnDemandMult, precision: 3);
+        Assert.Equal(saved.LawResidentialSpawnMult, host.State.LawResidentialSpawnMult, precision: 3);
+        Assert.Equal(saved.LawIndustrialSpawnMult, host.State.LawIndustrialSpawnMult, precision: 3);
+        Assert.Equal(saved.LawCommercialSpawnMult, host.State.LawCommercialSpawnMult, precision: 3);
+
+        var roundTrip = JsonSerializer.Deserialize(
+            host.GetSnapshotJson(),
+            SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(roundTrip);
+        Assert.Equal(saved.LawTrafficCapacityMult, roundTrip!.LawTrafficCapacityMult, precision: 3);
+        Assert.Equal(saved.LawSpawnDemandMult, roundTrip.LawSpawnDemandMult, precision: 3);
+        Assert.Equal(saved.LawCommercialSpawnMult, roundTrip.LawCommercialSpawnMult, precision: 3);
     }
 
     private static int PlaceBuilding(

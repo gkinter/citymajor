@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace CityMajor.UI
 {
     /// <summary>
-    /// UGUI Economy panel — goods imbalances + production flows from sim snapshot / EconomySystem.
+    /// UGUI Economy panel — goods imbalances, partition price spread, production flows.
     /// Toggle with E (toolbar button also available). Esc closes while open.
     /// </summary>
     public sealed class EconomyPanelController : MonoBehaviour
@@ -17,6 +17,7 @@ namespace CityMajor.UI
         Text _summary;
         Text _shortages;
         Text _surpluses;
+        Text _spreads;
         Text _flows;
         bool _open;
 
@@ -86,7 +87,7 @@ namespace CityMajor.UI
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
                 new Vector2(-220f, 20f),
-                new Vector2(420f, 560f));
+                new Vector2(420f, 620f));
             _root = panel.gameObject;
 
             var header = new GameObject("Header", typeof(RectTransform), typeof(Image));
@@ -130,15 +131,19 @@ namespace CityMajor.UI
 
             _shortages = UguiPanelBuilder.AddText(
                 body.transform, "Shortages", "", 13, Color.white);
-            Stretch(_shortages, 0f, 0.78f, 0f, -72f);
+            Stretch(_shortages, 0f, 0.82f, 0f, -72f);
 
             _surpluses = UguiPanelBuilder.AddText(
                 body.transform, "Surpluses", "", 13, Color.white);
-            Stretch(_surpluses, 0f, 0.52f, 0f, -210f);
+            Stretch(_surpluses, 0f, 0.62f, 0f, -180f);
+
+            _spreads = UguiPanelBuilder.AddText(
+                body.transform, "PartitionSpreads", "", 13, Color.white);
+            Stretch(_spreads, 0f, 0.38f, 0f, -290f);
 
             _flows = UguiPanelBuilder.AddText(
                 body.transform, "Flows", "", 13, Color.white);
-            Stretch(_flows, 0f, 0f, 0f, -340f);
+            Stretch(_flows, 0f, 0f, 0f, -410f);
 
             _root.SetActive(false);
         }
@@ -155,7 +160,7 @@ namespace CityMajor.UI
 
         void Refresh()
         {
-            if (!_open || _summary == null || _sim == null)
+            if (!_open || _summary == null || _spreads == null || _sim == null)
                 return;
 
             var snap = _sim.LatestSnapshot;
@@ -168,12 +173,15 @@ namespace CityMajor.UI
                 : state.GoodsSurplusIndex;
             var trade = state.TradeBalance;
             var emp = Mathf.RoundToInt(state.EmploymentRate * 100f);
+            var zones = Mathf.Max(1, state.MarketZoneCount);
+            var spread = Mathf.Max(1f, state.MaxPartitionPriceSpread);
 
             _summary.text =
                 $"Shortage pressure {Mathf.RoundToInt(shortageIdx * 100f)}% · " +
                 $"Surplus {Mathf.RoundToInt(surplusIdx * 100f)}%\n" +
                 $"Employment {emp}% · Trade {(trade >= 0 ? "+" : "")}{trade:N0}/mo · " +
                 $"Inter-zone {state.InterZoneTradeVolume:N0}/d\n" +
+                $"Markets {zones} · Spread ×{spread:F2} · " +
                 $"Friction ×{state.MeanInterZoneFriction:F2} · " +
                 $"Transport cost {Mathf.RoundToInt(Mathf.Clamp01(state.GoodsTransportCostIndex) * 100f)}%";
 
@@ -229,6 +237,45 @@ namespace CityMajor.UI
             }
 
             _surpluses.text = sb.ToString().TrimEnd();
+
+            sb.Clear();
+            sb.Append("Partition prices");
+            if (zones > 1)
+                sb.Append(" (").Append(zones).Append(" markets)");
+            sb.AppendLine();
+            var spreads = _sim.GetAnchorZonePriceSpreads();
+            if (zones <= 1 || spreads.Length == 0)
+            {
+                sb.AppendLine(zones <= 1
+                    ? "  (single market — grow population to split)"
+                    : "  (awaiting price divergence)");
+            }
+            else
+            {
+                var shown = 0;
+                for (var i = 0; i < spreads.Length && shown < 5; i++)
+                {
+                    var row = spreads[i];
+                    if (row.MinPrice <= 0f || row.MaxPrice <= row.MinPrice * 1.01f)
+                        continue;
+                    sb.Append("  • ")
+                        .Append(UguiPanelBuilder.FormatGoodName(row.Name))
+                        .Append("  ")
+                        .Append(UguiPanelBuilder.FormatUnits(row.MinPrice))
+                        .Append("–")
+                        .Append(UguiPanelBuilder.FormatUnits(row.MaxPrice))
+                        .Append("  avg ")
+                        .Append(UguiPanelBuilder.FormatUnits(row.CityAvgPrice))
+                        .AppendLine();
+                    shown++;
+                }
+
+                if (shown == 0)
+                    sb.AppendLine("  (prices aligned across districts)");
+            }
+
+            _spreads.text = sb.ToString().TrimEnd();
+            _spreads.color = spread >= 1.2f ? UguiPanelBuilder.Warn : Color.white;
 
             sb.Clear();
             sb.AppendLine("Production flows");

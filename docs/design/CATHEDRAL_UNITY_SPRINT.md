@@ -16,7 +16,7 @@
 Sprint 1–2 landed Cathedral **sim depth** (roads, zoning, goods, O-D, commute satisfaction) and several **web** HUD/overlays as early mirrors. Sprint 3 closes the **player gap**: bind those snapshot fields in the Unity client so Play mode is the truthful cathedral surface.
 
 **Primary pillar:** P7 Client truth (Unity HUD/tools)  
-**Secondary:** Finish Sprint 2 carry-over **P3.3** (SimCore) if not already cherry-picked  
+**Secondary:** Sprint 2 carry-over **P3.3** ✅ closed (partition scale + Unity spread HUD)  
 **Exit gate:** Cathedral economy / traffic / housing fields visible and operable in Unity Play; Play checklist subset green; no new web R3F player features
 
 ---
@@ -50,9 +50,10 @@ Sprint 1–2 landed Cathedral **sim depth** (roads, zoning, goods, O-D, commute 
 | Field | Value |
 |-------|-------|
 | **Owner** | Unity UI lane |
-| **Deliverable** | Goods shortages/surpluses, prices, production-chain drill-down, partition price spread (once P3.3 lands) |
+| **Deliverable** | Goods shortages/surpluses, prices, production-chain drill-down, partition price spread |
 | **Acceptance** | Building click or Economy panel (`E`) shows chain + prices from snapshot; matches SimCore characterization |
-| **Depends** | P3.1–P3.2 ✅; P3.3 for multi-partition spread |
+| **Depends** | P3.1–P3.3 ✅ |
+| **Landed** | UGUI Economy panel + partition min–max spread (P3.3) |
 
 ### U3.3 — Traffic / friction overlays (P1/P3 → Unity)
 
@@ -90,14 +91,14 @@ Sprint 1–2 landed Cathedral **sim depth** (roads, zoning, goods, O-D, commute 
 | **Deliverable** | Update [`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md) for Cathedral Sprint 2/3 surfaces; Editor menu verify where possible |
 | **Acceptance** | Checklist subset signed for integration tip before next sim-depth sprint |
 
-### S2 carry — P3.3 market partitions (SimCore)
+### S2 carry — P3.3 market partitions (SimCore) ✅
 
 | Field | Value |
 |-------|-------|
-| **Owner** | SimCore lane |
-| **Deliverable** | 8–16 market zones with distinct partition prices; unskip/green characterization |
+| **Owner** | SimCore + Unity UI |
+| **Deliverable** | 1→4→9→16 market zones with distinct partition prices; Unity Economy spread |
 | **Acceptance** | See [`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md) §P3.3 |
-| **Note** | Sim-only; Unity U3.2 binds the export once landed |
+| **Landed** | Characterization + Economy `[E]` / Cathedral markets line |
 
 ---
 
@@ -127,7 +128,7 @@ Follow merge protocol in [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md). B
 ## 6. Acceptance checklist
 
 - [ ] Unity Play: road tier + bridge/tunnel/ramp modes usable without digging inspector-only fields
-- [ ] Unity Play: Economy panel shows goods + chain (+ partition spread if P3.3 merged)
+- [x] Unity Play: Economy panel shows goods + chain + partition spread (`E`)
 - [x] Unity Play: congestion overlay reads snapshot edge data (`T`)
 - [x] Unity Play: friction corridor overlay reads economy corridor samples (`F`)
 - [ ] Unity Play: extended zones + density paint work under era gates

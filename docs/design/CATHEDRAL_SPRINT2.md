@@ -10,7 +10,7 @@
 **Platform note:** Sprint 2 landed several **web** HUD/overlays as early mirrors of Cathedral snapshot fields. Those are **not** the ship surface — Unity binds the same fields in Sprint 3. WASM/web remain optional **sim validation harness** only.
 
 **Landed this sync:** P2.1 ✅ · P3.2 export+HUD ✅ · P3.4 friction ✅ · P4.1 O-D+HUD ✅ · P4.2 FW+commute sat ✅ · P4.5 mode choice + mode-share HUD ✅ · P4.3 unemployment HUD ✅ · P1.5 ramp/bridge UI ✅ · congestion heatmap ✅ · SimplexNoise ✅ · P5 politics stub ✅ · P5.1 utilities char ✅ · P5.2 EMS response ✅ · P5.5/P5.6 ✅ · **P7.2 0-skip gate ✅** · smoke WASM wait ✅ · E-key fix ✅ · perf median gate ✅ · OpenSpec `001` archived ✅  
-**Still open:** P3.3 partition pricing depth (SimCore carry → Unity sprint)  
+**Still open:** none (P3.3 closed — Unity Economy partition spread + 1→4→9→16 characterization)  
 **Hand-off:** Port / bind player-facing Sprint 2 surfaces in Unity — see U3.* in [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md)
 
 ---
@@ -58,14 +58,15 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 | **Depends** | P3.1 ✅ |
 | **Landed** | `45d8186` partition prices · `746780c` production-chain HUD |
 
-### P3.3 — Market zone partition pricing (SB-4223)
+### P3.3 — Market zone partition pricing (SB-4223) ✅
 
 | Field | Value |
 |-------|-------|
-| **Owner** | SimCore |
-| **Deliverable** | 8–16 active market zones with distinct per-zone prices on snapshot |
-| **Acceptance** | `CathedralEconomyTests.MarketZonePrices_DifferAcrossPartitions` **unskipped and green**; two zones show price delta after trade shock |
+| **Owner** | SimCore + Unity Economy HUD |
+| **Deliverable** | 1→4→9→16 market zones with distinct per-zone prices; Economy `[E]` partition spread |
+| **Acceptance** | `CathedralEconomyTests.MarketZonePrices_DifferAcrossPartitions` green; trade-shock + 9/16 scale tests green; Unity shows min–max spread |
 | **Depends** | P3.1 ✅ |
+| **Landed** | SimCore scale/trade-shock characterization · Unity Economy/Cathedral partition spread HUD |
 
 ### P3.4 — Inter-zone friction UI (SB-4224) ✅
 
@@ -212,7 +213,7 @@ Sprint 1 closed **infrastructure truth** (P1) and the first housing/economy HUD 
 ## 7. Acceptance checklist (Fri W2)
 
 - [x] `dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"` — all pass, zero skipped (`817e968`)
-- [x] Goods panel / snapshot shows partition prices (export landed `45d8186`; UI spread still P3.3)
+- [x] Goods panel / snapshot shows partition prices (export landed `45d8186`; Unity spread HUD P3.3)
 - [x] Production-chain HUD with goods flow (`746780c`)
 - [x] Friction overlay landed (web spike `a9e7878`; Unity U3.3 binds product UX)
 - [x] Snapshot: home/work building O-D (`99a6547`) + O-D HUD (`ccf7f22`)

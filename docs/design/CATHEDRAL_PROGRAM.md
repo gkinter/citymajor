@@ -102,8 +102,8 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P2.2**–**P2.5** | ✅ Done | Density brush, rent model, Herald housing triggers, vacancy/rent burden snapshot |
 | **P3.1** | ✅ Done | Goods panel shortages/surpluses + prices in HUD |
 | **P3.2** | ✅ Done | Partition prices export + production-chain HUD — `45d8186` / `746780c` |
-| **P3.3** | 🔲 Sprint 2 | Market-zone pricing depth (8–16 partitions + unskip test) |
-| **P3.4** | ✅ Done | Inter-zone friction overlay — `a9e7878` |
+| **P3.3** | ✅ Done | Market-zone pricing depth (1→4→9→16 + Unity partition spread HUD) |
+| **P3.4** | ✅ Done | Inter-zone friction overlay — `a9e7878` · Unity `F` overlay |
 | **P4.1** | ✅ Done | Home/work building O-D for traffic lite — `99a6547` · O-D HUD `ccf7f22` |
 | **P4.2** | ✅ Done | Frank-Wolfe + graph commute → satisfaction — `76db8bf` / `f72dd3d` |
 | **P4.5** | ✅ Done | Mode-choice stub (simple MNL) — `571352a` · mode-share HUD `370e944` |
@@ -115,7 +115,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P7.2** | ✅ Done | 0 Cathedral `Skip=` gate — `817e968` / SB-4986 · isolation `49edba1` / `b4be623` |
 | **Harness polish** | ✅ Done | Smoke wait WASM `0ecc0ba` · E-key economy toggle `5205201` · perf median gate `6c1f077` |
 
-**Sprint 2 plan (closing):** [`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md) — P3.3 still open  
+**Sprint 2 plan (closed):** [`CATHEDRAL_SPRINT2.md`](./CATHEDRAL_SPRINT2.md) — P3.3 closed  
 **Sprint 3 plan (active next):** [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md) — Unity UI/HUD + tools parity
 
 ```mermaid
@@ -200,7 +200,7 @@ flowchart TB
 |-----------|-------------|----------|
 | **P3.1** ✅ | Goods panel: top shortages/surpluses, prices by good | `EconomySystem` |
 | **P3.2** ✅ | Partition prices export + production-chain HUD | `EconomySystem` / `45d8186` / `746780c` |
-| **P3.3** | 8–16 market zones with partition pricing | `SIMULATION_ARCHITECTURE` §5 |
+| **P3.3** ✅ | 1→4→9→16 market zones + partition price spread HUD | `SIMULATION_ARCHITECTURE` §5 · Unity Economy `[E]` |
 | **P3.4** ✅ | Inter-zone trade friction matrix visible | WP-E / `a9e7878` |
 | **P3.5** | Bilateral trade routes (v2): partner city, contract, freight time | `TradeSystem`, SB-3728 |
 | **P3.6** | Traffic delays → goods delivery latency → industrial throughput | Cross-pillar with P1 |
@@ -359,3 +359,4 @@ openspec/
 | 2026-08-10 | **Sprint 2 wave-2 sync** — P3.2 chain HUD (`746780c`), P3.4 friction (`a9e7878`), P1.5 ramp/bridge UI (`6084fad`/`b34942a`), congestion heatmap (`c8827bf`), O-D HUD (`ccf7f22`), mode choice (`571352a`), SimplexNoise (`b4be623`), P5 politics stub (`fb64bd9`); OpenSpec `001` archived; remaining **P3.3** + P7.2 unskip gate |
 | 2026-08-10 | **Unity-first mandate locked** — player experience = Unity Editor + builds; web R3F archival/spike; WASM optional harness; next sprint [`CATHEDRAL_UNITY_SPRINT.md`](./CATHEDRAL_UNITY_SPRINT.md); orchestration canonical [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md) |
 | 2026-08-10 | **Sprint 2 wave-3 sync** @ `06977a9` — P5.2 EMS response (`06977a9`), P5.5/P5.6 (`0452f88`/`ae15498`), P5.1 utilities char (`ae635b0`), P7.2 0-skip (`817e968`/SB-4986), mode-share HUD (`370e944`), unemployment HUD (`e70ed78`), smoke WASM wait (`0ecc0ba`), E-key fix (`5205201`), perf median gate (`6c1f077`); remaining **P3.3** |
+| 2026-08-11 | **P3.3 closed** — zone scale 1→4→9→16 + trade-shock characterization; Unity Economy/Cathedral partition spread HUD (`[E]`) |

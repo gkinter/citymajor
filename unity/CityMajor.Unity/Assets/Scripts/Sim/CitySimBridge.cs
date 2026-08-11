@@ -81,6 +81,16 @@ namespace CityMajor.Sim
                    ?? Array.Empty<EconomySystem.GoodFlowEntry>();
         }
 
+        /// <summary>Anchor good min/max prices across market partitions (Cathedral P3.3).</summary>
+        public EconomySystem.ZonePriceSpread[] GetAnchorZonePriceSpreads()
+        {
+            if (!_simCoreReady || _simHost?.Economy == null)
+                return Array.Empty<EconomySystem.ZonePriceSpread>();
+
+            return _simHost.Economy.GetAnchorZonePriceSpreads()
+                   ?? Array.Empty<EconomySystem.ZonePriceSpread>();
+        }
+
         /// <summary>Council seat faction ids from the latest snapshot (9 seats).</summary>
         public byte[] GetCouncilSeats()
         {
@@ -298,6 +308,8 @@ namespace CityMajor.Sim
             WaterAvgPrice = 0.8f,
             SteelAvgPrice = 2.4f,
             HasGoodsPrices = true,
+            MarketZoneCount = 4,
+            MaxPartitionPriceSpread = 1.35f,
         };
 
         void PublishFromSimHost()
@@ -327,6 +339,25 @@ namespace CityMajor.Sim
             var foodPrice = hasGoodsPrices ? economy.GetAveragePrice(Good.Food) : 0f;
             var waterPrice = hasGoodsPrices ? economy.GetAveragePrice(Good.Water) : 0f;
             var steelPrice = hasGoodsPrices ? economy.GetAveragePrice(Good.Steel) : 0f;
+            var marketZoneCount = economy?.ActiveZoneCount
+                ?? (snap.MarketZoneCount > 0 ? snap.MarketZoneCount : 1);
+            var maxPartitionSpread = 1f;
+            if (economy != null && marketZoneCount > 1)
+            {
+                var spreads = economy.GetAnchorZonePriceSpreads();
+                if (spreads != null)
+                {
+                    for (var i = 0; i < spreads.Length; i++)
+                    {
+                        var row = spreads[i];
+                        if (row.MinPrice <= 0f)
+                            continue;
+                        var ratio = row.MaxPrice / row.MinPrice;
+                        if (ratio > maxPartitionSpread)
+                            maxPartitionSpread = ratio;
+                    }
+                }
+            }
 
             State = new CitySimState
             {
@@ -371,6 +402,8 @@ namespace CityMajor.Sim
                 WaterAvgPrice = waterPrice,
                 SteelAvgPrice = steelPrice,
                 HasGoodsPrices = hasGoodsPrices,
+                MarketZoneCount = marketZoneCount,
+                MaxPartitionPriceSpread = maxPartitionSpread,
                 TimeOfDay = timeOfDay,
                 RushMultiplier = LifeSimMath.RushHourMultiplier(timeOfDay),
                 HouseholdCount = households.Length,

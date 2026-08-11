@@ -219,6 +219,11 @@ namespace CityMajor.UI
             var goods = state.HasGoodsPrices
                 ? $"Food {state.FoodAvgPrice:0.00} · Water {state.WaterAvgPrice:0.00} · Steel {state.SteelAvgPrice:0.00}"
                 : $"Shortage {Pct(state.GoodsShortageIndex)} · Surplus {Pct(state.GoodsSurplusIndex)}";
+            var markets = Mathf.Max(1, state.MarketZoneCount);
+            var spread = Mathf.Max(1f, state.MaxPartitionPriceSpread);
+            var marketsLine = markets > 1
+                ? $"Markets {markets} · Spread ×{spread:0.00}"
+                : $"Markets {markets}";
 
             var eventCount = SimActiveEventHeadlines.ResolveCount(activeEvents);
             if (eventCount <= 0)
@@ -237,6 +242,7 @@ namespace CityMajor.UI
                 $"Approval     {approval}\n" +
                 $"Power {power} · Water {water}\n" +
                 $"Goods  {goods}\n" +
+                $"{marketsLine}\n" +
                 eventLine;
         }
 

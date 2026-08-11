@@ -74,6 +74,8 @@
 - [ ] `U` — utility stress overlay (power/water strain tint)
 - [ ] `T` — edge traffic lines on congested roads
 - [ ] `F` — trade friction corridor heat on market-zone boundaries (cyan→magenta)
+- [ ] `E` — Economy panel: shortages/surpluses, **partition price min–max**, production flows
+- [ ] Cathedral metrics strip shows **Markets N · Spread ×…** when multi-zone
 - [ ] Bottom-center **demand strip** shows R/C/I + **goods shortage** bar + **utility stress** row
 - [ ] **Event ticker** (top) shows Herald headline from sim metrics (not static placeholder)
 - [ ] Zoom camera out (distance ≥ 200) — buildings switch to **box LOD** instanced cubes

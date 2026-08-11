@@ -19,7 +19,7 @@ Make the **goods economy legible** in HUD: top shortages/surpluses with prices, 
 |----|-------------|---------------|
 | P3.1 | Goods panel data contract (top 5 + prices) | **Partial** — names + magnitude in `EconomySnapshotDto`; prices not exported |
 | P3.2 | Market zone partition count on snapshot | **Partial** — `ActiveZoneCount` in `EconomySystem`; export stub `MarketZoneCount` |
-| P3.3 | Per-zone price spread visible (partition prices differ) | **Not implemented** — prices differ in sim when zones imbalanced; no export/test |
+| P3.3 | Per-zone price spread visible (partition prices differ) | **Done** — `GetAnchorZonePriceSpreads` + Unity Economy/Cathedral HUD; scale 1→4→9→16 |
 | P3.4 | Inter-zone friction on snapshot + HUD | **Live** — `MeanInterZoneFriction`, `InterZoneTradeVolume`, `GoodsTransportCostIndex`, friction corridor overlay |
 | P3.5 | Traffic delay → goods delivery lag | **Not implemented** — cross-link P1 |
 | P3.6 | Bilateral trade routes | **v2 boundary** — `TradeSystem.CreateTradeRoute` exists; player-facing routes deferred |
@@ -96,7 +96,7 @@ Panel shows **top 5 shortages** and **top 5 surpluses**, each row includes `city
 | `MeanInterZoneFriction` | `float` | Weighted mean friction of executed transfers (≥1.0) |
 | `InterZoneTradeVolume` | `float` | Daily units moved across zones |
 
-**P3.3 extension (deferred):** sparse `MarketZonePriceDto[]` for 3–5 anchor goods when `MarketZoneCount > 1` — only if perf budget allows (&lt;200 bytes/tick).
+**P3.3 extension:** sparse `MarketZonePriceDto[]` / `ZonePriceSpread[]` for anchor goods when `MarketZoneCount > 1` — live on WASM DTO + Unity Economy panel.
 
 ---
 
@@ -169,7 +169,7 @@ Document in UI: “International trade is automatic; trade agreements — coming
 | Test | File | Status |
 |------|------|--------|
 | Goods shortage index correlates with industrial/commercial imbalance | `CathedralEconomyTests` | **Implement** (may pass today) |
-| Market zone prices differ across partitions | `CathedralEconomyTests` | **Skipped** (`P3.3 not implemented`) |
+| Market zone prices differ across partitions | `CathedralEconomyTests` | **Green** (incl. trade-shock + 9/16 scale) |
 | `MarketZoneCount` on snapshot matches economy | `CathedralEconomyTests` | After export stub |
 | Traffic delay increases mean inter-zone friction | `CathedralEconomyTests` | Pending P3.5 |
 | Goods panel JSON includes prices per top imbalance | Integration | Pending P3.1 |

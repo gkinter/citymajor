@@ -90,6 +90,14 @@ namespace CityMajor.Sim
         /// <summary>True when anchor goods prices were sampled from EconomySystem.</summary>
         public bool HasGoodsPrices;
 
+        /// <summary>Cathedral P3.3 — active Leontief market partitions (1–16).</summary>
+        public int MarketZoneCount;
+
+        /// <summary>
+        /// Cathedral P3.3 — max/min price ratio across partitions for the widest anchor good (≥1).
+        /// </summary>
+        public float MaxPartitionPriceSpread;
+
         /// <summary>Sim hour 0–24 (from SimSnapshot.TimeOfDay).</summary>
         public float TimeOfDay;
 

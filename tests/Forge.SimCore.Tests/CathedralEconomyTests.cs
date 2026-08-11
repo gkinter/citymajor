@@ -54,6 +54,63 @@ public sealed class CathedralEconomyTests
     }
 
     [Fact]
+    public void MarketZonePrices_RemainDistinct_AfterTradeShock()
+    {
+        var economy = new EconomySystem();
+        economy.SetActiveZoneCount(9);
+
+        economy.SetZoneSupply(0, Good.Food, 200f);
+        economy.SetZoneDemand(0, Good.Food, 10f);
+        economy.SetZoneSupply(8, Good.Food, 2f);
+        economy.SetZoneDemand(8, Good.Food, 160f);
+
+        economy.RecalculatePrices();
+        float before0 = economy.GetPrice(0, Good.Food);
+        float before8 = economy.GetPrice(8, Good.Food);
+        Assert.True(before8 > before0 * 1.2f,
+            $"Pre-trade scarcity should price above surplus. z0={before0:F2} z8={before8:F2}");
+
+        economy.RunCrossZoneTradeOnly();
+        economy.RecalculatePrices();
+
+        float after0 = economy.GetPrice(0, Good.Food);
+        float after8 = economy.GetPrice(8, Good.Food);
+        Assert.True(economy.LastInterZoneTradeVolume > 0f,
+            "Trade shock should move goods across partitions.");
+        Assert.True(after8 > after0 * 1.05f,
+            $"Partition prices should stay distinct after trade. z0={after0:F2} z8={after8:F2}");
+
+        var spreads = economy.GetAnchorZonePriceSpreads();
+        var food = Assert.Single(spreads, row => row.Name == "Food");
+        Assert.True(food.MaxPrice > food.MinPrice * 1.05f,
+            $"Anchor spread should remain after trade. min={food.MinPrice:F2} max={food.MaxPrice:F2}");
+    }
+
+    [Fact]
+    public void MarketZoneCount_ScalesThroughNineAndSixteen()
+    {
+        var economy = new EconomySystem();
+        var state = new WorldState(64);
+
+        state.Population = 400;
+        economy.DailyTick(state, 1.0);
+        Assert.Equal(1, economy.ActiveZoneCount);
+
+        state.Population = 1500;
+        economy.DailyTick(state, 1.0);
+        Assert.Equal(4, economy.ActiveZoneCount);
+
+        state.Population = 5000;
+        economy.DailyTick(state, 1.0);
+        Assert.Equal(9, economy.ActiveZoneCount);
+
+        state.Population = 12000;
+        economy.DailyTick(state, 1.0);
+        Assert.Equal(16, economy.ActiveZoneCount);
+        Assert.Equal(EconomySystem.MaxMarketZones, economy.ActiveZoneCount);
+    }
+
+    [Fact]
     public void EconomySnapshot_ExportsPricePerTopImbalance()
     {
         var economy = new EconomySystem();

@@ -48,6 +48,11 @@
         </ui:VisualElement>
         <ui:Label name="trade-detail" class="panel-detail" text="" />
         <ui:VisualElement class="panel-row">
+            <ui:Label class="panel-label" text="Tourism" />
+            <ui:Label name="tourism-value" class="panel-value" text="—" />
+        </ui:VisualElement>
+        <ui:Label name="tourism-detail" class="panel-detail" text="" />
+        <ui:VisualElement class="panel-row">
             <ui:Label class="panel-label" text="Traffic density" />
             <ui:Label name="traffic-value" class="panel-value" text="—" />
         </ui:VisualElement>

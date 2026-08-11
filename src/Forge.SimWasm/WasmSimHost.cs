@@ -153,6 +153,14 @@ public sealed class WasmSimHost
     /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2).</summary>
     public float MeanHealthSatisfaction =>
         _host.State?.MeanHealthSatisfaction ?? 0f;
+    /// <summary>Park attraction units for tourism (Tier-2).</summary>
+    public int ParkAttractionCount => _host.State?.ParkAttractionCount ?? 0;
+    /// <summary>Landmark attraction units for tourism (Tier-2).</summary>
+    public int LandmarkAttractionCount => _host.State?.LandmarkAttractionCount ?? 0;
+    /// <summary>Park + landmark attraction units (Tier-2).</summary>
+    public int TourismAttractionCount => _host.State?.TourismAttractionCount ?? 0;
+    /// <summary>Monthly tourism income including attractions (Tier-2).</summary>
+    public float TourismIncome => _host.State?.TourismIncome ?? 0f;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
     /// <summary>Faction id per council seat (length <see cref="PoliticsSystem.CouncilSeatCount"/>).</summary>
@@ -417,6 +425,14 @@ public sealed class WasmStatusDto
     public float HealthCoverageFraction { get; init; }
     /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2).</summary>
     public float MeanHealthSatisfaction { get; init; }
+    /// <summary>Park attraction units for tourism (Tier-2).</summary>
+    public int ParkAttractionCount { get; init; }
+    /// <summary>Landmark attraction units for tourism (Tier-2).</summary>
+    public int LandmarkAttractionCount { get; init; }
+    /// <summary>Park + landmark attraction units (Tier-2).</summary>
+    public int TourismAttractionCount { get; init; }
+    /// <summary>Monthly tourism income including attractions (Tier-2).</summary>
+    public float TourismIncome { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Faction id per council seat (length 9).</summary>
@@ -542,6 +558,10 @@ public sealed class WasmStatusDto
             ParkAccessFraction = host.ParkAccessFraction,
             HealthCoverageFraction = host.HealthCoverageFraction,
             MeanHealthSatisfaction = host.MeanHealthSatisfaction,
+            ParkAttractionCount = host.ParkAttractionCount,
+            LandmarkAttractionCount = host.LandmarkAttractionCount,
+            TourismAttractionCount = host.TourismAttractionCount,
+            TourismIncome = host.TourismIncome,
             MarketZoneCount = host.MarketZoneCount,
             CouncilSeats = host.CouncilSeats,
         };

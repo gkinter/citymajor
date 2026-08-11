@@ -1,6 +1,7 @@
 using Forge.Engine.Core;
 using Forge.Engine.Data;
 using Forge.Engine.Simulation;
+using Forge.SimCore;
 
 namespace Forge.Game.Simulation;
 
@@ -42,6 +43,15 @@ public sealed class BudgetSystem
 
     /// <summary>Tourism income: tourists * average spending per tourist.</summary>
     public float TourismIncome { get; private set; }
+
+    /// <summary>Park attraction units counted into tourism (buildings + zone sites).</summary>
+    public int ParkAttractionCount { get; private set; }
+
+    /// <summary>Landmark / monument attraction units counted into tourism.</summary>
+    public int LandmarkAttractionCount { get; private set; }
+
+    /// <summary>Park + landmark attraction units.</summary>
+    public int TourismAttractionCount => ParkAttractionCount + LandmarkAttractionCount;
 
     /// <summary>Utility sales: power + water sold to citizens and businesses.</summary>
     public float UtilitySales { get; private set; }
@@ -347,11 +357,17 @@ public sealed class BudgetSystem
         TradeIncome = 0f;
 
         // --- Tourism Income ---
-        // Rough: happiness and cultural DNA drive tourism
-        // tourists = population * happiness * cultural_cosmopolitan_factor * 0.01
+        // Base: happiness + cultural DNA; attractions (parks / landmarks) add visitors.
         float cosmopolitan = state.CulturalDna.Length > 3 ? Math.Max(0, state.CulturalDna[3]) : 0f;
-        float tourists = state.Population * state.Happiness * (0.5f + cosmopolitan) * 0.01f;
-        TourismIncome = tourists * 50f; // $50 average spending per tourist
+        float baseTourists = state.Population * state.Happiness * (0.5f + cosmopolitan) * 0.01f;
+        ParkAttractionCount = TourismAttractions.CountParkAttractions(state);
+        LandmarkAttractionCount = TourismAttractions.CountLandmarkAttractions(state);
+        TourismIncome = TourismAttractions.ComputeTourismIncome(
+            baseTourists, ParkAttractionCount, LandmarkAttractionCount);
+        state.ParkAttractionCount = ParkAttractionCount;
+        state.LandmarkAttractionCount = LandmarkAttractionCount;
+        state.TourismAttractionCount = TourismAttractionCount;
+        state.TourismIncome = TourismIncome;
 
         // --- Utility Sales ---
         // Power and water sold: estimate from population

@@ -211,6 +211,14 @@ public sealed class SimSnapshotDto
     public float HealthCoverageFraction { get; init; }
     /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2 hospital + park health).</summary>
     public float MeanHealthSatisfaction { get; init; }
+    /// <summary>Park attraction units for tourism (Tier-2).</summary>
+    public int ParkAttractionCount { get; init; }
+    /// <summary>Landmark / monument attraction units for tourism (Tier-2).</summary>
+    public int LandmarkAttractionCount { get; init; }
+    /// <summary>Park + landmark attraction units (Tier-2).</summary>
+    public int TourismAttractionCount { get; init; }
+    /// <summary>Monthly tourism income including attractions (Tier-2).</summary>
+    public float TourismIncome { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Sparse market-zone boundary friction samples (0–1 heat).</summary>
@@ -350,6 +358,10 @@ public sealed class SimSnapshotDto
             ParkAccessFraction = state.ParkAccessFraction,
             HealthCoverageFraction = state.HealthCoverageFraction,
             MeanHealthSatisfaction = state.MeanHealthSatisfaction,
+            ParkAttractionCount = state.ParkAttractionCount,
+            LandmarkAttractionCount = state.LandmarkAttractionCount,
+            TourismAttractionCount = state.TourismAttractionCount,
+            TourismIncome = state.TourismIncome,
             MarketZoneCount = state.MarketZoneCount,
             CommuterCoverage = commuterAudit.Coverage,
             CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),

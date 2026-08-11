@@ -281,6 +281,26 @@ public sealed class WorldState
     public float MeanHealthSatisfaction { get; set; }
 
     /// <summary>
+    /// Park attraction units for tourism (park buildings + painted park zone sites). Tier-2.
+    /// </summary>
+    public int ParkAttractionCount { get; set; }
+
+    /// <summary>
+    /// Landmark / monument attraction units for tourism. Tier-2.
+    /// </summary>
+    public int LandmarkAttractionCount { get; set; }
+
+    /// <summary>
+    /// Park + landmark attraction units (visitor demand drivers). Tier-2.
+    /// </summary>
+    public int TourismAttractionCount { get; set; }
+
+    /// <summary>
+    /// Monthly tourism income from base visitors + attractions. Tier-2.
+    /// </summary>
+    public float TourismIncome { get; set; }
+
+    /// <summary>
     /// Per-tile wildfire burn intensity (0 = cold). Sized to <see cref="Tiles"/>.Count when first used.
     /// Not exported on snapshots — aggregates only.
     /// </summary>

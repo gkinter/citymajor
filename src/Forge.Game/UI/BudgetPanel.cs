@@ -128,6 +128,11 @@ public sealed class BudgetPanel
             DrawBudgetBar("Parking Fees", Budget.ParkingFees, maxValue, new Vector4(0.3f, 0.6f, 0.8f, 1f));
             DrawBudgetBar("Trade Income", Budget.TradeIncome, maxValue, new Vector4(0.6f, 0.5f, 0.8f, 1f));
             DrawBudgetBar("Tourism", Budget.TourismIncome, maxValue, new Vector4(0.6f, 0.5f, 0.8f, 1f));
+            if (Budget.TourismAttractionCount > 0)
+            {
+                ImGui.TextDisabled(
+                    $"  Attractions {Budget.TourismAttractionCount} (parks {Budget.ParkAttractionCount} · landmarks {Budget.LandmarkAttractionCount})");
+            }
             DrawBudgetBar("Utility Sales", Budget.UtilitySales, maxValue, new Vector4(0.8f, 0.7f, 0.3f, 1f));
             DrawBudgetBar("Govt Grants", Budget.GovernmentGrants, maxValue, new Vector4(0.8f, 0.7f, 0.3f, 1f));
 

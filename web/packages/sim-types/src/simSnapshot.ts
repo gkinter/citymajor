@@ -249,6 +249,14 @@ export type SimSnapshotDto = {
   healthCoverageFraction: number;
   /** Mean household HealthSatisfaction 0–1. */
   meanHealthSatisfaction: number;
+  /** Park attraction units for tourism (buildings + zone sites). */
+  parkAttractionCount: number;
+  /** Landmark / monument attraction units for tourism. */
+  landmarkAttractionCount: number;
+  /** Park + landmark attraction units. */
+  tourismAttractionCount: number;
+  /** Monthly tourism income including attractions. */
+  tourismIncome: number;
 
   marketZoneCount: number;
   commuterCoverage: number;
@@ -340,6 +348,10 @@ export type SimResourcesDto = Pick<
   | "parkAccessFraction"
   | "healthCoverageFraction"
   | "meanHealthSatisfaction"
+  | "parkAttractionCount"
+  | "landmarkAttractionCount"
+  | "tourismAttractionCount"
+  | "tourismIncome"
   | "marketZoneCount"
   | "commuterCoverage"
   | "councilSeats"

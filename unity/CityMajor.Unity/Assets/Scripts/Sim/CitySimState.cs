@@ -130,6 +130,18 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — mean household HealthSatisfaction 0–1.</summary>
         public float MeanHealthSatisfaction;
 
+        /// <summary>Tier-2 — park attraction units for tourism.</summary>
+        public int ParkAttractionCount;
+
+        /// <summary>Tier-2 — landmark / monument attraction units for tourism.</summary>
+        public int LandmarkAttractionCount;
+
+        /// <summary>Tier-2 — park + landmark attraction units.</summary>
+        public int TourismAttractionCount;
+
+        /// <summary>Tier-2 — monthly tourism income including attractions.</summary>
+        public float TourismIncome;
+
         /// <summary>Cathedral P2 — mean rent / income burden (0–1+).</summary>
         public float MeanRentBurden;
 

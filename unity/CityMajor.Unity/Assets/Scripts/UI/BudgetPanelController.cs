@@ -27,6 +27,8 @@ namespace CityMajor.UI
         Label _employment;
         Label _tradeBalance;
         Label _tradeDetail;
+        Label _tourism;
+        Label _tourismDetail;
         Label _traffic;
         Label _constructing;
         Label _goodsShortage;
@@ -101,6 +103,8 @@ namespace CityMajor.UI
             _employment = root.Q<Label>("employment-value");
             _tradeBalance = root.Q<Label>("trade-balance-value");
             _tradeDetail = root.Q<Label>("trade-detail");
+            _tourism = root.Q<Label>("tourism-value");
+            _tourismDetail = root.Q<Label>("tourism-detail");
             _traffic = root.Q<Label>("traffic-value");
             _constructing = root.Q<Label>("constructing-value");
             _goodsShortage = root.Q<Label>("goods-shortage-value");
@@ -146,7 +150,11 @@ namespace CityMajor.UI
                 snap.MonthlyImportCost,
                 snap.MeanTrafficDensity,
                 snap.ConstructingBuildingCount,
-                snap.GoodsShortageIndex);
+                snap.GoodsShortageIndex,
+                snap.TourismIncome,
+                snap.ParkAttractionCount,
+                snap.LandmarkAttractionCount,
+                snap.TourismAttractionCount);
         }
 
         void ApplyState(CitySimState state)
@@ -172,7 +180,11 @@ namespace CityMajor.UI
                 state.MonthlyImportCost,
                 state.MeanTrafficDensity,
                 state.ConstructingBuildingCount,
-                state.GoodsShortageIndex);
+                state.GoodsShortageIndex,
+                state.TourismIncome,
+                state.ParkAttractionCount,
+                state.LandmarkAttractionCount,
+                state.TourismAttractionCount);
         }
 
         void ApplyEconomyMetrics(
@@ -182,7 +194,11 @@ namespace CityMajor.UI
             float monthlyImportCost,
             float meanTrafficDensity,
             int constructingBuildingCount,
-            float goodsShortageIndex)
+            float goodsShortageIndex,
+            float tourismIncome,
+            int parkAttractionCount,
+            int landmarkAttractionCount,
+            int tourismAttractionCount)
         {
             if (_employment != null)
                 _employment.text = $"{Mathf.RoundToInt(employmentRate * 100f)}%";
@@ -201,6 +217,31 @@ namespace CityMajor.UI
                 _tradeDetail.text =
                     $"Exports {FormatSignedMoney(Mathf.RoundToInt(monthlyExportValue))} · " +
                     $"Imports {FormatSignedMoney(-Mathf.RoundToInt(monthlyImportCost))}";
+            }
+
+            if (_tourism != null)
+            {
+                var incomeRounded = Mathf.RoundToInt(tourismIncome);
+                _tourism.text = incomeRounded > 0 || tourismAttractionCount > 0
+                    ? $"{FormatSignedMoney(incomeRounded)}/mo"
+                    : "—";
+                _tourism.tooltip =
+                    "Tourism income from base visitors (pop × happiness) plus park / landmark attractions (Tier-2).";
+            }
+
+            if (_tourismDetail != null)
+            {
+                if (tourismAttractionCount <= 0 && tourismIncome <= 0f)
+                {
+                    _tourismDetail.text = "";
+                    _tourismDetail.style.display = DisplayStyle.None;
+                }
+                else
+                {
+                    _tourismDetail.style.display = DisplayStyle.Flex;
+                    _tourismDetail.text =
+                        $"Attractions {tourismAttractionCount} · 🌳 {parkAttractionCount} · 🗿 {landmarkAttractionCount}";
+                }
             }
 
             if (_traffic != null)

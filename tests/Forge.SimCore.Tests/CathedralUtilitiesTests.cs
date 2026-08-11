@@ -14,7 +14,8 @@ namespace Forge.SimCore.Tests;
 /// P5.4 EMS survival curve (Phase 5b), Tier-2 hospital capacity,
 /// Tier-2 wildfire / arson rings, aerial / lookout / fire rating,
 /// Tier-2 education depth, Tier-2 park amenity parity, Tier-2 hospital→HH
-/// health progression, and P4 health→satisfaction/migration.
+/// health progression, P4 health→satisfaction/migration, and Tier-2 tourism
+/// attractions stub.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -1070,6 +1071,53 @@ public sealed class CathedralUtilitiesTests
             $"hospital→health should raise P4 satisfaction (low={satLow:F1}, high={satHigh:F1})");
         Assert.True(host.State.MeanHealthSatisfaction > 40f / 255f);
         Assert.True(host.State.HealthCoverageFraction > 0f);
+    }
+
+    [Fact]
+    public void TourismAttractions_CountParksLandmarks_AndRaiseBudgetIncome()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+        var state = host.State!;
+        state.Population = 500;
+        state.Happiness = 0.4f;
+
+        PlaceBuilding(state, 10, 10, TourismAttractions.ServicePark);
+        PlaceBuilding(state, 20, 20, TourismAttractions.ServiceLandmark);
+        for (int i = 0; i < TourismAttractions.ParkTilesPerAttraction; i++)
+            state.Tiles.ZoneType[state.Tiles.Index(i % 8, 30 + i / 8)] = TourismAttractions.ZonePark;
+
+        Assert.Equal(2, TourismAttractions.CountParkAttractions(state)); // building + zone site
+        Assert.Equal(1, TourismAttractions.CountLandmarkAttractions(state));
+        Assert.Equal(3, TourismAttractions.CountTourismAttractions(state));
+
+        var budget = new BudgetSystem();
+        var economy = new EconomySystem();
+        budget.CalculateMonthlyBudget(state, economy);
+
+        Assert.Equal(2, budget.ParkAttractionCount);
+        Assert.Equal(1, budget.LandmarkAttractionCount);
+        Assert.True(budget.TourismIncome >
+            state.Population * state.Happiness * 0.5f * 0.01f * TourismAttractions.SpendPerTourist);
+
+        TourismAttractions.PublishCounts(state);
+        Assert.Equal(3, state.TourismAttractionCount);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(state.ParkAttractionCount, snap.ParkAttractionCount);
+        Assert.Equal(state.LandmarkAttractionCount, snap.LandmarkAttractionCount);
+        Assert.Equal(state.TourismAttractionCount, snap.TourismAttractionCount);
+        Assert.Equal(state.TourismIncome, snap.TourismIncome, precision: 2);
+
+        var dto = SimSnapshotDto.From(snap, state);
+        Assert.Equal(state.TourismAttractionCount, dto.TourismAttractionCount);
+        Assert.Equal(state.TourismIncome, dto.TourismIncome, precision: 2);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("tourismAttractionCount", out var attr));
+        Assert.True(doc.RootElement.TryGetProperty("tourismIncome", out var income));
+        Assert.Equal(state.TourismAttractionCount, attr.GetInt32());
+        Assert.Equal(state.TourismIncome, income.GetSingle(), precision: 2);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

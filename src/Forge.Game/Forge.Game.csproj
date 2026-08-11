@@ -22,6 +22,7 @@
     <Compile Include="..\Forge.SimCore\EducationProgression.cs" Link="SimCore\EducationProgression.cs" />
     <Compile Include="..\Forge.SimCore\HealthProgression.cs" Link="SimCore\HealthProgression.cs" />
     <Compile Include="..\Forge.SimCore\ParkAmenity.cs" Link="SimCore\ParkAmenity.cs" />
+    <Compile Include="..\Forge.SimCore\TourismAttractions.cs" Link="SimCore\TourismAttractions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\production_chains.json">

@@ -80,7 +80,7 @@ FIELD_EXPAND: dict[str, dict[str, list[str]]] = {
     },
     "TradeBalance / MonthlyExport/Import": {
         "E": ["TradeBalance", "MonthlyExportValue", "MonthlyImportCost"],
-        "W": [],
+        "W": ["TradeBalance", "MonthlyExportValue", "MonthlyImportCost"],
         "U": ["TradeBalance", "MonthlyExportValue", "MonthlyImportCost"],
     },
     "ShortageGoods / SurplusGoods": {

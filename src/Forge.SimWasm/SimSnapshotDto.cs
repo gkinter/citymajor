@@ -83,6 +83,12 @@ public sealed class SimSnapshotDto
     public float Happiness { get; init; }
     public long MonthlyIncome { get; init; }
     public long MonthlyExpenses { get; init; }
+    /// <summary>Net trade balance this month (exports − imports). Cathedral P3.</summary>
+    public float TradeBalance { get; init; }
+    /// <summary>Total export value this month.</summary>
+    public float MonthlyExportValue { get; init; }
+    /// <summary>Total import cost this month.</summary>
+    public float MonthlyImportCost { get; init; }
     public BuildingDto[] Buildings { get; init; } = [];
     public ZoneDto[] Zones { get; init; } = [];
     public RoadDto[] Roads { get; init; } = [];
@@ -242,6 +248,9 @@ public sealed class SimSnapshotDto
             Happiness = state.Happiness,
             MonthlyIncome = state.Income.Total,
             MonthlyExpenses = state.Expenses.Total,
+            TradeBalance = state.TradeBalance,
+            MonthlyExportValue = state.MonthlyExportValue,
+            MonthlyImportCost = state.MonthlyImportCost,
             Buildings = buildings,
             Zones = zones,
             Roads = roads,

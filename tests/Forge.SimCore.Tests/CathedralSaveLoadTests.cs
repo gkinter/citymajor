@@ -13,7 +13,8 @@ namespace Forge.SimCore.Tests;
 /// (<see cref="SimHost.GetSnapshotJson"/> / <see cref="SimHost.LoadSnapshotFromJson"/>)
 /// must survive snapshot restore — MeanRentBurden, councilSeats, mode shares,
 /// plus Event*Mult / Law*Mult / ActiveLawIds / ActiveOrdinances / NextElectionYear /
-/// BlackoutFraction / WaterShortageFraction / CulturalDna / delivery delay /
+/// BlackoutFraction / WaterShortageFraction / CulturalDna / TradeBalance /
+/// MonthlyExportValue / MonthlyImportCost / delivery delay /
 /// abandoned / fire / EMS / L2 sample.
 /// </summary>
 [Collection("SimHost")]
@@ -502,6 +503,64 @@ public sealed class CathedralSaveLoadTests
         Assert.Equal(8, roundTrip!.CulturalDna.Length);
         for (int i = 0; i < dna.Length; i++)
             Assert.Equal(dna[i], roundTrip.CulturalDna[i], precision: 3);
+    }
+
+    [Fact]
+    public void SnapshotRoundTrip_PreservesTradeBalance()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        const float exportValue = 12_500f;
+        const float importCost = 8_300f;
+        const float balance = exportValue - importCost;
+
+        host.Trade.RestoreMonthlyTotals(exportValue, importCost);
+        var state = host.State!;
+        state.MonthlyExportValue = host.Trade.MonthlyExportValue;
+        state.MonthlyImportCost = host.Trade.MonthlyImportCost;
+        state.TradeBalance = host.Trade.TradeBalance;
+
+        string json = host.GetSnapshotJson();
+        var saved = JsonSerializer.Deserialize(json, SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(saved);
+
+        using (var doc = JsonDocument.Parse(json))
+        {
+            Assert.True(doc.RootElement.TryGetProperty("tradeBalance", out var balEl));
+            Assert.Equal(balance, balEl.GetSingle(), precision: 1);
+            Assert.True(doc.RootElement.TryGetProperty("monthlyExportValue", out var exportEl));
+            Assert.Equal(exportValue, exportEl.GetSingle(), precision: 1);
+            Assert.True(doc.RootElement.TryGetProperty("monthlyImportCost", out var importEl));
+            Assert.Equal(importCost, importEl.GetSingle(), precision: 1);
+        }
+
+        Assert.Equal(balance, saved!.TradeBalance, precision: 1);
+        Assert.Equal(exportValue, saved.MonthlyExportValue, precision: 1);
+        Assert.Equal(importCost, saved.MonthlyImportCost, precision: 1);
+
+        // Mutate so restore cannot pass by Init coincidence.
+        host.Trade.RestoreMonthlyTotals(0f, 0f);
+        state.MonthlyExportValue = 0f;
+        state.MonthlyImportCost = 0f;
+        state.TradeBalance = 0f;
+
+        Assert.True(host.LoadSnapshotFromJson(json));
+
+        Assert.Equal(exportValue, host.Trade.MonthlyExportValue, precision: 1);
+        Assert.Equal(importCost, host.Trade.MonthlyImportCost, precision: 1);
+        Assert.Equal(balance, host.Trade.TradeBalance, precision: 1);
+        Assert.Equal(exportValue, host.State!.MonthlyExportValue, precision: 1);
+        Assert.Equal(importCost, host.State.MonthlyImportCost, precision: 1);
+        Assert.Equal(balance, host.State.TradeBalance, precision: 1);
+
+        var roundTrip = JsonSerializer.Deserialize(
+            host.GetSnapshotJson(),
+            SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(roundTrip);
+        Assert.Equal(balance, roundTrip!.TradeBalance, precision: 1);
+        Assert.Equal(exportValue, roundTrip.MonthlyExportValue, precision: 1);
+        Assert.Equal(importCost, roundTrip.MonthlyImportCost, precision: 1);
     }
 
     private static string FindRepoRoot()

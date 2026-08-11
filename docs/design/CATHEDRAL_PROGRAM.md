@@ -387,3 +387,4 @@ openspec/
 | 2026-08-11 | **ActiveOrdinances / NextElectionYear WASM DTO** — politics bitfield + election year export + restore; `SnapshotRoundTrip_PreservesActiveOrdinancesAndNextElectionYear` |
 | 2026-08-11 | **BlackoutFraction / WaterShortageFraction WASM DTO** — rolling L0 utility shortages export + restore; `SnapshotRoundTrip_PreservesBlackoutAndWaterShortageFractions` |
 | 2026-08-11 | **CulturalDna[] WASM DTO** — politics flavor vector export + restore; `SnapshotRoundTrip_PreservesCulturalDna` |
+| 2026-08-11 | **TradeBalance / export-import WASM DTO** — TradeBalance + MonthlyExport/Import export + restore; `SnapshotRoundTrip_PreservesTradeBalance` |

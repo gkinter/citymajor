@@ -57,6 +57,16 @@ public sealed class TradeSystem
     /// <summary>Net trade balance (exports - imports).</summary>
     public float TradeBalance => MonthlyExportValue - MonthlyImportCost;
 
+    /// <summary>
+    /// Seed monthly export/import totals from a save snapshot (until next <see cref="ProcessTrade"/>).
+    /// Non-finite values are treated as 0; negatives clamp to 0.
+    /// </summary>
+    public void RestoreMonthlyTotals(float exportValue, float importCost)
+    {
+        MonthlyExportValue = float.IsFinite(exportValue) ? Math.Max(0f, exportValue) : 0f;
+        MonthlyImportCost = float.IsFinite(importCost) ? Math.Max(0f, importCost) : 0f;
+    }
+
     // Import markup: importing goods costs 15% more than the global price
     private const float ImportMarkup = 1.15f;
 

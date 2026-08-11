@@ -88,7 +88,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | ApprovalRating | ✅ | ✅ `approval` (×100 %) | ✅ `Approval` | WorldState | DTO is percent |
 | EmploymentRate | ✅ | ✅ | ✅ | WorldState | |
 | UnemploymentRate | — | — | ✅ | Client-derived | `1 − EmploymentRate` |
-| TradeBalance / MonthlyExport/Import | ✅ | — | ✅ | WorldState | Unity economy strip |
+| TradeBalance / MonthlyExport/Import | ✅ | ✅ | ✅ | WorldState | Unity economy strip; WASM save/load |
 | MeanTrafficDensity | ✅ | ✅ | ✅ | WorldState | |
 | RushMultiplier | — | — | ✅ | Client-derived | Cosmetic |
 
@@ -208,6 +208,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | `ActiveEventDto` | eventId, typeId, phase, severity, tileX/Y | |
 | `ActiveLawIds` | `string[]` | laws.json slug ids currently enabled |
 | `ActiveOrdinances` / `NextElectionYear` | `ulong` / `int` | Politics bitfield + election calendar |
+| `TradeBalance` / `MonthlyExportValue` / `MonthlyImportCost` | floats | P3 trade strip; restore seeds TradeSystem until next ProcessTrade |
 | `CulturalDna` | `float[8]` | Politics flavor vector (−1…+1) |
 | `EconomySnapshotDto` | shortages, surpluses, flows, marketZoneCount, marketZonePrices | |
 | `PopulationL2Dto` | households[≤100] | Id, tiles, happiness, commuteMin, home/work building ids, rentBurden |
@@ -228,10 +229,9 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 
 These are **documentation of tip reality**, not a backlog invent:
 
-1. **TradeBalance / export-import** — engine + Unity; WASM relies on economy nested payload + indices.
-2. **Commute O-D sample** — WASM array; Unity uses aggregated HUD scalars + Citizen L2, not the same array type on `CitySimState`.
-3. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
-4. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
+1. **Commute O-D sample** — WASM array; Unity uses aggregated HUD scalars + Citizen L2, not the same array type on `CitySimState`.
+2. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
+3. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
 ---
 
 ## 7. Change protocol
@@ -258,3 +258,4 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **ActiveOrdinances / NextElectionYear WASM DTO** — politics bitfield + election year export + restore (closes former §6 gap #6) |
 | 2026-08-11 | **BlackoutFraction / WaterShortageFraction WASM DTO** — rolling L0 utility shortages export + restore (closes former §6 gap #1) |
 | 2026-08-11 | **CulturalDna[] WASM DTO** — politics flavor vector export + `ApplySnapshotDto` restore (closes former §6 gap #5) |
+| 2026-08-11 | **TradeBalance / export-import WASM DTO** — TradeBalance + MonthlyExportValue/ImportCost export + `ApplySnapshotDto` restore (closes former §6 gap #1) |

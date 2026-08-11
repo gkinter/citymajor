@@ -161,6 +161,8 @@ public sealed partial class SimHost
         if (dto.MonthlyExpenses > 0)
             _state.Expenses.InfrastructureMaintenance = dto.MonthlyExpenses;
 
+        RestoreTradeBalance(dto);
+
         RestoreResearchState(
             dto.ResearchPoints,
             dto.CurrentResearchId,
@@ -297,6 +299,31 @@ public sealed partial class SimHost
             float v = dto.CulturalDna[i];
             dest[i] = float.IsFinite(v) ? Math.Clamp(v, -1f, 1f) : 0f;
         }
+    }
+
+    private void RestoreTradeBalance(SimSnapshotDto dto)
+    {
+        // Prefer explicit export/import when present; else derive from TradeBalance
+        // (positive = export surplus, negative = import deficit) for older/partial saves.
+        float exportValue = dto.MonthlyExportValue;
+        float importCost = dto.MonthlyImportCost;
+        if (!float.IsFinite(exportValue) || exportValue < 0f)
+            exportValue = 0f;
+        if (!float.IsFinite(importCost) || importCost < 0f)
+            importCost = 0f;
+
+        if (exportValue == 0f && importCost == 0f && float.IsFinite(dto.TradeBalance) && dto.TradeBalance != 0f)
+        {
+            if (dto.TradeBalance > 0f)
+                exportValue = dto.TradeBalance;
+            else
+                importCost = -dto.TradeBalance;
+        }
+
+        _trade.RestoreMonthlyTotals(exportValue, importCost);
+        _state.MonthlyExportValue = _trade.MonthlyExportValue;
+        _state.MonthlyImportCost = _trade.MonthlyImportCost;
+        _state.TradeBalance = _trade.TradeBalance;
     }
 
     private void RestoreEventMultipliers(SimSnapshotDto dto)

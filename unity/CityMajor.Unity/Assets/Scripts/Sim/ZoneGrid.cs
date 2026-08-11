@@ -62,6 +62,7 @@ namespace CityMajor.Sim
             ZonePaintTool.ZoneKind.Office => new Color(0.75f, 0.52f, 0.99f, 0.45f),
             ZonePaintTool.ZoneKind.Mixed => new Color(0.18f, 0.83f, 0.66f, 0.45f),
             ZonePaintTool.ZoneKind.Agricultural => new Color(0.52f, 0.80f, 0.09f, 0.45f),
+            ZonePaintTool.ZoneKind.Park => new Color(0.22f, 0.72f, 0.38f, 0.45f),
             _ => Color.clear,
         };
     }

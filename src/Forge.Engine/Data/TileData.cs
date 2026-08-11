@@ -38,7 +38,7 @@ public sealed class TileData
     // Zone layer (set by player, consumed by growth simulation)
     // =========================================================================
 
-    /// <summary>Zone type: 0=none, 1=residential_low, 2=residential_high, 3=commercial, 4=industrial, 5=office, 6=mixed_use, 7=agricultural.</summary>
+    /// <summary>Zone type: 0=none, 1=residential_low, 2=residential_high, 3=commercial, 4=industrial, 5=office, 6=mixed_use, 7=agricultural, 8=park.</summary>
     public byte[] ZoneType;
 
     /// <summary>Zone density (0-3): empty, low, medium, high.</summary>

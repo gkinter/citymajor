@@ -6,7 +6,7 @@ namespace CityMajor.UI
 {
     /// <summary>
     /// Pause + sim speed. Keys: Space pause; <c>[</c>/<c>]</c>/<c>\</c> (or keypad 1/2/4) for 1×/2×/4×.
-    /// Does not use 5/6/7 — those paint Office / Mixed / Ag zones.
+    /// Does not use 5/6/7/8 — those paint Office / Mixed / Ag / Park zones.
     /// </summary>
     public sealed class TimeControlsController : MonoBehaviour
     {
@@ -32,7 +32,7 @@ namespace CityMajor.UI
                 Refresh();
             }
 
-            // Bracket keys avoid clash with ZonePaintTool Office/Mixed/Ag (5/6/7).
+            // Bracket keys avoid clash with ZonePaintTool Office/Mixed/Ag/Park (5/6/7/8).
             if (UnityEngine.Input.GetKeyDown(KeyCode.LeftBracket) || UnityEngine.Input.GetKeyDown(KeyCode.Keypad1))
                 SetSpeed(1f);
             if (UnityEngine.Input.GetKeyDown(KeyCode.RightBracket) || UnityEngine.Input.GetKeyDown(KeyCode.Keypad2))

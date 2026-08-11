@@ -5,7 +5,8 @@ namespace CityMajor.Input
 {
     /// <summary>
     /// Paint zones into Forge.SimCore via <see cref="CitySimBridge.PaintZone"/>.
-    /// Density 1–3 = Low / Med / High (Cathedral P2.2). Office / Mixed / Ag use P2.1 era (+ tech) gates.
+    /// Density 1–3 = Low / Med / High (Cathedral P2.2) with U3.4 era/tech gates.
+    /// Office / Mixed / Ag / Park use P2.1 era (+ tech) gates.
     /// </summary>
     public sealed class ZonePaintTool : MonoBehaviour
     {
@@ -18,6 +19,7 @@ namespace CityMajor.Input
             Office,
             Mixed,
             Agricultural,
+            Park,
         }
 
         [SerializeField] ZoneKind activeZone = ZoneKind.Residential;
@@ -44,6 +46,7 @@ namespace CityMajor.Input
                 ZoneKind.Office => $"Zone Office · {densityLabel} (5)",
                 ZoneKind.Mixed => $"Zone Mixed · {densityLabel} (6)",
                 ZoneKind.Agricultural => $"Zone Ag · {densityLabel} (7)",
+                ZoneKind.Park => $"Zone Park · {densityLabel} (8)",
                 _ => "Erase zone (0)",
             };
         }
@@ -63,6 +66,7 @@ namespace CityMajor.Input
             _camera = cityCamera;
             _grid = grid;
             _sim = sim;
+            zoneDensity = ZoneDensityTiers.ClampToUnlocked(zoneDensity, _sim);
         }
 
         void Update()
@@ -91,6 +95,9 @@ namespace CityMajor.Input
                 return;
             }
 
+            // Re-clamp density if era/research changes mid-session.
+            zoneDensity = ZoneDensityTiers.ClampToUnlocked(zoneDensity, _sim);
+
             HandleHotkeys();
 
             if (UnityEngine.Input.GetMouseButtonDown(0))
@@ -116,6 +123,8 @@ namespace CityMajor.Input
                 TrySetActiveZone(ZoneKind.Mixed);
             if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha7))
                 TrySetActiveZone(ZoneKind.Agricultural);
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha8))
+                TrySetActiveZone(ZoneKind.Park);
             if (UnityEngine.Input.GetKeyDown(KeyCode.Alpha0))
                 activeZone = ZoneKind.None;
 
@@ -132,7 +141,9 @@ namespace CityMajor.Input
             if (!Physics.Raycast(ray, out var hit, 5000f))
                 return;
 
-            var density = activeZone == ZoneKind.None ? (byte)0 : NormalizeDensity(zoneDensity);
+            var density = activeZone == ZoneKind.None
+                ? (byte)0
+                : ZoneDensityTiers.ClampToUnlocked(NormalizeDensity(zoneDensity), _sim);
             var center = _grid.WorldToTile(hit.point);
             for (var dy = -brushRadius; dy <= brushRadius; dy++)
             for (var dx = -brushRadius; dx <= brushRadius; dx++)
@@ -160,13 +171,21 @@ namespace CityMajor.Input
             return true;
         }
 
-        public void SetZoneDensity(byte density) =>
-            zoneDensity = NormalizeDensity(density);
+        public void SetZoneDensity(byte density) => TrySetZoneDensity(density);
+
+        public bool TrySetZoneDensity(byte density)
+        {
+            var normalized = NormalizeDensity(density);
+            if (!ZoneDensityTiers.IsUnlocked(normalized, _sim))
+                return false;
+
+            zoneDensity = normalized;
+            return true;
+        }
 
         public void CycleDensity()
         {
-            var next = (byte)(NormalizeDensity(zoneDensity) % 3 + 1);
-            zoneDensity = next;
+            zoneDensity = ZoneDensityTiers.NextUnlocked(zoneDensity, _sim);
         }
 
         public bool IsZoneUnlocked(ZoneKind zone)
@@ -180,11 +199,17 @@ namespace CityMajor.Input
             return ZoneTiers.IsUnlocked(tier, _sim);
         }
 
+        public bool IsDensityUnlocked(byte density) =>
+            ZoneDensityTiers.IsUnlocked(density, _sim);
+
         public string ZoneLockReason(ZoneKind zone)
         {
             if (!ZoneTiers.TryGet(zone, out var tier))
                 return "Unknown zone";
             return ZoneTiers.LockReason(tier, _sim);
         }
+
+        public string DensityLockReason(byte density) =>
+            ZoneDensityTiers.LockReason(density, _sim);
     }
 }

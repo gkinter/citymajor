@@ -44,9 +44,9 @@ namespace CityMajor.Editor
                 "(docs/design/UNITY_PLAY_SMOKE.md), then Open Play Verification Checklist. " +
                 "Rebuild SimCore after SimHost edits: ./scripts/build-simcore-for-unity.sh. " +
                 "Cathedral P1–P4: RoadTypeToolbar Local/Collector/Highway + Bridge/Tunnel/Ramp → PlaceRoad; ZonePaintTool density; " +
-                "ZoningToolbar Office/Mixed/Ag era gates; " +
+                "ZoningToolbar Office/Mixed/Ag/Park era gates; Med/High density era+tech gates; " +
                 "CitySimState MeanRentBurden / ResidentialVacancy / MeanCommuteMinutes · O-D · commute sat (F1 Help). " +
-                "Sim speed: [ ] \\ (not 5/6/7 — those are Office/Mixed/Ag).");
+                "Sim speed: [ ] \\ (not 5/6/7/8 — those are Office/Mixed/Ag/Park).");
         }
 
         [MenuItem("CityMajor/Verify GLTF Catalog")]
@@ -190,6 +190,67 @@ namespace CityMajor.Editor
             Debug.LogError($"[CityMajor] Rendering parity verify: FAIL ({failures.Count} issue(s))");
         }
 
+        [MenuItem("CityMajor/Verify Zone Era Gates (U3.4)")]
+        public static void VerifyZoneEraGates()
+        {
+            var failures = new List<string>();
+
+            // Park tier present with engine byte 8 + Public Parks Act tech.
+            var parkFound = false;
+            foreach (var tier in CityMajor.Sim.ZoneTiers.Paintable)
+            {
+                if (tier.Kind != CityMajor.Input.ZonePaintTool.ZoneKind.Park)
+                    continue;
+                parkFound = true;
+                if (tier.EngineZoneType != 8)
+                    failures.Add($"Park EngineZoneType expected 8, got {tier.EngineZoneType}");
+                if (tier.MinEra != 0)
+                    failures.Add($"Park MinEra expected 0 (Frontier), got {tier.MinEra}");
+                if (tier.RequiredTechId != CityMajor.Sim.ZoneTiers.ParkTechId)
+                    failures.Add($"Park RequiredTechId expected {CityMajor.Sim.ZoneTiers.ParkTechId}, got {tier.RequiredTechId}");
+            }
+
+            if (!parkFound)
+                failures.Add("ZoneTiers.Paintable missing Park");
+
+            // Density: Low free; Med T029; High Industrial + T031.
+            var dens = CityMajor.Sim.ZoneDensityTiers.Levels;
+            if (dens.Length != 3)
+                failures.Add($"ZoneDensityTiers.Levels expected 3 entries, got {dens.Length}");
+            else
+            {
+                if (dens[0].Density != 1 || dens[0].MinEra != 0 || dens[0].RequiredTechId != -1)
+                    failures.Add("Low density gate mismatch (expect era 0, no tech)");
+                if (dens[1].Density != 2 || dens[1].MinEra != 0 ||
+                    dens[1].RequiredTechId != CityMajor.Sim.ZoneDensityTiers.MediumTechId)
+                    failures.Add("Med density gate mismatch (expect T029)");
+                if (dens[2].Density != 3 || dens[2].MinEra != 1 ||
+                    dens[2].RequiredTechId != CityMajor.Sim.ZoneDensityTiers.HighTechId)
+                    failures.Add("High density gate mismatch (expect Industrial + T031)");
+            }
+
+            // Office still Industrial-gated.
+            foreach (var tier in CityMajor.Sim.ZoneTiers.Paintable)
+            {
+                if (tier.Kind != CityMajor.Input.ZonePaintTool.ZoneKind.Office)
+                    continue;
+                if (tier.MinEra != 1)
+                    failures.Add($"Office MinEra expected 1 (Industrial), got {tier.MinEra}");
+            }
+
+            if (failures.Count == 0)
+            {
+                Debug.Log(
+                    "[CityMajor] Zone era gates verify: PASS (Park + density Med/High + Office Industrial)");
+                return;
+            }
+
+            foreach (var failure in failures)
+                Debug.LogError($"[CityMajor] Zone era gates verify: {failure}");
+
+            Debug.LogError($"[CityMajor] Zone era gates verify: FAIL ({failures.Count} issue(s))");
+        }
+
         [MenuItem("CityMajor/Run Preflight Checks")]
         public static void RunPreflightChecks()
         {
@@ -213,6 +274,7 @@ namespace CityMajor.Editor
             VerifyGltfCatalog();
             VerifyAchievementsCatalog();
             VerifyRenderingParity();
+            VerifyZoneEraGates();
 
             if (issues == 0)
                 Debug.Log("[CityMajor] Preflight: complete — enter Play and run SB-4176 checklist");

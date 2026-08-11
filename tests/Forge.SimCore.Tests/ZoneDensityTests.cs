@@ -66,6 +66,23 @@ public sealed class ZoneDensityTests
         Assert.Equal((byte)2, host.State.Tiles.ZoneDensity[idx]);
     }
 
+    /// <summary>
+    /// U3.4 / P2.1 — Park zone byte (8) paints and stores density; no organic growth
+    /// (GetDemandForZone returns 0). Land-value bonus uses nearby park zones.
+    /// </summary>
+    [Fact]
+    public void PaintZone_ParkZone_SetsTypeAndDensity()
+    {
+        var host = new SimHost();
+        host.Init(32, new SimHostInitOptions { SkipStarterCity = true });
+
+        host.PaintZone(14, 14, zoneType: 8, density: 1); // Park
+
+        int idx = host.State.Tiles.Index(14, 14);
+        Assert.Equal((byte)8, host.State.Tiles.ZoneType[idx]);
+        Assert.Equal((byte)1, host.State.Tiles.ZoneDensity[idx]);
+    }
+
     [Theory]
     [InlineData(1)] // Residential low
     [InlineData(2)] // Residential high

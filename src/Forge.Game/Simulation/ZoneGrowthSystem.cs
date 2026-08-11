@@ -30,6 +30,8 @@ public sealed class ZoneGrowthSystem
     private const byte ZoneOffice = 5;
     private const byte ZoneMixedUse = 6;
     private const byte ZoneAgricultural = 7;
+    /// <summary>Park / recreation — no organic growth; raises nearby land value.</summary>
+    private const byte ZonePark = 8;
 
     // =========================================================================
     // Building state constants (from BuildingData.State)
@@ -330,6 +332,7 @@ public sealed class ZoneGrowthSystem
             ZoneOffice => SelectCommercial(wealth, density, era), // offices use commercial types
             ZoneMixedUse => SelectMixedUse(wealth, density, era),
             ZoneAgricultural => IndSmallWorkshop, // farms use workshop type
+            ZonePark => 0, // parks do not spawn buildings
             _ => ResLowSmallHouse
         };
     }
@@ -621,6 +624,7 @@ public sealed class ZoneGrowthSystem
             ZoneIndustrial => indDemand,
             ZoneMixedUse => Math.Max(resDemand, comDemand),
             ZoneAgricultural => indDemand * 0.5f,
+            ZonePark => 0f,
             _ => 0f
         };
     }
@@ -674,11 +678,12 @@ public sealed class ZoneGrowthSystem
     /// </summary>
     private void SpawnBuilding(WorldState state, int tileX, int tileY, byte zoneType, byte density)
     {
+        ushort typeId = SelectBuildingType(state, tileX, tileY, zoneType, density);
+        if (typeId == 0) return; // Park / no-growth zones
+
         var buildings = state.Buildings;
         int slot = buildings.Allocate();
         if (slot < 0) return; // Pool full
-
-        ushort typeId = SelectBuildingType(state, tileX, tileY, zoneType, density);
 
         buildings.GridX[slot] = tileX;
         buildings.GridY[slot] = tileY;
@@ -963,7 +968,7 @@ public sealed class ZoneGrowthSystem
     }
 
     /// <summary>
-    /// Check if any park building exists within a radius.
+    /// Check if any park building or painted park zone exists within a radius.
     /// </summary>
     private static bool HasNearbyPark(WorldState state, int tileX, int tileY)
     {
@@ -977,6 +982,25 @@ public sealed class ZoneGrowthSystem
             int dy = state.Buildings.GridY[i] - tileY;
             if (dx * dx + dy * dy <= radius * radius) return true;
         }
+
+        var tiles = state.Tiles;
+        int minX = Math.Max(0, tileX - radius);
+        int maxX = Math.Min(tiles.Size - 1, tileX + radius);
+        int minY = Math.Max(0, tileY - radius);
+        int maxY = Math.Min(tiles.Size - 1, tileY + radius);
+
+        for (int y = minY; y <= maxY; y++)
+        {
+            for (int x = minX; x <= maxX; x++)
+            {
+                int dx = x - tileX;
+                int dy = y - tileY;
+                if (dx * dx + dy * dy > radius * radius) continue;
+                if (tiles.ZoneType[tiles.Index(x, y)] == ZonePark)
+                    return true;
+            }
+        }
+
         return false;
     }
 

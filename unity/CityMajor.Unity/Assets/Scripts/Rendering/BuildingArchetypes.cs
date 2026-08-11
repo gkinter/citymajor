@@ -96,6 +96,7 @@ namespace CityMajor.Rendering
             ZonePaintTool.ZoneKind.Office => "com_modern_00",
             ZonePaintTool.ZoneKind.Mixed => "res_low_modern_00",
             ZonePaintTool.ZoneKind.Agricultural => "ind_modern_00",
+            ZonePaintTool.ZoneKind.Park => "svc_modern_00",
             _ => null,
         };
 
@@ -108,6 +109,7 @@ namespace CityMajor.Rendering
             ZonePaintTool.ZoneKind.Office => ComStart,
             ZonePaintTool.ZoneKind.Mixed => ResLowStart,
             ZonePaintTool.ZoneKind.Agricultural => IndStart,
+            ZonePaintTool.ZoneKind.Park => SvcStart,
             _ => 0,
         };
     }

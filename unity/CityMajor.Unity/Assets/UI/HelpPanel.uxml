@@ -11,8 +11,8 @@
         <ui:ScrollView class="panel-body help-body">
             <ui:Label class="help-section" text="Zoning &amp; tools" />
             <ui:Label class="help-line" text="1 — Residential · 2 — Commercial · 3 — Industrial · 0 — Erase" />
-            <ui:Label class="help-line" text="5 — Office · 6 — Mixed · 7 — Ag (era / research gated)" />
-            <ui:Label class="help-line" text="D — Cycle density Low / Med / High · bottom Zoning toolbar" />
+            <ui:Label class="help-line" text="5 — Office · 6 — Mixed · 7 — Ag · 8 — Park (era / research gated)" />
+            <ui:Label class="help-line" text="D — Cycle density Low / Med / High (Med/High era+tech gated)" />
             <ui:Label class="help-line" text="4 — Road paint · X — Bulldoze · B — Build / plop" />
             <ui:Label class="help-line" text="Road toolbar — Local / Collector / Highway · Ramp · Bridge / Tunnel (PlaceRoad)" />
             <ui:Label class="help-section" text="Panels" />

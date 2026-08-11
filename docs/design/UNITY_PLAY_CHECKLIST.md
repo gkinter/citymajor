@@ -33,10 +33,10 @@
 ## Zoning & roads
 
 - [ ] `1` / `2` / `3` — R / C / I zone paint on LMB drag
-- [ ] `5` / `6` / `7` — Office / Mixed / Ag when era + research unlock (locked otherwise)
+- [ ] `5` / `6` / `7` / `8` — Office / Mixed / Ag / Park when era + research unlock (locked otherwise)
 - [ ] `0` — erase zones
-- [ ] `D` — cycle density Low → Med → High (also bottom Zoning toolbar)
-- [ ] Bottom **Zoning** toolbar — tier buttons + Low/Med/High; paints via `CitySimBridge.PaintZone`
+- [ ] `D` — cycle density Low → Med → High among unlocked levels (Med=T029, High=Industrial+T031; also bottom Zoning toolbar)
+- [ ] Bottom **Zoning** toolbar — tier buttons + Low/Med/High; locked density buttons disabled; paints via `CitySimBridge.PaintZone`
 - [ ] `X` — bulldoze mode (clears zones, buildings, roads on tile)
 - [ ] `4` — road mode; roads appear in overlay + traffic tint after sim ticks
 - [ ] RoadPaintTool inspector — optional **Paint Bridge** / **Paint Tunnel** (P1.3) / **Paint Ramp** (P1.5)
@@ -87,7 +87,7 @@
 
 ## Time & persistence
 
-- [ ] `Space` — pause; `[`/`]`/`\` (or keypad 1/2/4) — 1×/2×/4× sim speed (`5`/`6`/`7` are Office/Mixed/Ag)
+- [ ] `Space` — pause; `[`/`]`/`\` (or keypad 1/2/4) — 1×/2×/4× sim speed (`5`/`6`/`7`/`8` are Office/Mixed/Ag/Park)
 - [ ] **Save** writes `citymajor.cmjr` to persistentDataPath
 - [ ] **Load** restores zones/buildings/funds
 - [ ] **Share** copies spectator URL to clipboard

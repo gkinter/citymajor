@@ -7,8 +7,8 @@ using UnityEngine.UIElements;
 namespace CityMajor.UI
 {
     /// <summary>
-    /// Bottom zoning palette — R/C/I + Office/Mixed/Ag with P2.1 era gates and Low/Med/High density.
-    /// Mirrors web <c>ZoningToolbar.tsx</c>; paints via <see cref="CitySimBridge.PaintZone"/>.
+    /// Bottom zoning palette — R/C/I + Office/Mixed/Ag/Park with P2.1 era gates and
+    /// Low/Med/High density (U3.4 era/tech gates). Paints via <see cref="CitySimBridge.PaintZone"/>.
     /// </summary>
     public sealed class ZoningToolbarController : MonoBehaviour
     {
@@ -47,7 +47,11 @@ namespace CityMajor.UI
 
         void Update() => RefreshSelection();
 
-        void OnSnapshotChanged(SimSnapshot _) => RebuildTiers();
+        void OnSnapshotChanged(SimSnapshot _)
+        {
+            RebuildTiers();
+            RefreshDensityButtons();
+        }
 
         void EnsureUi()
         {
@@ -85,12 +89,36 @@ namespace CityMajor.UI
             _densityLow?.RegisterCallback<ClickEvent>(_ => SetDensity(1));
             _densityMed?.RegisterCallback<ClickEvent>(_ => SetDensity(2));
             _densityHigh?.RegisterCallback<ClickEvent>(_ => SetDensity(3));
+            RefreshDensityButtons();
         }
 
         void SetDensity(byte density)
         {
-            _zone?.SetZoneDensity(density);
+            if (_zone == null)
+                return;
+
+            if (!_zone.TrySetZoneDensity(density) && _status != null)
+                _status.text = _zone.DensityLockReason(density);
             RefreshSelection();
+        }
+
+        void RefreshDensityButtons()
+        {
+            SetDensityButtonState(_densityLow, 1);
+            SetDensityButtonState(_densityMed, 2);
+            SetDensityButtonState(_densityHigh, 3);
+        }
+
+        void SetDensityButtonState(Button btn, byte density)
+        {
+            if (btn == null)
+                return;
+
+            var unlocked = _zone == null || _zone.IsDensityUnlocked(density);
+            btn.SetEnabled(unlocked);
+            btn.tooltip = unlocked
+                ? $"{ZonePaintTool.DensityLabel(density)} density"
+                : (_zone?.DensityLockReason(density) ?? "Locked");
         }
 
         void RebuildTiers()
@@ -141,6 +169,8 @@ namespace CityMajor.UI
                 _tiers.Add(btn);
                 _tierButtons[kind] = btn;
             }
+
+            RefreshDensityButtons();
         }
 
         void RefreshSelection()
@@ -154,6 +184,8 @@ namespace CityMajor.UI
                 pair.Value.EnableInClassList("zoning-btn--active", selected);
             }
 
+            RefreshDensityButtons();
+
             var density = ZonePaintTool.NormalizeDensity(_zone.ZoneDensity);
             _densityLow?.EnableInClassList("zoning-btn--active", density == 1);
             _densityMed?.EnableInClassList("zoning-btn--active", density == 2);
@@ -165,6 +197,8 @@ namespace CityMajor.UI
                     _status.text = "Erase · LMB drag";
                 else if (!_zone.IsZoneUnlocked(_zone.ActiveZone))
                     _status.text = _zone.ZoneLockReason(_zone.ActiveZone);
+                else if (!_zone.IsDensityUnlocked(density))
+                    _status.text = _zone.DensityLockReason(density);
                 else
                     _status.text =
                         $"{_zone.ActiveZoneLabel()} · D cycles density";
@@ -179,6 +213,7 @@ namespace CityMajor.UI
             ZonePaintTool.ZoneKind.Office => "5",
             ZonePaintTool.ZoneKind.Mixed => "6",
             ZonePaintTool.ZoneKind.Agricultural => "7",
+            ZonePaintTool.ZoneKind.Park => "8",
             _ => "0",
         };
     }

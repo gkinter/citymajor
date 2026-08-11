@@ -73,6 +73,7 @@ Sprint 1–2 landed Cathedral **sim depth** (roads, zoning, goods, O-D, commute 
 | **Deliverable** | Office / mixed / park / ag paint + density brush wired to `SimHost.PaintZone` |
 | **Acceptance** | Era gates honored; RCI + growth characterization still green |
 | **Depends** | P2.1 ✅ |
+| **Landed** | Park zone byte 8 + `ZoneDensityTiers` (Med T029 / High Industrial+T031); Office/Mixed/Ag unchanged |
 
 ### U3.5 — Population / commute readouts (P4 → Unity)
 
@@ -131,7 +132,7 @@ Follow merge protocol in [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md). B
 - [x] Unity Play: Economy panel shows goods + chain + partition spread (`E`)
 - [x] Unity Play: congestion overlay reads snapshot edge data (`T`)
 - [x] Unity Play: friction corridor overlay reads economy corridor samples (`F`)
-- [ ] Unity Play: extended zones + density paint work under era gates
+- [x] Unity Play: extended zones + density paint work under era gates (Park `8`; Med/High density gated)
 - [x] Unity Play: O-D / commute satisfaction sample visible (Cathedral HUD — tip after U3.5 bind)
 - [ ] [`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md) Cathedral subset signed on integration tip
 - [ ] `dotnet test --filter "FullyQualifiedName~Cathedral"` green

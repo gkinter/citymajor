@@ -118,7 +118,7 @@ namespace CityMajor.Sim
 
         public void BindGrid(ZoneGrid grid) => _grid = grid;
 
-        /// <summary>Engine zone type bytes — mirrors web/lib/zone-tiers.ts.</summary>
+        /// <summary>Engine zone type bytes — mirrors web/lib/zone-tiers.ts + Park (8).</summary>
         public static byte EngineZoneType(ZonePaintTool.ZoneKind kind) => kind switch
         {
             ZonePaintTool.ZoneKind.Residential => 1,
@@ -127,6 +127,7 @@ namespace CityMajor.Sim
             ZonePaintTool.ZoneKind.Office => 5,
             ZonePaintTool.ZoneKind.Mixed => 6,
             ZonePaintTool.ZoneKind.Agricultural => 7,
+            ZonePaintTool.ZoneKind.Park => 8,
             _ => 0,
         };
 
@@ -498,6 +499,7 @@ namespace CityMajor.Sim
             5 => ZonePaintTool.ZoneKind.Office,
             6 => ZonePaintTool.ZoneKind.Mixed,
             7 => ZonePaintTool.ZoneKind.Agricultural,
+            8 => ZonePaintTool.ZoneKind.Park,
             _ => ZonePaintTool.ZoneKind.None,
         };
 

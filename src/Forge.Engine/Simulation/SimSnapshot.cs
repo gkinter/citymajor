@@ -238,6 +238,12 @@ public sealed class SimSnapshot
     /// <summary>Mean EMS survival rate 0–1 from response-minute curve (Cathedral P5.4).</summary>
     public float MeanEmsSurvivalRate { get; init; } = 0.40f;
 
+    /// <summary>Hospital bed occupancy 0–1 (Tier-2 / MISSING_SYSTEMS §1.2).</summary>
+    public float HospitalBedOccupancyFraction { get; init; }
+
+    /// <summary>Free hospital beds city-wide (Tier-2 EMS diversion).</summary>
+    public int AvailableHospitalBeds { get; init; }
+
     public readonly record struct BuildingSnapshot(
         int GridX, int GridY, ushort TypeId, byte Level,
         byte State, ushort Occupants, ushort MaxOccupants, byte Condition);
@@ -407,6 +413,8 @@ public sealed class SimSnapshot
             HydrantCoverageFraction = state.HydrantCoverageFraction,
             ActiveFireCount = state.ActiveFireCount,
             MeanEmsSurvivalRate = state.MeanEmsSurvivalRate,
+            HospitalBedOccupancyFraction = state.HospitalBedOccupancyFraction,
+            AvailableHospitalBeds = state.AvailableHospitalBeds,
         };
     }
 }

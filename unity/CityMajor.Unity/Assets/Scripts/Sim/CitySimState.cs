@@ -70,6 +70,12 @@ namespace CityMajor.Sim
         /// <summary>Cathedral P5.4 — mean EMS survival rate from response minutes (0–1).</summary>
         public float MeanEmsSurvivalRate;
 
+        /// <summary>Tier-2 — hospital bed occupancy (occupied / capacity, 0–1).</summary>
+        public float HospitalBedOccupancyFraction;
+
+        /// <summary>Tier-2 — free hospital beds for EMS diversion.</summary>
+        public int AvailableHospitalBeds;
+
         /// <summary>Cathedral P2 — mean rent / income burden (0–1+).</summary>
         public float MeanRentBurden;
 

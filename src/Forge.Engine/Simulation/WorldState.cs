@@ -192,10 +192,22 @@ public sealed class WorldState
     public int ActiveFireCount { get; set; }
 
     /// <summary>
-    /// Mean EMS survival rate (0–1) over sampled zoned tiles from response minutes (P5.4 / Phase 5b).
+    /// Mean EMS survival rate (0–1) over sampled zoned tiles from response minutes (P5.4 / Phase 5b)
+    /// plus hospital transport when health buildings exist (Tier-2 capacity).
     /// Default matches no-station response (≥15 min → 40%).
     /// </summary>
     public float MeanEmsSurvivalRate { get; set; } = 0.40f;
+
+    /// <summary>
+    /// City-wide hospital bed occupancy (occupied / capacity, 0–1). Tier-2 / MISSING_SYSTEMS §1.2.
+    /// 0 when no health buildings exist.
+    /// </summary>
+    public float HospitalBedOccupancyFraction { get; set; }
+
+    /// <summary>
+    /// Free beds across active hospitals (MaxOccupants − Occupants). Tier-2 EMS diversion.
+    /// </summary>
+    public int AvailableHospitalBeds { get; set; }
 
     // =========================================================================
     // Goods economy imbalance (persisted after daily economy tick)

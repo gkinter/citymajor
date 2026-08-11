@@ -11,13 +11,14 @@ namespace Forge.SimCore.Tests;
 /// <summary>
 /// Characterization tests for Cathedral P5.1 utilities foundation (SB-4987),
 /// P5.2 emergency response time (SB-4242), P5.3 fire response v1,
-/// and P5.4 EMS survival curve (Phase 5b).
+/// P5.4 EMS survival curve (Phase 5b), and Tier-2 hospital capacity.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
     private const uint ServicePowerPlant = 1u << 7;
     private const uint ServiceWaterPump = 1u << 8;
     private const uint ServiceFire = 1u << 3;
+    private const uint ServiceHealth = 1u << 4;
 
     [Fact]
     public void GetSnapshotJson_IncludesPowerAndWaterCoverageFractions()
@@ -322,6 +323,112 @@ public sealed class CathedralUtilitiesTests
         Assert.Equal(rate, snap.MeanEmsSurvivalRate, precision: 3);
     }
 
+    [Fact]
+    public void HospitalCapacity_NearestWithBeds_SkipsFullHospital()
+    {
+        var state = new WorldState(64, maxBuildings: 16);
+
+        // Near hospital is full; far hospital has free beds → EMS diverts.
+        int near = PlaceBuilding(state, 10, 10, ServiceHealth, level: 1, maxOccupants: 10, occupants: 10);
+        int far = PlaceBuilding(state, 30, 10, ServiceHealth, level: 1, maxOccupants: 20, occupants: 5);
+
+        Assert.Equal(0, HospitalCapacity.GetAvailableBeds(state.Buildings, near));
+        Assert.Equal(15, HospitalCapacity.GetAvailableBeds(state.Buildings, far));
+
+        Assert.True(HospitalCapacity.TryFindNearestWithCapacity(
+            state, 12, 10,
+            out int id, out int hx, out int hy, out _));
+        Assert.Equal(far, id);
+        Assert.Equal(30, hx);
+        Assert.Equal(10, hy);
+    }
+
+    [Fact]
+    public void HospitalCapacity_FullCity_AppliesNoCapacityTransportPenalty()
+    {
+        var state = new WorldState(64, maxBuildings: 8);
+        PlaceBuilding(state, 10, 10, ServiceHealth, level: 1, maxOccupants: 5, occupants: 5);
+
+        Assert.Equal(0, HospitalCapacity.CountAvailableBeds(state));
+        Assert.Equal(1f, HospitalCapacity.CalculateOccupancyFraction(state), precision: 3);
+        Assert.Equal(
+            HospitalCapacity.NoCapacityTransportMinutes,
+            HospitalCapacity.CalculateTransportMinutes(state, 12, 10));
+    }
+
+    [Fact]
+    public void HospitalCapacity_NoHospitals_ZeroTransportKeepsP54Survival()
+    {
+        var state = new WorldState(64, maxBuildings: 4);
+        Assert.Equal(0f, HospitalCapacity.CalculateTransportMinutes(state, 8, 8));
+        Assert.Equal(0f, HospitalCapacity.CalculateOccupancyFraction(state));
+        Assert.Equal(0, HospitalCapacity.CountAvailableBeds(state));
+
+        float chain = HospitalCapacity.CalculateEmsChainMinutes(4f, 0f);
+        Assert.Equal(4f, chain);
+        Assert.Equal(EmsSurvival.SurvivalUnder5Min, EmsSurvival.CalculateRate(chain));
+    }
+
+    [Fact]
+    public void HospitalCapacity_NearHospitalRaisesSurvivalVsFullDivert()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        for (int x = 8; x <= 40; x++)
+            host.PlaceRoad(x, 10);
+        for (int x = 12; x <= 36; x++)
+            host.State!.Tiles.ZoneType[host.State.Tiles.Index(x, 11)] = 1;
+
+        PlaceBuilding(host.State!, 20, 11, ServiceFire);
+
+        // Only full hospital → transport penalty → lower survival.
+        PlaceBuilding(host.State, 10, 11, ServiceHealth, level: 1, maxOccupants: 4, occupants: 4);
+        host.Services!.UpdateMeanEmergencyResponse(host.State);
+        host.Services.UpdateHospitalCapacity(host.State);
+        float fullSurvival = host.State.MeanEmsSurvivalRate;
+        Assert.Equal(0, host.State.AvailableHospitalBeds);
+        Assert.Equal(1f, host.State.HospitalBedOccupancyFraction, precision: 3);
+
+        // Add a hospital with free beds near the corridor → shorter chain → higher survival.
+        PlaceBuilding(host.State, 22, 11, ServiceHealth, level: 1, maxOccupants: 40, occupants: 5);
+        host.Services.UpdateMeanEmergencyResponse(host.State);
+        host.Services.UpdateHospitalCapacity(host.State);
+        float openSurvival = host.State.MeanEmsSurvivalRate;
+
+        Assert.True(host.State.AvailableHospitalBeds > 0);
+        Assert.True(openSurvival > fullSurvival,
+            $"open beds should raise mean survival ({openSurvival:F3} vs {fullSurvival:F3})");
+        Assert.InRange(host.State.HospitalBedOccupancyFraction, 0f, 1f);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsHospitalCapacityFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        PlaceBuilding(host.State!, 10, 10, ServiceHealth, level: 1, maxOccupants: 20, occupants: 8);
+        host.Services!.UpdateHospitalCapacity(host.State!);
+
+        Assert.Equal(12, host.State.AvailableHospitalBeds);
+        Assert.Equal(0.4f, host.State.HospitalBedOccupancyFraction, precision: 3);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("hospitalBedOccupancyFraction", out var occ));
+        Assert.True(doc.RootElement.TryGetProperty("availableHospitalBeds", out var beds));
+        Assert.Equal(0.4f, occ.GetSingle(), precision: 3);
+        Assert.Equal(12, beds.GetInt32());
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(0.4f, dto.HospitalBedOccupancyFraction, precision: 3);
+        Assert.Equal(12, dto.AvailableHospitalBeds);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(0.4f, snap.HospitalBedOccupancyFraction, precision: 3);
+        Assert.Equal(12, snap.AvailableHospitalBeds);
+    }
+
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>
     private sealed class AlwaysLowRandom : Random
     {
@@ -347,7 +454,9 @@ public sealed class CathedralUtilitiesTests
         int x,
         int y,
         uint serviceFlags,
-        byte level = 1)
+        byte level = 1,
+        ushort maxOccupants = 20,
+        ushort occupants = 10)
     {
         int slot = state.Buildings.Allocate();
         state.Buildings.GridX[slot] = x;
@@ -357,8 +466,8 @@ public sealed class CathedralUtilitiesTests
         state.Buildings.ServiceFlags[slot] = serviceFlags;
         state.Buildings.Level[slot] = level;
         state.Buildings.State[slot] = 1;
-        state.Buildings.MaxOccupants[slot] = 20;
-        state.Buildings.Occupants[slot] = 10;
+        state.Buildings.MaxOccupants[slot] = maxOccupants;
+        state.Buildings.Occupants[slot] = occupants;
         state.Tiles.BuildingId[state.Tiles.Index(x, y)] = (ushort)slot;
         return slot;
     }

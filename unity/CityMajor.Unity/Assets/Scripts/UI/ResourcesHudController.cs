@@ -24,6 +24,7 @@ namespace CityMajor.UI
         Label _utilitiesValue;
         Label _emsValue;
         Label _fireValue;
+        Label _hospitalValue;
         Label _cranesLabel;
         readonly PopulationGrowthTracker _growthTracker = new();
 
@@ -92,6 +93,7 @@ namespace CityMajor.UI
             _utilitiesValue = root.Q<Label>("utilities-value");
             _emsValue = root.Q<Label>("ems-value");
             _fireValue = root.Q<Label>("fire-value");
+            _hospitalValue = root.Q<Label>("hospital-value");
             _cranesLabel = root.Q<Label>("cranes-label");
         }
 
@@ -156,7 +158,7 @@ namespace CityMajor.UI
                 var survivalPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanEmsSurvivalRate) * 100f);
                 _emsValue.text = $"{minutes} · {survivalPct}%";
                 _emsValue.tooltip =
-                    "Mean fire/EMS response minutes over sampled zoned tiles (road distance + traffic; 2× without hydrant) and EMS survival rate from response time (P5.4).";
+                    "Mean fire/EMS response minutes over sampled zoned tiles (road distance + traffic; 2× without hydrant) and EMS survival rate from response + hospital transport (P5.4 / Tier-2 capacity).";
             }
 
             if (_fireValue != null)
@@ -168,6 +170,17 @@ namespace CityMajor.UI
                     : $"🚰 {hydrantPct}%";
                 _fireValue.tooltip =
                     "Hydrant coverage over zoned buildings; active fire count when any building is burning (P5.3).";
+            }
+
+            if (_hospitalValue != null)
+            {
+                var freeBeds = Mathf.Max(0, state.AvailableHospitalBeds);
+                var occPct = Mathf.RoundToInt(Mathf.Clamp01(state.HospitalBedOccupancyFraction) * 100f);
+                _hospitalValue.text = freeBeds > 0 || occPct > 0
+                    ? $"🏥 {freeBeds} free · {occPct}%"
+                    : "🏥 —";
+                _hospitalValue.tooltip =
+                    "Free hospital beds and city-wide bed occupancy. EMS transports to the nearest hospital with capacity (Tier-2 / MISSING_SYSTEMS §1.2).";
             }
         }
 

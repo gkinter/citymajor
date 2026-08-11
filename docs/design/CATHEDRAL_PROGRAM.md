@@ -115,6 +115,7 @@ SUPERSEDED / ARCHIVAL — banner only, no player-ship work
 | **P5.2** | ✅ Done | Emergency response time (graph + BPR) — `06977a9` / SB-4242 |
 | **P5.3** | ✅ Done | Fire v1 (spread + hydrant coverage) |
 | **P5.4** | ✅ Done | EMS survival curve from response minutes |
+| **Tier-2 hosp** | ✅ Done | Hospital capacity — nearest free beds + EMS chain + ResourcesHud Hosp |
 | **P6.1**–**P6.3** / **P5.6** | ✅ Done | Law spawn mults · Event*Mult bridge · Herald predicates · council seats |
 | **P7.5** | ✅ Done | Unity Cathedral HUD Event*Mult + WASM DTO export (Sprint 3 parity close) |
 | **Client overlays** | ✅ Done | Congestion heatmap `c8827bf` · O-D sample HUD `ccf7f22` · mode share `370e944` · unemployment HUD `e70ed78` |
@@ -224,7 +225,7 @@ flowchart TB
 ### P5 — Services & emergencies
 
 **Phase 5a (EA):** Utilities L0 balance, coverage overlays, response time = distance + traffic.  
-**Phase 5b:** Fire spread, hydrants (P5.3 ✅), EMS survival curve (P5.4 ✅). Wildfire / arson rings still Tier 2.
+**Phase 5b:** Fire spread, hydrants (P5.3 ✅), EMS survival curve (P5.4 ✅), hospital capacity Tier-2 ✅. Wildfire / arson rings still Tier 2.
 
 | Milestone | Deliverable |
 |-----------|-------------|
@@ -233,6 +234,7 @@ flowchart TB
 | **P5.2** ✅ | Emergency response time model (distance + traffic / BPR) — `EmergencyResponseTime` / `06977a9` / SB-4242 |
 | **P5.3** ✅ | Fire v1 (spread + hydrant coverage) — `FireResponse` + ResourcesHud Fire line |
 | **P5.4** ✅ | EMS survival curve — `EmsSurvival` + `MeanEmsSurvivalRate` + ResourcesHud EMS % |
+| **Tier-2 hosp** ✅ | Hospital capacity — `HospitalCapacity` nearest free beds + EMS transport chain + ResourcesHud Hosp |
 
 ### P6 — Governance
 
@@ -376,6 +378,7 @@ openspec/
 | 2026-08-11 | **P7.5 landed** — Unity Cathedral HUD binds Event*Mult; WASM `SimSnapshotDto` Event*Mult export |
 | 2026-08-11 | **P5.3 landed** — `FireResponse` hydrant coverage + spread; no-hydrant 2× response; ResourcesHud Fire line |
 | 2026-08-11 | **P5.4 landed** — `EmsSurvival` response→survival curve; `MeanEmsSurvivalRate` snapshot + ResourcesHud EMS % |
+| 2026-08-11 | **Tier-2 hospital capacity** — `HospitalCapacity` nearest free beds; EMS survival chain + transport; `HospitalBedOccupancyFraction` / `AvailableHospitalBeds` + ResourcesHud Hosp |
 | 2026-08-11 | **P7.1 landed** — [`SIM_SNAPSHOT_V2.md`](./SIM_SNAPSHOT_V2.md) field/cadence/ownership matrix for engine · WASM DTO · Unity `CitySimState` |
 | 2026-08-11 | **P7.4 landed** — `scripts/verify-sim-snapshot-v2.py` doc↔export gap check in `unity-simcore.yml` (SB-4264) |
 | 2026-08-11 | **Save/load wave restore** — `ApplySnapshotDto` restores Event*Mult, delivery delay, abandoned recount, BuildingDto FireRisk/ServiceFlags (+ pool id preserve), L2 HH sample overlay; `CathedralSaveLoadTests` |

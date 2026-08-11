@@ -114,6 +114,12 @@ public sealed class WasmSimHost
     /// <summary>Mean EMS survival rate 0–1 (P5.4 / Phase 5b).</summary>
     public float MeanEmsSurvivalRate =>
         _host.State?.MeanEmsSurvivalRate ?? EmsSurvival.DefaultMeanRate;
+    /// <summary>Hospital bed occupancy 0–1 (Tier-2).</summary>
+    public float HospitalBedOccupancyFraction =>
+        _host.State?.HospitalBedOccupancyFraction ?? 0f;
+    /// <summary>Free hospital beds city-wide (Tier-2 EMS diversion).</summary>
+    public int AvailableHospitalBeds =>
+        _host.State?.AvailableHospitalBeds ?? 0;
     public int MarketZoneCount => _host.Economy?.ActiveZoneCount ?? 1;
 
     /// <summary>Faction id per council seat (length <see cref="PoliticsSystem.CouncilSeatCount"/>).</summary>
@@ -346,6 +352,10 @@ public sealed class WasmStatusDto
     public int ActiveFireCount { get; init; }
     /// <summary>Mean EMS survival rate 0–1 from response-minute curve (P5.4).</summary>
     public float MeanEmsSurvivalRate { get; init; } = 0.40f;
+    /// <summary>Hospital bed occupancy 0–1 (Tier-2).</summary>
+    public float HospitalBedOccupancyFraction { get; init; }
+    /// <summary>Free hospital beds city-wide (Tier-2).</summary>
+    public int AvailableHospitalBeds { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Faction id per council seat (length 9).</summary>
@@ -455,6 +465,8 @@ public sealed class WasmStatusDto
             HydrantCoverageFraction = host.HydrantCoverageFraction,
             ActiveFireCount = host.ActiveFireCount,
             MeanEmsSurvivalRate = host.MeanEmsSurvivalRate,
+            HospitalBedOccupancyFraction = host.HospitalBedOccupancyFraction,
+            AvailableHospitalBeds = host.AvailableHospitalBeds,
             MarketZoneCount = host.MarketZoneCount,
             CouncilSeats = host.CouncilSeats,
         };

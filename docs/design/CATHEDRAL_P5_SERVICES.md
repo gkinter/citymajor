@@ -10,7 +10,7 @@
 
 ## 1. Goal
 
-Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4).
+Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind.
 
 ---
 
@@ -22,6 +22,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 | **P5.2** | Emergency response time = distance + traffic | **Live** — `EmergencyResponseTime` + mean minutes on `WasmStatusDto` / Resources+Economy HUD |
 | **P5.3** | Fire v1 (spread + hydrant coverage) | **Live** — `FireResponse` + `HydrantCoverageFraction` / `ActiveFireCount` on snapshot + ResourcesHud Fire line |
 | **P5.4** | EMS survival curve from response minutes | **Live** — `EmsSurvival` + `MeanEmsSurvivalRate` on snapshot + ResourcesHud `EMS Xm · N%` |
+| **Tier-2** | Hospital capacity + EMS diversion | **Live** — `HospitalCapacity` + `HospitalBedOccupancyFraction` / `AvailableHospitalBeds` + ResourcesHud Hosp line |
 
 ---
 
@@ -125,8 +126,25 @@ Worker maps the key onto `SimResources`; ResourcesHud shows `EMS 4.2m` when pres
 
 `CathedralUtilitiesTests` pins bucket thresholds, faster response → higher mean survival, and snapshot export.
 
+### 4.7 Live (Tier-2 hospital capacity)
+
+```json
+{
+  "hospitalBedOccupancyFraction": 0.4,
+  "availableHospitalBeds": 12
+}
+```
+
+- Hospitals = buildings with `ServiceHealth` (`1 << 4`); beds = `MaxOccupants` (fallback `50 × level`)
+- EMS finds **nearest hospital with free beds** (skips full); transport minutes add to the survival chain
+- No health buildings → transport `0` (P5.4 station-only survival preserved)
+- Health buildings all full → `NoCapacityTransportMinutes` (30) diversion penalty
+- Unity ResourcesHud Hosp line: `🏥 {free} free · {occ%}`
+
+`CathedralUtilitiesTests` pins nearest-with-capacity diversion, full-city penalty, open beds raising survival, and snapshot export.
+
 ## 5. Out of scope (this stub)
 
-- Wildfire / arson rings / hospital capacity coupling (`MISSING_SYSTEMS.md` depth)
+- Wildfire / arson rings (`MISSING_SYSTEMS.md` depth)
 - Sewage / internet / waste as separate HUD meters
 - Rewriting tile BFS grids — keep daily ServiceSystem path

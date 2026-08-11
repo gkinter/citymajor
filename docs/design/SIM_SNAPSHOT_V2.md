@@ -144,6 +144,8 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | HydrantCoverageFraction | ✅ | ✅ | ✅ | WorldState | P5.3 |
 | ActiveFireCount | ✅ | ✅ | ✅ | WorldState | P5.3 |
 | MeanEmsSurvivalRate | ✅ | ✅ | ✅ | WorldState | P5.4; default 0.40 |
+| HospitalBedOccupancyFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 hospital capacity |
+| AvailableHospitalBeds | ✅ | ✅ | ✅ | WorldState | Tier-2 EMS diversion |
 | ServiceCoverage[] | — | ✅ | overlay via services | ServiceSystem | Sparse zoned tiles |
 | CouncilSeats | ✅ `byte[]` | ✅ `int[]` | via bridge getter | Politics | Length 9 |
 
@@ -249,3 +251,4 @@ These are **documentation of tip reality**, not a backlog invent:
 |------|--------|
 | 2026-08-11 | **P7.1** initial `SIM_SNAPSHOT_V2.md` from tip `8f57614` exports (Event*Mult, AbandonedBuildingCount, fire/EMS, delivery delay, HH L2, friction corridors, mode share, council seats) |
 | 2026-08-11 | **P7.4** gap-matrix CI — `scripts/verify-sim-snapshot-v2.py` doc↔export check (SB-4264) |
+| 2026-08-11 | **Tier-2 hospital capacity** — `HospitalBedOccupancyFraction` / `AvailableHospitalBeds` on E+W+U |

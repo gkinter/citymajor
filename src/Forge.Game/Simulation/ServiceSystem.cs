@@ -262,6 +262,7 @@ public sealed class ServiceSystem
         UpdatePerTileCrime(state);
         UpdateMeanEmergencyResponse(state);
         UpdateFireResponse(state);
+        UpdateHospitalCapacity(state);
     }
 
     /// <summary>
@@ -275,10 +276,20 @@ public sealed class ServiceSystem
     }
 
     /// <summary>
+    /// Tier-2 hospital beds — occupancy + free-bed count for EMS diversion / HUD.
+    /// </summary>
+    public void UpdateHospitalCapacity(WorldState state)
+    {
+        state.HospitalBedOccupancyFraction = HospitalCapacity.CalculateOccupancyFraction(state);
+        state.AvailableHospitalBeds = HospitalCapacity.CountAvailableBeds(state);
+    }
+
+    /// <summary>
     /// Sample zoned tiles (every <paramref name="sampleStride"/>-th) and average
     /// fire/EMS response minutes (road-graph + BPR). Writes
     /// <see cref="WorldState.MeanEmergencyResponseMinutes"/> and
-    /// <see cref="WorldState.MeanEmsSurvivalRate"/> (P5.4 survival curve).
+    /// <see cref="WorldState.MeanEmsSurvivalRate"/> (P5.4 survival curve + Tier-2
+    /// hospital transport when health buildings exist).
     /// </summary>
     public void UpdateMeanEmergencyResponse(WorldState state, int sampleStride = 8)
     {
@@ -298,7 +309,7 @@ public sealed class ServiceSystem
 
             float minutes = CalculateFireResponseTime(state, x, y);
             sum += minutes;
-            survivalSum += EmsSurvival.CalculateRate(minutes);
+            survivalSum += CalculateEmsSurvivalAtTile(state, x, y, minutes);
             count++;
         }
 
@@ -500,6 +511,30 @@ public sealed class ServiceSystem
     /// </summary>
     public static float CalculateEmsSurvivalRate(float responseMinutes)
         => EmsSurvival.CalculateRate(responseMinutes);
+
+    /// <summary>
+    /// EMS survival at a tile: station response + transport to nearest hospital
+    /// with free beds (Tier-2). No hospitals → station response only (P5.4).
+    /// </summary>
+    public float CalculateEmsSurvivalAtTile(
+        WorldState state,
+        int tileX,
+        int tileY,
+        float? stationResponseMinutes = null)
+    {
+        float station = stationResponseMinutes
+            ?? CalculateFireResponseTime(state, tileX, tileY);
+        float transport = HospitalCapacity.CalculateTransportMinutes(
+            state, tileX, tileY, state.RoadEdgeTravelTimes);
+        float chain = HospitalCapacity.CalculateEmsChainMinutes(station, transport);
+        return EmsSurvival.CalculateRate(chain);
+    }
+
+    /// <summary>
+    /// Minutes from incident to nearest hospital with capacity (0 if none exist).
+    /// </summary>
+    public static float CalculateHospitalTransportMinutes(WorldState state, int tileX, int tileY)
+        => HospitalCapacity.CalculateTransportMinutes(state, tileX, tileY, state.RoadEdgeTravelTimes);
 
     // =========================================================================
     // Education

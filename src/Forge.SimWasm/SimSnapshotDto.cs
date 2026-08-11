@@ -146,6 +146,10 @@ public sealed class SimSnapshotDto
     public int ActiveFireCount { get; init; }
     /// <summary>Mean EMS survival rate 0–1 from response-minute curve (P5.4).</summary>
     public float MeanEmsSurvivalRate { get; init; } = 0.40f;
+    /// <summary>Hospital bed occupancy 0–1 (Tier-2 / MISSING_SYSTEMS §1.2).</summary>
+    public float HospitalBedOccupancyFraction { get; init; }
+    /// <summary>Free hospital beds city-wide (Tier-2 EMS diversion).</summary>
+    public int AvailableHospitalBeds { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
     /// <summary>Sparse market-zone boundary friction samples (0–1 heat).</summary>
@@ -249,6 +253,8 @@ public sealed class SimSnapshotDto
             HydrantCoverageFraction = state.HydrantCoverageFraction,
             ActiveFireCount = state.ActiveFireCount,
             MeanEmsSurvivalRate = state.MeanEmsSurvivalRate,
+            HospitalBedOccupancyFraction = state.HospitalBedOccupancyFraction,
+            AvailableHospitalBeds = state.AvailableHospitalBeds,
             MarketZoneCount = state.MarketZoneCount,
             CommuterCoverage = commuterAudit.Coverage,
             CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),

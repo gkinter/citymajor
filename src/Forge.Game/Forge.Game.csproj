@@ -17,6 +17,7 @@
     <Compile Include="..\Forge.SimCore\EmergencyResponseTime.cs" Link="SimCore\EmergencyResponseTime.cs" />
     <Compile Include="..\Forge.SimCore\FireResponse.cs" Link="SimCore\FireResponse.cs" />
     <Compile Include="..\Forge.SimCore\EmsSurvival.cs" Link="SimCore\EmsSurvival.cs" />
+    <Compile Include="..\Forge.SimCore\HospitalCapacity.cs" Link="SimCore\HospitalCapacity.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\production_chains.json">

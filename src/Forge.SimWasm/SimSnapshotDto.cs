@@ -187,6 +187,11 @@ public sealed class SimSnapshotDto
     public CommuteOdSampleDto[] CommuteOdSample { get; init; } = [];
     /// <summary>Faction id per council seat (length 9).</summary>
     public int[] CouncilSeats { get; init; } = [];
+    /// <summary>
+    /// 8-dimensional cultural identity vector (−1…+1), politics flavor.
+    /// Matches <see cref="WorldState.CulturalDna"/>; clone on export / copy on restore.
+    /// </summary>
+    public float[] CulturalDna { get; init; } = [];
     /// <summary>City-wide car mode share from traffic assignment (0–1).</summary>
     public float CarModeShare { get; init; }
     /// <summary>City-wide transit mode share from traffic assignment (0–1).</summary>
@@ -298,6 +303,7 @@ public sealed class SimSnapshotDto
             CommuterCoverage = commuterAudit.Coverage,
             CommuteOdSample = ToCommuteOdSampleDtos(commuteOdSample),
             CouncilSeats = CollectCouncilSeats(state),
+            CulturalDna = CollectCulturalDna(state),
             CarModeShare = carModeShare,
             TransitModeShare = transitModeShare,
             WalkModeShare = walkModeShare,
@@ -313,6 +319,14 @@ public sealed class SimSnapshotDto
         for (int i = 0; i < src.Length; i++)
             seats[i] = src[i];
         return seats;
+    }
+
+    private static float[] CollectCulturalDna(WorldState state)
+    {
+        var src = state.CulturalDna;
+        if (src is not { Length: > 0 })
+            return [];
+        return (float[])src.Clone();
     }
 
     private static CommuteOdSampleDto[] ToCommuteOdSampleDtos(

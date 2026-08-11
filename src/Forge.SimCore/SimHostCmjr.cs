@@ -173,6 +173,7 @@ public sealed partial class SimHost
 
         _population.RestoreMeanRentBurden(dto.MeanRentBurden, _state);
         _politics.RestoreCouncilSeats(dto.CouncilSeats, _state);
+        RestoreCulturalDna(dto);
         _traffic.RestoreModeShares(dto.CarModeShare, dto.TransitModeShare, dto.WalkModeShare);
         _fullTraffic?.RestoreModeShares(
             dto.CarModeShare, dto.TransitModeShare, dto.WalkModeShare);
@@ -281,6 +282,21 @@ public sealed partial class SimHost
         // 0 means "unset" in older saves — keep WorldState default (2028).
         if (dto.NextElectionYear > 0)
             _state.NextElectionYear = dto.NextElectionYear;
+    }
+
+    private void RestoreCulturalDna(SimSnapshotDto dto)
+    {
+        // Older saves omit CulturalDna — leave WorldState defaults (zeros).
+        if (dto.CulturalDna is not { Length: > 0 })
+            return;
+
+        var dest = _state.CulturalDna;
+        int n = Math.Min(dest.Length, dto.CulturalDna.Length);
+        for (int i = 0; i < n; i++)
+        {
+            float v = dto.CulturalDna[i];
+            dest[i] = float.IsFinite(v) ? Math.Clamp(v, -1f, 1f) : 0f;
+        }
     }
 
     private void RestoreEventMultipliers(SimSnapshotDto dto)

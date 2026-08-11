@@ -13,7 +13,8 @@ namespace Forge.SimCore.Tests;
 /// (<see cref="SimHost.GetSnapshotJson"/> / <see cref="SimHost.LoadSnapshotFromJson"/>)
 /// must survive snapshot restore — MeanRentBurden, councilSeats, mode shares,
 /// plus Event*Mult / Law*Mult / ActiveLawIds / ActiveOrdinances / NextElectionYear /
-/// BlackoutFraction / WaterShortageFraction / delivery delay / abandoned / fire / EMS / L2 sample.
+/// BlackoutFraction / WaterShortageFraction / CulturalDna / delivery delay /
+/// abandoned / fire / EMS / L2 sample.
 /// </summary>
 [Collection("SimHost")]
 public sealed class CathedralSaveLoadTests
@@ -450,6 +451,57 @@ public sealed class CathedralSaveLoadTests
         Assert.NotNull(roundTrip);
         Assert.Equal(0.37f, roundTrip!.BlackoutFraction, precision: 3);
         Assert.Equal(0.28f, roundTrip.WaterShortageFraction, precision: 3);
+    }
+
+    [Fact]
+    public void SnapshotRoundTrip_PreservesCulturalDna()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        var state = host.State!;
+        // Pin non-default politics flavor vector (−1…+1, length 8).
+        float[] dna =
+        [
+            0.55f, -0.40f, 0.25f, -0.80f,
+            0.10f, 0.70f, -0.15f, 0.90f,
+        ];
+        for (int i = 0; i < dna.Length; i++)
+            state.CulturalDna[i] = dna[i];
+
+        string json = host.GetSnapshotJson();
+        var saved = JsonSerializer.Deserialize(json, SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(saved);
+
+        using (var doc = JsonDocument.Parse(json))
+        {
+            Assert.True(doc.RootElement.TryGetProperty("culturalDna", out var el));
+            Assert.Equal(JsonValueKind.Array, el.ValueKind);
+            Assert.Equal(8, el.GetArrayLength());
+            Assert.Equal(0.55f, el[0].GetSingle(), precision: 3);
+            Assert.Equal(0.90f, el[7].GetSingle(), precision: 3);
+        }
+
+        Assert.Equal(8, saved!.CulturalDna.Length);
+        for (int i = 0; i < dna.Length; i++)
+            Assert.Equal(dna[i], saved.CulturalDna[i], precision: 3);
+
+        // Mutate so restore cannot pass by Init coincidence.
+        for (int i = 0; i < state.CulturalDna.Length; i++)
+            state.CulturalDna[i] = 0f;
+
+        Assert.True(host.LoadSnapshotFromJson(json));
+
+        for (int i = 0; i < dna.Length; i++)
+            Assert.Equal(dna[i], host.State!.CulturalDna[i], precision: 3);
+
+        var roundTrip = JsonSerializer.Deserialize(
+            host.GetSnapshotJson(),
+            SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(roundTrip);
+        Assert.Equal(8, roundTrip!.CulturalDna.Length);
+        for (int i = 0; i < dna.Length; i++)
+            Assert.Equal(dna[i], roundTrip.CulturalDna[i], precision: 3);
     }
 
     private static string FindRepoRoot()

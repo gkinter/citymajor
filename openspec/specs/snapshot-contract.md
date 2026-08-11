@@ -19,6 +19,7 @@
 - **ActiveLawIds WASM save/load** — `SimSnapshotDto` exports active ordinance slug ids; `ApplySnapshotDto` restores `LawSystem` toggles then Law\*Mult scalars.
 - **ActiveOrdinances / NextElectionYear WASM save/load** — bitfield + election calendar on `SimSnapshotDto`; restored in `ApplySnapshotDto` (orthogonal to ActiveLawIds).
 - **BlackoutFraction / WaterShortageFraction WASM save/load** — rolling L0 utility shortages on `SimSnapshotDto`; restored to WorldState + `UtilityPartitionBalance` after service rebuild.
+- **CulturalDna[] WASM save/load** — 8-float politics flavor vector on `SimSnapshotDto`; `ApplySnapshotDto` copies into `WorldState.CulturalDna` (−1…+1).
 
 ## Target milestones
 

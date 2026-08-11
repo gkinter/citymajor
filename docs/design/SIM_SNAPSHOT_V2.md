@@ -168,7 +168,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | EventResearchMult | ✅ | ✅ | ✅ | WorldState | |
 | EventSpawnDemandMult | ✅ | ✅ | ✅ | WorldState | |
 | ActiveOrdinances / NextElectionYear | ✅ | ✅ | — | WorldState | Bitfield + election calendar on WASM DTO; law toggles also via ActiveLawIds |
-| CulturalDna[] | ✅ | — | — | WorldState | |
+| CulturalDna[] | ✅ | ✅ | — | WorldState | Politics flavor vector (−1…+1, length 8); WASM save/load |
 
 ### 4.7 Research
 
@@ -208,6 +208,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | `ActiveEventDto` | eventId, typeId, phase, severity, tileX/Y | |
 | `ActiveLawIds` | `string[]` | laws.json slug ids currently enabled |
 | `ActiveOrdinances` / `NextElectionYear` | `ulong` / `int` | Politics bitfield + election calendar |
+| `CulturalDna` | `float[8]` | Politics flavor vector (−1…+1) |
 | `EconomySnapshotDto` | shortages, surpluses, flows, marketZoneCount, marketZonePrices | |
 | `PopulationL2Dto` | households[≤100] | Id, tiles, happiness, commuteMin, home/work building ids, rentBurden |
 | `CommuteOdSampleDto` | home/work tiles, tripCount | Top 16 |
@@ -231,8 +232,6 @@ These are **documentation of tip reality**, not a backlog invent:
 2. **Commute O-D sample** — WASM array; Unity uses aggregated HUD scalars + Citizen L2, not the same array type on `CitySimState`.
 3. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
 4. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
-5. **CulturalDna[]** — still engine-only on WASM DTO (politics flavor vector).
-
 ---
 
 ## 7. Change protocol
@@ -258,3 +257,4 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **ActiveLawIds WASM DTO** — ordinance slug ids export + `ApplySnapshotDto` restore (deeper than Law\*Mult alone) |
 | 2026-08-11 | **ActiveOrdinances / NextElectionYear WASM DTO** — politics bitfield + election year export + restore (closes former §6 gap #6) |
 | 2026-08-11 | **BlackoutFraction / WaterShortageFraction WASM DTO** — rolling L0 utility shortages export + restore (closes former §6 gap #1) |
+| 2026-08-11 | **CulturalDna[] WASM DTO** — politics flavor vector export + `ApplySnapshotDto` restore (closes former §6 gap #5) |

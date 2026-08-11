@@ -386,3 +386,4 @@ openspec/
 | 2026-08-11 | **ActiveLawIds WASM DTO** — ordinance slug ids export + restore (deeper than Law\*Mult); `SnapshotRoundTrip_PreservesActiveLawIds` |
 | 2026-08-11 | **ActiveOrdinances / NextElectionYear WASM DTO** — politics bitfield + election year export + restore; `SnapshotRoundTrip_PreservesActiveOrdinancesAndNextElectionYear` |
 | 2026-08-11 | **BlackoutFraction / WaterShortageFraction WASM DTO** — rolling L0 utility shortages export + restore; `SnapshotRoundTrip_PreservesBlackoutAndWaterShortageFractions` |
+| 2026-08-11 | **CulturalDna[] WASM DTO** — politics flavor vector export + restore; `SnapshotRoundTrip_PreservesCulturalDna` |

@@ -192,7 +192,7 @@ FIELD_EXPAND: dict[str, dict[str, list[str]]] = {
     },
     "CulturalDna[]": {
         "E": ["CulturalDna"],
-        "W": [],
+        "W": ["CulturalDna"],
         "U": [],
     },
     "ResearchPoints / ResearchRate": {

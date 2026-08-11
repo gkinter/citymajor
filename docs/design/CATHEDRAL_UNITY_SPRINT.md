@@ -62,6 +62,7 @@ Sprint 1–2 landed Cathedral **sim depth** (roads, zoning, goods, O-D, commute 
 | **Deliverable** | Congestion from edge volumes/times; optional friction corridor highlight |
 | **Acceptance** | Overlay toggles in Play; visually consistent with snapshot samples |
 | **Depends** | P1.6 ✅ · P3.4 fields ✅ |
+| **Landed** | Congestion `EdgeTrafficOverlay` (`T`) · Friction `FrictionCorridorOverlay` (`F`) + Economy/Cathedral friction readouts |
 
 ### U3.4 — Zoning / density tools (P2 → Unity)
 
@@ -127,7 +128,8 @@ Follow merge protocol in [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md). B
 
 - [ ] Unity Play: road tier + bridge/tunnel/ramp modes usable without digging inspector-only fields
 - [ ] Unity Play: Economy panel shows goods + chain (+ partition spread if P3.3 merged)
-- [ ] Unity Play: congestion overlay reads snapshot edge data
+- [x] Unity Play: congestion overlay reads snapshot edge data (`T`)
+- [x] Unity Play: friction corridor overlay reads economy corridor samples (`F`)
 - [ ] Unity Play: extended zones + density paint work under era gates
 - [x] Unity Play: O-D / commute satisfaction sample visible (Cathedral HUD — tip after U3.5 bind)
 - [ ] [`UNITY_PLAY_CHECKLIST.md`](./UNITY_PLAY_CHECKLIST.md) Cathedral subset signed on integration tip

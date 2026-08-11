@@ -30,6 +30,11 @@ namespace CityMajor.Sim
         public SimSnapshot LatestSnapshot { get; private set; }
         public ServiceCoverageDto[] LatestServiceCoverage { get; private set; } = Array.Empty<ServiceCoverageDto>();
         public UtilityCoverageDto[] LatestUtilityCoverage { get; private set; } = Array.Empty<UtilityCoverageDto>();
+        /// <summary>
+        /// Cathedral P3.4 / U3.3 — sparse market-zone boundary friction heat for GL overlay.
+        /// Empty when economy has ≤1 active market zone or sim core is offline.
+        /// </summary>
+        public FrictionCorridorDto[] LatestFrictionCorridors { get; private set; } = Array.Empty<FrictionCorridorDto>();
         /// <summary>Active sim/Herald events for EventTicker (housing_crisis, housing_shortage, approval_unrest, …).</summary>
         public ActiveEventDto[] LatestActiveEvents { get; private set; } = Array.Empty<ActiveEventDto>();
         /// <summary>
@@ -272,6 +277,7 @@ namespace CityMajor.Sim
             MeanTrafficDensity = 0.34f,
             InterZoneTradeVolume = 1_240f,
             MeanInterZoneFriction = 1.18f,
+            GoodsTransportCostIndex = 0.28f,
             ConstructingBuildingCount = 3,
             PowerCoverageFraction = 0.93f,
             WaterCoverageFraction = 0.89f,
@@ -342,6 +348,7 @@ namespace CityMajor.Sim
                 MeanTrafficDensity = snap.MeanTrafficDensity,
                 InterZoneTradeVolume = snap.InterZoneTradeVolume,
                 MeanInterZoneFriction = snap.MeanInterZoneFriction,
+                GoodsTransportCostIndex = snap.GoodsTransportCostIndex,
                 BuildingCount = snap.BuildingCount,
                 ConstructingBuildingCount = snap.ConstructingBuildingCount,
                 ZonedTiles = zoned,
@@ -377,6 +384,7 @@ namespace CityMajor.Sim
 
             LatestServiceCoverage = _simHost.GetServiceCoverageSample(step: 8);
             LatestUtilityCoverage = _simHost.GetUtilityCoverageSample(step: 8);
+            LatestFrictionCorridors = BuildLatestFrictionCorridors(snap);
             LatestRoadGraph = BuildLatestRoadGraph();
             LatestActiveEvents = _simHost.GetActiveEvents();
             // Keep count on CitySimState for UGUI / badge consumers.
@@ -402,6 +410,43 @@ namespace CityMajor.Sim
                 ? times
                 : edgeTravelTimes;
             return RoadGraphSnapshotDto.From(_simHost.State.Roads, edgeVolumes, travelTimes);
+        }
+
+        FrictionCorridorDto[] BuildLatestFrictionCorridors(SimSnapshot snap)
+        {
+            if (!_simCoreReady || _simHost?.Economy == null || _simHost.State == null)
+                return Array.Empty<FrictionCorridorDto>();
+
+            var economy = _simHost.Economy;
+            if (economy.ActiveZoneCount <= 1)
+                return Array.Empty<FrictionCorridorDto>();
+
+            var worldSize = _simHost.State.Tiles?.Size > 0
+                ? _simHost.State.Tiles.Size
+                : (snap.WorldSize > 0 ? snap.WorldSize : _mapSize);
+            if (worldSize <= 1)
+                return Array.Empty<FrictionCorridorDto>();
+
+            var samples = economy.CollectFrictionCorridors(
+                worldSize,
+                _simHost.State.MeanInterZoneFriction,
+                _simHost.State.Tiles?.Traffic,
+                stride: 2);
+            if (samples == null || samples.Length == 0)
+                return Array.Empty<FrictionCorridorDto>();
+
+            var list = new FrictionCorridorDto[samples.Length];
+            for (var i = 0; i < samples.Length; i++)
+            {
+                list[i] = new FrictionCorridorDto
+                {
+                    TileX = samples[i].TileX,
+                    TileZ = samples[i].TileZ,
+                    Friction = samples[i].Friction,
+                };
+            }
+
+            return list;
         }
 
         void SyncGridFromSnapshot(SimSnapshot snap)

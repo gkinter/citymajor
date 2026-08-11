@@ -33,6 +33,10 @@ namespace CityMajor.Sim
         public float MeanTrafficDensity;
         public float InterZoneTradeVolume;
         public float MeanInterZoneFriction;
+
+        /// <summary>Cathedral P3.4 — composite goods transport cost pressure (0–1).</summary>
+        public float GoodsTransportCostIndex;
+
         public int BuildingCount;
         public int ConstructingBuildingCount;
         public int ZonedTiles;

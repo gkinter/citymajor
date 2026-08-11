@@ -78,6 +78,7 @@ namespace CityMajor.Core
             root.AddComponent<ServiceCoverageOverlay>().Configure(grid, sim);
             root.AddComponent<UtilityStressOverlay>().Configure(grid, sim);
             root.AddComponent<EdgeTrafficOverlay>().Configure(grid, sim);
+            root.AddComponent<FrictionCorridorOverlay>().Configure(grid, sim);
             root.AddComponent<AmbientLifeController>().Configure(sim);
             root.AddComponent<AmbientAudioController>().Configure(sim);
 

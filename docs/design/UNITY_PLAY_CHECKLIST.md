@@ -73,6 +73,7 @@
 - [ ] `V` — service coverage GL quads
 - [ ] `U` — utility stress overlay (power/water strain tint)
 - [ ] `T` — edge traffic lines on congested roads
+- [ ] `F` — trade friction corridor heat on market-zone boundaries (cyan→magenta)
 - [ ] Bottom-center **demand strip** shows R/C/I + **goods shortage** bar + **utility stress** row
 - [ ] **Event ticker** (top) shows Herald headline from sim metrics (not static placeholder)
 - [ ] Zoom camera out (distance ≥ 200) — buildings switch to **box LOD** instanced cubes

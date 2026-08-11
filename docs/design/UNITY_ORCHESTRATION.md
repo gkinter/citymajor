@@ -199,6 +199,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `ConstructionPropInstancer` | — | Crane cubes on growing buildings |
 | `ServiceCoverageOverlay` | `V` | Police / health / fire / education GL quads |
 | `EdgeTrafficOverlay` | `T` | Hot edge lines between congested road tiles |
+| `FrictionCorridorOverlay` | `F` | Market-zone boundary friction heat (P3.4 / U3.3) |
 | `AmbientLifeController` | — | Day/night ambient + sun tint |
 | `IsometricCameraController` | MMB pan | On `CityCamera` child |
 
@@ -231,7 +232,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `ApprovalMeterController` | — | Top-right mayor approval |
 | `EventTickerController` | — | Bottom HUD ticker — Herald headline from sim bucket |
 | `TimeControlsController` | `Space`, `[`/`]`/`\` (keypad 1/2/4) | Pause + 1×/2×/4× speed — not 5/6/7 (zone paint) |
-| `CathedralMetricsHudController` | — | Rent/vacancy/unemployment + **Commute min · O-D coverage · commute sat** (U3.5) |
+| `CathedralMetricsHudController` | — | Rent/vacancy/unemployment + commute/O-D/sat + **trade friction × / transport cost** (U3.3) |
 | `ToolModeHudController` | — | Active tool indicator (zone/road/build/bulldoze) |
 
 #### UI — toggle panels
@@ -265,7 +266,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `CityShareStub` | Spectator URL from save panel |
 | `BlueprintSlice` / `BlueprintSliceWriter` | v2.5 Workshop chunk header stub |
 
-**Controls summary:** `1`/`2`/`3` zones · `4` road · `0` erase · `X` bulldoze · `R` research · `H` herald · `C` citizens · `L` laws · `B` build · `P` blueprint · `E` trade · `F1` help · `V` services · `T` edges · `Space` pause · `5`/`6`/`7` speed · LMB · MMB pan
+**Controls summary:** `1`/`2`/`3` zones · `4` road · `0` erase · `X` bulldoze · `R` research · `H` herald · `C` citizens · `L` laws · `B` build · `P` blueprint · `E` economy · `G` politics · `F1` help · `V` services · `U` utilities · `T` edges · `F` friction · `Space` pause · `[`/`]`/`\` speed · LMB · MMB pan
 
 **Play gate:** [UNITY_PLAY_CHECKLIST.md](./UNITY_PLAY_CHECKLIST.md) · **CityMajor → Open Play Verification Checklist**
 

@@ -173,7 +173,9 @@ namespace CityMajor.UI
                 $"Shortage pressure {Mathf.RoundToInt(shortageIdx * 100f)}% · " +
                 $"Surplus {Mathf.RoundToInt(surplusIdx * 100f)}%\n" +
                 $"Employment {emp}% · Trade {(trade >= 0 ? "+" : "")}{trade:N0}/mo · " +
-                $"Inter-zone {state.InterZoneTradeVolume:N0}/d";
+                $"Inter-zone {state.InterZoneTradeVolume:N0}/d\n" +
+                $"Friction ×{state.MeanInterZoneFriction:F2} · " +
+                $"Transport cost {Mathf.RoundToInt(Mathf.Clamp01(state.GoodsTransportCostIndex) * 100f)}%";
 
             var hasImbalances = _sim.TryGetGoodImbalances(out var shortages, out var surpluses);
             var sb = new StringBuilder(256);

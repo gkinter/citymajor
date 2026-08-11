@@ -76,7 +76,7 @@ namespace CityMajor.UI
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(1f, 1f);
             rt.anchoredPosition = new Vector2(-16f, -140f);
-            rt.sizeDelta = new Vector2(PanelWidth, 268f);
+            rt.sizeDelta = new Vector2(PanelWidth, 288f);
 
             var image = go.AddComponent<Image>();
             image.color = new Color(0.06f, 0.09f, 0.14f, 0.82f);
@@ -97,7 +97,7 @@ namespace CityMajor.UI
             _title.color = new Color(0.85f, 0.9f, 0.95f, 1f);
 
             _body = CreateUguiText(panel, "Body", 13, FontStyle.Normal, new Vector2(PanelPad, -36f),
-                new Vector2(PanelWidth - PanelPad * 2f, 220f));
+                new Vector2(PanelWidth - PanelPad * 2f, 240f));
             _body.alignment = TextAnchor.UpperLeft;
             _body.horizontalOverflow = HorizontalWrapMode.Wrap;
             _body.verticalOverflow = VerticalWrapMode.Overflow;
@@ -137,7 +137,7 @@ namespace CityMajor.UI
             var title = CreateTmp(tmpType, panel, "Title", 15f, true,
                 new Vector2(PanelPad, -PanelPad), new Vector2(PanelWidth - PanelPad * 2f, 22f), "Cathedral");
             _tmpBody = CreateTmp(tmpType, panel, "Body", 13f, false,
-                new Vector2(PanelPad, -36f), new Vector2(PanelWidth - PanelPad * 2f, 220f), "—");
+                new Vector2(PanelPad, -36f), new Vector2(PanelWidth - PanelPad * 2f, 240f), "—");
             return title != null && _tmpBody != null;
         }
 
@@ -213,6 +213,8 @@ namespace CityMajor.UI
             var od = Pct(state.CommuterCoverage);
             var commuteSat = Pct(state.MeanCommuteSatisfaction);
             var commuteMin = Mathf.Max(0f, state.MeanCommuteMinutes);
+            var friction = Mathf.Max(0f, state.MeanInterZoneFriction);
+            var transport = Pct(state.GoodsTransportCostIndex);
 
             var goods = state.HasGoodsPrices
                 ? $"Food {state.FoodAvgPrice:0.00} · Water {state.WaterAvgPrice:0.00} · Steel {state.SteelAvgPrice:0.00}"
@@ -231,6 +233,7 @@ namespace CityMajor.UI
                 $"Unemployment {unemployment}\n" +
                 $"Commute  {commuteMin:0}m · O-D {od} · Sat {commuteSat}\n" +
                 $"Modes  Car {car} · Transit {transit} · Walk {walk}\n" +
+                $"Trade fric ×{friction:0.00} · Cost {transport}\n" +
                 $"Approval     {approval}\n" +
                 $"Power {power} · Water {water}\n" +
                 $"Goods  {goods}\n" +

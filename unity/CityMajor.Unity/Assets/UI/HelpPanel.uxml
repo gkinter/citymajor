@@ -22,6 +22,7 @@
             <ui:Label class="help-line" text="Bottom toolbar — Economy / Politics buttons" />
             <ui:Label class="help-section" text="Overlays" />
             <ui:Label class="help-line" text="V — Service coverage · U — Utility stress · T — Edge traffic heat" />
+            <ui:Label class="help-line" text="F — Trade friction corridors (market-zone boundaries)" />
             <ui:Label class="help-line" text="Bottom-center demand — R/C/I + goods shortage + utility stress" />
             <ui:Label class="help-section" text="Time" />
             <ui:Label class="help-line" text="Space — Pause · [ — 1× · ] — 2× · Backslash — 4× (keypad 1/2/4)" />

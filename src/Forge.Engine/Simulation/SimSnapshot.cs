@@ -175,6 +175,15 @@ public sealed class SimSnapshot
     /// <summary>Baseline spawn demand multiplier from construction_cost ordinances.</summary>
     public float LawSpawnDemandMult { get; init; } = 1f;
 
+    /// <summary>Residential zone spawn multiplier (housing_supply / housing_density).</summary>
+    public float LawResidentialSpawnMult { get; init; } = 1f;
+
+    /// <summary>Industrial zone spawn multiplier (industrial_output / operating cost).</summary>
+    public float LawIndustrialSpawnMult { get; init; } = 1f;
+
+    /// <summary>Commercial / office zone spawn multiplier (accessibility / diversity).</summary>
+    public float LawCommercialSpawnMult { get; init; } = 1f;
+
     /// <summary>Buildings currently under construction.</summary>
     public int ConstructingBuildingCount { get; init; }
 
@@ -351,6 +360,9 @@ public sealed class SimSnapshot
             LawTrafficCapacityMult = state.LawTrafficCapacityMult,
             LawConstructionSpeedMult = state.LawConstructionSpeedMult,
             LawSpawnDemandMult = state.LawSpawnDemandMult,
+            LawResidentialSpawnMult = state.LawResidentialSpawnMult,
+            LawIndustrialSpawnMult = state.LawIndustrialSpawnMult,
+            LawCommercialSpawnMult = state.LawCommercialSpawnMult,
             ConstructingBuildingCount = state.ConstructingBuildingCount,
             AbandonedBuildingCount = state.AbandonedBuildingCount,
             PowerCoverageFraction = state.PowerCoverageFraction,

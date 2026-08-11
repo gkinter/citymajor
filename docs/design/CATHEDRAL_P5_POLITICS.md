@@ -20,7 +20,7 @@ Pin the **mayor approval loop** as the politics foundation: happiness / services
 |----|-------------|-------------|---------------|
 | **P5.1** | Approval on WASM `GetStatus` + snapshot (percent 0–100) | P6 foundation | **Live** — `WasmStatusDto.Approval`, `SimSnapshotDto.Approval` |
 | **P5.2** | `ApplyApprovalDelta` Herald bridge characterization | P6.2 partial | **Live** — `SimHost.ApplyApprovalDelta` / WASM export |
-| **P5.3** | Law toggles → budget / traffic / spawn multipliers | P6.1 | **Partial** — `LawEffectsTests`; spawn hooks shallow |
+| **P5.3** ✅ | Law toggles → budget / traffic / spawn multipliers | P6.1 | **Live** — R/C/I spawn mults + congestion capacity; `LawEffectsTests`; Unity Law panel |
 | **P5.4** | `ApplyEventEffectsToState` parity (web + Unity) | P6.2 | **Partial** — WASM day tick applies aggregate happiness/approval |
 | **P5.5** | Herald buckets only when snapshot predicates true | P6.3 | **Live** — `ApprovalHeraldSystem` fires `approval_unrest` only when approval &lt; 40% for 2 months; web/Unity buckets share the same threshold |
 | **P5.6** | Faction / council seat export on status | AGENT_07 Phase 2 | **Live** — `councilSeats` on WASM status + snapshot DTO |
@@ -120,6 +120,8 @@ Web Herald options emit `approval_event` with `approvalDelta` (`herald-option-co
 | `GetSnapshotJson_IncludesApprovalField` | JSON contract field present | **Pinned** |
 | `HeraldUnrestBucket_RequiresApprovalBelowThreshold` | Bucket gated on snapshot | **Pinned** |
 | `WasmStatus_ExportsCouncilSeats` | Council seats on WASM | **Pinned** |
+| `SetLawActive_RecomputesZoneSpawnMultipliers` | Law toggle → R/C/I spawn mults | **Pinned** (`LawEffectsTests` / P6.1) |
+| `RestrictiveHousingLaws_ReduceResidentialSpawnsVsBaseline` | Spawn mults change growth | **Pinned** (`LawEffectsTests` / P6.1) |
 
 Unit math already covered in `Forge.Game.Tests/PoliticsSystemTests` (weights, elections, clout).
 
@@ -137,7 +139,7 @@ Unit math already covered in `Forge.Game.Tests/PoliticsSystemTests` (weights, el
 ## 8. Implementation order
 
 1. **P5.1–P5.2** — this stub (export + delta tests) ✅  
-2. **P5.3** — deepen law→spawn multipliers; unskip/extend `LawEffectsTests`  
+2. **P5.3** — deepen law→spawn multipliers; unskip/extend `LawEffectsTests` ✅  
 3. **P5.4** — prove event aggregate effects match desktop in Unity + web  
 4. **P5.5** — Herald predicate hard gates ✅  
 5. **P5.6** — council/faction status fields on WASM status + snapshot ✅

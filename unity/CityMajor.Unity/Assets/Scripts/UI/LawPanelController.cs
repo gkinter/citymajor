@@ -106,6 +106,12 @@ namespace CityMajor.UI
             _statsRoot.Clear();
             AddStat("Definitions", state.LawDefinitionCount.ToString());
             AddStat("Active", state.ActiveLawCount.ToString());
+            // Cathedral P6.1 — player-facing law → sim multipliers
+            AddStat("Traffic cap", FormatMult(state.LawTrafficCapacityMult));
+            AddStat("Spawn", FormatMult(state.LawSpawnDemandMult));
+            AddStat("R spawn", FormatMult(state.LawResidentialSpawnMult));
+            AddStat("C spawn", FormatMult(state.LawCommercialSpawnMult));
+            AddStat("I spawn", FormatMult(state.LawIndustrialSpawnMult));
 
             _togglesRoot.Clear();
             if (!string.IsNullOrEmpty(state.SampleLawId))
@@ -139,5 +145,7 @@ namespace CityMajor.UI
             row.Add(new Label(value) { name = "value" });
             _statsRoot.Add(row);
         }
+
+        static string FormatMult(float mult) => $"{mult:0.00}×";
     }
 }

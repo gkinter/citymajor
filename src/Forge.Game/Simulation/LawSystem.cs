@@ -32,6 +32,10 @@ public static class LawEffectKeys
     public const string HousingSupply = "housing_supply";
     public const string IndustrialOutput = "industrial_output";
     public const string HousingDensity = "housing_density";
+    public const string CommercialAccessibility = "commercial_accessibility";
+    public const string CommercialDiversity = "commercial_diversity";
+    public const string CommercialOperatingCost = "commercial_operating_cost";
+    public const string IndustrialOperatingCost = "industrial_operating_cost";
 }
 
 /// <summary>

@@ -1138,24 +1138,37 @@ public sealed partial class SimHost
 
         _state.ActiveLawCount = _laws.ActiveLawCount;
 
+        // Traffic: capacity ordinances raise throughput; congestion ordinances cut it.
         float roadCapacity = _laws.GetAggregateEffect(LawEffectKeys.RoadCapacity);
         float trafficCapacity = _laws.GetAggregateEffect(LawEffectKeys.TrafficCapacity);
-        _state.LawTrafficCapacityMult = Math.Clamp(1f + roadCapacity + trafficCapacity, 0.1f, 3f);
+        float trafficCongestion = _laws.GetAggregateEffect(LawEffectKeys.TrafficCongestion);
+        _state.LawTrafficCapacityMult = Math.Clamp(
+            1f + roadCapacity + trafficCapacity - trafficCongestion, 0.1f, 3f);
 
         float constructionCost = _laws.GetAggregateEffect(LawEffectKeys.ConstructionCost);
         float constructionSpeed = _laws.GetAggregateEffect(LawEffectKeys.ConstructionSpeed);
         float housingSupply = _laws.GetAggregateEffect(LawEffectKeys.HousingSupply);
         float housingDensity = _laws.GetAggregateEffect(LawEffectKeys.HousingDensity);
         float industrialOutput = _laws.GetAggregateEffect(LawEffectKeys.IndustrialOutput);
+        float industrialOpCost = _laws.GetAggregateEffect(LawEffectKeys.IndustrialOperatingCost);
+        float commercialAccess = _laws.GetAggregateEffect(LawEffectKeys.CommercialAccessibility);
+        float commercialDiversity = _laws.GetAggregateEffect(LawEffectKeys.CommercialDiversity);
+        float commercialOpCost = _laws.GetAggregateEffect(LawEffectKeys.CommercialOperatingCost);
 
+        // Construction speed shortens build duration in ZoneGrowthSystem.
         _state.LawConstructionSpeedMult = Math.Clamp(1f + constructionSpeed, 0.25f, 3f);
+
+        // Baseline spawn pressure: higher construction_cost → slower empty-tile growth.
         _state.LawSpawnDemandMult = Math.Clamp(1f - constructionCost * 0.5f, 0.25f, 3f);
+
+        // Zone-specific spawn multipliers (compounded with baseline in GetZoneLawSpawnMult).
         _state.LawResidentialSpawnMult = Math.Clamp(
             1f + housingSupply + housingDensity * 0.5f - constructionCost * 0.3f, 0.25f, 3f);
         _state.LawIndustrialSpawnMult = Math.Clamp(
-            1f + industrialOutput - constructionCost * 0.3f, 0.25f, 3f);
+            1f + industrialOutput - industrialOpCost * 0.3f - constructionCost * 0.3f, 0.25f, 3f);
         _state.LawCommercialSpawnMult = Math.Clamp(
-            1f - constructionCost * 0.2f, 0.25f, 3f);
+            1f + commercialAccess + commercialDiversity * 0.5f
+            - commercialOpCost * 0.3f - constructionCost * 0.2f, 0.25f, 3f);
     }
 
     private byte ComputeRoadFlags(int x, int y, byte tier, bool bridge, bool tunnel, bool ramp = false)

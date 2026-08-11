@@ -762,7 +762,11 @@ public sealed class ZoneGrowthSystem
         _ => 1f,
     };
 
-    private static float GetZoneLawSpawnMult(WorldState state, byte zoneType)
+    /// <summary>
+    /// Effective spawn chance multiplier for a zone type.
+    /// Compounds city-wide <see cref="WorldState.LawSpawnDemandMult"/> with the zone-specific mult.
+    /// </summary>
+    internal static float GetZoneLawSpawnMult(WorldState state, byte zoneType)
     {
         float zoneMult = zoneType switch
         {
@@ -770,7 +774,7 @@ public sealed class ZoneGrowthSystem
                 => state.LawResidentialSpawnMult,
             ZoneIndustrial => state.LawIndustrialSpawnMult,
             ZoneCommercial or ZoneOffice => state.LawCommercialSpawnMult,
-            _ => state.LawSpawnDemandMult,
+            _ => 1f,
         };
 
         return state.LawSpawnDemandMult * zoneMult;

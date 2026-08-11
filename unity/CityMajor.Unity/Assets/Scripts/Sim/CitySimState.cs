@@ -123,6 +123,21 @@ namespace CityMajor.Sim
         public string SampleLawName;
         public bool SampleLawActive;
 
+        /// <summary>Cathedral P6.1 — traffic edge capacity multiplier from ordinances.</summary>
+        public float LawTrafficCapacityMult;
+
+        /// <summary>Cathedral P6.1 — baseline zone spawn demand multiplier.</summary>
+        public float LawSpawnDemandMult;
+
+        /// <summary>Cathedral P6.1 — residential spawn multiplier.</summary>
+        public float LawResidentialSpawnMult;
+
+        /// <summary>Cathedral P6.1 — industrial spawn multiplier.</summary>
+        public float LawIndustrialSpawnMult;
+
+        /// <summary>Cathedral P6.1 — commercial / office spawn multiplier.</summary>
+        public float LawCommercialSpawnMult;
+
         /// <summary>Cathedral P6 — live EventSystem count for Herald / ticker.</summary>
         public int ActiveEventCount;
     }

@@ -429,6 +429,11 @@ namespace CityMajor.Sim
                 SampleLawId = sampleLaw?.Id ?? "",
                 SampleLawName = sampleLaw?.Name ?? "",
                 SampleLawActive = sampleLaw?.Active ?? false,
+                LawTrafficCapacityMult = snap.LawTrafficCapacityMult,
+                LawSpawnDemandMult = snap.LawSpawnDemandMult,
+                LawResidentialSpawnMult = snap.LawResidentialSpawnMult,
+                LawIndustrialSpawnMult = snap.LawIndustrialSpawnMult,
+                LawCommercialSpawnMult = snap.LawCommercialSpawnMult,
             };
 
             LatestServiceCoverage = _simHost.GetServiceCoverageSample(step: 8);

@@ -24,5 +24,6 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Forge.Engine.Tests" />
     <InternalsVisibleTo Include="Forge.Game.Tests" />
+    <InternalsVisibleTo Include="Forge.SimCore.Tests" />
   </ItemGroup>
 </Project>

@@ -142,9 +142,15 @@ DemandOverlayController.cs ← R/C/I demand bars
 ```bash
 # SimCore DLL for Unity (required after any SimHost change)
 ./scripts/build-simcore-for-unity.sh
+# Windows: scripts\build-simcore-for-unity.bat  (or .ps1)
 
-# Steam depot / headless player (Phase 3)
+# Steam depot / headless player (Phase 3) → Build/Steam/windows/CityMajor.exe
 ./scripts/build-steam-unity.sh
+# Windows: scripts\build-steam-unity.bat  (or .ps1; set UNITY_PATH if Hub discovery fails)
+
+# Steamworks.NET plugin (once per machine; Spacewar App ID 480 for dev)
+./scripts/setup-steamworks-unity.sh
+# Windows: scripts\setup-steamworks-unity.bat  (or .ps1)
 
 # Full sim (CI) — Unity native primary; WASM optional harness
 dotnet build src/Forge.SimCore/Forge.SimCore.csproj
@@ -153,6 +159,8 @@ dotnet build src/Forge.SimWasm/Forge.SimWasm.csproj   # harness only — not pla
 # Unity symlinks
 ./scripts/setup-unity.sh
 ```
+
+Editor fallback (any OS): **CityMajor → Build → Windows Steam Player** (same `Build/Steam/windows/` output).
 
 ---
 
@@ -300,14 +308,14 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | Rich presence | ✅ wired — needs live Steam client |
 | Achievements catalog + toast | ✅ 12 v1 rows |
 | Cloud saves (CMJR) | 🟡 `SteamCloudSave` + save panel status line when SDK live |
-| Headless Windows build | ✅ `./scripts/build-steam-unity.sh` |
+| Headless Windows build | ✅ `./scripts/build-steam-unity.sh` + Windows `.bat` / `.ps1` |
 | CI SimCore gate | ✅ `.github/workflows/unity-simcore.yml` + Engine (833) + Game (110) tests |
-| Steamworks.NET install | 🟡 see install doc below |
+| Steamworks.NET install | 🟡 see install doc below (`setup-steamworks-unity.sh` / `.bat` / `.ps1`) |
 | Partner App ID + depots | 🟡 | [DEPOT_UPLOAD_RUNBOOK.md](../steam/DEPOT_UPLOAD_RUNBOOK.md) | Human + partner site |
 
 ### Steam install (required for live SDK)
 
-1. Run `./scripts/setup-steamworks-unity.sh`
+1. Run `./scripts/setup-steamworks-unity.sh` (Windows: `scripts\setup-steamworks-unity.bat`)
 2. Unity: **CityMajor → Platform → Enable Steamworks.NET Define**
 3. Follow full steps: **[INSTALL_STEAMWORKS_NET.md](../steam/INSTALL_STEAMWORKS_NET.md)**
 4. Scope reference: [UNITY_STEAM_SCOPE.md](./UNITY_STEAM_SCOPE.md)

@@ -13,7 +13,7 @@ Complete [UNITY_PLAY_CHECKLIST.md](../design/UNITY_PLAY_CHECKLIST.md) before upl
 |------|--------|-------|
 | `SteamNativePlatform` + cloud save hooks | ✅ Code complete | `unity/CityMajor.Unity/Assets/Scripts/Platform/` |
 | Achievements catalog (12 × `CM_*`) | ✅ | `StreamingAssets/achievements-v1.json`; Editor: **CityMajor → Verify Achievements Catalog** |
-| Headless Windows build script | ✅ | `./scripts/build-steam-unity.sh` + GHA `unity-steam-build.yml` |
+| Headless Windows build script | ✅ | `./scripts/build-steam-unity.sh` · Windows `build-steam-unity.bat` / `.ps1` · GHA `unity-steam-build.yml` |
 | `app_build_template.vdf` | ✅ | `docs/steam/app_build_template.vdf` — placeholders only |
 | SB-4176 Play checklist | 🟡 Human gate | [UNITY_PLAY_CHECKLIST.md](../design/UNITY_PLAY_CHECKLIST.md) |
 | **Partner App ID** | ⛔ **Blocked** | `SteamAppConfig.AppId` and `steam_appid.txt` still **480** (Spacewar dev stub) |
@@ -32,7 +32,7 @@ Complete [UNITY_PLAY_CHECKLIST.md](../design/UNITY_PLAY_CHECKLIST.md) before upl
 | `SteamAppConfig.cs` | `unity/CityMajor.Unity/Assets/Scripts/Platform/SteamAppConfig.cs` | Set `AppId` to `YOUR_APP_ID` before ship build |
 | `steam_appid.txt` | `unity/CityMajor.Unity/steam_appid.txt` | Single line: `YOUR_APP_ID`. Dev default is `480` (Spacewar) |
 | `STEAMWORKS_NET` define | Unity scripting defines | Install plugin per [INSTALL_STEAMWORKS_NET.md](./INSTALL_STEAMWORKS_NET.md), then **CityMajor → Platform → Enable Steamworks.NET Define** |
-| SimCore DLL | `Assets/Plugins/Forge/Forge.SimCore.dll` | Built by `./scripts/build-simcore-for-unity.sh` (also run inside build script) |
+| SimCore DLL | `Assets/Plugins/Forge/Forge.SimCore.dll` | Built by `./scripts/build-simcore-for-unity.sh` / `.bat` / `.ps1` (also run inside Steam build scripts) |
 | `steamcmd` | Local or CI runner | [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) + logged-in depot account |
 
 **Do not commit:** partner credentials, depot keys, real App IDs, or `steamcmd` login tokens.
@@ -41,7 +41,9 @@ Complete [UNITY_PLAY_CHECKLIST.md](../design/UNITY_PLAY_CHECKLIST.md) before upl
 
 ## 2. Local build
 
-From repo root:
+From repo root. Dev default App ID is **Spacewar `480`** (`steam_appid.txt`) — no partner secrets needed for a local player build.
+
+### macOS / Linux
 
 ```bash
 # Once per machine
@@ -52,6 +54,28 @@ From repo root:
 export UNITY_PATH="/Applications/Unity/Hub/Editor/<version>/Unity.app/Contents/MacOS/Unity"
 ./scripts/build-steam-unity.sh
 ```
+
+### Windows (batch / PowerShell)
+
+```bat
+REM Once per machine (needs git + network)
+scripts\setup-steamworks-unity.bat
+REM Unity: CityMajor → Platform → Enable Steamworks.NET Define
+
+REM Optional if Hub discovery fails:
+set UNITY_PATH=C:\Program Files\Unity\Hub\Editor\<version>\Editor\Unity.exe
+
+scripts\build-steam-unity.bat
+```
+
+PowerShell equivalent (same env vars):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-steamworks-unity.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\build-steam-unity.ps1
+```
+
+`build-steam-unity.bat` / `.ps1` run SimCore copy first, then Unity `-batchmode` → `CityMajor.Editor.CityMajorSteamBuild.BuildWindowsCi` → `Build\Steam\windows\CityMajor.exe`.
 
 ### Artifact paths
 

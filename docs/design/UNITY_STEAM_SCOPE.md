@@ -33,13 +33,14 @@
 
 ```bash
 # 1. SimCore DLL (required before player build)
-./scripts/build-simcore-for-unity.sh
+./scripts/build-simcore-for-unity.sh          # Windows: scripts\build-simcore-for-unity.bat
 
 # 2. Steamworks.NET plugin (once per machine)
-./scripts/setup-steamworks-unity.sh
+./scripts/setup-steamworks-unity.sh           # Windows: scripts\setup-steamworks-unity.bat
 
-# 3. Unity headless / CI (placeholder)
-./scripts/build-steam-unity.sh
+# 3. Unity headless → Build/Steam/windows/CityMajor.exe (Spacewar App ID 480 OK for local)
+./scripts/build-steam-unity.sh                # Windows: scripts\build-steam-unity.bat
+#    Optional: UNITY_PATH=... (Unity.exe on Windows / Unity binary on macOS)
 
 # 4. steamcmd app build (manual until CI wired)
 #    Full checklist: docs/steam/DEPOT_UPLOAD_RUNBOOK.md
@@ -75,7 +76,7 @@ Full steps: [docs/steam/INSTALL_STEAMWORKS_NET.md](../steam/INSTALL_STEAMWORKS_N
 | `Assets/Scripts/Platform/SteamRichPresenceController.cs` | Pop + approval presence |
 | `SteamAchievementTracker` | — | Evaluates catalog → Steam unlock + toast |
 | `AchievementToastController` | — | Top-center popup queue |
-| `CityMajorSteamBuild` | Editor / CI | `build-steam-unity.sh` → `Build/Steam/windows/` |
+| `CityMajorSteamBuild` | Editor / CI | `build-steam-unity.sh` / `.bat` / `.ps1` → `Build/Steam/windows/` |
 | `CityShareStub` | Future: Steam invite / spectator deep link |
 
 ---

@@ -4,6 +4,14 @@
 ./scripts/setup-steamworks-unity.sh
 ```
 
+Windows:
+
+```bat
+scripts\setup-steamworks-unity.bat
+```
+
+(or `powershell -ExecutionPolicy Bypass -File .\scripts\setup-steamworks-unity.ps1`)
+
 Then in Unity Editor:
 
 1. **CityMajor → Platform → Enable Steamworks.NET Define**

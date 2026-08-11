@@ -121,7 +121,7 @@ Unity v1 quality is **not** fully automated in CI today. Use this split so agent
 | Play Mode enter guards | ✅ | Editor `InitializeOnLoad` | Blocks Play if SimCore DLL / SimHost type / bootstrap / build settings fail |
 | Web vitest (sim-metrics, event-catalog, news-ticker, play-keyboard) | ✅ | `.github/workflows/unity-simcore.yml` | `pnpm test` in `web/` |
 | SimCore → Unity DLL copy | ✅ | Script | `./scripts/build-simcore-for-unity.sh` — **run after every SimHost change** |
-| Windows headless player build | ✅ | Script | `./scripts/build-steam-unity.sh` — needs `UNITY_PATH`; produces `Build/Steam/windows/CityMajor.exe` |
+| Windows headless player build | ✅ | Script | `./scripts/build-steam-unity.sh` or Windows `scripts\build-steam-unity.bat` / `.ps1` — needs Hub install or `UNITY_PATH`; produces `Build/Steam/windows/CityMajor.exe` |
 | Web routes + WebGL smoke | ✅ | `.github/workflows/ci-smoke.yml` | **Web maintenance only** — does not load Unity `Play.unity` |
 | Web perf gate (≥30 FPS) | ⚠️ Manual dispatch | `.github/workflows/perf-gate.yml` | R3F `/play`; software renderer often skips — not Unity |
 | Unity script compile | ❌ | Unity Editor | Domain reload; MCP `read_console` for errors |

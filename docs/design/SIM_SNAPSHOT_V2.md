@@ -61,7 +61,7 @@ WorldState ──CaptureFrom──► SimSnapshot (engine)
                 └── CitySimBridge ──► CitySimState (+ LatestFrictionCorridors, council seats, …)
 ```
 
-**Do not add a field to one surface without updating the others when product UI or WASM smoke needs it.** P7.4 will auto-diff this matrix in CI.
+**Do not add a field to one surface without updating the others when product UI or WASM smoke needs it.** **P7.4** CI: `./scripts/verify-sim-snapshot-v2.sh` (or `pnpm verify:sim-snapshot-v2`) asserts §4 ✅ cells ↔ tip C# exports.
 
 ---
 
@@ -238,7 +238,8 @@ These are **documentation of tip reality**, not a backlog invent:
 3. Add to `SimSnapshotDto.From` + JSON source-gen context if WASM/web smoke needs it.
 4. Bind in `CitySimBridge` → `CitySimState` / Cathedral HUD if product UI needs it.
 5. Update **this file** + mark CATHEDRAL_PROGRAM changelog.
-6. Prefer characterization tests over inventing HUD-only fake metrics.
+6. Run `./scripts/verify-sim-snapshot-v2.sh` (extend `FIELD_EXPAND` / `REVERSE_ALLOW` if the checker cannot map a compound label).
+7. Prefer characterization tests over inventing HUD-only fake metrics.
 
 ---
 
@@ -247,3 +248,4 @@ These are **documentation of tip reality**, not a backlog invent:
 | Date | Change |
 |------|--------|
 | 2026-08-11 | **P7.1** initial `SIM_SNAPSHOT_V2.md` from tip `8f57614` exports (Event*Mult, AbandonedBuildingCount, fire/EMS, delivery delay, HH L2, friction corridors, mode share, council seats) |
+| 2026-08-11 | **P7.4** gap-matrix CI — `scripts/verify-sim-snapshot-v2.py` doc↔export check (SB-4264) |

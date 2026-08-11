@@ -109,7 +109,7 @@
 | SB-4261 | P7.1 SIM_SNAPSHOT_V2.md | Document fields, cadence, ownership per pillar | ✅ Doc at `docs/design/SIM_SNAPSHOT_V2.md`; linked from WASM_SIM_BRIDGE | `pillar:client` | — |
 | SB-4262 | P7.2 Per-pillar characterization tests | Test suite pins each pillar's core behavior | CI runs Cathedral test filter; skipped tests tracked | `pillar:client`, `acceptance-test`, `sim-core` | — |
 | SB-4263 | P7.3 Acceptance Playwright + Unity menu | End-to-end checks for road tier + goods panel | Smoke passes on preview deploy | `pillar:client`, `acceptance-test`, `web`, `unity` | SB-4201, SB-4221 |
-| SB-4264 | P7.4 Gap matrix CI regeneration | Script diffs spec exports vs SIM_V1_GAP_MATRIX | PR fails if gap matrix stale | `pillar:client`, `acceptance-test` | SB-4261 |
+| SB-4264 | P7.4 Gap matrix CI regeneration | Script asserts `SIM_SNAPSHOT_V2.md` §4 vs tip E/W/U exports (`verify-sim-snapshot-v2`) | ✅ CI step in `unity-simcore.yml`; `pnpm verify:sim-snapshot-v2` | `pillar:client`, `acceptance-test` | SB-4261 |
 
 ---
 

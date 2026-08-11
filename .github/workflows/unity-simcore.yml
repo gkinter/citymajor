@@ -59,6 +59,11 @@ jobs:
           chmod +x scripts/verify-achievements-catalog.sh
           ./scripts/verify-achievements-catalog.sh
 
+      - name: Verify SIM_SNAPSHOT_V2 gap matrix (P7.4)
+        run: |
+          chmod +x scripts/verify-sim-snapshot-v2.sh
+          ./scripts/verify-sim-snapshot-v2.sh
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"

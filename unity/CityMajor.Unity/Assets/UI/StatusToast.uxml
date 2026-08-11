@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="CityPanels.uss" />
+    <ui:VisualElement name="status-toast-root" class="status-toast-root" picking-mode="Ignore" style="display: none;">
+        <ui:Label name="status-toast-label" class="status-toast-label" text="" />
+    </ui:VisualElement>
+</ui:UXML>

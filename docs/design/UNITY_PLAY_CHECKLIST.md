@@ -142,7 +142,7 @@ Run **CityMajor → Smoke → Run Smoke Prep** (batch + enter guards), then huma
 
 | # | Surface | Keys / UI | Pass |
 |---|---------|-----------|------|
-| C1 | Road tiers + bridge/tunnel/ramp | RoadTypeToolbar + ToolMode HUD; inspector flags → `PlaceRoad` | ☐ |
+| C1 | Road tiers + bridge/tunnel/ramp | RoadTypeToolbar + ToolMode HUD; reject toast on illegal merge / invalid ramp; inspector flags → `PlaceRoad` | ☐ |
 | C2 | Economy truth + partition spread | `E` — goods, chain, min–max spread; Cathedral **Markets · Spread** | ☐ |
 | C3 | Congestion + friction overlays | `T` edge traffic; `F` friction corridors | ☐ |
 | C4 | Park + density era gates | `8` Park (T112); `D` Med T029 / High Industrial+T031 | ☐ |

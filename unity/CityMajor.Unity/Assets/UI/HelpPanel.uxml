@@ -15,6 +15,7 @@
             <ui:Label class="help-line" text="D — Cycle density Low / Med / High (Med/High era+tech gated)" />
             <ui:Label class="help-line" text="4 — Road paint · X — Bulldoze · B — Build / plop" />
             <ui:Label class="help-line" text="Road toolbar — Local / Collector / Highway · Ramp · Bridge / Tunnel (PlaceRoad)" />
+            <ui:Label class="help-line" text="Road reject toast — illegal highway merge / invalid ramp (use Ramp tool)" />
             <ui:Label class="help-section" text="Panels" />
             <ui:Label class="help-line" text="R — Research · H — Herald · C — Citizens · L — Laws" />
             <ui:Label class="help-line" text="E — Economy (goods / production) · G — Politics (approval / council)" />

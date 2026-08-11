@@ -23,6 +23,7 @@ namespace CityMajor.UI
         Button _bridge;
         Button _tunnel;
         bool _visible;
+        bool _bound;
 
         public void Configure(RoadPaintTool road)
         {
@@ -82,12 +83,16 @@ namespace CityMajor.UI
             _bridge = docRoot.Q<Button>("road-elev-bridge");
             _tunnel = docRoot.Q<Button>("road-elev-tunnel");
 
+            if (_bound)
+                return;
+
             _tier0?.RegisterCallback<ClickEvent>(_ => OnSelectTier(0));
             _tier1?.RegisterCallback<ClickEvent>(_ => OnSelectTier(1));
             _tier2?.RegisterCallback<ClickEvent>(_ => OnSelectTier(2));
             _ramp?.RegisterCallback<ClickEvent>(_ => OnSelectRamp());
             _bridge?.RegisterCallback<ClickEvent>(_ => OnToggleElevation(RoadPaintTool.RoadElevation.Bridge));
             _tunnel?.RegisterCallback<ClickEvent>(_ => OnToggleElevation(RoadPaintTool.RoadElevation.Tunnel));
+            _bound = true;
         }
 
         void OnSelectTier(byte tier)
@@ -104,8 +109,16 @@ namespace CityMajor.UI
 
         void OnToggleElevation(RoadPaintTool.RoadElevation mode)
         {
-            if (_road == null || _road.PaintRamp)
+            if (_road == null)
                 return;
+
+            if (_road.PaintRamp)
+            {
+                StatusToastController.ShowGlobal(
+                    "Ramp connectors are surface grade — pick Local/Collector/Highway for Bridge/Tunnel",
+                    2.8f);
+                return;
+            }
 
             _road.SetElevation(_road.Elevation == mode
                 ? RoadPaintTool.RoadElevation.None
@@ -130,6 +143,25 @@ namespace CityMajor.UI
             SetPressed(_tunnel, !rampActive && elev == RoadPaintTool.RoadElevation.Tunnel);
             SetEnabled(_bridge, !rampActive);
             SetEnabled(_tunnel, !rampActive);
+
+            if (_bridge != null)
+            {
+                _bridge.tooltip = rampActive
+                    ? "Bridge disabled while Ramp tool is active"
+                    : "Paint bridge roads (exclusive with Tunnel)";
+            }
+
+            if (_tunnel != null)
+            {
+                _tunnel.tooltip = rampActive
+                    ? "Tunnel disabled while Ramp tool is active"
+                    : "Paint tunnel roads (exclusive with Bridge)";
+            }
+
+            if (_ramp != null)
+            {
+                _ramp.tooltip = "Highway ramp connector — must touch exactly one highway tile";
+            }
         }
 
         static void SetPressed(Button btn, bool pressed)

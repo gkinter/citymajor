@@ -208,7 +208,7 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | Component | Key / toggle | Notes |
 |-----------|--------------|-------|
 | `ZonePaintTool` | `1`/`2`/`3`/`5`/`6`/`7`/`8`/`0`, `D` | R/C/I + Office/Mixed/Ag/Park + erase; density Low/Med/High → `CitySimBridge.PaintZone`; P2.1/U3.4 era/tech gates |
-| `RoadPaintTool` | `4` | `SimHost.PlaceRoad(tier, bridge?, tunnel?, ramp?)` — inspector Paint Bridge / Tunnel / Ramp |
+| `RoadPaintTool` | `4` | `SimHost.PlaceRoad(tier, bridge?, tunnel?, ramp?)` — RoadTypeToolbar + reject toast (U3.1) |
 | `BulldozeTool` | `X` | Zone/building/road clear via `SimHost.Bulldoze` |
 | `BuildPlopTool` | `B` + panel | Service plop on zoned tiles |
 | `CitizenPickTool` | LMB | Pick pedestrian dot → citizen panel |
@@ -234,6 +234,8 @@ All rows below are **created in `Awake`** on `CityMajor_Root` unless noted.
 | `TimeControlsController` | `Space`, `[`/`]`/`\` (keypad 1/2/4) | Pause + 1×/2×/4× speed — not 5/6/7 (zone paint) |
 | `CathedralMetricsHudController` | — | Rent/vacancy/unemployment + commute/O-D/sat + **trade friction × / transport cost** (U3.3) |
 | `ToolModeHudController` | — | Active tool indicator (zone/road/build/bulldoze) |
+| `RoadTypeToolbarController` | road mode (`4`) | Local/Collector/Highway + Ramp + Bridge/Tunnel |
+| `StatusToastController` | — | Ephemeral top toast (road reject / tool hints, U3.1) |
 
 #### UI — toggle panels
 

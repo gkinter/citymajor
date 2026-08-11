@@ -44,6 +44,8 @@ Sprint 1–2 landed Cathedral **sim depth** (roads, zoning, goods, O-D, commute 
 | **Deliverable** | Road tier select; bridge / tunnel / ramp paint modes discoverable in Play (not inspector-only) |
 | **Acceptance** | PlaceRoad flags match SimHost; ToolMode HUD shows active road mode; Play checklist road items pass |
 | **Depends** | P1.1–P1.6 ✅ |
+| **Landed (code)** | RoadTypeToolbar + ToolMode HUD; flag normalize (ramp XOR elev, bridge XOR tunnel); reject toast (illegal merge / invalid ramp); ramp disables Bridge/Tunnel with tooltips |
+| **Still human** | Play QA for C1 road items (SB-4176) — not claimed by agent |
 
 ### U3.2 — Economy HUD truth (P3 → Unity)
 
@@ -130,7 +132,7 @@ Follow merge protocol in [`UNITY_ORCHESTRATION.md`](./UNITY_ORCHESTRATION.md). B
 
 ## 6. Acceptance checklist
 
-- [ ] Unity Play: road tier + bridge/tunnel/ramp modes usable without digging inspector-only fields
+- [ ] Unity Play: road tier + bridge/tunnel/ramp modes usable without digging inspector-only fields (**code polish landed**; Play QA / C1 still human)
 - [x] Unity Play: Economy panel shows goods + chain + partition spread (`E`)
 - [x] Unity Play: congestion overlay reads snapshot edge data (`T`)
 - [x] Unity Play: friction corridor overlay reads economy corridor samples (`F`)

@@ -124,6 +124,10 @@ namespace CityMajor.Core
             var toast = achievementToastUi.AddComponent<AchievementToastController>();
             toast.BindTracker(achievements);
 
+            var statusToastUi = new GameObject("CityMajor_StatusToast");
+            statusToastUi.transform.SetParent(root.transform, false);
+            statusToastUi.AddComponent<StatusToastController>();
+
             var researchUi = new GameObject("CityMajor_ResearchUi");
             researchUi.transform.SetParent(root.transform, false);
             researchUi.AddComponent<ResearchPanelController>().Configure(sim);

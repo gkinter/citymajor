@@ -329,6 +329,28 @@
     color: rgba(200, 210, 225, 0.85);
 }
 
+.status-toast-root {
+    position: absolute;
+    top: 56px;
+    left: 50%;
+    translate: -50% 0;
+    min-width: 280px;
+    max-width: 420px;
+    padding: 8px 14px;
+    background-color: rgba(48, 22, 18, 0.94);
+    border-width: 1px;
+    border-color: rgba(255, 160, 100, 0.5);
+    border-radius: 6px;
+}
+
+.status-toast-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(255, 230, 210);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
 .time-controls {
     position: absolute;
     bottom: 12px;

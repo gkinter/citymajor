@@ -443,8 +443,10 @@ namespace CityMajor.Editor
             RequireType(failures, "CityMajor.UI.RoadTypeToolbarController, Assembly-CSharp");
             RequireType(failures, "CityMajor.UI.ToolModeHudController, Assembly-CSharp");
             RequireType(failures, "CityMajor.UI.ZoningToolbarController, Assembly-CSharp");
+            RequireType(failures, "CityMajor.UI.StatusToastController, Assembly-CSharp");
 
             RequireUiFile(failures, "RoadTypeToolbar.uxml");
+            RequireUiFile(failures, "StatusToast.uxml");
             RequireUiFile(failures, "ToolModeHud.uxml");
             RequireUiFile(failures, "ZoningToolbar.uxml");
         }

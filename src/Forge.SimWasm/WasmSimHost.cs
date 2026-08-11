@@ -147,6 +147,9 @@ public sealed class WasmSimHost
     public float MeanParkAccess => _host.State?.MeanParkAccess ?? 0f;
     /// <summary>Fraction of households with park access (Tier-2).</summary>
     public float ParkAccessFraction => _host.State?.ParkAccessFraction ?? 0f;
+    /// <summary>Fraction of households with hospital coverage (Tier-2).</summary>
+    public float HealthCoverageFraction =>
+        _host.State?.HealthCoverageFraction ?? 0f;
     /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2).</summary>
     public float MeanHealthSatisfaction =>
         _host.State?.MeanHealthSatisfaction ?? 0f;
@@ -410,6 +413,8 @@ public sealed class WasmStatusDto
     public float MeanParkAccess { get; init; }
     /// <summary>Fraction of households with park access (Tier-2).</summary>
     public float ParkAccessFraction { get; init; }
+    /// <summary>Fraction of households with hospital coverage (Tier-2).</summary>
+    public float HealthCoverageFraction { get; init; }
     /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2).</summary>
     public float MeanHealthSatisfaction { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
@@ -535,6 +540,7 @@ public sealed class WasmStatusDto
             EducationCoverageFraction = host.EducationCoverageFraction,
             MeanParkAccess = host.MeanParkAccess,
             ParkAccessFraction = host.ParkAccessFraction,
+            HealthCoverageFraction = host.HealthCoverageFraction,
             MeanHealthSatisfaction = host.MeanHealthSatisfaction,
             MarketZoneCount = host.MarketZoneCount,
             CouncilSeats = host.CouncilSeats,

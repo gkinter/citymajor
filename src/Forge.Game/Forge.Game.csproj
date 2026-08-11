@@ -20,6 +20,7 @@
     <Compile Include="..\Forge.SimCore\HospitalCapacity.cs" Link="SimCore\HospitalCapacity.cs" />
     <Compile Include="..\Forge.SimCore\WildfireArson.cs" Link="SimCore\WildfireArson.cs" />
     <Compile Include="..\Forge.SimCore\EducationProgression.cs" Link="SimCore\EducationProgression.cs" />
+    <Compile Include="..\Forge.SimCore\HealthProgression.cs" Link="SimCore\HealthProgression.cs" />
     <Compile Include="..\Forge.SimCore\ParkAmenity.cs" Link="SimCore\ParkAmenity.cs" />
   </ItemGroup>
   <ItemGroup>

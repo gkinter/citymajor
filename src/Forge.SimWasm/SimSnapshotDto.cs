@@ -207,7 +207,9 @@ public sealed class SimSnapshotDto
     public float MeanParkAccess { get; init; }
     /// <summary>Fraction of households with park access (Tier-2 park amenity).</summary>
     public float ParkAccessFraction { get; init; }
-    /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2 park amenity).</summary>
+    /// <summary>Fraction of households with hospital coverage (Tier-2 health progression).</summary>
+    public float HealthCoverageFraction { get; init; }
+    /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2 hospital + park health).</summary>
     public float MeanHealthSatisfaction { get; init; }
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
@@ -346,6 +348,7 @@ public sealed class SimSnapshotDto
             EducationCoverageFraction = state.EducationCoverageFraction,
             MeanParkAccess = state.MeanParkAccess,
             ParkAccessFraction = state.ParkAccessFraction,
+            HealthCoverageFraction = state.HealthCoverageFraction,
             MeanHealthSatisfaction = state.MeanHealthSatisfaction,
             MarketZoneCount = state.MarketZoneCount,
             CommuterCoverage = commuterAudit.Coverage,

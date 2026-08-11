@@ -265,7 +265,7 @@ public sealed class PopulationSystem
         float environment = CalculateEnvironmentSatisfaction(state, householdIndex);
         float education = CalculateEducationSatisfaction(state, householdIndex);
         float leisure = hh.LeisureSatisfaction[householdIndex] / 2.55f;
-        // ParkAmenity + hospital coverage blend into HealthSatisfaction (0–255 → 0–100).
+        // HealthProgression (hospitals + park exercise) blends into HealthSatisfaction (0–255 → 0–100).
         float health = hh.HealthSatisfaction[householdIndex] / 2.55f;
         float taxFairness = CalculateTaxFairnessSatisfaction(state, householdIndex);
         float cultural = CalculateCulturalSatisfaction(state, householdIndex);

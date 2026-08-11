@@ -280,7 +280,10 @@ public sealed class SimSnapshot
     /// <summary>Fraction of households with park access (Tier-2 park amenity).</summary>
     public float ParkAccessFraction { get; init; }
 
-    /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2 park amenity).</summary>
+    /// <summary>Fraction of households with hospital coverage (Tier-2 health progression).</summary>
+    public float HealthCoverageFraction { get; init; }
+
+    /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2 hospital + park health).</summary>
     public float MeanHealthSatisfaction { get; init; }
 
     public readonly record struct BuildingSnapshot(
@@ -466,6 +469,7 @@ public sealed class SimSnapshot
             EducationCoverageFraction = state.EducationCoverageFraction,
             MeanParkAccess = state.MeanParkAccess,
             ParkAccessFraction = state.ParkAccessFraction,
+            HealthCoverageFraction = state.HealthCoverageFraction,
             MeanHealthSatisfaction = state.MeanHealthSatisfaction,
         };
     }

@@ -124,6 +124,9 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — fraction of households with park access.</summary>
         public float ParkAccessFraction;
 
+        /// <summary>Tier-2 — fraction of households with hospital coverage.</summary>
+        public float HealthCoverageFraction;
+
         /// <summary>Tier-2 — mean household HealthSatisfaction 0–1.</summary>
         public float MeanHealthSatisfaction;
 

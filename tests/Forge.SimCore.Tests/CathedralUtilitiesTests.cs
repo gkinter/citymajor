@@ -13,7 +13,8 @@ namespace Forge.SimCore.Tests;
 /// P5.2 emergency response time (SB-4242), P5.3 fire response v1,
 /// P5.4 EMS survival curve (Phase 5b), Tier-2 hospital capacity,
 /// Tier-2 wildfire / arson rings, aerial / lookout / fire rating,
-/// Tier-2 education depth, Tier-2 park amenity parity, and P4 health→satisfaction/migration.
+/// Tier-2 education depth, Tier-2 park amenity parity, Tier-2 hospital→HH
+/// health progression, and P4 health→satisfaction/migration.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -849,7 +850,115 @@ public sealed class CathedralUtilitiesTests
     }
 
     [Fact]
-    public void ParkAmenityTick_NearPark_RaisesHealthSatisfaction()
+    public void HealthRecoveryTarget_HigherWithCoverageAndQuality()
+    {
+        float thin = HealthProgression.RecoveryTarget(0.1f, 1f, pollution: 0f, exerciseContribution: 0f);
+        float covered = HealthProgression.RecoveryTarget(1f, 1f, pollution: 0f, exerciseContribution: 0f);
+        float polluted = HealthProgression.RecoveryTarget(1f, 1f, pollution: 1f, exerciseContribution: 0f);
+        float withExercise = HealthProgression.RecoveryTarget(1f, 1f, pollution: 0f, exerciseContribution: 0.1f);
+
+        Assert.True(covered > thin);
+        Assert.True(covered > polluted);
+        Assert.True(withExercise > covered);
+        Assert.InRange(covered, 0f, 1f);
+    }
+
+    [Fact]
+    public void HealthTick_HospitalCoverage_RaisesHealthSatisfaction()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 16, 16, serviceFlags: 0);
+        PlaceBuilding(host.State!, 16, 17, serviceFlags: HealthProgression.ServiceHealth, level: 3);
+
+        int slot = host.State!.Households.Allocate();
+        Assert.True(slot >= 0);
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.HealthSatisfaction[slot] = 40;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        byte before = host.State.Households.HealthSatisfaction[slot];
+
+        int improved = 0;
+        for (int i = 0; i < 20; i++)
+        {
+            improved += HealthProgression.Tick(
+                host.State,
+                host.Services.HealthCoverage,
+                hospitalQuality: 1f,
+                days: 1f);
+        }
+
+        Assert.True(improved > 0, "hospital coverage should raise HealthSatisfaction over time");
+        Assert.True(host.State.Households.HealthSatisfaction[slot] > before);
+        Assert.True(host.State.HealthCoverageFraction > 0.5f);
+        Assert.True(host.State.MeanHealthSatisfaction > before / 255f);
+    }
+
+    [Fact]
+    public void HealthTick_NoCoverage_DecaysHealthSatisfaction()
+    {
+        var state = new WorldState(32, maxBuildings: 8);
+        int home = PlaceBuilding(state, 10, 10, serviceFlags: 0);
+        int slot = state.Households.Allocate();
+        state.Households.HomeBuildingId[slot] = (ushort)home;
+        state.Households.HealthSatisfaction[slot] = 220;
+
+        var emptyCoverage = new InfluenceMap(32, 32);
+        emptyCoverage.Recalculate();
+
+        for (int i = 0; i < 40; i++)
+        {
+            HealthProgression.Tick(
+                state,
+                emptyCoverage,
+                hospitalQuality: 1f,
+                days: 1f);
+        }
+
+        Assert.True(state.Households.HealthSatisfaction[slot] < 220,
+            "uncovered households should slowly lose HealthSatisfaction");
+        Assert.Equal(0f, state.HealthCoverageFraction);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsHealthProgressionFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 12, 12, serviceFlags: 0);
+        PlaceBuilding(host.State!, 12, 13, serviceFlags: HealthProgression.ServiceHealth, level: 2);
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.HealthSatisfaction[slot] = 160;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        host.Services.UpdateHealthProgression(host.State, days: 0f);
+
+        Assert.True(host.State.HealthCoverageFraction > 0f);
+        Assert.Equal(160f / 255f, host.State.MeanHealthSatisfaction, precision: 2);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("healthCoverageFraction", out var cov));
+        Assert.True(doc.RootElement.TryGetProperty("meanHealthSatisfaction", out var health));
+        Assert.Equal(host.State.HealthCoverageFraction, cov.GetSingle(), precision: 3);
+        Assert.Equal(host.State.MeanHealthSatisfaction, health.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.HealthCoverageFraction, dto.HealthCoverageFraction, precision: 3);
+        Assert.Equal(host.State.MeanHealthSatisfaction, dto.MeanHealthSatisfaction, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.HealthCoverageFraction, snap.HealthCoverageFraction, precision: 3);
+        Assert.Equal(host.State.MeanHealthSatisfaction, snap.MeanHealthSatisfaction, precision: 3);
+    }
+
+    [Fact]
+    public void HealthTick_NearPark_RaisesHealthSatisfactionViaExercise()
     {
         var host = new SimHost();
         host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
@@ -860,22 +969,31 @@ public sealed class CathedralUtilitiesTests
         int slot = host.State.Households.Allocate();
         Assert.True(slot >= 0);
         host.State.Households.HomeBuildingId[slot] = (ushort)home;
-        host.State.Households.HealthSatisfaction[slot] = 100;
+        host.State.Households.HealthSatisfaction[slot] = 40;
         host.State.Households.LeisureSatisfaction[slot] = 100;
         host.State.Households.MemberCount[slot] = 2;
 
+        host.Services!.RebuildFromWorld(host.State);
         byte beforeHealth = host.State.Households.HealthSatisfaction[slot];
         byte beforeLeisure = host.State.Households.LeisureSatisfaction[slot];
 
-        int improved = 0;
-        for (int i = 0; i < 12; i++)
-            improved += ParkAmenity.Tick(host.State, days: 1f);
+        int improvedHealth = 0;
+        int improvedLeisure = 0;
+        for (int i = 0; i < 20; i++)
+        {
+            improvedHealth += HealthProgression.Tick(
+                host.State,
+                host.Services.HealthCoverage,
+                hospitalQuality: 1f,
+                days: 1f);
+            improvedLeisure += ParkAmenity.Tick(host.State, days: 1f);
+        }
 
-        Assert.True(improved > 0, "park amenity tick should raise HealthSatisfaction near parks");
+        Assert.True(improvedHealth > 0, "park exercise should raise HealthSatisfaction even without a hospital");
         Assert.True(host.State.Households.HealthSatisfaction[slot] > beforeHealth);
+        Assert.True(improvedLeisure > 0);
         Assert.True(host.State.Households.LeisureSatisfaction[slot] > beforeLeisure);
         Assert.True(host.State.MeanParkAccess > 0f);
-        Assert.True(host.State.ParkAccessFraction > 0f);
         Assert.True(host.State.MeanHealthSatisfaction > beforeHealth / 255f);
     }
 
@@ -917,16 +1035,16 @@ public sealed class CathedralUtilitiesTests
     }
 
     [Fact]
-    public void HealthSatisfaction_FeedsP4SatisfactionAfterParkAmenity()
+    public void HealthSatisfaction_FeedsP4SatisfactionAfterHealthProgression()
     {
         var host = new SimHost();
         host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
 
         int home = PlaceBuilding(host.State!, 10, 10, serviceFlags: 0);
         int work = PlaceBuilding(host.State!, 16, 10, serviceFlags: 0);
-        host.State!.Tiles.ZoneType[host.State.Tiles.Index(11, 10)] = ParkAmenity.ZonePark;
+        PlaceBuilding(host.State!, 11, 10, serviceFlags: HealthProgression.ServiceHealth, level: 3);
 
-        int slot = host.State.Households.Allocate();
+        int slot = host.State!.Households.Allocate();
         Assert.True(slot >= 0);
         var hh = host.State.Households;
         hh.HomeBuildingId[slot] = (ushort)home;
@@ -940,16 +1058,18 @@ public sealed class CathedralUtilitiesTests
         hh.HealthSatisfaction[slot] = 40;
         hh.LeisureSatisfaction[slot] = 128;
 
+        host.Services!.RebuildFromWorld(host.State);
         float satLow = host.Population.CalculateSatisfaction(host.State, slot);
 
         for (int i = 0; i < 14; i++)
-            ParkAmenity.Tick(host.State, days: 1f);
+            HealthProgression.Tick(host.State, host.Services.HealthCoverage, hospitalQuality: 1f, days: 1f);
 
         Assert.True(host.State.Households.HealthSatisfaction[slot] > 40);
         float satHigh = host.Population.CalculateSatisfaction(host.State, slot);
         Assert.True(satHigh > satLow,
-            $"park→health should raise P4 satisfaction (low={satLow:F1}, high={satHigh:F1})");
+            $"hospital→health should raise P4 satisfaction (low={satLow:F1}, high={satHigh:F1})");
         Assert.True(host.State.MeanHealthSatisfaction > 40f / 255f);
+        Assert.True(host.State.HealthCoverageFraction > 0f);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

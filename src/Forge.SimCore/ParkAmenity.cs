@@ -202,16 +202,14 @@ public static class ParkAmenity
     }
 
     /// <summary>
-    /// Blend household HealthSatisfaction / LeisureSatisfaction toward park-aware
-    /// targets, then write <see cref="WorldState.MeanParkAccess"/>,
-    /// <see cref="WorldState.ParkAccessFraction"/>, and
-    /// <see cref="WorldState.MeanHealthSatisfaction"/>.
-    /// Returns net households that gained HealthSatisfaction this pass.
+    /// Blend household LeisureSatisfaction toward park-aware targets, then write
+    /// <see cref="WorldState.MeanParkAccess"/> and
+    /// <see cref="WorldState.ParkAccessFraction"/>.
+    /// HealthSatisfaction is owned by <see cref="HealthProgression"/> (hospitals +
+    /// exercise contribution); this tick only refreshes mean health for HUD convenience.
+    /// Returns net households that gained LeisureSatisfaction this pass.
     /// </summary>
-    public static int Tick(
-        WorldState state,
-        float days = 1f,
-        InfluenceMap? healthCoverage = null)
+    public static int Tick(WorldState state, float days = 1f)
     {
         float daysClamped = Math.Max(0f, days);
         if (daysClamped <= 0f)
@@ -231,29 +229,12 @@ public static class ParkAmenity
                 continue;
 
             float access = LocalParkAccess(state, hx, hy);
-            float healthcare = 0f;
-            if (healthCoverage != null)
-                healthcare = Math.Clamp(healthCoverage.GetValue(hx, hy), 0f, 1f);
-
-            int idx = state.Tiles.Index(hx, hy);
-            float pollution = Math.Clamp(state.Tiles.Pollution[idx], 0f, 1f);
-
-            // AGENT_06 lite: base − pollution + healthcare + exercise (parks).
-            float score = 0.6f
-                - pollution * 0.3f
-                + healthcare * 0.4f
-                + ExerciseContribution(access);
-            score = Math.Clamp(score, 0f, 1f);
-
-            byte healthTarget = (byte)Math.Clamp((int)MathF.Round(score * 255f), 0, 255);
-            byte before = hh.HealthSatisfaction[i];
-            hh.HealthSatisfaction[i] = BlendByte(before, healthTarget, blend);
-            if (hh.HealthSatisfaction[i] > before)
-                improved++;
-
             byte leisureTarget = (byte)Math.Clamp(
                 128f + access * LeisureBoostAtFullAccess, 0f, 255f);
-            hh.LeisureSatisfaction[i] = BlendByte(hh.LeisureSatisfaction[i], leisureTarget, blend);
+            byte before = hh.LeisureSatisfaction[i];
+            hh.LeisureSatisfaction[i] = BlendByte(before, leisureTarget, blend);
+            if (hh.LeisureSatisfaction[i] > before)
+                improved++;
         }
 
         RefreshAggregates(state);
@@ -264,6 +245,8 @@ public static class ParkAmenity
     {
         state.MeanParkAccess = MeanParkAccess(state);
         state.ParkAccessFraction = ParkAccessFraction(state);
+        // Mean health is primarily written by HealthProgression; keep in sync when
+        // only park amenity ran (e.g. characterization tests that skip hospitals).
         state.MeanHealthSatisfaction = MeanHealthSatisfaction(state);
     }
 

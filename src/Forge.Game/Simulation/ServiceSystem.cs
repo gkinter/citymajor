@@ -264,6 +264,7 @@ public sealed class ServiceSystem
         UpdateWildfireArson(state);
         UpdateHospitalCapacity(state);
         UpdateEducationProgression(state);
+        UpdateHealthProgression(state);
         UpdateParkAmenity(state);
     }
 
@@ -279,13 +280,25 @@ public sealed class ServiceSystem
     }
 
     /// <summary>
+    /// Tier-2 hospital → HH health — households under hospital coverage raise
+    /// HealthSatisfaction over time; thin coverage slowly decays. Writes
+    /// <see cref="WorldState.HealthCoverageFraction"/> + mean health.
+    /// </summary>
+    public void UpdateHealthProgression(WorldState state, float days = 1f)
+    {
+        float quality = HealthProgression.MeanHospitalQuality(state);
+        HealthProgression.Tick(state, _healthCoverage, quality, days);
+    }
+
+    /// <summary>
     /// Tier-2 park amenity parity — painted park zones + park buildings raise
-    /// household HealthSatisfaction / LeisureSatisfaction via exercise access.
-    /// Writes mean park access, coverage fraction, and mean health satisfaction.
+    /// LeisureSatisfaction via exercise access. HealthSatisfaction is owned by
+    /// <see cref="UpdateHealthProgression"/> (hospitals + park exercise term).
+    /// Writes mean park access and coverage fraction.
     /// </summary>
     public void UpdateParkAmenity(WorldState state, float days = 1f)
     {
-        ParkAmenity.Tick(state, days, _healthCoverage);
+        ParkAmenity.Tick(state, days);
     }
 
     /// <summary>

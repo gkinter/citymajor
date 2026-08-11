@@ -271,7 +271,12 @@ public sealed class WorldState
     public float ParkAccessFraction { get; set; }
 
     /// <summary>
-    /// Mean household HealthSatisfaction mapped to 0–1 (park + healthcare blend).
+    /// Fraction of households with home-tile hospital coverage ≥ recovery threshold (0–1).
+    /// </summary>
+    public float HealthCoverageFraction { get; set; }
+
+    /// <summary>
+    /// Mean household HealthSatisfaction mapped to 0–1 (hospital progression + park exercise).
     /// </summary>
     public float MeanHealthSatisfaction { get; set; }
 

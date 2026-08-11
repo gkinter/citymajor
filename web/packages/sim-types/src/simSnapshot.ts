@@ -245,6 +245,8 @@ export type SimSnapshotDto = {
   meanParkAccess: number;
   /** Fraction of households with park access. */
   parkAccessFraction: number;
+  /** Fraction of households under hospital coverage. */
+  healthCoverageFraction: number;
   /** Mean household HealthSatisfaction 0–1. */
   meanHealthSatisfaction: number;
 
@@ -336,6 +338,7 @@ export type SimResourcesDto = Pick<
   | "educationCoverageFraction"
   | "meanParkAccess"
   | "parkAccessFraction"
+  | "healthCoverageFraction"
   | "meanHealthSatisfaction"
   | "marketZoneCount"
   | "commuterCoverage"

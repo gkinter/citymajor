@@ -199,11 +199,13 @@ namespace CityMajor.UI
             {
                 var freeBeds = Mathf.Max(0, state.AvailableHospitalBeds);
                 var occPct = Mathf.RoundToInt(Mathf.Clamp01(state.HospitalBedOccupancyFraction) * 100f);
-                _hospitalValue.text = freeBeds > 0 || occPct > 0
-                    ? $"🏥 {freeBeds} free · {occPct}%"
+                var healthCovPct = Mathf.RoundToInt(Mathf.Clamp01(state.HealthCoverageFraction) * 100f);
+                var healthPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanHealthSatisfaction) * 100f);
+                _hospitalValue.text = freeBeds > 0 || occPct > 0 || healthCovPct > 0
+                    ? $"🏥 {freeBeds} free · {occPct}% · ❤ {healthPct}% · {healthCovPct}%"
                     : "🏥 —";
                 _hospitalValue.tooltip =
-                    "Free hospital beds and city-wide bed occupancy. EMS transports to the nearest hospital with capacity (Tier-2 / MISSING_SYSTEMS §1.2).";
+                    "Free beds / occupancy; mean household HealthSatisfaction and fraction under hospital coverage. Coverage raises HealthSatisfaction over time (Tier-2 health progression → P4 sat / migration).";
             }
 
             if (_eduValue != null)

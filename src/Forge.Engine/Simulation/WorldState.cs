@@ -281,6 +281,21 @@ public sealed class WorldState
     public float MeanHealthSatisfaction { get; set; }
 
     /// <summary>
+    /// Fraction of households with home-tile police coverage ≥ safety threshold (0–1). Tier-2.
+    /// </summary>
+    public float PoliceCoverageFraction { get; set; }
+
+    /// <summary>
+    /// Mean tile crime at household homes (0–1). Tier-2 police → crime.
+    /// </summary>
+    public float MeanCrimeRate { get; set; }
+
+    /// <summary>
+    /// Mean household SafetySatisfaction mapped to 0–1 (police → crime → safety). Tier-2.
+    /// </summary>
+    public float MeanSafetySatisfaction { get; set; }
+
+    /// <summary>
     /// Park attraction units for tourism (park buildings + painted park zone sites). Tier-2.
     /// </summary>
     public int ParkAttractionCount { get; set; }

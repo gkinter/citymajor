@@ -261,7 +261,8 @@ public sealed class PopulationSystem
         float housing = CalculateHousingSatisfaction(state, householdIndex);
         float commute = CalculateCommuteSatisfaction(state, householdIndex);
         float services = CalculateServicesSatisfaction(state, householdIndex);
-        float safety = CalculateSafetySatisfaction(state, householdIndex);
+        // PoliceCrime blends SafetySatisfaction toward (1 − tile crime); prefer HH byte (health analogue).
+        float safety = hh.SafetySatisfaction[householdIndex] / 2.55f;
         float environment = CalculateEnvironmentSatisfaction(state, householdIndex);
         float education = CalculateEducationSatisfaction(state, householdIndex);
         float leisure = hh.LeisureSatisfaction[householdIndex] / 2.55f;
@@ -554,12 +555,13 @@ public sealed class PopulationSystem
         float reputation = Math.Clamp(state.Happiness * 2f, 0f, 2f); // 0-2
         float taxMod = GetTaxAttractivenessModifier(state);
         float healthMod = GetHealthAttractivenessModifier(state);
+        float safetyMod = GetSafetyAttractivenessModifier(state);
 
         // Scale base with city size (log scale)
         float sizeScale = 1f + (float)Math.Log(Math.Max(1, state.Population / 1000f), 2);
         float rawRate = BaseImmigrationPerMonth * sizeScale *
                         jobAvailability * housingAvailability * reputation * taxMod *
-                        healthMod *
+                        healthMod * safetyMod *
                         GetRentAttractivenessModifier() *
                         Math.Clamp(state.EventImmigrationMult, 0.25f, 3f);
 
@@ -806,6 +808,10 @@ public sealed class PopulationSystem
         return Math.Clamp((fire + police + health + edu) * 25f, 0f, 100f);
     }
 
+    /// <summary>
+    /// Live tile-crime safety (0–100). Prefer HH <see cref="HouseholdData.SafetySatisfaction"/>
+    /// in <see cref="CalculateSatisfaction"/> after <see cref="PoliceCrime.Tick"/>.
+    /// </summary>
     private float CalculateSafetySatisfaction(WorldState state, int idx)
     {
         var hh = state.Households;
@@ -1191,6 +1197,17 @@ public sealed class PopulationSystem
         float health = Math.Clamp(ParkAmenity.MeanHealthSatisfaction(state), 0f, 1f);
         state.MeanHealthSatisfaction = health;
         return Math.Clamp(0.55f + health * 0.9f, 0.55f, 1.45f);
+    }
+
+    /// <summary>
+    /// Immigration attractiveness from mean HH safety (police → crime → SafetySatisfaction).
+    /// 0.55 at safety=0 → 1.45 at safety=1 (neutral ~1.0 at 128/255).
+    /// </summary>
+    private float GetSafetyAttractivenessModifier(WorldState state)
+    {
+        float safety = Math.Clamp(PoliceCrime.MeanSafetySatisfaction(state), 0f, 1f);
+        state.MeanSafetySatisfaction = safety;
+        return PoliceCrime.SafetyAttractivenessModifier(safety);
     }
 
     /// <summary>Get healthcare modifier for births (0.5-1.5).</summary>

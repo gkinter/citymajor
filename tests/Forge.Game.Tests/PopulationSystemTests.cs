@@ -155,6 +155,64 @@ public class PopulationSystemTests
     }
 
     [Fact]
+    public void CalculateSatisfaction_HigherSafetySatisfaction_RaisesScore()
+    {
+        var state = CreateTestWorld();
+        var system = new PopulationSystem(seed: 100);
+
+        int slot = AddHousehold(state, system,
+            homeBuilding: 0, workBuilding: 1, income: 1500);
+
+        state.Households.SafetySatisfaction[slot] = 40;
+        float satLow = system.CalculateSatisfaction(state, slot);
+
+        state.Households.SafetySatisfaction[slot] = 220;
+        float satHigh = system.CalculateSatisfaction(state, slot);
+
+        Assert.True(satHigh > satLow,
+            $"higher SafetySatisfaction should raise P4 satisfaction (low={satLow:F1}, high={satHigh:F1})");
+        Assert.True(satHigh - satLow > 2f,
+            $"expected material safety delta, got {satHigh - satLow:F2}");
+    }
+
+    [Fact]
+    public void CalculateImmigration_HigherMeanSafety_AttractsMoreImmigrants()
+    {
+        var state = CreateTestWorld();
+        state.Population = 2000;
+        state.Happiness = 0.7f;
+        state.Buildings.MaxOccupants[0] = 500;
+
+        var lowSafety = new PopulationSystem(seed: 77);
+        for (int i = 0; i < 40; i++)
+        {
+            int slot = AddHousehold(state, lowSafety, members: 2, homeBuilding: 0);
+            state.Households.SafetySatisfaction[slot] = 20;
+            state.Households.HealthSatisfaction[slot] = 128;
+        }
+
+        int immigrantsLow = lowSafety.CalculateImmigration(state);
+
+        var stateHigh = CreateTestWorld();
+        stateHigh.Population = 2000;
+        stateHigh.Happiness = 0.7f;
+        stateHigh.Buildings.MaxOccupants[0] = 500;
+        var highSafety = new PopulationSystem(seed: 77);
+        for (int i = 0; i < 40; i++)
+        {
+            int slot = AddHousehold(stateHigh, highSafety, members: 2, homeBuilding: 0);
+            stateHigh.Households.SafetySatisfaction[slot] = 240;
+            stateHigh.Households.HealthSatisfaction[slot] = 128;
+        }
+
+        int immigrantsHigh = highSafety.CalculateImmigration(stateHigh);
+
+        Assert.True(immigrantsHigh > immigrantsLow,
+            $"higher mean safety should attract more immigrants (low={immigrantsLow}, high={immigrantsHigh})");
+        Assert.True(stateHigh.MeanSafetySatisfaction > state.MeanSafetySatisfaction);
+    }
+
+    [Fact]
     public void Tick_LowHealthSatisfaction_LowersHappinessTowardEmigrationBand()
     {
         var state = CreateTestWorld();

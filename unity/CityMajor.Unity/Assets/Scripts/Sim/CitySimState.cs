@@ -142,6 +142,15 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — mean household HealthSatisfaction 0–1.</summary>
         public float MeanHealthSatisfaction;
 
+        /// <summary>Tier-2 — fraction of households with police coverage.</summary>
+        public float PoliceCoverageFraction;
+
+        /// <summary>Tier-2 — mean tile crime at household homes 0–1.</summary>
+        public float MeanCrimeRate;
+
+        /// <summary>Tier-2 — mean household SafetySatisfaction 0–1.</summary>
+        public float MeanSafetySatisfaction;
+
         /// <summary>Tier-2 — park attraction units for tourism.</summary>
         public int ParkAttractionCount;
 

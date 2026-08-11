@@ -25,6 +25,7 @@ namespace CityMajor.UI
         Label _emsValue;
         Label _fireValue;
         Label _hospitalValue;
+        Label _policeValue;
         Label _eduValue;
         Label _parkValue;
         Label _cranesLabel;
@@ -96,6 +97,7 @@ namespace CityMajor.UI
             _emsValue = root.Q<Label>("ems-value");
             _fireValue = root.Q<Label>("fire-value");
             _hospitalValue = root.Q<Label>("hospital-value");
+            _policeValue = root.Q<Label>("police-value");
             _eduValue = root.Q<Label>("edu-value");
             _parkValue = root.Q<Label>("park-value");
             _cranesLabel = root.Q<Label>("cranes-label");
@@ -206,6 +208,18 @@ namespace CityMajor.UI
                     : "🏥 —";
                 _hospitalValue.tooltip =
                     "Free beds / occupancy; mean household HealthSatisfaction and fraction under hospital coverage. Coverage raises HealthSatisfaction over time (Tier-2 health progression → P4 sat / migration).";
+            }
+
+            if (_policeValue != null)
+            {
+                var safetyPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanSafetySatisfaction) * 100f);
+                var crimePct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanCrimeRate) * 100f);
+                var covPct = Mathf.RoundToInt(Mathf.Clamp01(state.PoliceCoverageFraction) * 100f);
+                _policeValue.text = covPct > 0 || safetyPct > 0 || crimePct > 0
+                    ? $"👮 {safetyPct}% · crime {crimePct}% · {covPct}%"
+                    : "👮 —";
+                _policeValue.tooltip =
+                    "Mean household SafetySatisfaction, mean home-tile crime, and fraction under police coverage. Station quality deepens crime suppression; safety feeds P4 satisfaction / immigration (Tier-2 police → crime → outcomes; arson already reads tile crime).";
             }
 
             if (_eduValue != null)

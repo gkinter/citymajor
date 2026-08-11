@@ -219,6 +219,12 @@ public sealed class SimSnapshotDto
     public float HealthCoverageFraction { get; init; }
     /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2 hospital + park health).</summary>
     public float MeanHealthSatisfaction { get; init; }
+    /// <summary>Fraction of households with police coverage (Tier-2 police/crime).</summary>
+    public float PoliceCoverageFraction { get; init; }
+    /// <summary>Mean tile crime at household homes 0–1 (Tier-2 police/crime).</summary>
+    public float MeanCrimeRate { get; init; }
+    /// <summary>Mean household SafetySatisfaction 0–1 (Tier-2 police → crime → safety).</summary>
+    public float MeanSafetySatisfaction { get; init; }
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount { get; init; }
     /// <summary>Landmark / monument attraction units for tourism (Tier-2).</summary>
@@ -370,6 +376,9 @@ public sealed class SimSnapshotDto
             ParkAccessFraction = state.ParkAccessFraction,
             HealthCoverageFraction = state.HealthCoverageFraction,
             MeanHealthSatisfaction = state.MeanHealthSatisfaction,
+            PoliceCoverageFraction = state.PoliceCoverageFraction,
+            MeanCrimeRate = state.MeanCrimeRate,
+            MeanSafetySatisfaction = state.MeanSafetySatisfaction,
             ParkAttractionCount = state.ParkAttractionCount,
             LandmarkAttractionCount = state.LandmarkAttractionCount,
             TourismAttractionCount = state.TourismAttractionCount,

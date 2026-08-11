@@ -255,6 +255,12 @@ export type SimSnapshotDto = {
   healthCoverageFraction: number;
   /** Mean household HealthSatisfaction 0–1. */
   meanHealthSatisfaction: number;
+  /** Fraction of households under police coverage. */
+  policeCoverageFraction: number;
+  /** Mean tile crime at household homes 0–1. */
+  meanCrimeRate: number;
+  /** Mean household SafetySatisfaction 0–1. */
+  meanSafetySatisfaction: number;
   /** Park attraction units for tourism (buildings + zone sites). */
   parkAttractionCount: number;
   /** Landmark / monument attraction units for tourism. */
@@ -357,6 +363,9 @@ export type SimResourcesDto = Pick<
   | "parkAccessFraction"
   | "healthCoverageFraction"
   | "meanHealthSatisfaction"
+  | "policeCoverageFraction"
+  | "meanCrimeRate"
+  | "meanSafetySatisfaction"
   | "parkAttractionCount"
   | "landmarkAttractionCount"
   | "tourismAttractionCount"

@@ -164,6 +164,9 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | ParkAccessFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH with park access |
 | HealthCoverageFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH under hospital coverage |
 | MeanHealthSatisfaction | ✅ | ✅ | ✅ | WorldState | Tier-2 mean HealthSatisfaction (0–1); hospital progression + park exercise; feeds P4 sat / immigration |
+| PoliceCoverageFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH under police coverage |
+| MeanCrimeRate | ✅ | ✅ | ✅ | WorldState | Tier-2 mean home-tile crime (0–1); station quality deepens suppression |
+| MeanSafetySatisfaction | ✅ | ✅ | ✅ | WorldState | Tier-2 mean SafetySatisfaction (0–1); feeds P4 sat / immigration |
 | ParkAttractionCount | ✅ | ✅ | ✅ | WorldState | Tier-2 park attraction units (buildings + zone sites) → tourism |
 | LandmarkAttractionCount | ✅ | ✅ | ✅ | WorldState | Tier-2 landmark / monument attraction units → tourism |
 | TourismAttractionCount | ✅ | ✅ | ✅ | WorldState | Tier-2 park + landmark attraction units |
@@ -289,6 +292,7 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **Tier-2 health → P4** — `MeanHealthSatisfaction` / HH HealthSatisfaction feed satisfaction weight + immigration attractiveness |
 | 2026-08-11 | **Tier-2 hospital → HH health** — `HealthCoverageFraction` on E+W+U; `HealthProgression` recovery / decay under hospital coverage |
 | 2026-08-11 | **Tier-2 tourism attractions** — `ParkAttractionCount` / `LandmarkAttractionCount` / `TourismAttractionCount` / `TourismIncome` on E+W+U; parks/landmarks feed budget tourism |
+| 2026-08-11 | **Tier-2 police / crime** — `PoliceCoverageFraction` / `MeanCrimeRate` / `MeanSafetySatisfaction` on E+W+U; station quality deepens crime; safety → P4 sat / immigration |
 | 2026-08-11 | **P3.5 bilateral trade routes** — `BilateralRouteCount` / `BilateralTradeValue` / `MeanFreightMonths` on E+W+U; freight settlement + Unity Trade/Economy HUD |
 | 2026-08-11 | **SB-3728 create/cancel** — SimHost create/cancel APIs + Unity Trade strip `[Y]` player flow |
 | 2026-08-11 | **SB-3728 regional NPC markers** — `NpcPartnerCount` + `NpcRegionalPartners` catalog; distance freight; Unity Trade regional map |

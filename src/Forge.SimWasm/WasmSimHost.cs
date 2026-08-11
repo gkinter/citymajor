@@ -157,6 +157,15 @@ public sealed class WasmSimHost
     /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2).</summary>
     public float MeanHealthSatisfaction =>
         _host.State?.MeanHealthSatisfaction ?? 0f;
+    /// <summary>Fraction of households with police coverage (Tier-2).</summary>
+    public float PoliceCoverageFraction =>
+        _host.State?.PoliceCoverageFraction ?? 0f;
+    /// <summary>Mean tile crime at household homes 0–1 (Tier-2).</summary>
+    public float MeanCrimeRate =>
+        _host.State?.MeanCrimeRate ?? 0f;
+    /// <summary>Mean household SafetySatisfaction 0–1 (Tier-2).</summary>
+    public float MeanSafetySatisfaction =>
+        _host.State?.MeanSafetySatisfaction ?? 0f;
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount => _host.State?.ParkAttractionCount ?? 0;
     /// <summary>Landmark attraction units for tourism (Tier-2).</summary>
@@ -437,6 +446,12 @@ public sealed class WasmStatusDto
     public float HealthCoverageFraction { get; init; }
     /// <summary>Mean household HealthSatisfaction 0–1 (Tier-2).</summary>
     public float MeanHealthSatisfaction { get; init; }
+    /// <summary>Fraction of households with police coverage (Tier-2).</summary>
+    public float PoliceCoverageFraction { get; init; }
+    /// <summary>Mean tile crime at household homes 0–1 (Tier-2).</summary>
+    public float MeanCrimeRate { get; init; }
+    /// <summary>Mean household SafetySatisfaction 0–1 (Tier-2).</summary>
+    public float MeanSafetySatisfaction { get; init; }
     /// <summary>Park attraction units for tourism (Tier-2).</summary>
     public int ParkAttractionCount { get; init; }
     /// <summary>Landmark attraction units for tourism (Tier-2).</summary>
@@ -574,6 +589,9 @@ public sealed class WasmStatusDto
             ParkAccessFraction = host.ParkAccessFraction,
             HealthCoverageFraction = host.HealthCoverageFraction,
             MeanHealthSatisfaction = host.MeanHealthSatisfaction,
+            PoliceCoverageFraction = host.PoliceCoverageFraction,
+            MeanCrimeRate = host.MeanCrimeRate,
+            MeanSafetySatisfaction = host.MeanSafetySatisfaction,
             ParkAttractionCount = host.ParkAttractionCount,
             LandmarkAttractionCount = host.LandmarkAttractionCount,
             TourismAttractionCount = host.TourismAttractionCount,

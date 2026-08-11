@@ -71,12 +71,12 @@ public sealed class ServiceSystem
     internal const float MaterialConcrete = 0.5f;
 
     // Crime formula weights
-    internal const float CrimePoliceWeight = 0.7f;
-    internal const float CrimeUnemploymentWeight = 0.5f;
-    internal const float CrimePovertyWeight = 0.3f;
-    internal const float CrimeEducationWeight = 0.2f;
-    internal const float CrimeLightingWeight = 0.1f;
-    internal const float CrimeAbandonedWeight = 0.4f;
+    internal const float CrimePoliceWeight = PoliceCrime.CrimePoliceWeight;
+    internal const float CrimeUnemploymentWeight = PoliceCrime.CrimeUnemploymentWeight;
+    internal const float CrimePovertyWeight = PoliceCrime.CrimePovertyWeight;
+    internal const float CrimeEducationWeight = PoliceCrime.CrimeEducationWeight;
+    internal const float CrimeLightingWeight = PoliceCrime.CrimeLightingWeight;
+    internal const float CrimeAbandonedWeight = PoliceCrime.CrimeAbandonedWeight;
 
     // Health formula weights
     internal const float HealthPollutionWeight = 0.3f;
@@ -265,6 +265,7 @@ public sealed class ServiceSystem
         UpdateHospitalCapacity(state);
         UpdateEducationProgression(state);
         UpdateHealthProgression(state);
+        UpdatePoliceCrime(state);
         UpdateParkAmenity(state);
     }
 
@@ -288,6 +289,16 @@ public sealed class ServiceSystem
     {
         float quality = HealthProgression.MeanHospitalQuality(state);
         HealthProgression.Tick(state, _healthCoverage, quality, days);
+    }
+
+    /// <summary>
+    /// Tier-2 police → crime → safety — after per-tile crime is written, blend
+    /// household SafetySatisfaction toward (1 − crime) and export coverage /
+    /// mean crime / mean safety aggregates for HUD + P4 immigration.
+    /// </summary>
+    public void UpdatePoliceCrime(WorldState state, float days = 1f)
+    {
+        PoliceCrime.Tick(state, _policeCoverage, days);
     }
 
     /// <summary>
@@ -475,44 +486,26 @@ public sealed class ServiceSystem
 
     /// <summary>
     /// Calculate crime rate at a tile.
-    /// Formula: base * (1 - police*0.7) * (1 + unemployment*0.5) * (1 + poverty*0.3)
+    /// Formula: base * (1 - effectivePolice*0.7) * (1 + unemployment*0.5) * (1 + poverty*0.3)
     ///        * (1 - education*0.2) * (1 - lighting*0.1) * (1 + abandoned*0.4)
+    /// where effectivePolice = coverage × station quality (Tier-2 police depth).
     /// Returns 0.0 (no crime) to 1.0 (maximum crime).
     /// </summary>
     public float CalculateCrimeRate(WorldState state, int tileX, int tileY)
     {
         if (!state.Tiles.InBounds(tileX, tileY)) return 0f;
 
-        const float baseCrime = 0.3f;
-
-        // Police coverage (0-1)
         float police = Math.Clamp(_policeCoverage.GetValue(tileX, tileY), 0f, 1f);
-
-        // Unemployment rate (approximated from household data)
+        float quality = PoliceCrime.MeanPoliceQuality(state);
         float unemployment = CalculateLocalUnemployment(state, tileX, tileY);
-
-        // Poverty rate (approximated from household wealth levels)
         float poverty = CalculateLocalPoverty(state, tileX, tileY);
-
-        // Education level (from education coverage)
         float education = Math.Clamp(_educationCoverage.GetValue(tileX, tileY), 0f, 1f);
-
-        // Lighting: powered areas have lighting (simple proxy)
         int idx = state.Tiles.Index(tileX, tileY);
         float lighting = state.Tiles.PowerGrid[idx] != 0 ? 1f : 0f;
-
-        // Abandoned buildings nearby
         float abandoned = CalculateLocalAbandonment(state, tileX, tileY);
 
-        float crime = baseCrime
-            * (1f - police * CrimePoliceWeight)
-            * (1f + unemployment * CrimeUnemploymentWeight)
-            * (1f + poverty * CrimePovertyWeight)
-            * (1f - education * CrimeEducationWeight)
-            * (1f - lighting * CrimeLightingWeight)
-            * (1f + abandoned * CrimeAbandonedWeight);
-
-        return Math.Clamp(crime, 0f, 1f);
+        return PoliceCrime.CalculateCrimeRate(
+            police, quality, unemployment, poverty, education, lighting, abandoned);
     }
 
     // =========================================================================

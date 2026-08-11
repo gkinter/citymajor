@@ -15,7 +15,8 @@ namespace Forge.SimCore.Tests;
 /// Tier-2 wildfire / arson rings, aerial / lookout / fire rating,
 /// Tier-2 education depth, Tier-2 park amenity parity, Tier-2 hospital→HH
 /// health progression, P4 health→satisfaction/migration, Tier-2 tourism
-/// attractions stub, and Cathedral P3.5 bilateral trade freight metrics.
+/// attractions stub, Tier-2 police/crime depth, and Cathedral P3.5 bilateral
+/// trade freight metrics.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -1150,6 +1151,138 @@ public sealed class CathedralUtilitiesTests
         Assert.Equal(1, routes.GetInt32());
         Assert.Equal(500f, value.GetSingle(), precision: 1);
         Assert.Equal(4f, freight.GetSingle(), precision: 2);
+    }
+
+    [Fact]
+    public void PoliceCrime_HigherQuality_LowersCrimeAtSameCoverage()
+    {
+        float lowQ = PoliceCrime.CalculateCrimeRate(
+            policeCoverage: 0.8f, policeQuality: 0.3f,
+            unemployment: 0f, poverty: 0f, education: 0f, lighting: 1f, abandoned: 0f);
+        float highQ = PoliceCrime.CalculateCrimeRate(
+            policeCoverage: 0.8f, policeQuality: 1f,
+            unemployment: 0f, poverty: 0f, education: 0f, lighting: 1f, abandoned: 0f);
+        float uncovered = PoliceCrime.CalculateCrimeRate(
+            policeCoverage: 0f, policeQuality: 1f,
+            unemployment: 0f, poverty: 0f, education: 0f, lighting: 1f, abandoned: 0f);
+
+        Assert.True(highQ < lowQ,
+            $"higher station quality should suppress more crime (lowQ={lowQ:F3}, highQ={highQ:F3})");
+        Assert.True(uncovered > lowQ);
+        Assert.True(PoliceCrime.EffectivePoliceFactor(0.8f, 1f) >
+                    PoliceCrime.EffectivePoliceFactor(0.8f, 0.3f));
+    }
+
+    [Fact]
+    public void PoliceTick_StationCoverage_RaisesSafetyAndLowersMeanCrime()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 16, 16, serviceFlags: 0);
+        PlaceBuilding(host.State!, 16, 17, serviceFlags: PoliceCrime.ServicePolice, level: 3);
+
+        int slot = host.State!.Households.Allocate();
+        Assert.True(slot >= 0);
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.SafetySatisfaction[slot] = 40;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        host.Services.DailyTick(host.State, 1.0);
+        byte before = host.State.Households.SafetySatisfaction[slot];
+        float crimeBefore = host.State.Tiles.Crime[host.State.Tiles.Index(16, 16)];
+
+        int improved = 0;
+        for (int i = 0; i < 20; i++)
+        {
+            host.Services.DailyTick(host.State, 1.0);
+            improved += PoliceCrime.Tick(host.State, host.Services.PoliceCoverage, days: 1f);
+        }
+
+        Assert.True(host.State.PoliceCoverageFraction > 0.5f);
+        Assert.True(host.State.Households.SafetySatisfaction[slot] > before,
+            "police coverage should raise SafetySatisfaction over time");
+        Assert.True(improved > 0);
+        Assert.True(host.State.MeanCrimeRate < 0.35f,
+            $"covered crime should be suppressed (mean={host.State.MeanCrimeRate:F3}, tile={crimeBefore:F3})");
+        Assert.True(host.State.MeanSafetySatisfaction > before / 255f);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsPoliceCrimeFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 12, 12, serviceFlags: 0);
+        PlaceBuilding(host.State!, 12, 13, serviceFlags: PoliceCrime.ServicePolice, level: 2);
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.SafetySatisfaction[slot] = 180;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        // Write crime without blending safety yet.
+        host.Services.DailyTick(host.State, 1.0);
+        host.State.Households.SafetySatisfaction[slot] = 180;
+        host.Services.UpdatePoliceCrime(host.State, days: 0f);
+
+        Assert.True(host.State.PoliceCoverageFraction > 0f);
+        Assert.InRange(host.State.MeanCrimeRate, 0f, 1f);
+        Assert.Equal(180f / 255f, host.State.MeanSafetySatisfaction, precision: 2);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("policeCoverageFraction", out var cov));
+        Assert.True(doc.RootElement.TryGetProperty("meanCrimeRate", out var crime));
+        Assert.True(doc.RootElement.TryGetProperty("meanSafetySatisfaction", out var safety));
+        Assert.Equal(host.State.PoliceCoverageFraction, cov.GetSingle(), precision: 3);
+        Assert.Equal(host.State.MeanCrimeRate, crime.GetSingle(), precision: 3);
+        Assert.Equal(host.State.MeanSafetySatisfaction, safety.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.PoliceCoverageFraction, dto.PoliceCoverageFraction, precision: 3);
+        Assert.Equal(host.State.MeanCrimeRate, dto.MeanCrimeRate, precision: 3);
+        Assert.Equal(host.State.MeanSafetySatisfaction, dto.MeanSafetySatisfaction, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.PoliceCoverageFraction, snap.PoliceCoverageFraction, precision: 3);
+        Assert.Equal(host.State.MeanCrimeRate, snap.MeanCrimeRate, precision: 3);
+        Assert.Equal(host.State.MeanSafetySatisfaction, snap.MeanSafetySatisfaction, precision: 3);
+    }
+
+    [Fact]
+    public void SafetySatisfaction_FeedsP4SatisfactionAfterPoliceCrime()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 11, 10, serviceFlags: 0);
+        PlaceBuilding(host.State!, 11, 11, serviceFlags: PoliceCrime.ServicePolice, level: 3);
+        int work = PlaceBuilding(host.State!, 20, 20, serviceFlags: 0);
+
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.WorkBuildingId[slot] = (ushort)work;
+        host.State.Households.SafetySatisfaction[slot] = 30;
+        host.State.Households.HealthSatisfaction[slot] = 128;
+        host.State.Households.LeisureSatisfaction[slot] = 128;
+        host.State.Households.MemberCount[slot] = 2;
+        host.State.Households.Income[slot] = 1500;
+
+        host.Services!.RebuildFromWorld(host.State);
+        var pop = new PopulationSystem(seed: 42);
+        float satLow = pop.CalculateSatisfaction(host.State, slot);
+
+        for (int i = 0; i < 25; i++)
+            host.Services.DailyTick(host.State, 1.0);
+
+        float satHigh = pop.CalculateSatisfaction(host.State, slot);
+        Assert.True(host.State.Households.SafetySatisfaction[slot] > 30);
+        Assert.True(satHigh > satLow,
+            $"police→safety should raise P4 satisfaction (low={satLow:F1}, high={satHigh:F1})");
+        Assert.True(host.State.MeanSafetySatisfaction > 30f / 255f);
+        Assert.True(host.State.PoliceCoverageFraction > 0f);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

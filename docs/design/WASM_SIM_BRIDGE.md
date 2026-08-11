@@ -302,6 +302,9 @@ export type SimSnapshotDto = {
   parkAccessFraction: number;
   healthCoverageFraction: number; // 0–1
   meanHealthSatisfaction: number; // 0–1
+  policeCoverageFraction: number; // 0–1
+  meanCrimeRate: number; // 0–1
+  meanSafetySatisfaction: number; // 0–1
 
   marketZoneCount: number;
   commuterCoverage: number;
@@ -438,6 +441,9 @@ export type CommuteOdSampleDto = {
   "parkAccessFraction": 0.38,
   "healthCoverageFraction": 0.48,
   "meanHealthSatisfaction": 0.61,
+  "policeCoverageFraction": 0.55,
+  "meanCrimeRate": 0.18,
+  "meanSafetySatisfaction": 0.72,
   "culturalDna": [0, 0, 0, 0, 0, 0, 0, 0],
   "councilSeats": [0, 0, 0, 0, 0, 0, 0, 0, 0],
   "buildings": [

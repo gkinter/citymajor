@@ -10,7 +10,7 @@
 
 ## 1. Goal
 
-Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind. Ship **Tier-2 wildfire / arson rings** — drought fuel spread + high-crime ignition clusters. Ship **Tier-2 aerial / lookout / fire rating** — lookout spark mitigation, aerial suppression, city fire safety rating → insurance premium. Ship **Tier-2 education depth** — household education progression under school coverage + research RP mult + Edu HUD. Ship **Tier-2 park amenity parity** — painted park zones boost health/exercise (not only land value) + Park HUD. Ship **Tier-2 health → P4** — `HealthSatisfaction` feeds household satisfaction / migration so parks + hospitals change city outcomes. Ship **Tier-2 hospital → HH health progression** — hospitals raise nearby `HealthSatisfaction` over time (education analogue) + Hosp HUD coverage.
+Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind. Ship **Tier-2 wildfire / arson rings** — drought fuel spread + high-crime ignition clusters. Ship **Tier-2 aerial / lookout / fire rating** — lookout spark mitigation, aerial suppression, city fire safety rating → insurance premium. Ship **Tier-2 education depth** — household education progression under school coverage + research RP mult + Edu HUD. Ship **Tier-2 park amenity parity** — painted park zones boost health/exercise (not only land value) + Park HUD. Ship **Tier-2 health → P4** — `HealthSatisfaction` feeds household satisfaction / migration so parks + hospitals change city outcomes. Ship **Tier-2 hospital → HH health progression** — hospitals raise nearby `HealthSatisfaction` over time (education analogue) + Hosp HUD coverage. Ship **Tier-2 police / crime** — station quality deepens crime suppression; coverage → crime → `SafetySatisfaction` → satisfaction / immigration + Police HUD (arson already reads tile crime).
 
 ---
 
@@ -29,6 +29,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 | **Tier-2** | Park amenity parity | **Live** — `ParkAmenity` painted zones + buildings raise health/leisure; `MeanParkAccess` / `ParkAccessFraction` / `MeanHealthSatisfaction` + Park HUD 🌳 |
 | **Tier-2** | Health → P4 outcomes | **Live** — `HealthSatisfaction` weight in `CalculateSatisfaction` + mean-health immigration mod → happiness / emigration / immigration |
 | **Tier-2** | Hospital → HH health | **Live** — `HealthProgression` raises / decays `HealthSatisfaction` under hospital coverage + `HealthCoverageFraction` + Hosp HUD ❤ / cov% |
+| **Tier-2** | Police / crime depth | **Live** — `PoliceCrime` station quality → crime; `PoliceCoverageFraction` / `MeanCrimeRate` / `MeanSafetySatisfaction` + Police HUD 👮 → P4 sat / immigration |
 
 ---
 
@@ -244,6 +245,24 @@ Park + hospital coverage already write `HouseholdData.HealthSatisfaction` and `M
 - Unity ResourcesHud Hosp line appends `❤ {health%} · {cov%}`
 
 `CathedralUtilitiesTests` pins recovery targets, hospital coverage tick, uncovered decay, park-exercise lift, and snapshot export.
+
+### 4.14 Live (Tier-2 police / crime depth)
+
+```json
+{
+  "policeCoverageFraction": 0.55,
+  "meanCrimeRate": 0.18,
+  "meanSafetySatisfaction": 0.72
+}
+```
+
+- Police stations (`ServicePolice`) publish coverage; **station quality** (level × condition) scales the AGENT_06 police term so better stations suppress crime more at the same radius
+- Daily tick blends `SafetySatisfaction` toward home-tile `(1 − crime)`
+- `CalculateSatisfaction` reads HH `SafetySatisfaction`; immigration multiplies by mean-safety attractiveness (**0.55–1.45**)
+- Arson / decline already consume tile crime — deepened stations lower those risk paths
+- Unity ResourcesHud Police line: `👮 {safety%} · crime {crime%} · {cov%}`
+
+`CathedralUtilitiesTests` + `PopulationSystemTests` pin quality→lower crime, police tick→safety, snapshot export, and safety→immigration.
 
 ## 5. Out of scope (this stub)
 

@@ -1681,6 +1681,142 @@ public sealed class CathedralUtilitiesTests
         Assert.True(host.State.MeanTelecomAccess > 0.3f);
     }
 
+    [Fact]
+    public void StormOverflow_ManningVelocity_IncreasesWithSlope()
+    {
+        float flat = StormOverflow.ManningVelocity(StormOverflow.MinSlope);
+        float steeper = StormOverflow.ManningVelocity(0.02f);
+        Assert.True(steeper > flat,
+            $"steeper slope should raise Manning velocity (flat={flat:F3}, steep={steeper:F3})");
+        Assert.InRange(flat, 2.4f, 3.0f); // ~ReferenceVelocityMs at MinSlope
+
+        float lowCap = StormOverflow.PipeCapacity(StormOverflow.MinSlope, plantQuality: 0.3f);
+        float highCap = StormOverflow.PipeCapacity(StormOverflow.MinSlope, plantQuality: 1f);
+        Assert.True(highCap > lowCap, "better plants raise pipe capacity");
+        Assert.True(StormOverflow.CombinedStormFraction(0.3f) >
+                    StormOverflow.CombinedStormFraction(1f),
+            "better plants separate more stormwater from the combined sewer");
+    }
+
+    [Fact]
+    public void StormOverflow_StormRaisesCso_BetterPlantsReduceOverflow()
+    {
+        float dry = StormOverflow.DrySewageInflow(coverage: 0.9f, zoneType: 1);
+        float stormHeavy = StormOverflow.StormRunoffInflow(
+            runoffCoefficient: 0.9f,
+            stormIntensity: 1f,
+            combinedStormFraction: 1f);
+        float stormLight = StormOverflow.StormRunoffInflow(
+            runoffCoefficient: 0.9f,
+            stormIntensity: 0.1f,
+            combinedStormFraction: 1f);
+        float poorCap = StormOverflow.PipeCapacity(StormOverflow.MinSlope, 0.3f);
+        float goodCap = StormOverflow.PipeCapacity(0.02f, 1f);
+
+        float overflowStorm = StormOverflow.OverflowAmount(dry, stormHeavy, poorCap);
+        float overflowDry = StormOverflow.OverflowAmount(dry, stormLight, poorCap);
+        float overflowGood = StormOverflow.OverflowAmount(dry, stormHeavy, goodCap);
+
+        Assert.True(overflowStorm > overflowDry,
+            $"storm should raise CSO (storm={overflowStorm:F3}, dryish={overflowDry:F3})");
+        Assert.True(overflowStorm > overflowGood,
+            $"better capacity should cut CSO (poor={overflowStorm:F3}, good={overflowGood:F3})");
+        Assert.True(StormOverflow.StormIntensity(0.1f, weatherCondition: 3) >= 0.85f);
+        Assert.True(StormOverflow.DiseasePressureFromCso(0.5f) >
+                    StormOverflow.DiseasePressureFromCso(0.1f));
+    }
+
+    [Fact]
+    public void StormOverflowTick_StormWeather_RaisesCsoAndPollution()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 16, 16, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(16, 16)] = 1;
+        host.State.Tiles.RoadFlags[host.State.Tiles.Index(16, 16)] = 1;
+        host.State.Tiles.Pollution[host.State.Tiles.Index(16, 16)] = 0.2f;
+        // Flat elevation → MinSlope capacity (easier overflow).
+        host.State.Tiles.Elevation[host.State.Tiles.Index(16, 16)] = 40;
+        PlaceBuilding(host.State!, 16, 17, serviceFlags: SewageTreatment.ServiceSewage, level: 1);
+        host.State.Buildings.Condition[
+            host.State.Tiles.BuildingId[host.State.Tiles.Index(16, 17)]] = 80;
+
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.RebuildFromWorld(host.State);
+        host.Services.UpdateSewageTreatment(host.State, days: 0f);
+
+        host.State.WeatherCondition = 0; // Clear
+        host.State.Precipitation = 0f;
+        StormOverflow.Tick(host.State, host.Services.SewageCoverage, days: 1f);
+        float csoClear = host.State.CsoOverflowRate;
+        float utilClear = host.State.MeanPipeUtilization;
+        float pollutionClear = host.State.Tiles.Pollution[host.State.Tiles.Index(16, 16)];
+
+        host.State.WeatherCondition = 3; // Storm
+        host.State.Precipitation = 1f;
+        host.State.Tiles.Pollution[host.State.Tiles.Index(16, 16)] = 0.2f;
+        int overflowed = StormOverflow.Tick(host.State, host.Services.SewageCoverage, days: 1f);
+        float csoStorm = host.State.CsoOverflowRate;
+        float utilStorm = host.State.MeanPipeUtilization;
+        float pollutionStorm = host.State.Tiles.Pollution[host.State.Tiles.Index(16, 16)];
+
+        Assert.True(host.State.StormRunoffLoad > 0.2f);
+        Assert.True(utilStorm >= utilClear,
+            $"storm should raise pipe util (clear={utilClear:F3}, storm={utilStorm:F3})");
+        Assert.True(csoStorm > csoClear || overflowed > 0,
+            $"storm should raise CSO (clear={csoClear:F3}, storm={csoStorm:F3}, tiles={overflowed})");
+        Assert.True(pollutionStorm >= pollutionClear,
+            $"CSO should not clean tiles (clear={pollutionClear:F3}, storm={pollutionStorm:F3})");
+        if (overflowed > 0)
+            Assert.True(pollutionStorm > pollutionClear);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsManningCsoFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 12, 12, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(12, 12)] = 1;
+        host.State.Tiles.RoadFlags[host.State.Tiles.Index(12, 12)] = 1;
+        PlaceBuilding(host.State!, 12, 13, serviceFlags: SewageTreatment.ServiceSewage, level: 2);
+        int slot = host.State!.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.State.WeatherCondition = 3;
+        host.State.Precipitation = 0.9f;
+        host.Services!.RebuildFromWorld(host.State);
+        host.Services.UpdateSewageTreatment(host.State, days: 1f);
+
+        Assert.True(host.State.MeanPipeUtilization > 0f);
+        Assert.InRange(host.State.CsoOverflowRate, 0f, 1f);
+        Assert.True(host.State.StormRunoffLoad > 0f);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("meanPipeUtilization", out var util));
+        Assert.True(doc.RootElement.TryGetProperty("csoOverflowRate", out var cso));
+        Assert.True(doc.RootElement.TryGetProperty("stormRunoffLoad", out var runoff));
+        Assert.Equal(host.State.MeanPipeUtilization, util.GetSingle(), precision: 3);
+        Assert.Equal(host.State.CsoOverflowRate, cso.GetSingle(), precision: 3);
+        Assert.Equal(host.State.StormRunoffLoad, runoff.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.MeanPipeUtilization, dto.MeanPipeUtilization, precision: 3);
+        Assert.Equal(host.State.CsoOverflowRate, dto.CsoOverflowRate, precision: 3);
+        Assert.Equal(host.State.StormRunoffLoad, dto.StormRunoffLoad, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.MeanPipeUtilization, snap.MeanPipeUtilization, precision: 3);
+        Assert.Equal(host.State.CsoOverflowRate, snap.CsoOverflowRate, precision: 3);
+        Assert.Equal(host.State.StormRunoffLoad, snap.StormRunoffLoad, precision: 3);
+    }
+
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>
     private sealed class AlwaysLowRandom : Random
     {

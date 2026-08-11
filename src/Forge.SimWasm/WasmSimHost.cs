@@ -184,6 +184,15 @@ public sealed class WasmSimHost
     /// <summary>Mean water quality 0–1 ≈ (1 − contamination) (Tier-2).</summary>
     public float MeanWaterQuality =>
         _host.State?.MeanWaterQuality ?? 0f;
+    /// <summary>Mean combined-sewer pipe utilization 0–1+ (Manning/CSO).</summary>
+    public float MeanPipeUtilization =>
+        _host.State?.MeanPipeUtilization ?? 0f;
+    /// <summary>Combined-sewer overflow rate 0–1 (Manning/CSO).</summary>
+    public float CsoOverflowRate =>
+        _host.State?.CsoOverflowRate ?? 0f;
+    /// <summary>Mean storm runoff load 0–1+ (Manning/CSO).</summary>
+    public float StormRunoffLoad =>
+        _host.State?.StormRunoffLoad ?? 0f;
     /// <summary>Fraction of households with internet tier ≥ copper (Tier-2).</summary>
     public float InternetCoverageFraction =>
         _host.State?.InternetCoverageFraction ?? 0f;
@@ -491,6 +500,12 @@ public sealed class WasmStatusDto
     public float MeanWaterContamination { get; init; }
     /// <summary>Mean water quality 0–1 ≈ (1 − contamination) (Tier-2).</summary>
     public float MeanWaterQuality { get; init; }
+    /// <summary>Mean combined-sewer pipe utilization 0–1+ (Manning/CSO).</summary>
+    public float MeanPipeUtilization { get; init; }
+    /// <summary>Combined-sewer overflow rate 0–1 (Manning/CSO).</summary>
+    public float CsoOverflowRate { get; init; }
+    /// <summary>Mean storm runoff load 0–1+ (Manning/CSO).</summary>
+    public float StormRunoffLoad { get; init; }
     /// <summary>Fraction of households with internet tier ≥ copper (Tier-2).</summary>
     public float InternetCoverageFraction { get; init; }
     /// <summary>Mean InternetConnection tier at household homes 0–3 (Tier-2).</summary>
@@ -643,6 +658,9 @@ public sealed class WasmStatusDto
             SewageCoverageFraction = host.SewageCoverageFraction,
             MeanWaterContamination = host.MeanWaterContamination,
             MeanWaterQuality = host.MeanWaterQuality,
+            MeanPipeUtilization = host.MeanPipeUtilization,
+            CsoOverflowRate = host.CsoOverflowRate,
+            StormRunoffLoad = host.StormRunoffLoad,
             InternetCoverageFraction = host.InternetCoverageFraction,
             MeanInternetTier = host.MeanInternetTier,
             MeanTelecomAccess = host.MeanTelecomAccess,

@@ -243,13 +243,15 @@ namespace CityMajor.UI
             if (_sewageValue != null)
             {
                 var qualityPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanWaterQuality) * 100f);
-                var contamPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanWaterContamination) * 100f);
+                var csoPct = Mathf.RoundToInt(Mathf.Clamp01(state.CsoOverflowRate) * 100f);
+                var utilPct = Mathf.RoundToInt(Mathf.Clamp(state.MeanPipeUtilization, 0f, 2f) * 100f);
                 var covPct = Mathf.RoundToInt(Mathf.Clamp01(state.SewageCoverageFraction) * 100f);
-                _sewageValue.text = covPct > 0 || qualityPct > 0 || contamPct > 0
-                    ? $"💧 {qualityPct}% · contam {contamPct}% · {covPct}%"
+                _sewageValue.text = covPct > 0 || qualityPct > 0 || csoPct > 0 || utilPct > 0
+                    ? $"💧 {qualityPct}% · cso {csoPct}% · util {utilPct}%"
                     : "💧 —";
                 _sewageValue.tooltip =
-                    "Mean water quality (1 − contamination), mean water contamination, and fraction under sewage coverage. Treatment plants abate waterborne pollution; uncovered zones contaminate water that feeds health / environment / immigration (Tier-2 sewage → water quality → outcomes).";
+                    "Mean water quality, combined-sewer overflow (CSO) rate, and Manning pipe utilization. Storm runoff (rational method) + dry sewage vs pipe capacity; overflow dirties water that feeds health / environment / immigration. Coverage " +
+                    $"{covPct}% · runoff {Mathf.RoundToInt(Mathf.Clamp(state.StormRunoffLoad, 0f, 1.5f) * 100f)}% (Manning/CSO extends Tier-2 sewage).";
             }
 
             if (_netValue != null)

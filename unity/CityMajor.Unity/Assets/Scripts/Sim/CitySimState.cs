@@ -169,6 +169,15 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — mean water quality 0–1 ≈ (1 − contamination).</summary>
         public float MeanWaterQuality;
 
+        /// <summary>Manning/CSO — mean combined-sewer pipe utilization 0–1+.</summary>
+        public float MeanPipeUtilization;
+
+        /// <summary>Manning/CSO — combined-sewer overflow rate 0–1.</summary>
+        public float CsoOverflowRate;
+
+        /// <summary>Manning/CSO — mean storm runoff load entering combined sewers 0–1+.</summary>
+        public float StormRunoffLoad;
+
         /// <summary>Tier-2 — fraction of households with internet tier ≥ copper.</summary>
         public float InternetCoverageFraction;
 

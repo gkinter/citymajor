@@ -325,6 +325,15 @@ public sealed class SimSnapshot
     /// <summary>Mean water quality 0–1 ≈ (1 − contamination) (Tier-2 sewage → outcomes).</summary>
     public float MeanWaterQuality { get; init; }
 
+    /// <summary>Mean combined-sewer pipe utilization 0–1+ (Manning/CSO).</summary>
+    public float MeanPipeUtilization { get; init; }
+
+    /// <summary>Combined-sewer overflow rate 0–1 (Manning/CSO storm overflow).</summary>
+    public float CsoOverflowRate { get; init; }
+
+    /// <summary>Mean storm runoff load entering combined sewers 0–1+ (Manning/CSO).</summary>
+    public float StormRunoffLoad { get; init; }
+
     /// <summary>Fraction of households with internet tier ≥ copper (Tier-2 telecom).</summary>
     public float InternetCoverageFraction { get; init; }
 
@@ -544,6 +553,9 @@ public sealed class SimSnapshot
             SewageCoverageFraction = state.SewageCoverageFraction,
             MeanWaterContamination = state.MeanWaterContamination,
             MeanWaterQuality = state.MeanWaterQuality,
+            MeanPipeUtilization = state.MeanPipeUtilization,
+            CsoOverflowRate = state.CsoOverflowRate,
+            StormRunoffLoad = state.StormRunoffLoad,
             InternetCoverageFraction = state.InternetCoverageFraction,
             MeanInternetTier = state.MeanInternetTier,
             MeanTelecomAccess = state.MeanTelecomAccess,

@@ -173,6 +173,9 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | SewageCoverageFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH under sewage coverage |
 | MeanWaterContamination | ✅ | ✅ | ✅ | WorldState | Tier-2 mean water contamination (0–1); plant quality deepens treatment |
 | MeanWaterQuality | ✅ | ✅ | ✅ | WorldState | Tier-2 mean (1 − contamination); feeds P4 sat / immigration |
+| MeanPipeUtilization | ✅ | ✅ | ✅ | WorldState | Manning/CSO mean combined-sewer utilization (0–1+) |
+| CsoOverflowRate | ✅ | ✅ | ✅ | WorldState | Manning/CSO overflow rate (0–1); storm + dry sewage &gt; capacity |
+| StormRunoffLoad | ✅ | ✅ | ✅ | WorldState | Manning/CSO mean storm runoff into combined sewers (0–1+) |
 | InternetCoverageFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH with internet tier ≥ copper |
 | MeanInternetTier | ✅ | ✅ | ✅ | WorldState | Tier-2 mean InternetConnection (0–3); hub quality deepens tier |
 | MeanTelecomAccess | ✅ | ✅ | ✅ | WorldState | Tier-2 mean (tier / 3); feeds P4 services sat / immigration |
@@ -305,6 +308,7 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **Tier-2 waste / pollution** — `WasteCoverageFraction` / `MeanPollution` / `MeanEnvironmentScore` on E+W+U; depot quality deepens abatement; env → P4 sat / immigration |
 | 2026-08-11 | **Tier-2 sewage / water contamination** — `SewageCoverageFraction` / `MeanWaterContamination` / `MeanWaterQuality` on E+W+U; plant quality deepens treatment; water quality → P4 sat / immigration |
 | 2026-08-11 | **Tier-2 internet / telecom** — `InternetCoverageFraction` / `MeanInternetTier` / `MeanTelecomAccess` on E+W+U; hub quality deepens `InternetConnection`; telecom → P4 sat / immigration |
+| 2026-08-11 | **Manning / CSO storm overflow** — `MeanPipeUtilization` / `CsoOverflowRate` / `StormRunoffLoad` on E+W+U; Manning capacity + rational runoff; overflow dirties water; Sewage HUD 💧 |
 | 2026-08-11 | **P3.5 bilateral trade routes** — `BilateralRouteCount` / `BilateralTradeValue` / `MeanFreightMonths` on E+W+U; freight settlement + Unity Trade/Economy HUD |
 | 2026-08-11 | **SB-3728 create/cancel** — SimHost create/cancel APIs + Unity Trade strip `[Y]` player flow |
 | 2026-08-11 | **SB-3728 regional NPC markers** — `NpcPartnerCount` + `NpcRegionalPartners` catalog; distance freight; Unity Trade regional map |

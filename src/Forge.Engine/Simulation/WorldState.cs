@@ -326,6 +326,21 @@ public sealed class WorldState
     public float MeanWaterQuality { get; set; }
 
     /// <summary>
+    /// Mean combined-sewer pipe utilization (0–1+; may exceed 1 when overflowing). Manning/CSO.
+    /// </summary>
+    public float MeanPipeUtilization { get; set; }
+
+    /// <summary>
+    /// Combined-sewer overflow rate 0–1 (storm + dry sewage exceeding Manning capacity).
+    /// </summary>
+    public float CsoOverflowRate { get; set; }
+
+    /// <summary>
+    /// Mean storm runoff load entering combined sewers (rational method, 0–1+). Manning/CSO.
+    /// </summary>
+    public float StormRunoffLoad { get; set; }
+
+    /// <summary>
     /// Fraction of households with home-tile internet tier ≥ copper (0–1). Tier-2.
     /// </summary>
     public float InternetCoverageFraction { get; set; }

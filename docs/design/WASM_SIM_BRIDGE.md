@@ -311,6 +311,9 @@ export type SimSnapshotDto = {
   sewageCoverageFraction: number; // 0–1
   meanWaterContamination: number; // 0–1
   meanWaterQuality: number; // 0–1
+  meanPipeUtilization: number; // 0–1+
+  csoOverflowRate: number; // 0–1
+  stormRunoffLoad: number; // 0–1+
   internetCoverageFraction: number; // 0–1
   meanInternetTier: number; // 0–3
   meanTelecomAccess: number; // 0–1
@@ -459,6 +462,9 @@ export type CommuteOdSampleDto = {
   "sewageCoverageFraction": 0.52,
   "meanWaterContamination": 0.2,
   "meanWaterQuality": 0.8,
+  "meanPipeUtilization": 0.62,
+  "csoOverflowRate": 0.08,
+  "stormRunoffLoad": 0.22,
   "internetCoverageFraction": 0.58,
   "meanInternetTier": 1.8,
   "meanTelecomAccess": 0.6,

@@ -273,6 +273,12 @@ export type SimSnapshotDto = {
   meanWaterContamination: number;
   /** Mean water quality 0–1 ≈ (1 − contamination). */
   meanWaterQuality: number;
+  /** Mean combined-sewer pipe utilization 0–1+ (Manning/CSO). */
+  meanPipeUtilization: number;
+  /** Combined-sewer overflow rate 0–1 (Manning/CSO storm overflow). */
+  csoOverflowRate: number;
+  /** Mean storm runoff load entering combined sewers 0–1+ (Manning/CSO). */
+  stormRunoffLoad: number;
   /** Park attraction units for tourism (buildings + zone sites). */
   parkAttractionCount: number;
   /** Landmark / monument attraction units for tourism. */
@@ -384,6 +390,9 @@ export type SimResourcesDto = Pick<
   | "sewageCoverageFraction"
   | "meanWaterContamination"
   | "meanWaterQuality"
+  | "meanPipeUtilization"
+  | "csoOverflowRate"
+  | "stormRunoffLoad"
   | "parkAttractionCount"
   | "landmarkAttractionCount"
   | "tourismAttractionCount"

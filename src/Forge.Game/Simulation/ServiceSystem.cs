@@ -350,13 +350,16 @@ public sealed class ServiceSystem
 
     /// <summary>
     /// Tier-2 sewage → water contamination → health/env — treatment plants abate
-    /// waterborne pollution; uncovered zones contaminate. Exports coverage /
-    /// mean contamination / water quality for HUD + P4 immigration. Health
-    /// progression and environment satisfaction already read tile pollution.
+    /// waterborne pollution; uncovered zones contaminate. Then Manning/CSO storm
+    /// overflow raises pollution when combined inflow exceeds pipe capacity.
+    /// Exports coverage / contamination / water quality + pipe util / CSO / runoff
+    /// for HUD + P4 immigration. Health progression and environment satisfaction
+    /// already read tile pollution.
     /// </summary>
     public void UpdateSewageTreatment(WorldState state, float days = 1f)
     {
         SewageTreatment.Tick(state, _sewageCoverage, days);
+        StormOverflow.Tick(state, _sewageCoverage, days);
     }
 
     /// <summary>
@@ -898,9 +901,12 @@ public sealed class ServiceSystem
         }
 
         // Re-apply waste / sewage windows so industrial recalculation does not
-        // wipe Tier-2 garbage + treatment coverage effects.
+        // wipe Tier-2 garbage + treatment coverage effects. Manning/CSO follows
+        // sewage so storm overflow pollution persists through the rewrite.
         WasteCollection.Tick(state, _wasteCoverage, days: Math.Max(1f, dt));
-        SewageTreatment.Tick(state, _sewageCoverage, days: Math.Max(1f, dt));
+        float sewageDays = Math.Max(1f, dt);
+        SewageTreatment.Tick(state, _sewageCoverage, days: sewageDays);
+        StormOverflow.Tick(state, _sewageCoverage, days: sewageDays);
     }
 
     // =========================================================================

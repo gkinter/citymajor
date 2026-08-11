@@ -12,7 +12,8 @@ namespace Forge.SimCore.Tests;
 /// Characterization: Cathedral HUD metrics that are exported on the save API
 /// (<see cref="SimHost.GetSnapshotJson"/> / <see cref="SimHost.LoadSnapshotFromJson"/>)
 /// must survive snapshot restore — MeanRentBurden, councilSeats, mode shares,
-/// plus Event*Mult / Law*Mult / ActiveLawIds / delivery delay / abandoned / fire / EMS / L2 sample.
+/// plus Event*Mult / Law*Mult / ActiveLawIds / ActiveOrdinances / NextElectionYear /
+/// delivery delay / abandoned / fire / EMS / L2 sample.
 /// </summary>
 [Collection("SimHost")]
 public sealed class CathedralSaveLoadTests
@@ -357,6 +358,50 @@ public sealed class CathedralSaveLoadTests
         Assert.NotNull(roundTrip);
         Assert.Equal(saved.ActiveLawIds, roundTrip!.ActiveLawIds);
         Assert.Equal(saved.LawTrafficCapacityMult, roundTrip.LawTrafficCapacityMult, precision: 3);
+    }
+
+    [Fact]
+    public void SnapshotRoundTrip_PreservesActiveOrdinancesAndNextElectionYear()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        var state = host.State!;
+        // Pin non-default politics bitfield + election year (orthogonal to ActiveLawIds).
+        const ulong ordinances = (1UL << 3) | (1UL << 7) | (1UL << 12);
+        state.ActiveOrdinances = ordinances;
+        state.NextElectionYear = 2036;
+
+        string json = host.GetSnapshotJson();
+        var saved = JsonSerializer.Deserialize(json, SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(saved);
+
+        using (var doc = JsonDocument.Parse(json))
+        {
+            Assert.True(doc.RootElement.TryGetProperty("activeOrdinances", out var ordEl));
+            Assert.Equal(JsonValueKind.Number, ordEl.ValueKind);
+            Assert.True(doc.RootElement.TryGetProperty("nextElectionYear", out var yearEl));
+            Assert.Equal(2036, yearEl.GetInt32());
+        }
+
+        Assert.Equal(ordinances, saved!.ActiveOrdinances);
+        Assert.Equal(2036, saved.NextElectionYear);
+
+        // Mutate so restore cannot pass by Init coincidence.
+        state.ActiveOrdinances = 0UL;
+        state.NextElectionYear = 2020;
+
+        Assert.True(host.LoadSnapshotFromJson(json));
+
+        Assert.Equal(ordinances, host.State!.ActiveOrdinances);
+        Assert.Equal(2036, host.State.NextElectionYear);
+
+        var roundTrip = JsonSerializer.Deserialize(
+            host.GetSnapshotJson(),
+            SnapshotJsonContext.Default.SimSnapshotDto);
+        Assert.NotNull(roundTrip);
+        Assert.Equal(ordinances, roundTrip!.ActiveOrdinances);
+        Assert.Equal(2036, roundTrip.NextElectionYear);
     }
 
     private static string FindRepoRoot()

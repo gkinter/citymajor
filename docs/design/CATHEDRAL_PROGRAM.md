@@ -384,3 +384,4 @@ openspec/
 | 2026-08-11 | **Save/load wave restore** — `ApplySnapshotDto` restores Event*Mult, delivery delay, abandoned recount, BuildingDto FireRisk/ServiceFlags (+ pool id preserve), L2 HH sample overlay; `CathedralSaveLoadTests` |
 | 2026-08-11 | **Law\*Mult WASM DTO** — export + `ApplySnapshotDto` restore for traffic/construction/spawn Mults; closes SIM_SNAPSHOT_V2 §6 gap; `SnapshotRoundTrip_PreservesLawMults` |
 | 2026-08-11 | **ActiveLawIds WASM DTO** — ordinance slug ids export + restore (deeper than Law\*Mult); `SnapshotRoundTrip_PreservesActiveLawIds` |
+| 2026-08-11 | **ActiveOrdinances / NextElectionYear WASM DTO** — politics bitfield + election year export + restore; `SnapshotRoundTrip_PreservesActiveOrdinancesAndNextElectionYear` |

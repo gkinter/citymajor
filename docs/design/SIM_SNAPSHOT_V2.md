@@ -167,7 +167,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | EventProductivityMult | ✅ | ✅ | ✅ | WorldState | |
 | EventResearchMult | ✅ | ✅ | ✅ | WorldState | |
 | EventSpawnDemandMult | ✅ | ✅ | ✅ | WorldState | |
-| ActiveOrdinances / NextElectionYear | ✅ | — | — | WorldState | Bitfield / election calendar; law toggles use ActiveLawIds on WASM |
+| ActiveOrdinances / NextElectionYear | ✅ | ✅ | — | WorldState | Bitfield + election calendar on WASM DTO; law toggles also via ActiveLawIds |
 | CulturalDna[] | ✅ | — | — | WorldState | |
 
 ### 4.7 Research
@@ -207,6 +207,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | `FrictionCorridorDto` | tileX/Z, friction 0–1 | P3.4 |
 | `ActiveEventDto` | eventId, typeId, phase, severity, tileX/Y | |
 | `ActiveLawIds` | `string[]` | laws.json slug ids currently enabled |
+| `ActiveOrdinances` / `NextElectionYear` | `ulong` / `int` | Politics bitfield + election calendar |
 | `EconomySnapshotDto` | shortages, surpluses, flows, marketZoneCount, marketZonePrices | |
 | `PopulationL2Dto` | households[≤100] | Id, tiles, happiness, commuteMin, home/work building ids, rentBurden |
 | `CommuteOdSampleDto` | home/work tiles, tripCount | Top 16 |
@@ -231,7 +232,7 @@ These are **documentation of tip reality**, not a backlog invent:
 3. **Commute O-D sample** — WASM array; Unity uses aggregated HUD scalars + Citizen L2, not the same array type on `CitySimState`.
 4. **WASM_SIM_BRIDGE §6** TypeScript sketch is **stale** vs tip DTO — treat **this doc + `SimSnapshotDto.cs`** as canonical for Cathedral fields; update TS types when web harness needs them.
 5. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), bilateral trade, multiplayer — do not claim present.
-6. **ActiveOrdinances bitfield / NextElectionYear** — still engine-only on WASM DTO; ordinance *toggles* round-trip via `ActiveLawIds[]` (+ Law\*Mult scalars).
+6. **CulturalDna[]** — still engine-only on WASM DTO (politics flavor vector).
 
 ---
 
@@ -256,3 +257,4 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **Tier-2 hospital capacity** — `HospitalBedOccupancyFraction` / `AvailableHospitalBeds` on E+W+U |
 | 2026-08-11 | **Law\*Mult WASM DTO** — traffic/construction/spawn Mults export + `ApplySnapshotDto` restore (closes former §6 gap #2) |
 | 2026-08-11 | **ActiveLawIds WASM DTO** — ordinance slug ids export + `ApplySnapshotDto` restore (deeper than Law\*Mult alone) |
+| 2026-08-11 | **ActiveOrdinances / NextElectionYear WASM DTO** — politics bitfield + election year export + restore (closes former §6 gap #6) |

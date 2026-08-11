@@ -100,6 +100,12 @@ public sealed class SimSnapshotDto
     /// Deeper save/load than Law*Mult scalars alone — restore via <see cref="LawSystem.SetActive"/>.
     /// </summary>
     public string[] ActiveLawIds { get; init; } = [];
+    /// <summary>
+    /// WorldState ordinance bitfield (legacy / politics path). Orthogonal to <see cref="ActiveLawIds"/>.
+    /// </summary>
+    public ulong ActiveOrdinances { get; init; }
+    /// <summary>Next mayoral election calendar year (PoliticsSystem).</summary>
+    public int NextElectionYear { get; init; }
     /// <summary>Cathedral P6.1 — road capacity multiplier from active ordinances.</summary>
     public float LawTrafficCapacityMult { get; init; } = 1f;
     /// <summary>Cathedral P6.1 — construction duration multiplier from active ordinances.</summary>
@@ -237,6 +243,8 @@ public sealed class SimSnapshotDto
             ActiveEvents = events is null ? [] : CollectActiveEvents(events),
             ActiveEventCount = events?.ActiveEventCount ?? 0,
             ActiveLawIds = laws?.CollectActiveIds() ?? [],
+            ActiveOrdinances = state.ActiveOrdinances,
+            NextElectionYear = state.NextElectionYear,
             LawTrafficCapacityMult = state.LawTrafficCapacityMult,
             LawConstructionSpeedMult = state.LawConstructionSpeedMult,
             LawSpawnDemandMult = state.LawSpawnDemandMult,

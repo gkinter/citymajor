@@ -177,9 +177,11 @@ public sealed partial class SimHost
         _fullTraffic?.RestoreModeShares(
             dto.CarModeShare, dto.TransitModeShare, dto.WalkModeShare);
 
-        // Cathedral wave restores — active law ids (+ Mults), Event*Mult, delivery delay, vacancy, abandoned, L2 sample.
+        // Cathedral wave restores — active law ids (+ Mults), ordinance bitfield / election year,
+        // Event*Mult, delivery delay, vacancy, abandoned, L2 sample.
         RestoreActiveLaws(dto);
         RestoreLawMultipliers(dto);
+        RestoreOrdinancePolitics(dto);
         RestoreEventMultipliers(dto);
         RestoreActiveEvents(dto);
         _economy.RestoreMeanGoodsDeliveryDelay(dto.MeanGoodsDeliveryDelay, _state);
@@ -255,6 +257,14 @@ public sealed partial class SimHost
         _state.LawResidentialSpawnMult = ClampLawMult(dto.LawResidentialSpawnMult);
         _state.LawIndustrialSpawnMult = ClampLawMult(dto.LawIndustrialSpawnMult);
         _state.LawCommercialSpawnMult = ClampLawMult(dto.LawCommercialSpawnMult);
+    }
+
+    private void RestoreOrdinancePolitics(SimSnapshotDto dto)
+    {
+        _state.ActiveOrdinances = dto.ActiveOrdinances;
+        // 0 means "unset" in older saves — keep WorldState default (2028).
+        if (dto.NextElectionYear > 0)
+            _state.NextElectionYear = dto.NextElectionYear;
     }
 
     private void RestoreEventMultipliers(SimSnapshotDto dto)

@@ -66,6 +66,9 @@ namespace CityMajor.Sim
         /// <summary>Cathedral P3.5 — mean freight lag in months across bilateral routes.</summary>
         public float MeanFreightMonths;
 
+        /// <summary>SB-3728 — NPC towns on the regional map catalog.</summary>
+        public int NpcPartnerCount;
+
         public int BuildingCount;
         public int ConstructingBuildingCount;
         /// <summary>Cathedral P2.6 — abandoned buildings (visible with abandoned tint).</summary>

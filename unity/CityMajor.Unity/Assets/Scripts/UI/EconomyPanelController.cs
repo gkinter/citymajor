@@ -187,7 +187,8 @@ namespace CityMajor.UI
                 $"Transport cost {Mathf.RoundToInt(Mathf.Clamp01(state.GoodsTransportCostIndex) * 100f)}%\n" +
                 $"Bilateral {Mathf.Max(0, state.BilateralRouteCount)} · " +
                 $"notional {state.BilateralTradeValue:N0}/mo · " +
-                $"freight {Mathf.Max(0f, state.MeanFreightMonths):0.#} mo";
+                $"freight {Mathf.Max(0f, state.MeanFreightMonths):0.#} mo · " +
+                $"NPC {Mathf.Max(0, state.NpcPartnerCount)}";
 
             var hasImbalances = _sim.TryGetGoodImbalances(out var shortages, out var surpluses);
             var sb = new StringBuilder(256);

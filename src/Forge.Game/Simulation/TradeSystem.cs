@@ -84,7 +84,7 @@ public sealed class TradeSystem
     }
 
     /// <summary>
-    /// Cathedral P3.5 — freight lag from partner distance + local delivery delay.
+    /// Cathedral P3.5 / SB-3728 — freight lag from regional NPC distance + local delivery delay.
     /// Global market (<paramref name="partnerCityId"/> &lt; 0) always settles in 1 month.
     /// </summary>
     public static int ComputeFreightMonths(int partnerCityId, float deliveryDelay)
@@ -92,8 +92,8 @@ public sealed class TradeSystem
         if (partnerCityId < 0)
             return 1;
 
-        // NPC towns: base 1–3 months by partner id; congestion adds 0–2.
-        int partnerBase = 1 + (Math.Abs(partnerCityId) % 3);
+        // NPC towns: base 1–3 months from regional map distance; congestion adds 0–2.
+        int partnerBase = NpcRegionalPartners.FreightBaseMonths(partnerCityId);
         float delay = float.IsFinite(deliveryDelay) ? Math.Clamp(deliveryDelay, 0f, 1f) : 0f;
         int congestion = (int)MathF.Round(delay * 2f);
         return Math.Clamp(partnerBase + congestion, 1, 5);

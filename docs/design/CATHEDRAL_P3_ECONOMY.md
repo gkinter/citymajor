@@ -21,7 +21,7 @@ Make the **goods economy legible** in HUD: top shortages/surpluses with prices, 
 | P3.2 | Market zone partition count on snapshot | **Partial** — `ActiveZoneCount` in `EconomySystem`; export stub `MarketZoneCount` |
 | P3.3 | Per-zone price spread visible (partition prices differ) | **Done** — `GetAnchorZonePriceSpreads` + Unity Economy/Cathedral HUD; scale 1→4→9→16 |
 | P3.4 | Inter-zone friction on snapshot + HUD | **Live** — `MeanInterZoneFriction`, `InterZoneTradeVolume`, `GoodsTransportCostIndex`, friction corridor overlay |
-| P3.5 | Bilateral trade routes (partner, contract, freight) | **Done (v2 stretch)** — `FreightMonths` + snapshot + Unity Trade/Economy HUD; **SB-3728 create/cancel** on Trade strip `[Y]` (regional map still deferred) |
+| P3.5 | Bilateral trade routes (partner, contract, freight) | **Done (v2 stretch)** — `FreightMonths` + snapshot + Unity Trade/Economy HUD; **SB-3728 create/cancel** + regional NPC markers |
 | P3.6 | Traffic delay → goods delivery lag | **Done** — `EffectiveTradeFriction` + industrial throughput; Unity Delivery % HUD |
 
 ---
@@ -156,15 +156,21 @@ Cross-reference: P1 traffic partition observability · `WasmTrafficLite` · [`SI
 
 **Still deferred (SB-3728 regional polish):**
 
-- Regional map UI / NPC town markers
 - Multi-city save linking
 - Route cancellation penalties / diplomacy
+
+**Landed (SB-3728 regional map NPC markers):**
+
+- `NpcRegionalPartners` catalog — 5 towns with regional (x,y), export/import specialties
+- Freight base months from regional distance (not partner-id modulo)
+- Snapshot `NpcPartnerCount`; Unity Trade strip regional map + clickable markers
+- Create rejects unknown partner ids
 
 **Landed (SB-3728 create/cancel slice):**
 
 - `SimHost.CreateBilateralTradeRoute` / `CancelBilateralTradeRoute` (cap 8; freight from delivery delay)
 - Unity Trade strip `[Y]` — partner/good/dir/volume/duration create + per-route Cancel
-- Characterization: `BilateralTradeRoutesTests` create/cancel/cap
+- Characterization: `BilateralTradeRoutesTests` create/cancel/cap + `NpcRegionalPartnersTests`
 
 **v1 behavior (keep):**
 
@@ -197,6 +203,6 @@ dotnet test tests/Forge.SimCore.Tests --filter "FullyQualifiedName~Cathedral"
 2. **P3.1** Add `price` + `goodId` to `GoodImbalanceDto` / `EconomySnapshotDto`.  
 3. **P3.3** Per-zone price spread test + optional sparse zone price export.  
 4. **P3.6** ✅ Wire traffic partition delays into `CrossZoneTrade` friction multiplier + industrial throughput.  
-5. **P3.5** ✅ Bilateral partner routes + freight months + snapshot/HUD (regional map UI remains SB-3728).
+5. **P3.5** ✅ Bilateral partner routes + freight months + snapshot/HUD + SB-3728 regional NPC markers.
 
 **Dependency:** P3.5 requires P1 traffic partition delay export stable on snapshot (`MeanTrafficDensity` per partition or edge delay rollup).

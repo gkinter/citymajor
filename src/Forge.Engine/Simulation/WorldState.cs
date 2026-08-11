@@ -373,6 +373,11 @@ public sealed class WorldState
     /// </summary>
     public float MeanFreightMonths { get; set; }
 
+    /// <summary>
+    /// SB-3728 — NPC towns on the regional map catalog (read-only markers).
+    /// </summary>
+    public int NpcPartnerCount { get; set; }
+
     /// <summary>Active Leontief market partitions (1–16), from <see cref="EconomySystem.ActiveZoneCount"/>.</summary>
     public int MarketZoneCount { get; set; } = 1;
 

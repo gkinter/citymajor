@@ -128,6 +128,7 @@ public sealed partial class SimHost
         RecomputeLawEffects();
         // PoliticsSystem owns seat assignment; mirror onto WorldState for snapshot/WASM export (P5.6).
         Array.Copy(_politics.CouncilSeats, _state.CouncilSeats, PoliticsSystem.CouncilSeatCount);
+        NpcRegionalPartners.PublishCount(_state);
         IsInitialized = true;
     }
 
@@ -380,7 +381,7 @@ public sealed partial class SimHost
     }
 
     /// <summary>
-    /// SB-3728 — player create bilateral partner contract (PartnerCityId ≥ 0).
+    /// SB-3728 — player create bilateral partner contract with a catalog NPC town.
     /// Uses current <see cref="WorldState.MeanGoodsDeliveryDelay"/> for freight lag.
     /// </summary>
     public bool CreateBilateralTradeRoute(
@@ -391,7 +392,7 @@ public sealed partial class SimHost
         int durationMonths)
     {
         if (!IsInitialized || _trade is null || _state is null) return false;
-        if (partnerCityId < 0) return false;
+        if (!NpcRegionalPartners.IsKnownPartner(partnerCityId)) return false;
         if (durationMonths <= 0 || monthlyQuantity == 0f) return false;
         if ((byte)goodType >= (byte)Good.COUNT) return false;
         if (_trade.CountBilateralRoutes() >= TradeSystem.MaxBilateralRoutes) return false;
@@ -412,6 +413,7 @@ public sealed partial class SimHost
         if (!_trade.CreateTradeRoute(partnerCityId, goodType, monthlyQuantity, price, durationMonths, delay))
             return false;
 
+        NpcRegionalPartners.PublishCount(_state);
         _trade.PublishBilateralMetrics(_state);
         return true;
     }
@@ -423,9 +425,14 @@ public sealed partial class SimHost
     {
         if (!IsInitialized || _trade is null || _state is null) return false;
         if (!_trade.CancelBilateralRoute(bilateralIndex)) return false;
+        NpcRegionalPartners.PublishCount(_state);
         _trade.PublishBilateralMetrics(_state);
         return true;
     }
+
+    /// <summary>SB-3728 — regional map NPC partner markers for Trade HUD.</summary>
+    public IReadOnlyList<NpcPartnerMarker> GetNpcPartners()
+        => NpcRegionalPartners.All;
 
     public LawPreviewDto? GetSampleLawPreview()
     {

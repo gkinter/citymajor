@@ -18,6 +18,13 @@
             <ui:Label name="trade-interzone" class="panel-note" text="" />
             <ui:Label name="trade-demand" class="panel-note" text="" />
 
+            <ui:Label class="panel-section-title" text="Regional map (SB-3728)" />
+            <ui:VisualElement name="trade-regional-map" class="trade-regional-map">
+                <ui:VisualElement name="trade-player-claim" class="trade-regional-map__claim" />
+                <ui:VisualElement name="trade-map-markers" class="trade-regional-map__markers" />
+            </ui:VisualElement>
+            <ui:Label name="trade-regional-hint" class="panel-note" text="5 NPC towns · player claim center · freight from distance" />
+
             <ui:Label class="panel-section-title" text="Active bilateral" />
             <ui:VisualElement name="trade-routes" class="trade-route-list" />
 
@@ -29,6 +36,7 @@
                     <ui:Label name="trade-partner-label" class="trade-create-value" text="Coal Ridge" />
                     <ui:Button name="trade-partner-next" class="trade-cycle" text="›" />
                 </ui:VisualElement>
+                <ui:Label name="trade-partner-profile" class="panel-note" text="" />
                 <ui:VisualElement class="trade-create-row">
                     <ui:Label class="trade-create-label" text="Good" />
                     <ui:Button name="trade-good-prev" class="trade-cycle" text="‹" />
@@ -51,7 +59,7 @@
                     <ui:Label name="trade-months-label" class="trade-create-value" text="12 mo" />
                     <ui:Button name="trade-months-next" class="trade-cycle" text="›" />
                 </ui:VisualElement>
-                <ui:Label name="trade-create-hint" class="panel-note" text="Price uses global market; freight from partner + delivery delay." />
+                <ui:Label name="trade-create-hint" class="panel-note" text="Price uses global market; freight from regional distance + delivery delay." />
                 <ui:Button name="trade-create-btn" class="trade-create-btn" text="Create bilateral route" />
                 <ui:Label name="trade-create-feedback" class="panel-note" text="" />
             </ui:VisualElement>

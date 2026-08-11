@@ -6,21 +6,12 @@ using UnityEngine.UIElements;
 namespace CityMajor.UI
 {
     /// <summary>
-    /// Trade routes strip — global market totals + SB-3728 create/cancel bilateral contracts.
+    /// Trade routes strip — global market totals + SB-3728 regional NPC markers + create/cancel.
     /// Toggle with Y (T reserved for edge traffic overlay). Esc closes while open.
     /// </summary>
     public sealed class TradeStripController : MonoBehaviour
     {
         const string PanelPath = "Assets/UI/TradeStrip.uxml";
-
-        static readonly (int Id, string Name)[] Partners =
-        {
-            (0, "Coal Ridge"),
-            (1, "Harbor Vale"),
-            (2, "Ironhaven"),
-            (3, "Grain Crossing"),
-            (4, "Timber Reach"),
-        };
 
         static readonly Good[] Goods =
         {
@@ -35,6 +26,7 @@ namespace CityMajor.UI
         UIDocument _document;
         VisualElement _root;
         VisualElement _routesRoot;
+        VisualElement _mapMarkersRoot;
         Label _subtitle;
         Label _status;
         Label _employment;
@@ -44,14 +36,18 @@ namespace CityMajor.UI
         Label _flow;
         Label _interzone;
         Label _demand;
+        Label _regionalHint;
         Label _partnerLabel;
+        Label _partnerProfile;
         Label _goodLabel;
         Label _qtyLabel;
         Label _monthsLabel;
+        Label _createHint;
         Label _createFeedback;
         Button _dirBtn;
         Button _closeBtn;
         Button _createBtn;
+        NpcPartnerRow[] _partners = System.Array.Empty<NpcPartnerRow>();
         bool _open;
         bool _export = true;
         int _partnerIdx;
@@ -124,11 +120,15 @@ namespace CityMajor.UI
             _flow = docRoot?.Q<Label>("trade-flow");
             _interzone = docRoot?.Q<Label>("trade-interzone");
             _demand = docRoot?.Q<Label>("trade-demand");
+            _regionalHint = docRoot?.Q<Label>("trade-regional-hint");
+            _mapMarkersRoot = docRoot?.Q<VisualElement>("trade-map-markers");
             _routesRoot = docRoot?.Q<VisualElement>("trade-routes");
             _partnerLabel = docRoot?.Q<Label>("trade-partner-label");
+            _partnerProfile = docRoot?.Q<Label>("trade-partner-profile");
             _goodLabel = docRoot?.Q<Label>("trade-good-label");
             _qtyLabel = docRoot?.Q<Label>("trade-qty-label");
             _monthsLabel = docRoot?.Q<Label>("trade-months-label");
+            _createHint = docRoot?.Q<Label>("trade-create-hint");
             _createFeedback = docRoot?.Q<Label>("trade-create-feedback");
             _dirBtn = docRoot?.Q<Button>("trade-dir-toggle");
             _closeBtn = docRoot?.Q<Button>("trade-close");
@@ -144,12 +144,18 @@ namespace CityMajor.UI
 
             BindCycle("trade-partner-prev", "trade-partner-next", () =>
             {
-                _partnerIdx = (_partnerIdx + Partners.Length - 1) % Partners.Length;
+                EnsurePartners();
+                if (_partners.Length == 0) return;
+                _partnerIdx = (_partnerIdx + _partners.Length - 1) % _partners.Length;
                 RefreshCreateLabels();
+                RefreshRegionalMap();
             }, () =>
             {
-                _partnerIdx = (_partnerIdx + 1) % Partners.Length;
+                EnsurePartners();
+                if (_partners.Length == 0) return;
+                _partnerIdx = (_partnerIdx + 1) % _partners.Length;
                 RefreshCreateLabels();
+                RefreshRegionalMap();
             });
             BindCycle("trade-good-prev", "trade-good-next", () =>
             {
@@ -179,7 +185,9 @@ namespace CityMajor.UI
                 RefreshCreateLabels();
             });
 
+            EnsurePartners();
             RefreshCreateLabels();
+            RefreshRegionalMap();
         }
 
         void BindCycle(string prevName, string nextName, System.Action prev, System.Action next)
@@ -189,10 +197,50 @@ namespace CityMajor.UI
             docRoot?.Q<Button>(nextName)?.RegisterCallback<ClickEvent>(_ => next());
         }
 
+        void EnsurePartners()
+        {
+            if (_sim != null)
+                _partners = _sim.GetNpcPartners();
+            if (_partners == null || _partners.Length == 0)
+            {
+                // Catalog fallback when bridge is mid-boot
+                var catalog = NpcRegionalPartners.All;
+                _partners = new NpcPartnerRow[catalog.Count];
+                for (var i = 0; i < catalog.Count; i++)
+                {
+                    var m = catalog[i];
+                    _partners[i] = new NpcPartnerRow
+                    {
+                        Id = m.Id,
+                        Name = m.Name,
+                        RegionalX = m.RegionalX,
+                        RegionalY = m.RegionalY,
+                        ExportSpecialty = m.ExportSpecialty,
+                        ImportDemand = m.ImportDemand,
+                        FreightBaseMonths = NpcRegionalPartners.FreightBaseMonths(m.Id),
+                    };
+                }
+            }
+
+            if (_partnerIdx >= _partners.Length)
+                _partnerIdx = 0;
+        }
+
         void RefreshCreateLabels()
         {
+            EnsurePartners();
+            if (_partners.Length == 0)
+                return;
+
+            var partner = _partners[_partnerIdx];
             if (_partnerLabel != null)
-                _partnerLabel.text = Partners[_partnerIdx].Name;
+                _partnerLabel.text = partner.Name;
+            if (_partnerProfile != null)
+            {
+                _partnerProfile.text =
+                    $"Sells {partner.ExportSpecialty} · wants {partner.ImportDemand} · " +
+                    $"freight base {partner.FreightBaseMonths} mo";
+            }
             if (_goodLabel != null)
                 _goodLabel.text = Goods[_goodIdx].ToString();
             if (_qtyLabel != null)
@@ -201,6 +249,55 @@ namespace CityMajor.UI
                 _monthsLabel.text = $"{Durations[_monthsIdx]} mo";
             if (_dirBtn != null)
                 _dirBtn.text = _export ? "Export +" : "Import −";
+            if (_createHint != null)
+            {
+                _createHint.text =
+                    $"Price uses global market; freight ≈ {partner.FreightBaseMonths}–" +
+                    $"{Mathf.Min(5, partner.FreightBaseMonths + 2)} mo from regional distance + delay.";
+            }
+        }
+
+        void RefreshRegionalMap()
+        {
+            if (_mapMarkersRoot == null)
+                return;
+
+            EnsurePartners();
+            _mapMarkersRoot.Clear();
+
+            var selectedId = _partners.Length > 0 ? _partners[_partnerIdx].Id : -1;
+            for (var i = 0; i < _partners.Length; i++)
+            {
+                var p = _partners[i];
+                var marker = new VisualElement();
+                marker.AddToClassList("trade-regional-marker");
+                if (p.Id == selectedId)
+                    marker.AddToClassList("trade-regional-marker--selected");
+
+                // Regional Y is north-up; UIToolkit bottom is south → left/bottom %.
+                marker.style.left = Length.Percent(Mathf.Clamp01(p.RegionalX) * 100f);
+                marker.style.bottom = Length.Percent(Mathf.Clamp01(p.RegionalY) * 100f);
+
+                var caption = new Label(ShortName(p.Name));
+                caption.AddToClassList("trade-regional-marker__label");
+                marker.Add(caption);
+
+                var idx = i;
+                marker.RegisterCallback<ClickEvent>(_ =>
+                {
+                    _partnerIdx = idx;
+                    RefreshCreateLabels();
+                    RefreshRegionalMap();
+                });
+                _mapMarkersRoot.Add(marker);
+            }
+
+            if (_regionalHint != null)
+            {
+                _regionalHint.text =
+                    $"{_partners.Length} NPC towns · player claim center · " +
+                    $"catalog count {Mathf.Max(_partners.Length, _sim?.State.NpcPartnerCount ?? 0)}";
+            }
         }
 
         void TryCreate()
@@ -214,15 +311,22 @@ namespace CityMajor.UI
                 return;
             }
 
-            var partner = Partners[_partnerIdx].Id;
+            EnsurePartners();
+            if (_partners.Length == 0)
+            {
+                SetFeedback("No NPC partners in catalog.");
+                return;
+            }
+
+            var partner = _partners[_partnerIdx];
             var good = Goods[_goodIdx];
             var qty = Quantities[_qtyIdx] * (_export ? 1f : -1f);
             var months = Durations[_monthsIdx];
 
-            var ok = _sim.CreateBilateralTradeRoute(partner, good, qty, agreedPrice: 0f, months);
+            var ok = _sim.CreateBilateralTradeRoute(partner.Id, good, qty, agreedPrice: 0f, months);
             if (ok)
             {
-                SetFeedback($"Created {(_export ? "export" : "import")} {good} ↔ {Partners[_partnerIdx].Name}.");
+                SetFeedback($"Created {(_export ? "export" : "import")} {good} ↔ {partner.Name}.");
                 OnState(_sim.State);
             }
             else
@@ -230,7 +334,7 @@ namespace CityMajor.UI
                 var count = Mathf.Max(0, _sim.State.BilateralRouteCount);
                 SetFeedback(count >= TradeSystem.MaxBilateralRoutes
                     ? $"At cap ({TradeSystem.MaxBilateralRoutes} bilateral routes)."
-                    : "Create failed — check partner / volume.");
+                    : "Create failed — unknown partner or bad volume.");
             }
         }
 
@@ -245,13 +349,15 @@ namespace CityMajor.UI
             if (_balance == null)
                 return;
 
+            EnsurePartners();
             var routes = Mathf.Max(0, state.BilateralRouteCount);
             var freight = Mathf.Max(0f, state.MeanFreightMonths);
+            var npc = Mathf.Max(state.NpcPartnerCount, _partners.Length);
             if (_subtitle != null)
             {
                 _subtitle.text = routes > 0
-                    ? $"Global market · {routes} bilateral route{(routes == 1 ? "" : "s")} · freight {freight:0.#} mo"
-                    : "Global market · create partner contracts [Y]";
+                    ? $"Regional {npc} NPC · {routes} bilateral · freight {freight:0.#} mo"
+                    : $"Regional map · {npc} NPC partners · create contracts [Y]";
             }
 
             if (_status != null)
@@ -259,7 +365,7 @@ namespace CityMajor.UI
                 _status.text = routes > 0
                     ? $"Bilateral: {routes} route{(routes == 1 ? "" : "s")} · " +
                       $"notional {state.BilateralTradeValue:N0}/mo · mean freight {freight:0.#} mo"
-                    : "No bilateral routes yet. Pick a partner below — auto-trade still fills global gaps.";
+                    : "No bilateral routes yet. Pick an NPC marker below — auto-trade still fills global gaps.";
             }
 
             var net = state.MonthlyIncome - state.MonthlyExpense;
@@ -300,7 +406,11 @@ namespace CityMajor.UI
             }
 
             if (_open)
+            {
+                RefreshCreateLabels();
+                RefreshRegionalMap();
                 RefreshRouteList();
+            }
         }
 
         void RefreshRouteList()
@@ -352,14 +462,23 @@ namespace CityMajor.UI
             }
         }
 
-        static string PartnerName(int id)
+        string PartnerName(int id)
         {
-            for (var i = 0; i < Partners.Length; i++)
+            EnsurePartners();
+            for (var i = 0; i < _partners.Length; i++)
             {
-                if (Partners[i].Id == id)
-                    return Partners[i].Name;
+                if (_partners[i].Id == id)
+                    return _partners[i].Name;
             }
-            return $"Partner {id}";
+            return NpcRegionalPartners.NameOrFallback(id);
+        }
+
+        static string ShortName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return "?";
+            var space = name.IndexOf(' ');
+            return space > 0 ? name.Substring(0, space) : name;
         }
 
         static string FormatDemand(float demand)

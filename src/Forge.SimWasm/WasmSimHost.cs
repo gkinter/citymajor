@@ -104,6 +104,7 @@ public sealed class WasmSimHost
     public int BilateralRouteCount => _host.State?.BilateralRouteCount ?? 0;
     public float BilateralTradeValue => _host.State?.BilateralTradeValue ?? 0f;
     public float MeanFreightMonths => _host.State?.MeanFreightMonths ?? 0f;
+    public int NpcPartnerCount => _host.State?.NpcPartnerCount ?? 0;
     public float MeanRentBurden => _host.State?.MeanRentBurden ?? 0f;
     public float ResidentialVacancy => _host.State?.ResidentialVacancy ?? 1f;
     /// <summary>Mean fire/EMS response minutes over sampled zoned tiles.</summary>
@@ -390,6 +391,8 @@ public sealed class WasmStatusDto
     public float BilateralTradeValue { get; init; }
     /// <summary>Cathedral P3.5 — mean freight lag in months.</summary>
     public float MeanFreightMonths { get; init; }
+    /// <summary>SB-3728 — NPC towns on the regional map catalog.</summary>
+    public int NpcPartnerCount { get; init; }
     /// <summary>Segment-graph node types (parallel arrays, Cathedral P1.6).</summary>
     public RoadGraphSnapshotDto RoadGraph { get; init; } = new();
     public float MeanRentBurden { get; init; }
@@ -547,6 +550,7 @@ public sealed class WasmStatusDto
             BilateralRouteCount = host.BilateralRouteCount,
             BilateralTradeValue = host.BilateralTradeValue,
             MeanFreightMonths = host.MeanFreightMonths,
+            NpcPartnerCount = host.NpcPartnerCount,
             RoadGraph = host.RoadGraphSnapshot,
             MeanRentBurden = host.MeanRentBurden,
             ResidentialVacancy = host.ResidentialVacancy,

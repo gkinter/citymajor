@@ -511,6 +511,67 @@
     margin-bottom: 6px;
 }
 
+.trade-regional-map {
+    position: relative;
+    height: 140px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    background-color: rgba(18, 28, 22, 0.92);
+    border-width: 1px;
+    border-color: rgba(120, 160, 110, 0.28);
+    overflow: hidden;
+}
+
+.trade-regional-map__claim {
+    position: absolute;
+    left: 25%;
+    bottom: 25%;
+    width: 50%;
+    height: 50%;
+    border-radius: 4px;
+    background-color: rgba(70, 110, 160, 0.22);
+    border-width: 1px;
+    border-color: rgba(140, 180, 220, 0.45);
+}
+
+.trade-regional-map__markers {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.trade-regional-marker {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    margin-bottom: -5px;
+    border-radius: 5px;
+    background-color: rgba(220, 170, 70, 0.95);
+    border-width: 1px;
+    border-color: rgba(255, 230, 160, 0.85);
+}
+
+.trade-regional-marker--selected {
+    background-color: rgba(255, 210, 90, 1);
+    border-color: rgba(255, 255, 220, 1);
+    width: 12px;
+    height: 12px;
+    margin-left: -6px;
+    margin-bottom: -6px;
+}
+
+.trade-regional-marker__label {
+    position: absolute;
+    left: 12px;
+    top: -4px;
+    font-size: 9px;
+    color: rgba(230, 220, 180, 0.92);
+    white-space: nowrap;
+}
+
 .trade-route-row {
     flex-direction: row;
     align-items: center;

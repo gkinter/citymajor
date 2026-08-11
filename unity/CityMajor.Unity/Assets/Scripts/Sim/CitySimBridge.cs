@@ -304,6 +304,7 @@ namespace CityMajor.Sim
             BilateralRouteCount = 2,
             BilateralTradeValue = 8_400f,
             MeanFreightMonths = 2.5f,
+            NpcPartnerCount = NpcRegionalPartners.Count,
             ConstructingBuildingCount = 3,
             AbandonedBuildingCount = 1,
             PowerCoverageFraction = 0.93f,
@@ -443,6 +444,7 @@ namespace CityMajor.Sim
                 BilateralRouteCount = snap.BilateralRouteCount,
                 BilateralTradeValue = snap.BilateralTradeValue,
                 MeanFreightMonths = snap.MeanFreightMonths,
+                NpcPartnerCount = snap.NpcPartnerCount,
                 BuildingCount = snap.BuildingCount,
                 ConstructingBuildingCount = snap.ConstructingBuildingCount,
                 AbandonedBuildingCount = snap.AbandonedBuildingCount,
@@ -872,6 +874,28 @@ namespace CityMajor.Sim
             }
             return list.ToArray();
         }
+
+        /// <summary>SB-3728 — regional map NPC partner markers for Trade strip.</summary>
+        public NpcPartnerRow[] GetNpcPartners()
+        {
+            var catalog = NpcRegionalPartners.All;
+            var rows = new NpcPartnerRow[catalog.Count];
+            for (var i = 0; i < catalog.Count; i++)
+            {
+                var m = catalog[i];
+                rows[i] = new NpcPartnerRow
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    RegionalX = m.RegionalX,
+                    RegionalY = m.RegionalY,
+                    ExportSpecialty = m.ExportSpecialty,
+                    ImportDemand = m.ImportDemand,
+                    FreightBaseMonths = NpcRegionalPartners.FreightBaseMonths(m.Id),
+                };
+            }
+            return rows;
+        }
     }
 
     /// <summary>Player-facing bilateral route row for SB-3728 Trade strip.</summary>
@@ -884,5 +908,17 @@ namespace CityMajor.Sim
         public float AgreedPrice;
         public int RemainingMonths;
         public int FreightMonths;
+    }
+
+    /// <summary>SB-3728 — regional map NPC partner marker for Trade HUD.</summary>
+    public struct NpcPartnerRow
+    {
+        public int Id;
+        public string Name;
+        public float RegionalX;
+        public float RegionalY;
+        public Good ExportSpecialty;
+        public Good ImportDemand;
+        public int FreightBaseMonths;
     }
 }

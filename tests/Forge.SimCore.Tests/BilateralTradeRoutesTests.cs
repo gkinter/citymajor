@@ -19,11 +19,11 @@ public sealed class BilateralTradeRoutesTests
     [Fact]
     public void ComputeFreightMonths_PartnerPlusCongestion_ClampsToFive()
     {
-        // partner 1 → base 1+(1%3)=2; delay 1 → +2 → 4
+        // Harbor Vale (1) → regional base 2; delay 1 → +2 → 4
         Assert.Equal(4, TradeSystem.ComputeFreightMonths(1, 1f));
-        // partner 3 → base 1+0=1; delay 0 → 1
-        Assert.Equal(1, TradeSystem.ComputeFreightMonths(3, 0f));
-        // partner 2 → base 1+2=3; delay 1 → +2 → 5 (clamp)
+        // Grain Crossing (3) → regional base 2; delay 0 → 2
+        Assert.Equal(2, TradeSystem.ComputeFreightMonths(3, 0f));
+        // Ironhaven (2) → regional base 3; delay 1 → +2 → 5 (clamp)
         Assert.Equal(5, TradeSystem.ComputeFreightMonths(2, 1f));
     }
 
@@ -116,10 +116,12 @@ public sealed class BilateralTradeRoutesTests
         host.State!.MeanGoodsDeliveryDelay = 1f;
 
         Assert.False(host.CreateBilateralTradeRoute(-1, Good.Steel, 50f, 10f, 12));
+        Assert.False(host.CreateBilateralTradeRoute(99, Good.Steel, 50f, 10f, 12));
         Assert.True(host.CreateBilateralTradeRoute(1, Good.Steel, 50f, 10f, 12));
         Assert.Equal(1, host.State.BilateralRouteCount);
         Assert.Equal(500f, host.State.BilateralTradeValue, precision: 1);
-        Assert.Equal(4, host.State.MeanFreightMonths, precision: 2); // partner 1 + delay 1 → freight 4
+        Assert.Equal(4, host.State.MeanFreightMonths, precision: 2); // Harbor Vale + delay 1 → freight 4
+        Assert.Equal(NpcRegionalPartners.Count, host.State.NpcPartnerCount);
 
         var snap = host.GetSnapshot();
         Assert.Equal(1, snap.BilateralRouteCount);

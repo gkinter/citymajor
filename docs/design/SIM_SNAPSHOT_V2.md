@@ -114,7 +114,8 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | MeanGoodsDeliveryDelay | ✅ | ✅ | ✅ | WorldState | PROGRAM P3.6 / domain P3.5; 0 free-flow … 1 congested |
 | BilateralRouteCount | ✅ | ✅ | ✅ | TradeSystem | P3.5 partner routes (PartnerCityId ≥ 0) |
 | BilateralTradeValue | ✅ | ✅ | ✅ | TradeSystem | P3.5 monthly contract notional Σ\|qty\|×price |
-| MeanFreightMonths | ✅ | ✅ | ✅ | TradeSystem | P3.5 mean freight lag (partner + delivery delay) |
+| MeanFreightMonths | ✅ | ✅ | ✅ | TradeSystem | P3.5 mean freight lag (regional distance + delivery delay) |
+| NpcPartnerCount | ✅ | ✅ | ✅ | NpcRegionalPartners | SB-3728 regional map catalog size (5) |
 | MarketZoneCount | ✅ | ✅ | ✅ | WorldState / Economy | 1–16 |
 | Residential/Commercial/IndustrialDemand | — | ✅ | ✅ | EconomySystem | |
 | Economy.Shortages/Surpluses/Flows/MarketZonePrices | — | ✅ nested | partial (Food/Water/Steel avg + spread) | EconomySystem | |
@@ -252,7 +253,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 These are **documentation of tip reality**, not a backlog invent:
 
 1. ~~**WASM_SIM_BRIDGE §6** TypeScript sketch stale~~ — **closed:** `@citymajor/sim-types` `simSnapshot.ts` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts` fields match tip `SimSnapshotDto` (Event*Mult, Law*Mult, ActiveLawIds, ordinances, utilities, CulturalDna, TradeBalance, fire/wildfire/hospital).
-2. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), multiplayer — do not claim present. Bilateral trade routes (P3.5) — partner/contract/freight + Unity Trade create/cancel `[Y]` landed; regional map UI remains SB-3728.
+2. **Planned-only** (not on tip): Economic Control Spectrum slider (P6.4 / v2), multiplayer — do not claim present. Bilateral trade (P3.5 / SB-3728) — partner/contract/freight + create/cancel + regional NPC markers landed; multi-city save / diplomacy remain deferred.
 ---
 
 ## 7. Change protocol
@@ -289,5 +290,6 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **Tier-2 hospital → HH health** — `HealthCoverageFraction` on E+W+U; `HealthProgression` recovery / decay under hospital coverage |
 | 2026-08-11 | **Tier-2 tourism attractions** — `ParkAttractionCount` / `LandmarkAttractionCount` / `TourismAttractionCount` / `TourismIncome` on E+W+U; parks/landmarks feed budget tourism |
 | 2026-08-11 | **P3.5 bilateral trade routes** — `BilateralRouteCount` / `BilateralTradeValue` / `MeanFreightMonths` on E+W+U; freight settlement + Unity Trade/Economy HUD |
-| 2026-08-11 | **SB-3728 create/cancel** — SimHost create/cancel APIs + Unity Trade strip `[Y]` player flow (regional map still deferred) |
+| 2026-08-11 | **SB-3728 create/cancel** — SimHost create/cancel APIs + Unity Trade strip `[Y]` player flow |
+| 2026-08-11 | **SB-3728 regional NPC markers** — `NpcPartnerCount` + `NpcRegionalPartners` catalog; distance freight; Unity Trade regional map |
 | 2026-08-11 | **WASM_SIM_BRIDGE / sim-types TS refresh** — `@citymajor/sim-types` `simSnapshot.ts` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts` match tip DTO (closes former §6 gap #1) |

@@ -125,6 +125,9 @@ public sealed class SimSnapshot
     /// <summary>Cathedral P3.5 — mean freight lag in months across bilateral routes.</summary>
     public float MeanFreightMonths { get; init; }
 
+    /// <summary>SB-3728 — NPC towns on the regional map catalog.</summary>
+    public int NpcPartnerCount { get; init; }
+
     /// <summary>Active Leontief market partitions (1–16).</summary>
     public int MarketZoneCount { get; init; } = 1;
 
@@ -437,6 +440,7 @@ public sealed class SimSnapshot
             BilateralRouteCount = state.BilateralRouteCount,
             BilateralTradeValue = state.BilateralTradeValue,
             MeanFreightMonths = state.MeanFreightMonths,
+            NpcPartnerCount = state.NpcPartnerCount,
             MarketZoneCount = state.MarketZoneCount,
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,

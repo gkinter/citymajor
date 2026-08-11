@@ -175,6 +175,8 @@ public sealed class SimSnapshotDto
     public float BilateralTradeValue { get; init; }
     /// <summary>Cathedral P3.5 — mean freight lag in months across bilateral routes.</summary>
     public float MeanFreightMonths { get; init; }
+    /// <summary>SB-3728 — NPC towns on the regional map catalog.</summary>
+    public int NpcPartnerCount { get; init; }
     public float MeanRentBurden { get; init; }
     public float ResidentialVacancy { get; init; } = 1f;
     /// <summary>Mean fire/EMS response minutes over sampled zoned tiles (P5.2).</summary>
@@ -345,6 +347,7 @@ public sealed class SimSnapshotDto
             BilateralRouteCount = state.BilateralRouteCount,
             BilateralTradeValue = state.BilateralTradeValue,
             MeanFreightMonths = state.MeanFreightMonths,
+            NpcPartnerCount = state.NpcPartnerCount,
             MeanRentBurden = state.MeanRentBurden,
             ResidentialVacancy = state.ResidentialVacancy,
             MeanEmergencyResponseMinutes = state.MeanEmergencyResponseMinutes,

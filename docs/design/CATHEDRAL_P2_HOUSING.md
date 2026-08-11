@@ -39,7 +39,7 @@ Align `TileData.ZoneType` with brush palette and growth system:
 | 5 | O | Office | High-edu jobs | Uses commercial building catalog today; split office TypeIds in P2.1 |
 | 6 | MX | Mixed-use | Res + commercial | `Math.Max(resDemand, comDemand)` |
 | 7 | A | Agricultural | Ind proxy (×0.5 demand) | **v1 subset:** frontier farms + industrial market gardens only; no modern mega-farms |
-| 8 | P | Park / recreation | No growth | Painted zone byte 8 (U3.4) + ploppable `ServicePark`; raises land value in `RecalculateLandValue` / `HasNearbyPark` |
+| 8 | P | Park / recreation | No growth | Painted zone byte 8 (U3.4) + ploppable `ServicePark`; raises land value (`HasNearbyPark`) **and** health/exercise (`ParkAmenity` / `LocalParkAccess`) |
 
 **Era gating (Frontier → Industrial):** Office brush unlocks at Industrial era (`Era >= 3`). Mixed-use unlocks Colonial+ (`Era >= 2`). Ag subset always available in frontier band.
 

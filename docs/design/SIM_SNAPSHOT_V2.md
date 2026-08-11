@@ -156,6 +156,9 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 | FireInsurancePremiumMult | ✅ | ✅ | ✅ | WorldState | Tier-2 insurance from fire rating |
 | MeanEducationLevel | ✅ | ✅ | ✅ | WorldState | Tier-2 education depth (0–3) |
 | EducationCoverageFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH under school coverage |
+| MeanParkAccess | ✅ | ✅ | ✅ | WorldState | Tier-2 park / exercise access (0–1) |
+| ParkAccessFraction | ✅ | ✅ | ✅ | WorldState | Tier-2 HH with park access |
+| MeanHealthSatisfaction | ✅ | ✅ | ✅ | WorldState | Tier-2 mean HealthSatisfaction (0–1) |
 | ServiceCoverage[] | — | ✅ | overlay via services | ServiceSystem | Sparse zoned tiles |
 | CouncilSeats | ✅ `byte[]` | ✅ `int[]` | via bridge getter | Politics | Length 9 |
 
@@ -273,4 +276,5 @@ These are **documentation of tip reality**, not a backlog invent:
 | 2026-08-11 | **Tier-2 wildfire / arson rings** — `WildfireRiskIndex` / `ActiveWildfireTileCount` / `ArsonRiskIndex` / `ArsonRingActive` on E+W+U |
 | 2026-08-11 | **Tier-2 aerial / lookout / fire rating** — `LookoutTowerCount` / `AerialFirefightingAvailable` / `FireSafetyRating` / `FireInsurancePremiumMult` on E+W+U |
 | 2026-08-11 | **Tier-2 education depth** — `MeanEducationLevel` / `EducationCoverageFraction` on E+W+U; HH progression under school coverage |
+| 2026-08-11 | **Tier-2 park amenity parity** — `MeanParkAccess` / `ParkAccessFraction` / `MeanHealthSatisfaction` on E+W+U; painted parks boost health/exercise |
 | 2026-08-11 | **WASM_SIM_BRIDGE / sim-types TS refresh** — `@citymajor/sim-types` `simSnapshot.ts` + WASM_SIM_BRIDGE §6 + archival `sim-bridge.ts` match tip DTO (closes former §6 gap #1) |

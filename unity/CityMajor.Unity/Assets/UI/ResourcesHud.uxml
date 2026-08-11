@@ -31,6 +31,8 @@
             <ui:Label name="hospital-value" class="hud-value hud-hospital-value" text="—" />
             <ui:Label class="hud-label hud-edu-label" text="Edu" />
             <ui:Label name="edu-value" class="hud-value hud-edu-value" text="—" />
+            <ui:Label class="hud-label hud-park-label" text="Park" />
+            <ui:Label name="park-value" class="hud-value hud-park-value" text="—" />
         </ui:VisualElement>
         <ui:Label name="cranes-label" class="hud-sub hud-cranes" text="" style="display: none;" />
     </ui:VisualElement>

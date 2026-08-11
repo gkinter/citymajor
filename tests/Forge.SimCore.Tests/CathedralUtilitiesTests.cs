@@ -13,7 +13,7 @@ namespace Forge.SimCore.Tests;
 /// P5.2 emergency response time (SB-4242), P5.3 fire response v1,
 /// P5.4 EMS survival curve (Phase 5b), Tier-2 hospital capacity,
 /// Tier-2 wildfire / arson rings, aerial / lookout / fire rating,
-/// and Tier-2 education depth.
+/// Tier-2 education depth, and Tier-2 park amenity parity.
 /// </summary>
 public sealed class CathedralUtilitiesTests
 {
@@ -805,6 +805,115 @@ public sealed class CathedralUtilitiesTests
         var snap = host.GetSnapshot();
         Assert.Equal(host.State.MeanEducationLevel, snap.MeanEducationLevel, precision: 3);
         Assert.Equal(host.State.EducationCoverageFraction, snap.EducationCoverageFraction, precision: 3);
+    }
+
+    [Fact]
+    public void ParkAmenity_PaintedZone_RaisesLocalParkAccess()
+    {
+        var state = new WorldState(32, maxBuildings: 8);
+        float none = ParkAmenity.LocalParkAccess(state, 16, 16);
+        Assert.Equal(0f, none);
+
+        state.Tiles.ZoneType[state.Tiles.Index(18, 16)] = ParkAmenity.ZonePark;
+        float withZone = ParkAmenity.LocalParkAccess(state, 16, 16);
+        Assert.True(withZone > 0f, "painted park zone must contribute exercise access");
+        Assert.True(ParkAmenity.HasNearbyPark(state, 16, 16));
+        Assert.True(ParkAmenity.ExerciseContribution(withZone) > 0f);
+    }
+
+    [Fact]
+    public void ParkAmenity_ParkBuilding_RaisesLocalParkAccess()
+    {
+        var state = new WorldState(32, maxBuildings: 8);
+        PlaceBuilding(state, 20, 16, serviceFlags: ParkAmenity.ServicePark);
+
+        float access = ParkAmenity.LocalParkAccess(state, 16, 16);
+        Assert.True(access > 0f);
+        Assert.True(ParkAmenity.HasNearbyPark(state, 16, 16));
+    }
+
+    [Fact]
+    public void CalculateHealthScore_PaintedParkZone_HigherThanBare()
+    {
+        const int size = 32;
+        var state = new WorldState(size, maxBuildings: 8);
+        var services = new ServiceSystem(size);
+
+        float bare = services.CalculateHealthScore(state, 16, 16);
+
+        state.Tiles.ZoneType[state.Tiles.Index(17, 16)] = ParkAmenity.ZonePark;
+        float withPark = services.CalculateHealthScore(state, 16, 16);
+
+        Assert.True(withPark > bare,
+            $"painted park should raise health/exercise (bare={bare:F3}, park={withPark:F3})");
+    }
+
+    [Fact]
+    public void ParkAmenityTick_NearPark_RaisesHealthSatisfaction()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 16, 16, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(17, 16)] = ParkAmenity.ZonePark;
+
+        int slot = host.State.Households.Allocate();
+        Assert.True(slot >= 0);
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.HealthSatisfaction[slot] = 100;
+        host.State.Households.LeisureSatisfaction[slot] = 100;
+        host.State.Households.MemberCount[slot] = 2;
+
+        byte beforeHealth = host.State.Households.HealthSatisfaction[slot];
+        byte beforeLeisure = host.State.Households.LeisureSatisfaction[slot];
+
+        int improved = 0;
+        for (int i = 0; i < 12; i++)
+            improved += ParkAmenity.Tick(host.State, days: 1f);
+
+        Assert.True(improved > 0, "park amenity tick should raise HealthSatisfaction near parks");
+        Assert.True(host.State.Households.HealthSatisfaction[slot] > beforeHealth);
+        Assert.True(host.State.Households.LeisureSatisfaction[slot] > beforeLeisure);
+        Assert.True(host.State.MeanParkAccess > 0f);
+        Assert.True(host.State.ParkAccessFraction > 0f);
+        Assert.True(host.State.MeanHealthSatisfaction > beforeHealth / 255f);
+    }
+
+    [Fact]
+    public void SnapshotJson_ExportsParkAmenityFields()
+    {
+        var host = new SimHost();
+        host.Init(64, new SimHostInitOptions { SkipStarterCity = true });
+
+        int home = PlaceBuilding(host.State!, 12, 12, serviceFlags: 0);
+        host.State!.Tiles.ZoneType[host.State.Tiles.Index(12, 13)] = ParkAmenity.ZonePark;
+        int slot = host.State.Households.Allocate();
+        host.State.Households.HomeBuildingId[slot] = (ushort)home;
+        host.State.Households.HealthSatisfaction[slot] = 160;
+        host.State.Households.MemberCount[slot] = 2;
+
+        host.Services!.UpdateParkAmenity(host.State, days: 0f);
+
+        Assert.True(host.State.MeanParkAccess > 0f);
+        Assert.True(host.State.ParkAccessFraction > 0f);
+
+        using var doc = JsonDocument.Parse(host.GetSnapshotJson());
+        Assert.True(doc.RootElement.TryGetProperty("meanParkAccess", out var mean));
+        Assert.True(doc.RootElement.TryGetProperty("parkAccessFraction", out var cov));
+        Assert.True(doc.RootElement.TryGetProperty("meanHealthSatisfaction", out var health));
+        Assert.Equal(host.State.MeanParkAccess, mean.GetSingle(), precision: 3);
+        Assert.Equal(host.State.ParkAccessFraction, cov.GetSingle(), precision: 3);
+        Assert.Equal(host.State.MeanHealthSatisfaction, health.GetSingle(), precision: 3);
+
+        var dto = SimSnapshotDto.From(host.GetSnapshot(), host.State);
+        Assert.Equal(host.State.MeanParkAccess, dto.MeanParkAccess, precision: 3);
+        Assert.Equal(host.State.ParkAccessFraction, dto.ParkAccessFraction, precision: 3);
+        Assert.Equal(host.State.MeanHealthSatisfaction, dto.MeanHealthSatisfaction, precision: 3);
+
+        var snap = host.GetSnapshot();
+        Assert.Equal(host.State.MeanParkAccess, snap.MeanParkAccess, precision: 3);
+        Assert.Equal(host.State.ParkAccessFraction, snap.ParkAccessFraction, precision: 3);
+        Assert.Equal(host.State.MeanHealthSatisfaction, snap.MeanHealthSatisfaction, precision: 3);
     }
 
     /// <summary>RNG that always returns 0 so probabilistic spread always succeeds.</summary>

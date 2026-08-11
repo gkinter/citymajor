@@ -10,7 +10,7 @@
 
 ## 1. Goal
 
-Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind. Ship **Tier-2 wildfire / arson rings** — drought fuel spread + high-crime ignition clusters. Ship **Tier-2 aerial / lookout / fire rating** — lookout spark mitigation, aerial suppression, city fire safety rating → insurance premium. Ship **Tier-2 education depth** — household education progression under school coverage + research RP mult + Edu HUD.
+Surface **power / water coverage** from the L0 utility partition balance so players (and Herald) can see blackouts and shortages. Wire **emergency response time** from road-graph distance × BPR congestion (P5.2). Ship **fire v1** hydrant coverage + spread (P5.3). Ship **EMS survival** from response minutes (P5.4). Ship **Tier-2 hospital capacity** — EMS transports to nearest hospital with free beds + HUD bind. Ship **Tier-2 wildfire / arson rings** — drought fuel spread + high-crime ignition clusters. Ship **Tier-2 aerial / lookout / fire rating** — lookout spark mitigation, aerial suppression, city fire safety rating → insurance premium. Ship **Tier-2 education depth** — household education progression under school coverage + research RP mult + Edu HUD. Ship **Tier-2 park amenity parity** — painted park zones boost health/exercise (not only land value) + Park HUD.
 
 ---
 
@@ -26,6 +26,7 @@ Surface **power / water coverage** from the L0 utility partition balance so play
 | **Tier-2** | Wildfire / arson rings | **Live** — `WildfireArson` + `WildfireRiskIndex` / `ActiveWildfireTileCount` / `ArsonRiskIndex` / `ArsonRingActive` + Fire HUD 🌲/🕵️ |
 | **Tier-2** | Aerial / lookout / fire rating | **Live** — lookout spark cut + aerial suppression + `FireSafetyRating` / `FireInsurancePremiumMult` + Fire HUD 🔭/✈️/⭐ |
 | **Tier-2** | Education depth | **Live** — `EducationProgression` HH level-ups under school coverage + `MeanEducationLevel` / `EducationCoverageFraction` + Edu HUD 🎓 |
+| **Tier-2** | Park amenity parity | **Live** — `ParkAmenity` painted zones + buildings raise health/leisure; `MeanParkAccess` / `ParkAccessFraction` / `MeanHealthSatisfaction` + Park HUD 🌳 |
 
 ---
 
@@ -198,6 +199,22 @@ Worker maps the key onto `SimResources`; ResourcesHud shows `EMS 4.2m` when pres
 - Unity ResourcesHud Edu line: `🎓 {mean}/3 · {cov%}`
 
 `CathedralUtilitiesTests` pins upgrade/decay chances, school coverage tick, research mult monotonicity, and snapshot export.
+
+### 4.11 Live (Tier-2 park amenity parity)
+
+```json
+{
+  "meanParkAccess": 0.42,
+  "parkAccessFraction": 0.38,
+  "meanHealthSatisfaction": 0.61
+}
+```
+
+- Painted `ZonePark` (byte 8) and ploppable `ServicePark` share `ParkAmenity.HasNearbyPark` / `LocalParkAccess` (land value + health/exercise)
+- Daily tick blends `HealthSatisfaction` / `LeisureSatisfaction` toward park-aware targets (AGENT_06 exercise term)
+- Unity ResourcesHud Park line: `🌳 {access%} · ❤️ {health%}`
+
+`CathedralUtilitiesTests` pins painted-zone access, health-score lift, HH tick, and snapshot export.
 
 ## 5. Out of scope (this stub)
 

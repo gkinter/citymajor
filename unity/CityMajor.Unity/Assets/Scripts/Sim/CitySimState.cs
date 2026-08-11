@@ -118,6 +118,15 @@ namespace CityMajor.Sim
         /// <summary>Tier-2 — fraction of households with school coverage.</summary>
         public float EducationCoverageFraction;
 
+        /// <summary>Tier-2 — mean household park / exercise access 0–1.</summary>
+        public float MeanParkAccess;
+
+        /// <summary>Tier-2 — fraction of households with park access.</summary>
+        public float ParkAccessFraction;
+
+        /// <summary>Tier-2 — mean household HealthSatisfaction 0–1.</summary>
+        public float MeanHealthSatisfaction;
+
         /// <summary>Cathedral P2 — mean rent / income burden (0–1+).</summary>
         public float MeanRentBurden;
 

@@ -41,7 +41,6 @@ public sealed class ServiceSystem
     private const uint ServiceFire = 1 << 3;
     private const uint ServiceHealth = 1 << 4;
     private const uint ServiceEducation = 1 << 5;
-    private const uint ServicePark = 1 << 6;
     private const uint ServicePowerPlant = 1 << 7;
     private const uint ServiceWaterPump = 1 << 8;
 
@@ -265,6 +264,7 @@ public sealed class ServiceSystem
         UpdateWildfireArson(state);
         UpdateHospitalCapacity(state);
         UpdateEducationProgression(state);
+        UpdateParkAmenity(state);
     }
 
     /// <summary>
@@ -276,6 +276,16 @@ public sealed class ServiceSystem
         float quality = EducationProgression.MeanSchoolQuality(
             state, (s, id) => CalculateEducationQuality(s, id));
         EducationProgression.Tick(state, _educationCoverage, quality, days, rng);
+    }
+
+    /// <summary>
+    /// Tier-2 park amenity parity — painted park zones + park buildings raise
+    /// household HealthSatisfaction / LeisureSatisfaction via exercise access.
+    /// Writes mean park access, coverage fraction, and mean health satisfaction.
+    /// </summary>
+    public void UpdateParkAmenity(WorldState state, float days = 1f)
+    {
+        ParkAmenity.Tick(state, days, _healthCoverage);
     }
 
     /// <summary>
@@ -1019,25 +1029,11 @@ public sealed class ServiceSystem
     }
 
     /// <summary>
-    /// Calculate local park access: any park service building nearby.
-    /// Returns 0-1.
+    /// Calculate local park access: park buildings or painted park zones nearby.
+    /// Returns 0–1 (distance falloff). Shared with land-value <c>HasNearbyPark</c>.
     /// </summary>
     private static float CalculateLocalParkAccess(WorldState state, int tileX, int tileY)
-    {
-        const int radius = 10;
-
-        for (int i = 0; i < state.Buildings.Capacity; i++)
-        {
-            if (!state.Buildings.IsActive(i)) continue;
-            if ((state.Buildings.ServiceFlags[i] & ServicePark) == 0) continue;
-
-            int bx = state.Buildings.GridX[i];
-            int by = state.Buildings.GridY[i];
-            float dist = MathF.Sqrt((bx - tileX) * (bx - tileX) + (by - tileY) * (by - tileY));
-            if (dist <= radius) return 1f;
-        }
-        return 0f;
-    }
+        => ParkAmenity.LocalParkAccess(state, tileX, tileY, ParkAmenity.AccessRadius);
 
     /// <summary>
     /// Update the packed ServiceCoverage byte in TileData from influence maps.

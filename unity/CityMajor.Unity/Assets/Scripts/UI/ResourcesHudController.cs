@@ -26,6 +26,7 @@ namespace CityMajor.UI
         Label _fireValue;
         Label _hospitalValue;
         Label _eduValue;
+        Label _parkValue;
         Label _cranesLabel;
         readonly PopulationGrowthTracker _growthTracker = new();
 
@@ -96,6 +97,7 @@ namespace CityMajor.UI
             _fireValue = root.Q<Label>("fire-value");
             _hospitalValue = root.Q<Label>("hospital-value");
             _eduValue = root.Q<Label>("edu-value");
+            _parkValue = root.Q<Label>("park-value");
             _cranesLabel = root.Q<Label>("cranes-label");
         }
 
@@ -211,6 +213,15 @@ namespace CityMajor.UI
                 _eduValue.text = $"🎓 {mean:0.0}/3 · {covPct}%";
                 _eduValue.tooltip =
                     "Mean household education level (0–3) and fraction of households under school coverage. Coverage raises education over time; thin coverage slowly decays (Tier-2 / Cathedral P5 education depth).";
+            }
+
+            if (_parkValue != null)
+            {
+                var accessPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanParkAccess) * 100f);
+                var healthPct = Mathf.RoundToInt(Mathf.Clamp01(state.MeanHealthSatisfaction) * 100f);
+                _parkValue.text = $"🌳 {accessPct}% · ❤️ {healthPct}%";
+                _parkValue.tooltip =
+                    "Mean park / exercise access and mean household health satisfaction. Painted park zones and park buildings raise health and leisure (Tier-2 park amenity parity — not only land value).";
             }
         }
 

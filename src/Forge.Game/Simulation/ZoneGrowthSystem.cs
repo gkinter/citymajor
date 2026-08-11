@@ -1,6 +1,7 @@
 using Forge.Engine.Core;
 using Forge.Engine.Data;
 using Forge.Engine.Simulation;
+using Forge.SimCore;
 
 namespace Forge.Game.Simulation;
 
@@ -41,12 +42,6 @@ public sealed class ZoneGrowthSystem
     private const byte StateOperational = 1;
     private const byte StateAbandoned = 2;
     private const byte StateDemolishing = 3;
-
-    // =========================================================================
-    // Service flags for classification
-    // =========================================================================
-
-    private const uint ServicePark = 1 << 6;
 
     // =========================================================================
     // Growth tuning constants
@@ -997,40 +992,10 @@ public sealed class ZoneGrowthSystem
 
     /// <summary>
     /// Check if any park building or painted park zone exists within a radius.
+    /// Delegates to <see cref="ParkAmenity.HasNearbyPark"/> (land value + health parity).
     /// </summary>
     private static bool HasNearbyPark(WorldState state, int tileX, int tileY)
-    {
-        const int radius = 8;
-        for (int i = 0; i < state.Buildings.Capacity; i++)
-        {
-            if (!state.Buildings.IsActive(i)) continue;
-            if ((state.Buildings.ServiceFlags[i] & ServicePark) == 0) continue;
-
-            int dx = state.Buildings.GridX[i] - tileX;
-            int dy = state.Buildings.GridY[i] - tileY;
-            if (dx * dx + dy * dy <= radius * radius) return true;
-        }
-
-        var tiles = state.Tiles;
-        int minX = Math.Max(0, tileX - radius);
-        int maxX = Math.Min(tiles.Size - 1, tileX + radius);
-        int minY = Math.Max(0, tileY - radius);
-        int maxY = Math.Min(tiles.Size - 1, tileY + radius);
-
-        for (int y = minY; y <= maxY; y++)
-        {
-            for (int x = minX; x <= maxX; x++)
-            {
-                int dx = x - tileX;
-                int dy = y - tileY;
-                if (dx * dx + dy * dy > radius * radius) continue;
-                if (tiles.ZoneType[tiles.Index(x, y)] == ZonePark)
-                    return true;
-            }
-        }
-
-        return false;
-    }
+        => ParkAmenity.HasNearbyPark(state, tileX, tileY, ParkAmenity.LandValueRadius);
 
     /// <summary>
     /// Check if any industrial zone exists within a radius.

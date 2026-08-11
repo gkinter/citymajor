@@ -298,6 +298,9 @@ export type SimSnapshotDto = {
   fireInsurancePremiumMult: number;
   meanEducationLevel: number; // 0–3
   educationCoverageFraction: number;
+  meanParkAccess: number; // 0–1
+  parkAccessFraction: number;
+  meanHealthSatisfaction: number; // 0–1
 
   marketZoneCount: number;
   commuterCoverage: number;
@@ -430,6 +433,9 @@ export type CommuteOdSampleDto = {
   "fireInsurancePremiumMult": 1,
   "meanEducationLevel": 1.2,
   "educationCoverageFraction": 0.55,
+  "meanParkAccess": 0.42,
+  "parkAccessFraction": 0.38,
+  "meanHealthSatisfaction": 0.61,
   "culturalDna": [0, 0, 0, 0, 0, 0, 0, 0],
   "councilSeats": [0, 0, 0, 0, 0, 0, 0, 0, 0],
   "buildings": [

@@ -241,6 +241,12 @@ export type SimSnapshotDto = {
   meanEducationLevel: number;
   /** Fraction of households under school coverage. */
   educationCoverageFraction: number;
+  /** Mean household park / exercise access 0–1. */
+  meanParkAccess: number;
+  /** Fraction of households with park access. */
+  parkAccessFraction: number;
+  /** Mean household HealthSatisfaction 0–1. */
+  meanHealthSatisfaction: number;
 
   marketZoneCount: number;
   commuterCoverage: number;
@@ -328,6 +334,9 @@ export type SimResourcesDto = Pick<
   | "fireInsurancePremiumMult"
   | "meanEducationLevel"
   | "educationCoverageFraction"
+  | "meanParkAccess"
+  | "parkAccessFraction"
+  | "meanHealthSatisfaction"
   | "marketZoneCount"
   | "commuterCoverage"
   | "councilSeats"

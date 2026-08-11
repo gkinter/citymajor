@@ -261,6 +261,21 @@ public sealed class WorldState
     public float EducationCoverageFraction { get; set; }
 
     /// <summary>
+    /// Mean household park / exercise access 0–1 (Tier-2 park amenity parity).
+    /// </summary>
+    public float MeanParkAccess { get; set; }
+
+    /// <summary>
+    /// Fraction of households with park access ≥ coverage threshold (0–1).
+    /// </summary>
+    public float ParkAccessFraction { get; set; }
+
+    /// <summary>
+    /// Mean household HealthSatisfaction mapped to 0–1 (park + healthcare blend).
+    /// </summary>
+    public float MeanHealthSatisfaction { get; set; }
+
+    /// <summary>
     /// Per-tile wildfire burn intensity (0 = cold). Sized to <see cref="Tiles"/>.Count when first used.
     /// Not exported on snapshots — aggregates only.
     /// </summary>

@@ -74,6 +74,38 @@ public sealed class BuildingData
         return slot;
     }
 
+    /// <summary>
+    /// Activate a specific pool slot for save/load (preserves household home/work ids).
+    /// Falls back to <see cref="Allocate"/> when the preferred slot is unavailable.
+    /// </summary>
+    public int AllocateAt(int preferred)
+    {
+        if (preferred <= 0 || preferred >= Capacity || IsActive(preferred))
+            return Allocate();
+
+        // Rebuild free stack without the preferred slot.
+        if (_freeSlots.Count > 0)
+        {
+            var tmp = new int[_freeSlots.Count];
+            int n = 0;
+            while (_freeSlots.Count > 0)
+            {
+                int s = _freeSlots.Pop();
+                if (s != preferred)
+                    tmp[n++] = s;
+            }
+
+            for (int i = n - 1; i >= 0; i--)
+                _freeSlots.Push(tmp[i]);
+        }
+
+        Flags[preferred] = 1;
+        Level[preferred] = 1;
+        Condition[preferred] = 255;
+        Count++;
+        return preferred;
+    }
+
     public void Free(int index)
     {
         if (index < 0 || index >= Capacity) return;

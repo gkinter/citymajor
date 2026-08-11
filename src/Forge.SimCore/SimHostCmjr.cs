@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Forge.Engine.Simulation;
+using Forge.Game.Simulation;
 using Forge.SimWasm;
 
 namespace Forge.SimCore;
@@ -120,13 +121,16 @@ public sealed partial class SimHost
             _state.Tiles.Traffic[idx] = Math.Clamp(tile.Density, 0f, 1f);
         }
 
+        // Prefer saved pool ids so Household L2 home/work ids stay valid after load.
+        var buildingIdMap = new Dictionary<int, int>(dto.Buildings.Length);
         foreach (var building in dto.Buildings)
         {
             if (!_state.Tiles.InBounds(building.TileX, building.TileZ)) continue;
 
-            int slot = _state.Buildings.Allocate();
+            int slot = _state.Buildings.AllocateAt(building.Id);
             if (slot < 0) break;
 
+            buildingIdMap[building.Id] = slot;
             _state.Buildings.GridX[slot] = building.TileX;
             _state.Buildings.GridY[slot] = building.TileZ;
             _state.Buildings.Width[slot] = 1;
@@ -135,8 +139,13 @@ public sealed partial class SimHost
             _state.Buildings.Level[slot] = building.Level == 0 ? (byte)1 : building.Level;
             _state.Buildings.State[slot] = building.State == 0 ? (byte)1 : building.State;
             _state.Buildings.Condition[slot] = building.Condition == 0 ? (byte)255 : building.Condition;
+            _state.Buildings.FireRisk[slot] = building.FireRisk;
+            _state.Buildings.ServiceFlags[slot] = building.ServiceFlags;
             _state.Buildings.Occupants[slot] = 0;
             _state.Buildings.MaxOccupants[slot] = 48;
+
+            int tileIdx = _state.Tiles.Index(building.TileX, building.TileZ);
+            _state.Tiles.BuildingId[tileIdx] = (ushort)slot;
         }
 
         _state.TickCount = dto.Tick;
@@ -168,7 +177,86 @@ public sealed partial class SimHost
         _fullTraffic?.RestoreModeShares(
             dto.CarModeShare, dto.TransitModeShare, dto.WalkModeShare);
 
+        // Cathedral wave restores — Event*Mult, delivery delay, vacancy, abandoned, L2 sample.
+        RestoreEventMultipliers(dto);
+        RestoreActiveEvents(dto);
+        _economy.RestoreMeanGoodsDeliveryDelay(dto.MeanGoodsDeliveryDelay, _state);
+        _state.ResidentialVacancy = float.IsFinite(dto.ResidentialVacancy)
+            ? Math.Clamp(dto.ResidentialVacancy, 0f, 1f)
+            : 1f;
+        _state.AbandonedBuildingCount = ZoneGrowthSystem.CountAbandonedBuildings(_state);
+        _state.ConstructingBuildingCount = dto.ConstructingBuildingCount;
+        _state.MeanInterZoneFriction = dto.MeanInterZoneFriction > 0f
+            ? dto.MeanInterZoneFriction
+            : 1f;
+        _state.GoodsTransportCostIndex = Math.Clamp(dto.GoodsTransportCostIndex, 0f, 1f);
+        _state.MarketZoneCount = Math.Clamp(dto.MarketZoneCount, 1, 16);
+
+        if (dto.PopulationL2?.Households is { Length: > 0 })
+        {
+            var rows = new PopulationSystem.HouseholdSampleRow[dto.PopulationL2.Households.Length];
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var preview = dto.PopulationL2.Households[i];
+                rows[i] = new PopulationSystem.HouseholdSampleRow
+                {
+                    Id = preview.Id,
+                    TileX = preview.TileX,
+                    TileZ = preview.TileZ,
+                    Happiness = preview.Happiness,
+                    CommuteMin = preview.CommuteMin,
+                    HomeBuildingId = RemapBuildingId(buildingIdMap, preview.HomeBuildingId),
+                    WorkBuildingId = RemapBuildingId(buildingIdMap, preview.WorkBuildingId),
+                    RentBurden = preview.RentBurden,
+                };
+            }
+
+            _population.RestoreHouseholdSampleRows(_state, rows);
+        }
+
         ResetTickAccumulators();
         RebuildServicesAfterLoad();
+        // FireRisk + ServiceFlags on restored buildings feed ActiveFireCount / hydrant / EMS
+        // via ServiceSystem.DailyTick — no DTO override needed when geometry is present.
+    }
+
+    private static int RemapBuildingId(Dictionary<int, int> map, int savedId)
+    {
+        if (savedId <= 0) return 0;
+        return map.TryGetValue(savedId, out int mapped) ? mapped : savedId;
+    }
+
+    private void RestoreEventMultipliers(SimSnapshotDto dto)
+    {
+        _state.EventTaxRevenueMult = ClampEventMult(dto.EventTaxRevenueMult);
+        _state.EventImmigrationMult = ClampEventMult(dto.EventImmigrationMult);
+        _state.EventCommercialSpawnMult = ClampEventMult(dto.EventCommercialSpawnMult);
+        _state.EventProductivityMult = ClampEventMult(dto.EventProductivityMult);
+        _state.EventResearchMult = ClampEventMult(dto.EventResearchMult);
+        _state.EventSpawnDemandMult = ClampEventMult(dto.EventSpawnDemandMult);
+    }
+
+    private static float ClampEventMult(float value) =>
+        float.IsFinite(value) ? Math.Clamp(value, 0.25f, 3f) : 1f;
+
+    private void RestoreActiveEvents(SimSnapshotDto dto)
+    {
+        if (dto.ActiveEvents is not { Length: > 0 })
+            return;
+
+        _events.ClearAllEvents(_state);
+        foreach (var evt in dto.ActiveEvents)
+        {
+            if (string.IsNullOrWhiteSpace(evt.TypeId)) continue;
+            _events.TriggerEvent(
+                evt.TypeId,
+                _state,
+                severityOverride: evt.Severity > 0f ? evt.Severity : null,
+                tileX: evt.TileX,
+                tileY: evt.TileY);
+        }
+
+        // Re-apply saved Mults after spawn — Brewing phase would otherwise soften aggregates.
+        RestoreEventMultipliers(dto);
     }
 }

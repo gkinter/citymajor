@@ -378,3 +378,4 @@ openspec/
 | 2026-08-11 | **P5.4 landed** — `EmsSurvival` response→survival curve; `MeanEmsSurvivalRate` snapshot + ResourcesHud EMS % |
 | 2026-08-11 | **P7.1 landed** — [`SIM_SNAPSHOT_V2.md`](./SIM_SNAPSHOT_V2.md) field/cadence/ownership matrix for engine · WASM DTO · Unity `CitySimState` |
 | 2026-08-11 | **P7.4 landed** — `scripts/verify-sim-snapshot-v2.py` doc↔export gap check in `unity-simcore.yml` (SB-4264) |
+| 2026-08-11 | **Save/load wave restore** — `ApplySnapshotDto` restores Event*Mult, delivery delay, abandoned recount, BuildingDto FireRisk/ServiceFlags (+ pool id preserve), L2 HH sample overlay; `CathedralSaveLoadTests` |

@@ -795,7 +795,7 @@ public sealed class ZoneGrowthSystem
     }
 
     /// <summary>City-wide abandoned building count for snapshot / Cathedral HUD (P2.6).</summary>
-    internal static int CountAbandonedBuildings(WorldState state)
+    public static int CountAbandonedBuildings(WorldState state)
     {
         int count = 0;
         var buildings = state.Buildings;

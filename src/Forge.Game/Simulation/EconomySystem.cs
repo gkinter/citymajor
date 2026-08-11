@@ -1550,10 +1550,20 @@ public sealed class EconomySystem
     /// </summary>
     internal void SetCityDeliveryDelay(float delay)
     {
+        RestoreMeanGoodsDeliveryDelay(delay, state: null);
+    }
+
+    /// <summary>
+    /// Restore mean goods delivery delay after snapshot load (HUD / trade friction until next economy tick).
+    /// </summary>
+    public void RestoreMeanGoodsDeliveryDelay(float delay, WorldState? state)
+    {
         _fallbackDeliveryDelay = Math.Clamp(delay, 0f, 2f);
         LastMeanGoodsDeliveryDelay = _fallbackDeliveryDelay;
         for (int z = 0; z < MaxMarketZones; z++)
             _zoneDeliveryDelay[z] = _fallbackDeliveryDelay;
+        if (state is not null)
+            state.MeanGoodsDeliveryDelay = LastMeanGoodsDeliveryDelay;
     }
 
     /// <summary>

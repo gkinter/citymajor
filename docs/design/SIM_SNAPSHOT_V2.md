@@ -196,7 +196,7 @@ Legend: **E** = `SimSnapshot`, **W** = `SimSnapshotDto`, **U** = `CitySimState`.
 
 | Nested type | Fields | Notes |
 |-------------|--------|-------|
-| `BuildingDto` | id, typeId, tileX, tileZ, level, state, condition | Sparse pool slots |
+| `BuildingDto` | id, typeId, tileX, tileZ, level, state, condition, fireRisk, serviceFlags | Sparse pool slots; fireRisk/serviceFlags for P5 save/load |
 | `ZoneDto` / `RoadDto` | tile + type/flags | Sparse non-zero |
 | `RoadGraphSnapshotDto` | nodeTypes/positions, edgeFrom/To, volumes, travelTimes | P1.6 / P4.2 |
 | `TrafficDto` | tileX/Z, density | density ≥ 0.01 |

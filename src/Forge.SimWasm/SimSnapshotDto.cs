@@ -343,6 +343,8 @@ public sealed class SimSnapshotDto
                 Level = pool.Level[i],
                 State = pool.State[i],
                 Condition = pool.Condition[i],
+                FireRisk = pool.FireRisk[i],
+                ServiceFlags = pool.ServiceFlags[i],
             });
         }
         return list.ToArray();
@@ -464,6 +466,10 @@ public sealed class BuildingDto
     public byte Level { get; init; }
     public byte State { get; init; }
     public byte Condition { get; init; }
+    /// <summary>Burning intensity (0 = not on fire). Cathedral P5.3 save/load.</summary>
+    public byte FireRisk { get; init; }
+    /// <summary>Service bitmask (hydrants, stations, utilities). Cathedral P5 save/load.</summary>
+    public uint ServiceFlags { get; init; }
 }
 
 public sealed class ZoneDto

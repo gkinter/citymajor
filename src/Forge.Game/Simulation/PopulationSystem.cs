@@ -110,6 +110,53 @@ public sealed class PopulationSystem
     }
 
     /// <summary>
+    /// Overlay L2 Citizen-panel sample rows onto active households after Layer-C restore
+    /// (home/work building ids, happiness, rent burden). Building ids must already be remapped.
+    /// </summary>
+    public void RestoreHouseholdSampleRows(WorldState state, ReadOnlySpan<HouseholdSampleRow> rows)
+    {
+        if (rows.Length == 0 || state.Households.Count == 0)
+            return;
+
+        EnsureCapacity(state.Households.Capacity);
+        var hh = state.Households;
+
+        for (int r = 0; r < rows.Length; r++)
+        {
+            var row = rows[r];
+            int idx = ParseHouseholdSampleIndex(row.Id);
+            if (idx < 0 || idx >= hh.Capacity || !hh.IsActive(idx))
+                continue;
+
+            if (row.HomeBuildingId > 0 && row.HomeBuildingId < state.Buildings.Capacity
+                && state.Buildings.IsActive(row.HomeBuildingId))
+                hh.HomeBuildingId[idx] = (ushort)row.HomeBuildingId;
+
+            if (row.WorkBuildingId > 0 && row.WorkBuildingId < state.Buildings.Capacity
+                && state.Buildings.IsActive(row.WorkBuildingId))
+                hh.WorkBuildingId[idx] = (ushort)row.WorkBuildingId;
+            else if (row.WorkBuildingId == 0)
+                hh.WorkBuildingId[idx] = 0;
+
+            hh.Happiness[idx] = (byte)Math.Clamp(
+                (int)MathF.Round(Math.Clamp(row.Happiness, 0f, 1f) * 255f), 0, 255);
+
+            if (idx < _rentBurdenCapacity && float.IsFinite(row.RentBurden))
+                _rentBurden[idx] = Math.Max(0f, row.RentBurden);
+        }
+    }
+
+    private static int ParseHouseholdSampleIndex(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return -1;
+        // Format from CollectHouseholdSample: "HH-00042"
+        if (id.StartsWith("HH-", StringComparison.OrdinalIgnoreCase)
+            && int.TryParse(id.AsSpan(3), out int parsed))
+            return parsed;
+        return -1;
+    }
+
+    /// <summary>
     /// Create a new PopulationSystem with the given RNG seed.
     /// </summary>
     public PopulationSystem(uint seed = 42)

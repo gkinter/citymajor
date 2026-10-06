@@ -96,6 +96,14 @@ docs/DEPLOY_WEB.md            → Coolify preview deploy (Dockerfile, BUILD_WASM
 - LOD: full GLTF → simplified mesh → instanced boxes → heatmap blocks.
 - Play URL: `/play`. Preview deploys: `*.apps.softblaze.net` (see `docs/DEPLOY_WEB.md`).
 
+## Cursor Cloud specific instructions
+
+- Run `git lfs pull` before `pnpm dev`. Meshes in `web/public/assets/gltf/` are Git LFS; pointer stubs make `/play` throw GLTF parse errors and fail `pnpm smoke:all`.
+- `pnpm build:wasm` needs the .NET 8 SDK, the `wasm-tools` workload, and `python` on PATH (`python3` is enough if symlinked). `web/wasm/build-wasm.sh` runs `dotnet workload restore`, so the SDK directory must be writable by the user running the build. The script unsets `NODE_OPTIONS` because emscripten's Node rejects some V8 flags.
+- Dev server is `pnpm dev` from the repo root (Next.js, port 3000, hostname `0.0.0.0`). `/play` shows `Data: WASM sim` only after `web/public/dotnet/_framework/blazor.boot.json` exists; otherwise the HUD stays on procedural data.
+- With the dev server up, `WASM_EXPECTED=1 pnpm smoke:all` is the end-to-end check (home, shop, WebGL, WASM sim, zone/build tools). `pnpm --filter @citymajor/web test` and `pnpm --filter @citymajor/web exec tsc --noEmit` cover unit tests and types. `pnpm --filter @citymajor/web lint` calls `next lint`, which is not a valid Next.js 16 command.
+- Stripe, R2, and LLM keys are optional. `GET /api/shop` lists missing Stripe keys and the shop uses mock checkout. Narrative events use templates when no LLM key is set.
+
 ## Related docs
 
 - [`CLAUDE.md`](CLAUDE.md) — stack summary, monetization, architecture notes
